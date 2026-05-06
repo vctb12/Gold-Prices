@@ -148,6 +148,13 @@ jobs:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
           TWELVEDATA_SYMBOL: ${{ secrets.TWELVEDATA_SYMBOL }}
           GOLDPRICEZ_API_KEY: ${{ secrets.GOLDPRICEZ_API_KEY }}
+          # gold-api.com — no key required per provider docs, but one
+          # can be supplied. Hard-disabled in scheduled runs (previous
+          # production failure; needs fresh bakeoff before re-enabling).
+          # To test manually: pass ``gold_api_com`` in the providers
+          # input and set GOLD_API_COM_ENABLED=true as a repo secret.
+          GOLD_API_COM_ENABLED: ${{ secrets.GOLD_API_COM_ENABLED || 'false' }}
+          GOLD_API_COM_KEY: ${{ secrets.GOLD_API_COM_KEY }}
           # Provider enable flags scoped to THIS bakeoff workflow
           # only. These literals do NOT propagate to
           # ``gold-price-fetch.yml`` / ``post_gold.yml`` or any other

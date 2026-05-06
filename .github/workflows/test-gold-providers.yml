@@ -67,6 +67,11 @@ jobs:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
           TWELVEDATA_SYMBOL: ${{ secrets.TWELVEDATA_SYMBOL }}
           GOLDPRICEZ_API_KEY: ${{ secrets.GOLDPRICEZ_API_KEY }}
+          # gold-api.com — disabled by default; set GOLD_API_COM_ENABLED=true
+          # as a repository secret to include it in a manual smoke round.
+          # No key is required per provider docs, but one can be supplied.
+          GOLD_API_COM_ENABLED: ${{ secrets.GOLD_API_COM_ENABLED }}
+          GOLD_API_COM_KEY: ${{ secrets.GOLD_API_COM_KEY }}
           GOLD_PROVIDER_ORDER: ${{ inputs.providers }}
         run: |
           python scripts/python/provider_bakeoff.py \
