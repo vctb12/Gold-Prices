@@ -121,9 +121,11 @@ def get_gold_price():
         raise ValueError("gold_price.json is not a JSON object")
 
     gold = raw.get("gold") or {}
-    price = gold.get("ounce_usd")
+    price = raw.get("xau_usd_per_oz")
     if not isinstance(price, (int, float)) or price <= 0:
-        raise ValueError("gold_price.json missing or invalid gold.ounce_usd")
+        price = gold.get("ounce_usd")
+    if not isinstance(price, (int, float)) or price <= 0:
+        raise ValueError("gold_price.json missing or invalid spot price (xau_usd_per_oz / gold.ounce_usd)")
     price = float(price)
 
     previous_price, previous_posted_at_utc, previous_content_hash = _load_last_price()
@@ -133,7 +135,12 @@ def get_gold_price():
 
     # Prefer the per-gram AED value already computed by the fetcher; fall
     # back to local math if absent.
-    g24_aed = gold.get("gram_aed")
+    karats_aed = raw.get("karats_aed_per_gram") if isinstance(raw.get("karats_aed_per_gram"), dict) else {}
+    g24_aed = karats_aed.get("24k")
+    if not isinstance(g24_aed, (int, float)) or g24_aed <= 0:
+        g24_aed = raw.get("aed_per_gram_24k")
+    if not isinstance(g24_aed, (int, float)) or g24_aed <= 0:
+        g24_aed = gold.get("gram_aed")
     if isinstance(g24_aed, (int, float)) and g24_aed > 0:
         g24 = float(g24_aed) / AED_RATE  # USD/g to keep downstream _aed() happy
     else:
@@ -155,6 +162,25 @@ def get_gold_price():
     }
 
 
+def _provider_timestamp_iso(raw_data):
+    if not isinstance(raw_data, dict):
+        return None
+    for key in ("timestamp_utc", "fetched_at_utc"):
+        value = raw_data.get(key)
+        if isinstance(value, str) and value:
+            return value
+    legacy = raw_data.get("source_updated_at_gmt")
+    if not isinstance(legacy, str) or not legacy:
+        return None
+    try:
+        parsed = datetime.strptime(legacy.strip().upper(), "%d-%m-%Y %I:%M:%S %p").replace(
+            tzinfo=timezone.utc
+        )
+        return parsed.strftime('%Y-%m-%dT%H:%M:%SZ')
+    except Exception:
+        return None
+
+
 # ── Staleness check ────────────────────────────────────────────────────────────
 def check_staleness(raw_data, _now=None):
     """Check whether upstream gold price data is too old to post.
@@ -169,15 +195,34 @@ def check_staleness(raw_data, _now=None):
 
     Pass `_now` (a tz-aware UTC datetime) to pin the clock in tests.
     """
+    parsed = None
+    source_label = "provider timestamp"
     value = raw_data.get("source_updated_at_gmt") if isinstance(raw_data, dict) else None
-    if not value:
-        msg = f"WARN: could not parse source_updated_at_gmt={value!r} (missing field)"
-        return ('parse_error', msg)
-    try:
-        parsed = datetime.strptime(str(value).strip().upper(), "%d-%m-%Y %I:%M:%S %p")
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    except Exception:
-        msg = f"WARN: could not parse source_updated_at_gmt={value!r}"
+    if value:
+        try:
+            parsed = datetime.strptime(str(value).strip().upper(), "%d-%m-%Y %I:%M:%S %p")
+            parsed = parsed.replace(tzinfo=timezone.utc)
+            source_label = "source_updated_at_gmt"
+        except Exception:
+            parsed = None
+    if parsed is None and isinstance(raw_data, dict):
+        for key in ("timestamp_utc", "fetched_at_utc"):
+            candidate = raw_data.get(key)
+            if not candidate or not isinstance(candidate, str):
+                continue
+            try:
+                iso = candidate[:-1] + "+00:00" if candidate.endswith("Z") else candidate
+                parsed = datetime.fromisoformat(iso)
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=timezone.utc)
+                else:
+                    parsed = parsed.astimezone(timezone.utc)
+                source_label = key
+                break
+            except Exception:
+                continue
+    if parsed is None:
+        msg = f"WARN: could not parse provider timestamp source_updated_at_gmt={value!r}"
         return ('parse_error', msg)
 
     now = _now if _now is not None else datetime.now(timezone.utc)
@@ -192,9 +237,9 @@ def check_staleness(raw_data, _now=None):
     if age_hours <= 4:
         return ('ok', None)
     if age_hours <= 12:
-        msg = f"WARN: UPSTREAM STALE: goldpricez source_updated_at_gmt is {age_str} old (last: {iso})"
+        msg = f"WARN: UPSTREAM STALE: {source_label} is {age_str} old (last: {iso})"
         return ('warn', msg)
-    msg = f"ERROR: UPSTREAM SEVERELY STALE: goldpricez source_updated_at_gmt is {age_str} old (last: {iso})"
+    msg = f"ERROR: UPSTREAM SEVERELY STALE: {source_label} is {age_str} old (last: {iso})"
     return ('skip', msg)
 
 
@@ -533,7 +578,9 @@ def main():
               " The gold-price-fetch.yml workflow must run first to populate it.")
         sys.exit(0)
     raw_data = json.loads(GOLD_PRICE_FILE.read_text(encoding="utf-8"))
-    source_ts = raw_data.get("source_updated_at_gmt", "n/a") if isinstance(raw_data, dict) else "n/a"
+    source_ts = _provider_timestamp_iso(raw_data) or (
+        raw_data.get("source_updated_at_gmt", "n/a") if isinstance(raw_data, dict) else "n/a"
+    )
 
     # 3. Compute post type from the intended cron schedule when available.
     # GitHub scheduled workflows can start late, so using github.event.schedule
@@ -561,7 +608,7 @@ def main():
         sys.exit(0)
 
     # 6. Load gold price (includes previous-state fields)
-    print("📡 Reading gold price from data/gold_price.json (goldpricez.com)…")
+    print("📡 Reading gold price from data/gold_price.json (canonical price payload)…")
     data = get_gold_price()
     print(f"   Spot: ${data['price']:,.2f}/oz")
     if data.get('prev_price') is not None:
@@ -615,11 +662,17 @@ def main():
     if tweet_guard is not None:
         guard_quote = {
             "xau_usd_per_oz": data['price'],
-            "timestamp_utc": raw_data.get("source_updated_at_gmt") if isinstance(raw_data, dict) else None,
+            "timestamp_utc": _provider_timestamp_iso(raw_data),
             "is_fresh": staleness_action == 'ok',
             "is_fallback": False,
-            "provider": (raw_data.get("source") if isinstance(raw_data, dict) else None) or "goldpricez",
-            "source_type": "spot_reference",
+            "provider": (
+                (raw_data.get("provider") if isinstance(raw_data, dict) else None)
+                or (raw_data.get("source") if isinstance(raw_data, dict) else None)
+                or "goldpricez"
+            ),
+            "source_type": (
+                raw_data.get("source_type") if isinstance(raw_data, dict) else None
+            ) or "spot_reference",
         }
         guard_state = tweet_guard.load_state(LAST_TWEET_STATE_FILE)
         decision = tweet_guard.decide(guard_state, quote=guard_quote, tweet_text=tweet)

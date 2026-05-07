@@ -283,6 +283,58 @@ def test_content_hash_missing_in_old_state(tmp_path, monkeypatch):
     assert content_hash is None  # graceful, no crash
 
 
+# ── gold_price.json schema compatibility ───────────────────────────────────────
+def test_get_gold_price_supports_legacy_schema(tmp_path, monkeypatch):
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "fetched_at_utc": "2026-05-07T12:00:00Z",
+                "gold": {"ounce_usd": 4736.36, "gram_aed": 558.40},
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0}))
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+
+    data = pg.get_gold_price()
+    assert data["price"] == 4736.36
+    assert data["prev_price"] == 4700.0
+    assert data["price_gram_24k"] > 0
+
+
+def test_get_gold_price_supports_normalized_schema(tmp_path, monkeypatch):
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4731.2,
+                "timestamp_utc": "2026-05-07T10:34:52Z",
+                "fetched_at_utc": "2026-05-07T10:35:03Z",
+                "aed_per_gram_24k": 558.4,
+                "karats_aed_per_gram": {
+                    "24k": 558.4,
+                    "22k": 511.87,
+                    "21k": 488.6,
+                    "18k": 418.8,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4725.0}))
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+
+    data = pg.get_gold_price()
+    assert data["price"] == 4731.2
+    assert data["prev_price"] == 4725.0
+    assert data["price_gram_24k"] > 0
+
+
 # ── Staleness tests ───────────────────────────────────────────────────────────
 def _staleness_ts(hours_ago, now=None):
     """Return source_updated_at_gmt string for `hours_ago` hours before `now`."""
@@ -332,6 +384,13 @@ def test_staleness_missing_field():
     assert action == 'parse_error'
     assert msg is not None
     assert "WARN: could not parse" in msg
+
+
+def test_staleness_supports_normalized_timestamp_utc():
+    raw = {"timestamp_utc": (_NOW - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')}
+    action, msg = pg.check_staleness(raw, _now=_NOW)
+    assert action == 'ok'
+    assert msg is None
 
 
 # ── Error-logging tests ───────────────────────────────────────────────────────

@@ -38,14 +38,19 @@ async function fetchGoldPrice() {
   try {
     const raw = fs.readFileSync(GOLD_PRICE_FILE, 'utf8');
     const data = JSON.parse(raw);
-    const price = data?.gold?.ounce_usd;
+    const price =
+      typeof data?.xau_usd_per_oz === 'number' && data.xau_usd_per_oz > 0
+        ? data.xau_usd_per_oz
+        : data?.gold?.ounce_usd;
     if (typeof price !== 'number' || price <= 0) {
-      throw new Error('gold_price.json missing or invalid gold.ounce_usd');
+      throw new Error(
+        'gold_price.json missing or invalid spot price (xau_usd_per_oz / gold.ounce_usd)'
+      );
     }
     return {
       price,
       change24h: 0,
-      updatedAt: data.fetched_at_utc || new Date().toISOString(),
+      updatedAt: data.timestamp_utc || data.fetched_at_utc || new Date().toISOString(),
     };
   } catch (error) {
     console.error('Error reading gold price from data file:', error);

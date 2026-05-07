@@ -1,10 +1,10 @@
 # ------------------------------------------------------------------
-# Gold Price Fetch — pulls live gold/AED rates from goldpricez.com
+# Gold Price Fetch — pulls live gold/AED rates from the provider-adapter
 # every 6 minutes while global gold markets are open and commits
 # data/gold_price.json if it changed.
 # NOT a required merge gate.
 # ------------------------------------------------------------------
-name: Gold Price Fetch (goldpricez.com)
+name: Gold Price Fetch (provider-adapter)
 
 on:
   schedule:
@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   fetch:
-    name: Fetch goldpricez.com → data/gold_price.json
+    name: Fetch provider-adapter → data/gold_price.json
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -42,8 +42,15 @@ jobs:
 
       - name: Fetch gold price
         env:
+          GOLD_API_COM_ENABLED: 'true'
+          GOLD_PROVIDER_ORDER: gold_api_com,twelvedata_xauusd,fmp_gcusd
+          GOLD_API_COM_KEY: ${{ secrets.GOLD_API_COM_KEY }}
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+          TWELVEDATA_SYMBOL: ${{ secrets.TWELVEDATA_SYMBOL }}
+          FMP_API_KEY: ${{ secrets.FMP_API_KEY }}
+          FMP_SYMBOL: ${{ secrets.FMP_SYMBOL }}
           GOLDPRICEZ_API_KEY: ${{ secrets.GOLDPRICEZ_API_KEY }}
-        run: python scripts/fetch_gold_price.py
+        run: python scripts/python/fetch_gold_price.py
 
       - name: Commit data/gold_price.json if changed
         uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7

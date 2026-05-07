@@ -33,14 +33,19 @@ const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK_URL || '';
 function readGoldPrice() {
   const raw = fs.readFileSync(GOLD_PRICE_FILE, 'utf8');
   const data = JSON.parse(raw);
-  const price = data?.gold?.ounce_usd;
+  const price =
+    typeof data?.xau_usd_per_oz === 'number' && data.xau_usd_per_oz > 0
+      ? data.xau_usd_per_oz
+      : data?.gold?.ounce_usd;
   if (typeof price !== 'number' || price <= 0) {
-    throw new Error('data/gold_price.json missing or invalid gold.ounce_usd');
+    throw new Error(
+      'data/gold_price.json missing or invalid spot price (xau_usd_per_oz / gold.ounce_usd)'
+    );
   }
   return {
     price,
     prev_close_price: data?.gold?.day_low_usd || null,
-    updatedAt: data.fetched_at_utc || new Date().toISOString(),
+    updatedAt: data.timestamp_utc || data.fetched_at_utc || new Date().toISOString(),
   };
 }
 

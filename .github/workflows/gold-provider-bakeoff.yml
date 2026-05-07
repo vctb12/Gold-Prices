@@ -119,13 +119,25 @@ jobs:
           if gh run download "$PREV_RUN_ID" \
               --name "gold-provider-bakeoff-$PREV_RUN_ID" \
               --dir prev-bakeoff 2>/dev/null; then
-            if [ -f prev-bakeoff/data/provider_bakeoff_log.jsonl ]; then
-              cp prev-bakeoff/data/provider_bakeoff_log.jsonl data/provider_bakeoff_log.jsonl
+            PREV_LOG_PATH=""
+            if [ -f prev-bakeoff/provider_bakeoff_log.jsonl ]; then
+              PREV_LOG_PATH="prev-bakeoff/provider_bakeoff_log.jsonl"
+            elif [ -f prev-bakeoff/data/provider_bakeoff_log.jsonl ]; then
+              PREV_LOG_PATH="prev-bakeoff/data/provider_bakeoff_log.jsonl"
+            fi
+            if [ -n "$PREV_LOG_PATH" ]; then
+              cp "$PREV_LOG_PATH" data/provider_bakeoff_log.jsonl
               LINES="$(wc -l < data/provider_bakeoff_log.jsonl || echo 0)"
               echo "Restored prior JSONL ($LINES rows)."
             fi
-            if [ -f prev-bakeoff/data/provider_scorecard.json ]; then
-              cp prev-bakeoff/data/provider_scorecard.json data/provider_scorecard.json
+            PREV_SCORECARD_PATH=""
+            if [ -f prev-bakeoff/provider_scorecard.json ]; then
+              PREV_SCORECARD_PATH="prev-bakeoff/provider_scorecard.json"
+            elif [ -f prev-bakeoff/data/provider_scorecard.json ]; then
+              PREV_SCORECARD_PATH="prev-bakeoff/data/provider_scorecard.json"
+            fi
+            if [ -n "$PREV_SCORECARD_PATH" ]; then
+              cp "$PREV_SCORECARD_PATH" data/provider_scorecard.json
             fi
           else
             echo "Could not download prior artifact (maybe expired) — starting a fresh JSONL log."

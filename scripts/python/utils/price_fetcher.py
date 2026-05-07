@@ -77,21 +77,27 @@ def fetch_gold_price() -> Dict[str, Any]:
         raise PriceFetchError("gold_price.json is not a JSON object")
 
     gold = raw.get("gold") or {}
-    spot = gold.get("ounce_usd")
+    spot = raw.get("xau_usd_per_oz")
+    if not isinstance(spot, (int, float)) or spot <= 0:
+        spot = gold.get("ounce_usd")
     if not isinstance(spot, (int, float)) or spot <= 0:
         raise PriceFetchError(
-            f"Invalid or missing 'gold.ounce_usd' in {GOLD_PRICE_FILE}: {raw}"
+            f"Invalid or missing spot price (xau_usd_per_oz / gold.ounce_usd) in {GOLD_PRICE_FILE}: {raw}"
         )
     spot = float(spot)
 
     day_high = gold.get("day_high_usd")
     day_low = gold.get("day_low_usd")
-    timestamp = raw.get("fetched_at_utc")
+    timestamp = raw.get("timestamp_utc") or raw.get("fetched_at_utc")
 
     # Per-karat per-gram prices. Prefer whatever is already in the payload
     # for AED, compute USD locally from spot so callers that only care
     # about USD still work.
-    karats_aed = raw.get("karats_aed_per_gram") or {}
+    karats_aed = dict(raw.get("karats_aed_per_gram") or {})
+    aed_24k = raw.get("aed_per_gram_24k")
+    if isinstance(aed_24k, (int, float)) and aed_24k > 0:
+        for code, purity in (("24k", 1.0), ("22k", 22 / 24), ("21k", 21 / 24), ("18k", 18 / 24)):
+            karats_aed.setdefault(code, float(aed_24k) * purity)
     karats = _get_karats()
     karat_prices = []
     for k in karats:

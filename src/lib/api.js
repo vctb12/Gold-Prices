@@ -114,7 +114,7 @@ export async function fetchGold() {
   if (_simulateGoldFail) throw new NetworkError('Simulated gold API failure');
 
   // Data comes from a single, committed file written every 6 min by
-  // .github/workflows/gold-price-fetch.yml (source: goldpricez.com).
+  // .github/workflows/gold-price-fetch.yml.
   // We fetch same-origin with cache-busting so the freshness timestamp
   // in the payload is the truth.
   try {
@@ -124,14 +124,17 @@ export async function fetchGold() {
         CONSTANTS.GOLD_FETCH_TIMEOUT
       );
       const data = await res.json();
-      const price = data?.gold?.ounce_usd;
+      const normalizedPrice = data?.xau_usd_per_oz;
+      const legacyPrice = data?.gold?.ounce_usd;
+      const price =
+        typeof normalizedPrice === 'number' && normalizedPrice > 0 ? normalizedPrice : legacyPrice;
       if (typeof price !== 'number' || price <= 0) {
         throw new DataError('Invalid gold price data file');
       }
       return {
         price,
-        updatedAt: data.fetched_at_utc || new Date().toISOString(),
-        source: 'goldpricez',
+        updatedAt: data.timestamp_utc || data.fetched_at_utc || new Date().toISOString(),
+        source: data.provider || data.source || 'goldpricez',
         raw: data,
       };
     });

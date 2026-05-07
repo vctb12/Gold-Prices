@@ -52,13 +52,19 @@ LAST_GOLD_PRICE_FILE = DATA_DIR / "last_gold_price.json"
 PROVIDER_STATE_FILE = DATA_DIR / "provider_state.json"
 
 DEFAULT_PROVIDER_ORDER = (
-    "metal_sentinel,finnhub_oanda,fmp_gcusd,goldapi_io,twelvedata_xauusd,goldpricez"
+    "gold_api_com,twelvedata_xauusd,fmp_gcusd"
 )
 
 # Circuit-breaker tuning
 CB_FAILURE_THRESHOLD = 3
 CB_FAILURE_OPEN_MINUTES = 30
 CB_RATE_LIMIT_OPEN_MINUTES = 60
+KARAT_PURITY = {
+    "24k": 1.0,
+    "22k": 22 / 24,
+    "21k": 21 / 24,
+    "18k": 18 / 24,
+}
 
 
 # ── Provider state I/O ───────────────────────────────────────────────────────
@@ -164,6 +170,52 @@ def _emit_actions_outputs(outputs: Dict[str, Any]) -> None:
         pass
 
 
+def _with_legacy_wrapper(normalized: Dict[str, Any]) -> Dict[str, Any]:
+    """Return normalized payload plus legacy compatibility fields."""
+    payload = dict(normalized)
+    xau = payload.get("xau_usd_per_oz")
+    aed_peg = payload.get("aed_peg", 3.6725)
+    if not isinstance(xau, (int, float)) or xau <= 0:
+        return payload
+
+    xau = float(xau)
+    usd_per_gram_24k = xau / 31.1034768
+    aed_per_gram_24k = payload.get("aed_per_gram_24k")
+    if not isinstance(aed_per_gram_24k, (int, float)) or aed_per_gram_24k <= 0:
+        aed_per_gram_24k = usd_per_gram_24k * float(aed_peg)
+
+    karats_aed_per_gram = {
+        code: round(float(aed_per_gram_24k) * purity, 2)
+        for code, purity in KARAT_PURITY.items()
+    }
+    provider_ts = payload.get("timestamp_utc")
+    source_updated_at_gmt = None
+    if isinstance(provider_ts, str) and provider_ts:
+        try:
+            dt = parse_timestamp(provider_ts)
+            if dt is not None:
+                source_updated_at_gmt = dt.strftime("%d-%m-%Y %I:%M:%S %p").lower()
+        except Exception:
+            source_updated_at_gmt = None
+
+    payload.update({
+        "source": payload.get("provider"),
+        "source_updated_at_gmt": source_updated_at_gmt,
+        "gold": {
+            "ounce_usd": round(xau, 2),
+            "ounce_aed": round(xau * float(aed_peg), 2),
+            "gram_aed": round(float(aed_per_gram_24k), 2),
+            "day_low_usd": None,
+            "day_high_usd": None,
+            "ask_usd": payload.get("ask") if isinstance(payload.get("ask"), (int, float)) else round(xau, 2),
+            "bid_usd": payload.get("bid") if isinstance(payload.get("bid"), (int, float)) else round(xau, 2),
+        },
+        "karats_aed_per_gram": karats_aed_per_gram,
+        "status": "ok" if payload.get("is_fresh") else "stale",
+    })
+    return payload
+
+
 def _decide_should_post(
     normalized: Optional[Dict[str, Any]],
     note: str,
@@ -230,7 +282,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if not args.dry_run:
         if chosen is not None:
-            payload = dict(chosen)
+            payload = _with_legacy_wrapper(chosen)
             payload["is_fallback"] = bool(is_fallback)
             _atomic_write_json(GOLD_PRICE_FILE, payload)
             if chosen.get("is_fresh"):
