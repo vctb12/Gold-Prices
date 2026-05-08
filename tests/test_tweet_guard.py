@@ -52,7 +52,7 @@ def test_skip_on_unchanged_provider_timestamp_within_summary_window(monkeypatch)
         last_provider_timestamp_utc="2026-05-01T10:00:00Z",
         last_price_usd_oz=4550.0,
     )
-    d = tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:00:00Z"), tweet_text="NEW")
+    d = tg.decide(state, quote=_quote(price=4555.0, ts="2026-05-01T10:00:00Z"), tweet_text="NEW")
     assert d.should_post is False
     assert d.skip_reason == "provider_timestamp_unchanged"
     assert d.provider_timestamp_changed is False

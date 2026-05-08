@@ -460,6 +460,7 @@ def test_tweet_429_logs_retry_after(capsys, monkeypatch):
 
 
 def test_main_dry_run_does_not_post(tmp_path, monkeypatch, capsys):
+    fresh_now = datetime.now(timezone.utc)
     gold_file = tmp_path / "gold_price.json"
     state_file = tmp_path / "last_gold_price.json"
     tweet_state_file = tmp_path / "last_tweet_state.json"
@@ -468,8 +469,8 @@ def test_main_dry_run_does_not_post(tmp_path, monkeypatch, capsys):
             {
                 "provider": "gold_api_com",
                 "xau_usd_per_oz": 4731.2,
-                "timestamp_utc": "2026-05-07T10:34:52Z",
-                "fetched_at_utc": "2026-05-07T10:35:03Z",
+                "timestamp_utc": (fresh_now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "fetched_at_utc": fresh_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "aed_per_gram_24k": 558.4,
                 "karats_aed_per_gram": {
                     "24k": 558.4,
