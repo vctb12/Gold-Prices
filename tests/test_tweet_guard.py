@@ -21,6 +21,10 @@ def _quote(price=4550.0, ts="2026-05-01T10:00:00Z", is_fresh=True, is_fallback=F
     }
 
 
+def _minutes_ago_iso(minutes):
+    return (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def test_first_post_is_allowed():
     state = tg.TweetState()
     d = tg.decide(state, quote=_quote(), tweet_text="Gold price: $4,550")
@@ -49,7 +53,7 @@ def test_skip_on_unchanged_provider_timestamp_within_summary_window(monkeypatch)
     same_ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     state = tg.TweetState(
         last_tweet_text_hash=tg.hash_tweet("OLD"),
-        last_tweet_time_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        last_tweet_time_utc=_minutes_ago_iso(56),
         last_provider_timestamp_utc=same_ts,
         last_price_usd_oz=4550.0,
     )
@@ -92,7 +96,7 @@ def test_skip_on_duplicate_text_hash(monkeypatch):
     text = "Gold price: $4,550"
     state = tg.TweetState(
         last_tweet_text_hash=tg.hash_tweet(text),
-        last_tweet_time_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        last_tweet_time_utc=_minutes_ago_iso(70),
         last_provider_timestamp_utc="2026-05-01T10:00:00Z",
         last_price_usd_oz=4540.0,
     )
@@ -108,7 +112,7 @@ def test_skip_on_small_price_move(monkeypatch):
     monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
     state = tg.TweetState(
         last_tweet_text_hash=tg.hash_tweet("OLD"),
-        last_tweet_time_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        last_tweet_time_utc=_minutes_ago_iso(56),
         last_provider_timestamp_utc="2026-05-01T10:00:00Z",
         last_price_usd_oz=4550.00,
     )
@@ -121,7 +125,7 @@ def test_post_on_meaningful_price_move(monkeypatch):
     monkeypatch.setenv("MIN_TWEET_MOVE_USD", "1.00")
     state = tg.TweetState(
         last_tweet_text_hash=tg.hash_tweet("OLD"),
-        last_tweet_time_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        last_tweet_time_utc=_minutes_ago_iso(70),
         last_provider_timestamp_utc="2026-05-01T10:00:00Z",
         last_price_usd_oz=4550.00,
     )
@@ -133,7 +137,7 @@ def test_post_on_meaningful_price_move(monkeypatch):
 def test_skip_fallback_with_same_price_and_timestamp():
     state = tg.TweetState(
         last_tweet_text_hash=tg.hash_tweet("OLD"),
-        last_tweet_time_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        last_tweet_time_utc=_minutes_ago_iso(70),
         last_provider_timestamp_utc="2026-05-01T10:00:00Z",
         last_price_usd_oz=4550.00,
     )
@@ -142,6 +146,32 @@ def test_skip_fallback_with_same_price_and_timestamp():
     d = tg.decide(state, quote=q, tweet_text="NEW")
     assert d.should_post is False
     assert d.skip_reason == "fallback_no_change"
+
+
+def test_skip_when_within_cooldown_window(monkeypatch):
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(20),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4540.0,
+    )
+    d = tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    assert d.should_post is False
+    assert d.skip_reason == "cooldown_active"
+
+
+def test_force_post_overrides_cooldown_only(monkeypatch):
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.setenv("FORCE_POST", "true")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(20),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4540.0,
+    )
+    d = tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    assert d.should_post is True
 
 
 def test_persistence_round_trip(tmp_path: Path):

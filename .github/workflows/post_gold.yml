@@ -1,30 +1,42 @@
 # ------------------------------------------------------------------
-# Post Gold Price to X — informational social-posting bot. Runs every
-# 6 minutes while global gold markets are open and posts only when the
-# committed spot price changes. Requires `contents: write` because it
-# rotates a small state file commit.
+# Post Gold Price to X — informational social-posting bot. Runs hourly
+# while global gold markets are open and posts only when the committed
+# cached spot price passes the posting guards. Supports manual
+# workflow_dispatch for GitHub UI / iPhone Shortcut triggers without
+# bypassing guardrails.
 # NOT a required merge gate.
 # ------------------------------------------------------------------
 name: Post Gold Price to X (Python)
 
 on:
   schedule:
-    - cron: '3 21 * * 0'       # Market OPEN — after the 21:00 UTC fetch
-    - cron: '9-59/6 21 * * 0'  # Every 6 min after Sunday open
-    - cron: '3-59/6 22-23 * * 0' # Sunday evening UTC
-    - cron: '3-59/6 * * * 1-4' # Every 6 min Mon–Thu
-    - cron: '3-59/6 0-20 * * 5' # Every 6 min Friday until close hour
-    - cron: '3 21 * * 5'       # Market CLOSE — after the 21:00 UTC fetch
+    - cron: '9 21-23 * * 0'  # Hourly from Sunday open, after the fetch workflow
+    - cron: '9 * * * 1-4'    # Hourly Mon–Thu
+    - cron: '9 0-20 * * 5'   # Hourly Friday until close hour
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true = evaluate all guards and skip the real X API call"
+        required: false
+        default: "false"
+      force_post:
+        description: "true = bypass cooldown only; duplicate, stale, and length guards still apply"
+        required: false
+        default: "false"
+      source:
+        description: "Trigger source label for logs/state (manual, shortcut, scheduled)"
+        required: false
+        default: "manual"
 
 # Least-privilege default; the posting job elevates to write for the state commit.
 permissions:
   contents: read
 
 concurrency:
-  # Serialize tweet runs so two crons can't race on the state-file commit.
+  # Conservative by design: if a scheduled run and a manual Shortcut run overlap,
+  # cancel the older in-flight run so the repo state and tweet budget stay clean.
   group: post-gold
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   post:
@@ -55,6 +67,10 @@ jobs:
           TWITTER_ACCESS_TOKEN:        ${{ secrets.ACCESS_TOKEN }}
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
           GITHUB_EVENT_SCHEDULE:       ${{ github.event.schedule }}
+          DRY_RUN_TWEET:               ${{ github.event.inputs.dry_run || 'false' }}
+          FORCE_POST:                  ${{ github.event.inputs.force_post || 'false' }}
+          POST_TRIGGER_SOURCE:         ${{ github.event.inputs.source || 'scheduled' }}
+          MIN_TWEET_INTERVAL_MINUTES:  '55'
         run: python scripts/python/post_gold_price.py
 
       - name: Commit last price state
@@ -62,10 +78,10 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -f data/last_gold_price.json ]; then
-            git add data/last_gold_price.json
-            git diff --cached --quiet || git commit -m "chore: update gold price state [skip ci]"
+          if [ -f data/last_gold_price.json ] || [ -f data/last_tweet_state.json ]; then
+            git add data/last_gold_price.json data/last_tweet_state.json || true
+            git diff --cached --quiet || git commit -m "chore: update gold tweet state [skip ci]"
             git push
           else
-            echo "data/last_gold_price.json not found, skipping commit."
+            echo "tweet state files not found, skipping commit."
           fi

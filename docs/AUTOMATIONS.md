@@ -114,18 +114,22 @@ Pings the site every **30 minutes**. Alerts via Telegram and/or Discord if site 
 
 ### 8. Python X/Twitter posts — `post_gold.yml`
 
-Runs every 6 minutes while the global gold market is open (Sunday 21:00 UTC through Friday 20:59
-UTC), offset a few minutes after the fetch workflow so it reads freshly committed data. It posts
-only when the committed spot price changes. Manual runs use the same staleness, market-hours,
-price-change, and duplicate-content guards; they are not force posts.
+Runs **hourly** while the global gold market is open (Sunday 21:00 UTC through Friday 20:59 UTC),
+offset a few minutes after the fetch workflow so it reads freshly committed data. It posts only when
+the cached result passes the stale, duplicate, cooldown, and 280-character guards.
+
+Manual `workflow_dispatch` is supported for GitHub UI and iPhone Shortcut triggers. Manual runs do
+not fetch gold prices themselves and do not bypass GitHub guardrails; they reuse the same cached
+`data/gold_price.json` source-of-truth and are protected by the same skip logic. `force_post=true`
+only overrides the cooldown guard.
 
 - Script: `scripts/python/post_gold_price.py`
-- Secrets needed: `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_TOKEN`, `ACCESS_TOKEN_SECRET`,
-  `GOLDPRICEZ_API_KEY`
+- Secrets needed: `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_TOKEN`, `ACCESS_TOKEN_SECRET`
 - State file: `data/last_gold_price.json` records the last successful post and is ignored by the
   deploy workflow to avoid redeploying the site for tweet-state-only commits.
-- Market open/close tweets use explicit cron entries so delayed GitHub scheduled starts do not
-  repeat event tweets throughout the hour.
+- `data/last_tweet_state.json` stores duplicate/cooldown state for safe scheduled + manual runs.
+- Recommended manual inputs: `dry_run`, `force_post`, and `source` (`manual`, `shortcut`,
+  `scheduled`).
 
 ### 8a. Gold provider bakeoff & migration (infrastructure only)
 

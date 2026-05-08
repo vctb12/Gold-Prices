@@ -594,6 +594,9 @@ def main():
     # GitHub scheduled workflows can start late, so using github.event.schedule
     # prevents repeated event tweets during the whole delayed start hour.
     schedule_cron = os.environ.get('GITHUB_EVENT_SCHEDULE', '').strip() or None
+    trigger_source = os.environ.get('POST_TRIGGER_SOURCE', '').strip() or (
+        'scheduled' if schedule_cron else 'manual'
+    )
     post_type = get_post_type(schedule_cron=schedule_cron)
 
     # 4. Print RUN CONTEXT block
@@ -603,6 +606,9 @@ def main():
     print(f"sha:          {sha[:7] if sha else 'local'}")
     print(f"actor:        {os.environ.get('GITHUB_ACTOR', 'local')}")
     print(f"schedule:     {schedule_cron or 'manual/local'}")
+    print(f"source:       {trigger_source}")
+    print(f"dry_run:      {os.environ.get('DRY_RUN_TWEET', 'false')}")
+    print(f"force_post:   {os.environ.get('FORCE_POST', 'false')}")
     print(f"post_type:    {post_type}")
     print("data_file:    data/gold_price.json")
     print(f"source_ts:    {source_ts}")
@@ -714,7 +720,7 @@ def main():
                 quote=guard_quote,  # noqa: F821
                 tweet_text=tweet,
                 tweet_id=None,
-                reason="price_moved",
+                reason=f"{trigger_source}_price_moved",
             )
             tweet_guard.save_state(LAST_TWEET_STATE_FILE, new_state)
         except Exception as exc:  # pragma: no cover — best-effort

@@ -13,6 +13,15 @@ automation-rule violation against the account.
 This doc describes how `scripts/python/post_gold_price.py` and `scripts/python/tweet_guard.py`
 cooperate to make the bot duplicate-safe and freshness-honest.
 
+Production posture:
+
+- scheduled posting is **hourly**, not every 6 minutes
+- manual GitHub `workflow_dispatch` is supported for GitHub UI and iPhone Shortcut triggers
+- manual runs still use the cached `data/gold_price.json` source-of-truth and the same GitHub
+  guardrails
+- `force_post=true` only overrides the cooldown guard; stale, duplicate, and length checks still
+  apply
+
 ---
 
 ## 1. Failure mode we're guarding against
@@ -38,13 +47,14 @@ means the bot exits 0 with a `skip_reason`.
 | #   | Skip reason                    | Trigger                                                                                                   |
 | --- | ------------------------------ | --------------------------------------------------------------------------------------------------------- | -------- | ------------------------- | -------- | ------------------------------------------------------------------------ |
 | 1   | `stale_quote`                  | `is_fresh=false` and `ALLOW_STALE_TWEET≠true`. Fresh = `freshness_seconds ≤ MAX_GOLD_FRESHNESS_SECONDS`.  |
-| 2   | `provider_sample_unchanged`    | Provider price **and** provider timestamp both match the last successful post. Always skipped.            |
-| 3   | `provider_timestamp_unchanged` | Provider timestamp equals the last successful post's, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed.   |
-| 4   | `duplicate_text_hash`          | SHA-256 of generated tweet text equals the last posted hash. Always skipped — X would reject anyway.      |
-| 5   | `fallback_no_change`           | `is_fallback=true` (or `source_type` is `cache_last_known` / `spot_delayed`) AND price equals last price. |
-| 6   | `price_move_below_threshold`   | `                                                                                                         | move_usd | < MIN_TWEET_MOVE_USD`AND` | move_pct | < MIN_TWEET_MOVE_PCT`, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed. |
+| 2   | `cooldown_active`              | Last successful tweet was less than `MIN_TWEET_INTERVAL_MINUTES` ago (default 55) and `FORCE_POST≠true`.  |
+| 3   | `provider_sample_unchanged`    | Provider price **and** provider timestamp both match the last successful post. Always skipped.            |
+| 4   | `provider_timestamp_unchanged` | Provider timestamp equals the last successful post's, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed.   |
+| 5   | `duplicate_text_hash`          | SHA-256 of generated tweet text equals the last posted hash. Always skipped — X would reject anyway.      |
+| 6   | `fallback_no_change`           | `is_fallback=true` (or `source_type` is `cache_last_known` / `spot_delayed`) AND price equals last price. |
+| 7   | `price_move_below_threshold`   | `                                                                                                         | move_usd | < MIN_TWEET_MOVE_USD`AND` | move_pct | < MIN_TWEET_MOVE_PCT`, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed. |
 
-When all six rules pass, the bot posts and updates `data/last_tweet_state.json`.
+When all seven rules pass, the bot posts and updates `data/last_tweet_state.json`.
 
 `post_gold_price.py` also applies a hard length guard before calling the X API:
 
@@ -62,9 +72,11 @@ All env vars; sensible defaults baked into the code so a missing variable behave
 | ----------------------------- | ------: | ------------------------------------------------------------------------------------------------------------------- |
 | `SKIP_DUPLICATE_TWEETS`       |  `true` | Master switch for the new guard. `false` → bypass (tests only).                                                     |
 | `ALLOW_STALE_TWEET`           | `false` | Allow posting when `is_fresh=false`. Use only for forced summaries with explicit "delayed" copy.                    |
+| `MIN_TWEET_INTERVAL_MINUTES`  |    `55` | Cooldown between successful tweets so scheduled + manual runs do not double-post.                                   |
 | `MIN_TWEET_MOVE_USD`          |  `1.00` | Skip below this absolute USD/oz move (when timestamp has changed).                                                  |
 | `MIN_TWEET_MOVE_PCT`          |  `0.03` | Skip below this percentage move.                                                                                    |
 | `FORCE_SUMMARY_AFTER_MINUTES` |    `60` | Override "no movement" suppression after N minutes since the last post (so the feed always has a recent reference). |
+| `FORCE_POST`                  | `false` | Override the cooldown guard only. It does **not** bypass stale, duplicate, or 280-character checks.                 |
 | `DRY_RUN_TWEET`               | `false` | Run the full pipeline including the guard but never call the X API. Useful for the migration sign-off.              |
 
 ## 4. State file

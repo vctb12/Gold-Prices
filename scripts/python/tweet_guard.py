@@ -81,6 +81,12 @@ def hash_tweet(text: str) -> str:
     return hashlib.sha256(canon.encode("utf-8")).hexdigest()
 
 
+def _same_price(a: Any, b: Any) -> Optional[bool]:
+    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        return None
+    return round(float(a), 2) == round(float(b), 2)
+
+
 def load_state(path: Path) -> TweetState:
     if not path.exists():
         return TweetState()
@@ -160,9 +166,7 @@ def decide(
     if isinstance(cur_price, (int, float)) and isinstance(state.last_price_usd_oz, (int, float)) and state.last_price_usd_oz:
         move_usd = float(cur_price) - float(state.last_price_usd_oz)
         move_pct = (move_usd / float(state.last_price_usd_oz)) * 100.0
-    same_price: Optional[bool] = None
-    if isinstance(cur_price, (int, float)) and isinstance(state.last_price_usd_oz, (int, float)):
-        same_price = round(float(cur_price), 2) == round(float(state.last_price_usd_oz), 2)
+    same_price = _same_price(cur_price, state.last_price_usd_oz)
 
     ts_changed: Optional[bool] = None
     if cur_ts and state.last_provider_timestamp_utc:
@@ -175,8 +179,10 @@ def decide(
         return Decision(True, None, h, move_usd, move_pct, ts_changed)
 
     allow_stale = _truthy("ALLOW_STALE_TWEET", default=False)
+    force_post = _truthy("FORCE_POST", default=False)
     min_move_usd = _envf("MIN_TWEET_MOVE_USD", 1.00)
     min_move_pct = _envf("MIN_TWEET_MOVE_PCT", 0.03)
+    min_interval_minutes = _envi("MIN_TWEET_INTERVAL_MINUTES", 55)
     force_summary_min = _envi("FORCE_SUMMARY_AFTER_MINUTES", 60)
 
     minutes_since_last = _minutes_since(state.last_tweet_time_utc, now)
@@ -192,19 +198,27 @@ def decide(
     if state.last_tweet_text_hash is None:
         return Decision(True, None, h, move_usd, move_pct, ts_changed)
 
-    # Rule 2: same provider sample (price + timestamp) → always skip.
+    # Rule 2: cooldown — keep scheduled + manual GitHub runs from double-posting.
+    if (
+        not force_post
+        and minutes_since_last is not None
+        and minutes_since_last < min_interval_minutes
+    ):
+        return Decision(False, "cooldown_active", h, move_usd, move_pct, ts_changed)
+
+    # Rule 3: same provider sample (price + timestamp) → always skip.
     if same_price is True and ts_changed is False:
         return Decision(False, "provider_sample_unchanged", h, move_usd, move_pct, ts_changed)
 
-    # Rule 3: provider timestamp unchanged → skip unless forced summary due.
+    # Rule 4: provider timestamp unchanged → skip unless forced summary due.
     if ts_changed is False and not force_summary_due:
         return Decision(False, "provider_timestamp_unchanged", h, move_usd, move_pct, ts_changed)
 
-    # Rule 4: identical text hash → ALWAYS skip (X rejects this anyway).
+    # Rule 5: identical text hash → ALWAYS skip (X rejects this anyway).
     if h == state.last_tweet_text_hash:
         return Decision(False, "duplicate_text_hash", h, move_usd, move_pct, ts_changed)
 
-    # Rule 5: fallback/cache with same price → skip. Evaluated before the
+    # Rule 6: fallback/cache with same price → skip. Evaluated before the
     # price-move threshold so a fallback replaying yesterday's price doesn't
     # masquerade as "below threshold" (it isn't a real micro-move; it's the
     # provider serving cached data).
@@ -212,7 +226,7 @@ def decide(
         if same_price:
             return Decision(False, "fallback_no_change", h, move_usd, move_pct, ts_changed)
 
-    # Rule 6: small price movement → skip unless forced summary due.
+    # Rule 7: small price movement → skip unless forced summary due.
     if move_usd is not None and move_pct is not None:
         if abs(move_usd) < min_move_usd and abs(move_pct) < min_move_pct and not force_summary_due:
             return Decision(False, "price_move_below_threshold", h, move_usd, move_pct, ts_changed)

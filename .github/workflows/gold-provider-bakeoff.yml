@@ -8,13 +8,6 @@
 #     Default = one round smoke so a single click is safe. Micro mode
 #     runs 50–90 minutes (default 60) at 6-minute intervals so we can
 #     gather quick evidence without waiting 24h.
-#   * Scheduled (hourly chunked accumulation): each hourly run
-#     samples the smoke-passing candidate trio
-#     (goldapi_io, twelvedata_xauusd, fmp_gcusd) every 6 minutes for
-#     ~50 minutes (≈8 samples/provider/run). Each run restores the
-#     JSONL from the previous successful run's artifact via the
-#     GitHub API (``gh run download``) before sampling, so results
-#     accumulate across runs without writing anything to git.
 #
 # X is NEVER posted from this workflow. Raw response bodies are
 # NEVER logged (BAKEOFF_LOG_RAW is hard-pinned to "false"). By
@@ -56,10 +49,6 @@ on:
         description: "Commit scorecard + JSONL back to the branch. Default false — the rolling artifact is the canonical store. Only set true for a specific tracked snapshot."
         required: false
         default: "false"
-  schedule:
-    # Hourly single-round sample, offset away from minute 0 (where
-    # GitHub Actions schedules see the most starvation/dropping).
-    - cron: "11 * * * *"
 
 permissions:
   contents: read
@@ -99,60 +88,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/python/requirements.txt
 
-      - name: Restore previous bakeoff log (scheduled runs)
-        # On scheduled runs we want each new hourly chunk to *append*
-        # to the JSONL produced by prior runs so samples accumulate.
-        # The previous artifact is the most recent successful run of
-        # this same workflow. Failures here are non-fatal — a missing
-        # prior artifact just means we start a fresh log.
-        if: github.event_name == 'schedule'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          mkdir -p data
-          PREV_RUN_ID="$(gh run list \
-            --workflow=gold-provider-bakeoff.yml \
-            --branch="${{ github.ref_name }}" \
-            --status=success \
-            --limit=1 \
-            --json databaseId \
-            --jq '.[0].databaseId // empty' || true)"
-          if [ -z "$PREV_RUN_ID" ]; then
-            echo "No previous successful run found — starting a fresh JSONL log."
-            exit 0
-          fi
-          echo "Restoring artifact from previous run: $PREV_RUN_ID"
-          rm -rf prev-bakeoff
-          mkdir -p prev-bakeoff
-          if gh run download "$PREV_RUN_ID" \
-              --name "gold-provider-bakeoff-$PREV_RUN_ID" \
-              --dir prev-bakeoff 2>/dev/null; then
-            PREV_LOG_PATH=""
-            if [ -f prev-bakeoff/provider_bakeoff_log.jsonl ]; then
-              PREV_LOG_PATH="prev-bakeoff/provider_bakeoff_log.jsonl"
-            elif [ -f prev-bakeoff/data/provider_bakeoff_log.jsonl ]; then
-              PREV_LOG_PATH="prev-bakeoff/data/provider_bakeoff_log.jsonl"
-            fi
-            if [ -n "$PREV_LOG_PATH" ]; then
-              cp "$PREV_LOG_PATH" data/provider_bakeoff_log.jsonl
-              LINES="$(wc -l < data/provider_bakeoff_log.jsonl || echo 0)"
-              echo "Restored prior JSONL ($LINES rows)."
-            fi
-            PREV_SCORECARD_PATH=""
-            if [ -f prev-bakeoff/provider_scorecard.json ]; then
-              PREV_SCORECARD_PATH="prev-bakeoff/provider_scorecard.json"
-            elif [ -f prev-bakeoff/data/provider_scorecard.json ]; then
-              PREV_SCORECARD_PATH="prev-bakeoff/data/provider_scorecard.json"
-            fi
-            if [ -n "$PREV_SCORECARD_PATH" ]; then
-              cp "$PREV_SCORECARD_PATH" data/provider_scorecard.json
-            fi
-          else
-            echo "Could not download prior artifact (maybe expired) — starting a fresh JSONL log."
-          fi
-          rm -rf prev-bakeoff
-
       - name: Run bakeoff
         env:
           # Provider API keys come from secrets. Anything not
@@ -170,7 +105,7 @@ jobs:
           TWELVEDATA_SYMBOL: ${{ secrets.TWELVEDATA_SYMBOL }}
           GOLDPRICEZ_API_KEY: ${{ secrets.GOLDPRICEZ_API_KEY }}
           # gold-api.com — no key required per provider docs, but one
-          # can be supplied. Hard-disabled in scheduled runs (previous
+          # can be supplied. Hard-disabled by default (previous
           # production failure; needs fresh bakeoff before re-enabling).
           # To test manually: pass ``gold_api_com`` in the providers
           # input and set GOLD_API_COM_ENABLED=true as a repo secret.
@@ -202,16 +137,7 @@ jobs:
           INTERVAL="${{ github.event.inputs.interval_seconds || '360' }}"
           PROVIDERS="${{ github.event.inputs.providers || '' }}"
 
-          # Scheduled (cron) defaults: pin the candidate trio and
-          # run for ~50 minutes per hourly trigger so each run
-          # produces ~8 samples/provider, well under the runner cap.
-          if [ "$EVENT" = "schedule" ]; then
-            if [ -z "$PROVIDERS" ]; then
-              PROVIDERS="goldapi_io,twelvedata_xauusd,fmp_gcusd"
-            fi
-            DURATION="0.83"
-            INTERVAL="360"
-          elif [ "$MODE" = "micro" ]; then
+          if [ "$MODE" = "micro" ]; then
             if [ -z "$PROVIDERS" ]; then
               PROVIDERS="goldapi_io,twelvedata_xauusd,fmp_gcusd"
             fi
@@ -252,7 +178,7 @@ PY
           {
             echo "## Gold Provider Bakeoff"
             echo
-            echo "- Mode: `${{ github.event_name == 'schedule' && 'scheduled-hourly' || (github.event.inputs.mode || 'smoke') }}`"
+            echo "- Mode: `${{ github.event.inputs.mode || 'smoke' }}`"
             echo "- Providers: `${{ github.event.inputs.providers || 'auto/default selection' }}`"
             echo "- Interval seconds: `${{ github.event.inputs.interval_seconds || '360' }}`"
             echo "- Commit results: `${{ github.event.inputs.commit_results || 'false' }}`"

@@ -1,16 +1,18 @@
 # ------------------------------------------------------------------
 # Gold Price Fetch — pulls live gold/AED rates from the provider-adapter
-# every 6 minutes while global gold markets are open and commits
-# data/gold_price.json if it changed.
+# once per hour while global gold markets are open and commits
+# data/gold_price.json if it changed. This is the single production
+# provider-call path; post_gold.yml reads the cached result and does not
+# fetch again.
 # NOT a required merge gate.
 # ------------------------------------------------------------------
 name: Gold Price Fetch (provider-adapter)
 
 on:
   schedule:
-    - cron: '*/6 21-23 * * 0'  # Every 6 min from Sunday open
-    - cron: '*/6 * * * 1-4'    # Every 6 min Mon–Thu
-    - cron: '*/6 0-20 * * 5'   # Every 6 min Friday until close hour
+    - cron: '2 21-23 * * 0'  # Hourly from Sunday open
+    - cron: '2 * * * 1-4'    # Hourly Mon–Thu
+    - cron: '2 0-20 * * 5'   # Hourly Friday until close hour
   workflow_dispatch:
 
 permissions:
@@ -18,7 +20,7 @@ permissions:
 
 concurrency:
   group: gold-price-fetch
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   fetch:
