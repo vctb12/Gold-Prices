@@ -178,6 +178,8 @@
   --content-max-width: 1280px;
   --page-gutter: 1.25rem;
   --nav-height: 64px;
+  --mobile-bottom-nav-height: 64px;
+  --mobile-bottom-nav-body-offset: 68px;
 
   /* Focus ring */
   --focus-ring-color: var(--color-gold);
@@ -5242,7 +5244,7 @@ body > * {
   justify-content: space-around;
   max-width: 500px;
   margin: 0 auto;
-  height: 60px;
+  min-height: var(--mobile-bottom-nav-height);
 }
 
 .mobile-bottom-nav-item {
@@ -5255,7 +5257,7 @@ body > * {
   padding: 6px 4px 4px;
   text-decoration: none;
   color: var(--color-text-faint);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-wide);
   transition: color 0.15s ease;
@@ -5276,6 +5278,10 @@ body > * {
   color: var(--color-gold-dark);
 }
 
+.mobile-bottom-nav-item.is-active .mobile-bottom-nav-label {
+  font-weight: var(--weight-bold);
+}
+
 .mobile-bottom-nav-icon {
   width: 22px;
   height: 22px;
@@ -5294,7 +5300,7 @@ body > * {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 60px;
+  max-width: 76px;
 }
 
 /* Show bottom nav only on mobile */
@@ -5305,7 +5311,7 @@ body > * {
 
   /* Add bottom padding to body so content isn't hidden behind the nav */
   body {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--mobile-bottom-nav-body-offset) + env(safe-area-inset-bottom, 0px));
   }
 }
 

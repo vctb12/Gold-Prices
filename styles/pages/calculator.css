@@ -557,9 +557,24 @@
     flex-wrap: nowrap;
   }
 
+  .calc-nav-tabs {
+    position: sticky;
+    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
+    z-index: 15;
+    background: var(--surface-primary);
+  }
+
   .calc-tab {
     flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  .calc-input-row {
+    flex-direction: column;
+  }
+
+  .calc-input-row .calc-select {
+    width: 100%;
   }
 }
 

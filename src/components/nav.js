@@ -932,7 +932,7 @@ function _injectMobileBottomNav(lang, _depth) {
         </button>`;
       }
 
-      return `<a href="${item.href}" class="${cls}" data-mobile-nav="${item.key}">
+      return `<a href="${item.href}" class="${cls}" data-mobile-nav="${item.key}" aria-label="${item.label}">
         <span class="mobile-bottom-nav-icon" aria-hidden="true">${item.icon}</span>
         <span class="mobile-bottom-nav-label">${item.label}</span>
       </a>`;
@@ -1163,8 +1163,7 @@ export function updateNavLang(lang) {
       const key = el.dataset.mobileNav;
       const lbl = el.querySelector('.mobile-bottom-nav-label');
       if (lbl && labels[key]) lbl.textContent = labels[key];
-      // Keep aria-label in sync for the "More" button
-      if (key === 'menu' && labels[key]) el.setAttribute('aria-label', labels[key]);
+      if (labels[key]) el.setAttribute('aria-label', labels[key]);
     });
   }
 }

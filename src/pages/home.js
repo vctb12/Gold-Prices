@@ -202,12 +202,17 @@ function renderHeroCard() {
   const k24 = KARATS.find((k) => k.code === '24');
   const k22 = KARATS.find((k) => k.code === '22');
   const k21 = KARATS.find((k) => k.code === '21');
+  const k18 = KARATS.find((k) => k.code === '18');
+  if (!k24 || !k22 || !k21 || !k18) {
+    console.warn('[home] Missing required karat config (24/22/21/18); skipping hero card render');
+    return;
+  }
 
   const usd24oz = goldPrice;
   const aed24g = calc.usdPerGram(goldPrice, k24.purity) * CONSTANTS.AED_PEG;
-  const usd22g = calc.usdPerGram(goldPrice, k22.purity);
-  const aed22g = usd22g * CONSTANTS.AED_PEG;
-  const usd21g = calc.usdPerGram(goldPrice, k21.purity);
+  const aed22g = calc.usdPerGram(goldPrice, k22.purity) * CONSTANTS.AED_PEG;
+  const aed21g = calc.usdPerGram(goldPrice, k21.purity) * CONSTANTS.AED_PEG;
+  const aed18g = calc.usdPerGram(goldPrice, k18.purity) * CONSTANTS.AED_PEG;
 
   // Update sticky spot bar
   updateSpotBar({
@@ -227,9 +232,9 @@ function renderHeroCard() {
   }
   document.getElementById('hero-live-card')?.removeAttribute('aria-busy');
   setTextById('hlc-aed24', fmt.formatPrice(aed24g, 'AED', 2));
-  setTextById('hlc-usd22', fmt.formatPrice(usd22g, 'USD', 2));
   setTextById('hlc-aed22', fmt.formatPrice(aed22g, 'AED', 2));
-  setTextById('hlc-usd21', fmt.formatPrice(usd21g, 'USD', 2));
+  setTextById('hlc-aed21', fmt.formatPrice(aed21g, 'AED', 2));
+  setTextById('hlc-aed18', fmt.formatPrice(aed18g, 'AED', 2));
   const { ageText, isLive, sourceText, key } = getFreshnessMeta();
   const ageClass = freshnessAgeClass(getLiveFreshness({ updatedAt: goldUpdatedAt, lang }).ageMs);
   const hlcUpdatedEl = document.getElementById('hlc-updated');
@@ -285,13 +290,12 @@ function renderHeroCard() {
   }
 
   // Update bottom ticker
-  const k18 = KARATS.find((k) => k.code === '18');
   updateTicker({
     xauUsd: goldPrice,
     uae24k: aed24g,
-    uae22k: calc.usdPerGram(goldPrice, k22.purity) * CONSTANTS.AED_PEG,
-    uae21k: calc.usdPerGram(goldPrice, k21.purity) * CONSTANTS.AED_PEG,
-    uae18k: calc.usdPerGram(goldPrice, k18?.purity ?? 0.75) * CONSTANTS.AED_PEG,
+    uae22k: aed22g,
+    uae21k: aed21g,
+    uae18k: aed18g,
     updatedAt: goldUpdatedAt,
     hasLiveFailure: priceSourceLabel !== 'live',
   });
@@ -460,9 +464,9 @@ function applyLangToPage() {
   setTextById('hlc-title', tx('spotTitle'));
   setTextById('hlc-sub', tx('perOz'));
   setTextById('hlc-label-aed24', tx('lbl24aed'));
-  setTextById('hlc-label-usd22', tx('lbl22usd'));
   setTextById('hlc-label-aed22', tx('lbl22aed'));
-  setTextById('hlc-label-usd21', tx('lbl21usd'));
+  setTextById('hlc-label-aed21', tx('lbl21aed'));
+  setTextById('hlc-label-aed18', tx('lbl18aed'));
   setTextById('hlc-updated', tx('fetching'));
   setTextById('gcc-section-title', tx('gccLiveTitle'));
   setTextById('gcc-section-sub', tx('gccLiveSub'));

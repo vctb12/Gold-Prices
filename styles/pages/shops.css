@@ -1937,12 +1937,14 @@
   }
 
   .shop-actions-row {
-    gap: 0.3rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
   .shop-action-btn {
-    flex: 1 1 auto;
-    justify-content: center;
+    width: 100%;
+    justify-content: flex-start;
     font-size: 0.7rem;
     padding: 0.3rem 0.5rem;
   }
@@ -1952,7 +1954,9 @@
   }
 
   .shop-action-label {
-    display: none;
+    display: inline;
+    white-space: normal;
+    line-height: 1.4;
   }
 
   .modal-actions {
@@ -1967,7 +1971,9 @@
   }
 
   .modal-action-label {
-    display: none;
+    display: inline;
+    white-space: normal;
+    line-height: 1.4;
   }
 }
 

@@ -2968,7 +2968,7 @@ body.tracker-workspace-basic .tracker-advanced-only {
   /* Sticky controls strip on mobile */
   .tracker-hero-controls {
     position: sticky;
-    top: var(--nav-height, 64px);
+    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
     z-index: 20;
     background: linear-gradient(180deg, #1a1208 0%, #0d0a07 100%);
     padding-block: var(--space-3);
@@ -3034,7 +3034,8 @@ body.tracker-workspace-basic .tracker-advanced-only {
   }
 
   .tp-tab-label {
-    display: none; /* icons only on very small screens */
+    /* Keep text visible on compact screens to improve tab discoverability. */
+    display: inline;
   }
 
   .tracker-modes-divider {
@@ -3092,6 +3093,11 @@ body.tracker-workspace-basic .tracker-advanced-only {
   .tracker-badge {
     min-height: 44px;
     font-size: 0.72rem;
+  }
+
+  .tracker-mode-tab {
+    padding: 0.45rem 0.58rem;
+    font-size: 0.74rem;
   }
 
   .tracker-wire-track {
