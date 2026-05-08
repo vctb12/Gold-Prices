@@ -77,7 +77,17 @@ const T = {
     dock_waiting: 'Enter values to see a mobile summary.',
     dock_meta: 'Spot-linked reference before making charges and VAT.',
     dock_action: 'View breakdown',
+    dock_tracker: 'Compare this in tracker',
     dock_method: 'Methodology →',
+    tracker_kicker: 'Tracker handoff',
+    tracker_title: 'Compare this in the live tracker',
+    tracker_copy:
+      'Open the tracker with the same karat and currency so you can compare the current reference move, historical range, and market context.',
+    tracker_note_waiting: 'Live tracker price helper will appear here when spot data is loaded.',
+    tracker_note_live:
+      'Live tracker helper: {currency} {price} per gram for {karat}K right now. Shop prices can still add making charges and VAT.',
+    tracker_cta: 'Compare this in tracker',
+    tracker_method: 'Methodology note',
     tab_value: 'Gold Value',
     tab_scrap: 'Scrap Gold',
     tab_zakat: 'Zakat',
@@ -155,7 +165,17 @@ const T = {
     dock_waiting: 'أدخل القيم لعرض ملخص مناسب للموبايل.',
     dock_meta: 'مرجع مرتبط بالسعر الفوري قبل المصنعية وضريبة القيمة المضافة.',
     dock_action: 'عرض التفاصيل',
+    dock_tracker: 'قارن هذا في المتتبع',
     dock_method: 'المنهجية ←',
+    tracker_kicker: 'الانتقال إلى المتتبع',
+    tracker_title: 'قارن هذا داخل المتتبع المباشر',
+    tracker_copy:
+      'افتح المتتبع بنفس العيار والعملة لمقارنة الحركة المرجعية الحالية والنطاق التاريخي وسياق السوق.',
+    tracker_note_waiting: 'سيظهر هنا مساعد سعر المتتبع المباشر عند توفر بيانات السعر الفوري.',
+    tracker_note_live:
+      'مساعد المتتبع المباشر: {currency} {price} لكل غرام لعيار {karat} حالياً. قد تضيف أسعار المحلات المصنعية والضريبة.',
+    tracker_cta: 'قارن هذا في المتتبع',
+    tracker_method: 'ملاحظة المنهجية',
     tab_value: 'قيمة الذهب',
     tab_scrap: 'ذهب مستعمل',
     tab_zakat: 'زكاة الذهب',
@@ -214,13 +234,19 @@ const T = {
   },
 };
 
-function t(key) {
-  return T[STATE.lang]?.[key] ?? T.en[key] ?? key;
+function t(key, params = {}) {
+  const template = T[STATE.lang]?.[key] ?? T.en[key] ?? key;
+  return Object.entries(params).reduce(
+    (text, [token, value]) => text.replaceAll(`{${token}}`, String(value)),
+    template
+  );
 }
 
 function hideMobileDock() {
   const dock = document.getElementById('calc-mobile-dock');
   if (dock) dock.hidden = true;
+  const handoff = document.getElementById('calc-tracker-handoff');
+  if (handoff) handoff.hidden = true;
 }
 
 function updateMobileDock({ title, value, meta, targetId }) {
@@ -235,6 +261,40 @@ function updateMobileDock({ title, value, meta, targetId }) {
   if (metaEl) metaEl.textContent = meta;
   if (actionBtn) actionBtn.dataset.target = targetId || '';
   dock.hidden = false;
+}
+
+function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
+  const handoff = document.getElementById('calc-tracker-handoff');
+  const trackerLink = document.getElementById('calc-tracker-link');
+  const mobileTrackerLink = document.getElementById('calc-mobile-dock-tracker');
+  const note = document.getElementById('calc-live-tracker-note');
+  if (!handoff || !trackerLink || !mobileTrackerLink || !note) return;
+
+  const params = new URLSearchParams({
+    mode: 'live',
+    cur: currency,
+    k: String(karat),
+    u: 'gram',
+    r: '30D',
+    lang: STATE.lang,
+  });
+  const href = `tracker.html#${params.toString()}`;
+  trackerLink.href = href;
+  mobileTrackerLink.href = href;
+  handoff.hidden = false;
+
+  const rate = getRate(currency);
+  const purity = getPurityForKarat(karat);
+  if (STATE.spotUsdPerOz && rate) {
+    const price = formatPrice(usdPerGram(STATE.spotUsdPerOz, purity) * rate, currency, 2);
+    note.textContent = t('tracker_note_live', {
+      currency,
+      price,
+      karat,
+    });
+  } else {
+    note.textContent = t('tracker_note_waiting');
+  }
 }
 
 // ── Weight unit conversions (to grams) ─────────────────────────────────────
@@ -331,6 +391,7 @@ function calcValue() {
   ]);
 
   result.hidden = false;
+  updateTrackerHandoff({ karat, currency });
   updateMobileDock({
     title: t('val_result_label'),
     value: document.getElementById('val-result-value').textContent,
@@ -391,6 +452,7 @@ function calcScrap() {
   if (pctEl) pctEl.textContent = Math.round(payout * 100);
 
   result.hidden = false;
+  updateTrackerHandoff({ karat, currency });
   updateMobileDock({
     title: t('scrap_label_spot'),
     value: document.getElementById('scrap-result-dealer').textContent,
@@ -459,6 +521,7 @@ function calcZakat() {
   }
 
   result.hidden = false;
+  updateTrackerHandoff({ karat, currency });
   updateMobileDock({
     title: t('zakat_label_due'),
     value: document.getElementById('zakat-result-value').textContent,
@@ -513,6 +576,7 @@ function calcBuying() {
   ]);
 
   result.hidden = false;
+  updateTrackerHandoff({ karat, currency });
   updateMobileDock({
     title: t('buy_result_label'),
     value: document.getElementById('buy-result-grams').textContent,
@@ -562,6 +626,10 @@ function calcConvert() {
 function refreshMobileDockForActiveTab() {
   const activeTab = document.querySelector('.calc-tab.active')?.dataset.calc ?? 'value';
   if (activeTab === 'value' && !document.getElementById('val-result')?.hidden) {
+    updateTrackerHandoff({
+      karat: document.getElementById('val-karat')?.value ?? '22',
+      currency: document.getElementById('val-currency')?.value ?? 'AED',
+    });
     updateMobileDock({
       title: t('val_result_label'),
       value: document.getElementById('val-result-value')?.textContent || '—',
@@ -571,6 +639,10 @@ function refreshMobileDockForActiveTab() {
     return;
   }
   if (activeTab === 'scrap' && !document.getElementById('scrap-result')?.hidden) {
+    updateTrackerHandoff({
+      karat: document.getElementById('scrap-karat')?.value ?? '22',
+      currency: document.getElementById('scrap-currency')?.value ?? 'AED',
+    });
     updateMobileDock({
       title: t('scrap_label_spot'),
       value: document.getElementById('scrap-result-dealer')?.textContent || '—',
@@ -580,6 +652,10 @@ function refreshMobileDockForActiveTab() {
     return;
   }
   if (activeTab === 'zakat' && !document.getElementById('zakat-result')?.hidden) {
+    updateTrackerHandoff({
+      karat: document.getElementById('zakat-karat')?.value ?? '22',
+      currency: document.getElementById('zakat-currency')?.value ?? 'AED',
+    });
     updateMobileDock({
       title: t('zakat_label_due'),
       value: document.getElementById('zakat-result-value')?.textContent || '—',
@@ -589,6 +665,10 @@ function refreshMobileDockForActiveTab() {
     return;
   }
   if (activeTab === 'buying' && !document.getElementById('buy-result')?.hidden) {
+    updateTrackerHandoff({
+      karat: document.getElementById('buy-karat')?.value ?? '22',
+      currency: document.getElementById('buy-currency')?.value ?? 'AED',
+    });
     updateMobileDock({
       title: t('buy_result_label'),
       value: document.getElementById('buy-result-grams')?.textContent || '—',
@@ -644,7 +724,14 @@ function applyLang() {
   set('calc-mobile-dock-title', t('dock_title'));
   set('calc-mobile-dock-meta', t('dock_meta'));
   set('calc-mobile-dock-action', t('dock_action'));
+  set('calc-mobile-dock-tracker', t('dock_tracker'));
   set('calc-mobile-dock-method', t('dock_method'));
+  set('calc-tracker-kicker', t('tracker_kicker'));
+  set('calc-tracker-title', t('tracker_title'));
+  set('calc-tracker-copy', t('tracker_copy'));
+  set('calc-live-tracker-note', t('tracker_note_waiting'));
+  set('calc-tracker-link', t('tracker_cta'));
+  set('calc-tracker-methodology', t('tracker_method'));
   set('calc-value-title', t('tab_value'));
   set('calc-scrap-title', t('tab_scrap'));
   set('calc-zakat-title', t('tab_zakat'));
@@ -744,6 +831,7 @@ function updateSpotBadge() {
           : `Freshness: ${sourceLabel} · ${stamp} · Source: goldpricez.com`;
     }
   }
+  refreshMobileDockForActiveTab();
 }
 
 // ── Tab switching ────────────────────────────────────────────────────────────

@@ -29,9 +29,15 @@ function csvRow(cells) {
   return cells.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',');
 }
 
-function isoTimestamp() {
-  // Colons are not safe in Windows filenames; replace with hyphens for portability.
-  return new Date().toISOString().replace(/:/g, '-').slice(0, 19) + 'Z';
+function dateStamp(value = new Date()) {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
+function historyDateLabel(value) {
+  if (value instanceof Date) return dateStamp(value);
+  if (typeof value === 'string' && /^\d{4}-\d{2}$/.test(value)) return `${value}-01`;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  return dateStamp();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -83,7 +89,7 @@ export function exportCSV(countries, karatCode, prices, lang = 'en') {
 
   downloadFile(
     [...header, ...dataRows].join('\n'),
-    `gold-prices-${karatCode}k-${isoTimestamp()}.csv`,
+    `goldtickerlive-current-snapshot-${dateStamp()}.csv`,
     'text/csv;charset=utf-8;'
   );
 }
@@ -112,11 +118,11 @@ export function exportJSON(STATE, prices) {
     prices,
     rates: STATE.rates,
     disclaimer:
-      'Estimated bullion-equivalent values only. Retail prices may differ. Not financial advice.',
+      'Reference / spot-linked estimates only. Retail prices may differ because of making charges, VAT, and dealer premiums.',
   };
   downloadFile(
     JSON.stringify(payload, null, 2),
-    `gold-prices-${isoTimestamp()}.json`,
+    `goldtickerlive-current-snapshot-${dateStamp()}.json`,
     'application/json'
   );
 }
@@ -184,7 +190,7 @@ export function exportArchiveCSV(history, karatCode = '24', aedPeg = CONSTANTS.A
 
   downloadFile(
     lines.join('\n'),
-    `gold-archive-${karatCode}k-${isoTimestamp()}.csv`,
+    `goldtickerlive-archive-${karatCode}k-${dateStamp()}.csv`,
     'text/csv;charset=utf-8;'
   );
 }
@@ -243,7 +249,7 @@ export function exportHistoricalCSV(records, karatCode = '24') {
 
   downloadFile(
     lines.join('\n'),
-    `gold-history-${karatCode}k-${isoTimestamp()}.csv`,
+    `goldtickerlive-full-history-${karatCode}k-${dateStamp()}.csv`,
     'text/csv;charset=utf-8;'
   );
 }
@@ -258,12 +264,21 @@ export function exportChartCSV(rows, range, karatCode = '24') {
   const AED = CONSTANTS.AED_PEG;
   const purity = parseInt(karatCode, 10) / 24;
 
+  const startDate = historyDateLabel(rows[0]?.date);
+  const endDate = historyDateLabel(rows[rows.length - 1]?.date);
+  const hasMonthly = rows.some(
+    (row) => row.granularity === 'monthly' || String(row.date).length === 7
+  );
+  const resolution = hasMonthly
+    ? 'mixed daily/monthly reference history'
+    : 'daily snapshot history';
   const lines = [
-    `# Gold Ticker Live — Visible Chart Slice (${karatCode}K, ${range || 'ALL'})`,
+    `# Gold Ticker Live — Visible Historical Range (${karatCode}K, ${range || 'ALL'})`,
     `# Exported: ${new Date().toISOString()}`,
-    `# Range filter: ${range || 'ALL'} · points: ${rows.length}`,
+    `# Range filter: ${range || 'ALL'} · ${startDate} → ${endDate} · points: ${rows.length}`,
     `# AED peg: ${AED} fixed (UAE Central Bank)`,
-    '# Note: Spot-linked estimates only. Not financial advice.',
+    `# Data resolution: ${resolution}`,
+    '# Note: Reference / spot-linked estimates only. This is not retail or shop pricing.',
     '',
     csvRow([
       'Date',
@@ -299,7 +314,7 @@ export function exportChartCSV(rows, range, karatCode = '24') {
 
   downloadFile(
     lines.join('\n'),
-    `gold-chart-${karatCode}k-${range || 'all'}-${isoTimestamp()}.csv`,
+    `goldtickerlive-range-${startDate}-to-${endDate}.csv`,
     'text/csv;charset=utf-8;'
   );
 }
@@ -352,7 +367,7 @@ export function exportWatchlistCSV({
 
   downloadFile(
     lines.join('\n'),
-    `gold-watchlist-${karatCode}k-${selectedCurrency}-${isoTimestamp()}.csv`,
+    `goldtickerlive-watchlist-${karatCode}k-${selectedCurrency}-${dateStamp()}.csv`,
     'text/csv;charset=utf-8;'
   );
 }
@@ -401,7 +416,66 @@ export function exportCurrentViewCSV({
 
   downloadFile(
     lines.join('\n'),
-    `gold-current-view-${karatCode}k-${selectedCurrency}-${isoTimestamp()}.csv`,
+    `goldtickerlive-current-snapshot-${dateStamp()}.csv`,
+    'text/csv;charset=utf-8;'
+  );
+}
+
+export function exportComparisonCSV({
+  countries,
+  karatCodes,
+  priceFor,
+  spot,
+  freshness,
+  lang = 'en',
+}) {
+  if (!spot || !countries?.length || !karatCodes?.length) return;
+
+  const lines = [
+    '# Gold Ticker Live — Comparison Snapshot',
+    `# Exported: ${new Date().toISOString()}`,
+    `# Gold source timestamp: ${freshness?.goldUpdatedAt || 'unavailable'}`,
+    `# FX source timestamp: ${freshness?.fxUpdatedAt || 'unavailable'}`,
+    `# Live status: ${freshness?.hasLiveFailure ? 'cached/stale reference' : 'live snapshot'}`,
+    `# AED peg: ${CONSTANTS.AED_PEG} fixed (UAE Central Bank)`,
+    '# Note: Reference / spot-linked prices only. Retail quotes may differ due to making charges, VAT, and dealer premiums.',
+    '',
+    csvRow([
+      'Country',
+      'Currency',
+      'Karat',
+      'Price per gram',
+      'FX source',
+      'Freshness',
+      'AED peg note',
+    ]),
+  ];
+
+  countries.forEach((country) => {
+    karatCodes.forEach((karatCode) => {
+      const price = priceFor({
+        currency: country.currency,
+        karat: karatCode,
+        unit: 'gram',
+        spot,
+      });
+      lines.push(
+        csvRow([
+          lang === 'ar' ? country.nameAr || country.nameEn : country.nameEn,
+          country.currency,
+          `${karatCode}K`,
+          price ? price.toFixed(country.decimals ?? 2) : 'Unavailable',
+          country.currency === 'AED' ? 'AED fixed peg 3.6725' : 'open.er-api.com',
+          freshness?.hasLiveFailure ? 'cached / delayed reference' : 'live / current reference',
+          country.currency === 'AED' ? 'AED uses fixed peg 3.6725' : '',
+        ])
+      );
+    });
+  });
+
+  downloadFile(
+    lines.join('\n'),
+    `goldtickerlive-comparison-${dateStamp()}.csv`,
     'text/csv;charset=utf-8;'
   );
 }
@@ -420,7 +494,7 @@ export function exportBriefText(headline, body) {
     '',
     body || '',
     '',
-    'Source: goldpricez.com / open.er-api.com · Not financial advice.',
+    'Source: goldpricez.com / open.er-api.com · Reference prices only · Not financial advice.',
   ].join('\n');
-  downloadFile(content, `gold-brief-${isoTimestamp()}.txt`, 'text/plain;charset=utf-8;');
+  downloadFile(content, `goldtickerlive-brief-${dateStamp()}.txt`, 'text/plain;charset=utf-8;');
 }

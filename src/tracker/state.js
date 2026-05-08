@@ -1,5 +1,6 @@
 // tracker/state.js
 import { CONSTANTS } from '../config/index.js';
+import { COUNTRIES } from '../config/index.js';
 import * as cache from '../lib/cache.js';
 import { showStorageQuotaWarning } from '../lib/cache.js';
 
@@ -21,7 +22,11 @@ export const DEFAULT_STATE = {
   selectedKarat: '24',
   selectedUnit: 'gram',
   compareCurrency: 'USD',
+  compareCountries: ['AE', 'SA', 'KW'],
+  compareKarats: ['24', '22', '21'],
+  comparePreset: 'gcc-core',
   range: '30D',
+  historyMonth: '',
   metric: 'selected',
   autoRefresh: true,
   favoritesOnly: false,
@@ -49,6 +54,7 @@ export const DEFAULT_STATE = {
 
 export function createInitialState() {
   const base = structuredClone(DEFAULT_STATE);
+  const validCountryCodes = new Set(COUNTRIES.map((country) => country.code));
 
   // Load shared cache into a stub first so we don't double-maintain logic.
   const stub = {
@@ -104,7 +110,17 @@ export function createInitialState() {
   base.selectedKarat = saved.selectedKarat || base.selectedKarat;
   base.selectedUnit = saved.selectedUnit || base.selectedUnit;
   base.compareCurrency = saved.compareCurrency || base.compareCurrency;
+  base.compareCountries =
+    Array.isArray(saved.compareCountries) && saved.compareCountries.length
+      ? saved.compareCountries.filter((code) => !code || validCountryCodes.has(code)).slice(0, 3)
+      : base.compareCountries;
+  base.compareKarats =
+    Array.isArray(saved.compareKarats) && saved.compareKarats.length
+      ? saved.compareKarats.slice(0, 4)
+      : base.compareKarats;
+  base.comparePreset = saved.comparePreset || base.comparePreset;
   base.range = saved.range || base.range;
+  base.historyMonth = saved.historyMonth || base.historyMonth;
   base.metric = saved.metric || base.metric;
   base.autoRefresh = saved.autoRefresh !== false;
   base.favoritesOnly = !!saved.favoritesOnly;
@@ -133,7 +149,11 @@ export function persistState(state) {
     selectedKarat: state.selectedKarat,
     selectedUnit: state.selectedUnit,
     compareCurrency: state.compareCurrency,
+    compareCountries: state.compareCountries,
+    compareKarats: state.compareKarats,
+    comparePreset: state.comparePreset,
     range: state.range,
+    historyMonth: state.historyMonth,
     metric: state.metric,
     autoRefresh: state.autoRefresh,
     favoritesOnly: state.favoritesOnly,
@@ -157,6 +177,7 @@ export function syncUrlFromState(state, _panel = null) {
   params.set('r', state.range);
   params.set('cmp', state.compareCurrency);
   params.set('lang', state.lang);
+  if (state.historyMonth) params.set('month', state.historyMonth);
   if (state.panel && VALID_PANELS.has(state.panel)) params.set('panel', state.panel);
   url.hash = params.toString();
   history.replaceState(null, '', url.toString());
@@ -176,6 +197,7 @@ export function applyUrlState(state) {
   state.selectedUnit = params.get('u') || state.selectedUnit;
   state.range = params.get('r') || state.range;
   state.compareCurrency = params.get('cmp') || state.compareCurrency;
+  state.historyMonth = params.get('month') || state.historyMonth;
   const urlLang = params.get('lang');
   if (urlLang === 'en' || urlLang === 'ar') state.lang = urlLang;
   return parsed;

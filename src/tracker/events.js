@@ -12,6 +12,12 @@ export function initEvents({ state, el, ...callbacks }) {
 }
 
 export function bindCoreEvents() {
+  const comparePresets = {
+    'gcc-core': { countries: ['AE', 'SA', 'KW'], karats: ['24', '22', '21'] },
+    'uae-karats': { countries: ['AE', '', ''], karats: ['24', '22', '21', '18'] },
+    'arab-markets': { countries: ['AE', 'EG', 'JO'], karats: ['24', '21', '18'] },
+  };
+
   // Refresh button
   _el.refreshBtn?.addEventListener('click', async () => {
     _el.refreshBtn.disabled = true;
@@ -83,6 +89,7 @@ export function bindCoreEvents() {
   _el.language?.addEventListener('change', () => {
     _state.lang = _el.language.value;
     persistState(_state);
+    _cb.populateSelects();
     _cb.renderAll();
   });
 
@@ -96,9 +103,24 @@ export function bindCoreEvents() {
       pill.classList.add('is-active');
       pill.setAttribute('aria-pressed', 'true');
       _state.range = pill.dataset.range;
+      _state.historyMonth = '';
+      if (_el.historyMonth) _el.historyMonth.value = '';
       persistState(_state);
       _cb.renderAll();
     });
+  });
+
+  _el.historyMonth?.addEventListener('change', () => {
+    _state.historyMonth = _el.historyMonth.value || '';
+    persistState(_state);
+    _cb.renderAll();
+  });
+
+  _el.historyMonthClear?.addEventListener('click', () => {
+    _state.historyMonth = '';
+    if (_el.historyMonth) _el.historyMonth.value = '';
+    persistState(_state);
+    _cb.renderAll();
   });
 
   // Auto-refresh toggle
@@ -132,6 +154,55 @@ export function bindCoreEvents() {
       regionTabs.forEach((b) => b.classList.remove('is-active'));
       btn.classList.add('is-active');
       _cb.renderMarkets();
+    });
+  });
+
+  _el.compareCountrySelects?.forEach((select, index) => {
+    select?.addEventListener('change', () => {
+      const next = [...(_state.compareCountries || [])];
+      const duplicateIndex = select.value
+        ? next.findIndex((code, idx) => idx !== index && code === select.value)
+        : -1;
+      if (duplicateIndex !== -1) {
+        _cb.showToast('Pick different countries for each comparison slot.');
+        _cb.populateSelects();
+        return;
+      }
+      next[index] = select.value;
+      _state.compareCountries = next.filter(Boolean).slice(0, 3);
+      persistState(_state);
+      _cb.populateSelects();
+      _cb.renderAll();
+    });
+  });
+
+  _el.compareKaratButtons?.forEach((button) => {
+    button.addEventListener('click', () => {
+      const code = button.dataset.compareKarat;
+      const current = new Set(_state.compareKarats || []);
+      if (current.has(code)) current.delete(code);
+      else if (current.size < 4) current.add(code);
+      else {
+        _cb.showToast('Comparison supports up to 4 karats at once.');
+        return;
+      }
+      _state.compareKarats = [...current];
+      persistState(_state);
+      _cb.populateSelects();
+      _cb.renderAll();
+    });
+  });
+
+  _el.comparePresetButtons?.forEach((button) => {
+    button.addEventListener('click', () => {
+      const preset = comparePresets[button.dataset.comparePreset];
+      if (!preset) return;
+      _state.comparePreset = button.dataset.comparePreset;
+      _state.compareCountries = preset.countries;
+      _state.compareKarats = preset.karats;
+      persistState(_state);
+      _cb.populateSelects();
+      _cb.renderAll();
     });
   });
 
@@ -301,8 +372,9 @@ export function bindCoreEvents() {
   _el.downloadJson2?.addEventListener('click', () => _cb.exportJsonData());
   _el.exportChart?.addEventListener('click', () => _cb.exportChartData());
   _el.exportChart2?.addEventListener('click', () => _cb.exportChartData());
+  _el.exportCompare?.addEventListener('click', () => _cb.exportComparisonData());
+  _el.exportCompare2?.addEventListener('click', () => _cb.exportComparisonData());
   _el.exportWatchlist?.addEventListener('click', () => _cb.exportWatchlistData());
-  _el.exportCurrent?.addEventListener('click', () => _cb.exportCurrentViewData());
   _el.downloadBrief?.addEventListener('click', () => _cb.exportBriefData());
 
   // Alert list: delete button delegation

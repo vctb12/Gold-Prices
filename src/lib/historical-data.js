@@ -129,6 +129,39 @@ export function toChartData(records) {
   }));
 }
 
+function normalizeHistoryDate(value) {
+  const date =
+    value instanceof Date
+      ? new Date(value.getTime())
+      : typeof value === 'string' && /^\d{4}-\d{2}$/.test(value)
+        ? new Date(`${value}-01T00:00:00Z`)
+        : new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
+function normalizeRecord(record) {
+  const date = normalizeHistoryDate(record.date);
+  const price = Number(record.price ?? record.spot);
+  if (!date || !Number.isFinite(price) || price <= 0) return null;
+  return {
+    ...record,
+    date,
+    price,
+    granularity: record.granularity || (String(record.date).length === 7 ? 'monthly' : 'daily'),
+    source: record.source || 'derived',
+  };
+}
+
+const RANGE_WINDOWS = {
+  '24H': 1,
+  '7D': 7,
+  '30D': 30,
+  '90D': 90,
+  '1Y': 365,
+  '3Y': 365 * 3,
+  '5Y': 365 * 5,
+};
+
 /**
  * Filter records by a date range.
  * @param {HistoryRecord[]} records
@@ -136,24 +169,120 @@ export function toChartData(records) {
  */
 export function filterByRange(records, range) {
   if (!range || range === 'ALL') return records;
-  const now = new Date();
-  const cutoffs = {
-    '30D': 30,
-    '90D': 90,
-    '1Y': 365,
-    '3Y': 365 * 3,
-    '5Y': 365 * 5,
-  };
-  const days = cutoffs[range.toUpperCase()];
+  const days = RANGE_WINDOWS[range.toUpperCase()];
   if (!days) return records;
-  const cutoffDate = new Date(now.getTime() - days * 86400000);
-  const cutoffStr = cutoffDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
-  return records.filter((r) => {
-    // Monthly records have 'YYYY-MM' keys (7 chars); normalise to 'YYYY-MM-01'
-    // so the comparison is always between two YYYY-MM-DD strings.
-    const dateStr = r.date.length === 7 ? `${r.date}-01` : r.date;
-    return dateStr >= cutoffStr;
-  });
+  const normalized = records.map(normalizeRecord).filter(Boolean);
+  if (!normalized.length) return [];
+  const latest = normalized[normalized.length - 1].date;
+  const cutoff = new Date(latest.getTime() - days * 86400000);
+  return normalized
+    .filter((r) => r.date >= cutoff)
+    .map((r) => ({
+      ...r,
+      date: r.date instanceof Date ? r.date.toISOString().slice(0, 10) : r.date,
+    }));
+}
+
+export function filterByMonth(records, monthValue) {
+  if (!monthValue) return records;
+  const normalized = records.map(normalizeRecord).filter(Boolean);
+  if (!normalized.length) return [];
+  return normalized
+    .filter((record) => record.date.toISOString().slice(0, 7) === monthValue)
+    .map((record) => ({
+      ...record,
+      date: record.date.toISOString().slice(0, 10),
+    }));
+}
+
+export function describeHistoryResolution(records = [], { hasLive = false } = {}) {
+  if (!records.length && !hasLive) {
+    return {
+      key: 'unavailable',
+      label: 'Unavailable',
+      detail: 'No historical data is available for this selection.',
+    };
+  }
+
+  const normalized = records.map(normalizeRecord).filter(Boolean);
+  const granularities = new Set(normalized.map((record) => record.granularity));
+  const sources = new Set(normalized.map((record) => String(record.source || '').toLowerCase()));
+  const hasMonthly = granularities.has('monthly');
+  const hasDaily = granularities.has('daily');
+  const hasEstimated = [...sources].some((source) => source.includes('estimated'));
+  const hasDerived = [...sources].some(
+    (source) => source.includes('derived') || source.includes('baseline')
+  );
+
+  if (hasLive && !normalized.length) {
+    return {
+      key: 'live',
+      label: 'Live snapshot',
+      detail: 'The workspace currently has a live spot-linked snapshot only.',
+    };
+  }
+
+  if (hasLive && hasDaily && !hasMonthly) {
+    return {
+      key: 'daily',
+      label: 'Live + cached daily snapshots',
+      detail: 'Short ranges combine the latest live snapshot with cached browser checkpoints.',
+    };
+  }
+
+  if (hasDaily && !hasMonthly) {
+    return {
+      key: 'daily',
+      label: 'Cached daily snapshots',
+      detail: 'Daily history comes from browser snapshots captured while the tracker was used.',
+    };
+  }
+
+  if (hasMonthly && !hasDaily) {
+    return {
+      key: hasEstimated ? 'estimated' : 'monthly',
+      label: hasEstimated ? 'Estimated monthly baseline' : 'Monthly baseline',
+      detail:
+        'Long-range history uses monthly XAU/USD baseline records. It is not intraday or shop pricing.',
+    };
+  }
+
+  return {
+    key: hasDerived || hasEstimated ? 'derived' : 'mixed',
+    label: hasEstimated ? 'Mixed live + estimated baseline' : 'Mixed live + monthly baseline',
+    detail:
+      'Recent browser snapshots are merged with the monthly baseline, so precision changes across the selected window.',
+  };
+}
+
+export function buildHistorySummary(records = [], { range = 'ALL', liveRecord = null } = {}) {
+  const normalized = records.map(normalizeRecord).filter(Boolean);
+  const summaryRecords = [...normalized];
+  const liveNormalized = liveRecord ? normalizeRecord(liveRecord) : null;
+  if (liveNormalized) summaryRecords.push(liveNormalized);
+  if (!summaryRecords.length) return null;
+
+  summaryRecords.sort((a, b) => a.date - b.date);
+  const start = summaryRecords[0];
+  const end = summaryRecords[summaryRecords.length - 1];
+  const prices = summaryRecords.map((record) => record.price);
+  const highest = Math.max(...prices);
+  const lowest = Math.min(...prices);
+  const change = end.price - start.price;
+  const pctChange = start.price ? (change / start.price) * 100 : 0;
+  const resolution = describeHistoryResolution(normalized, { hasLive: Boolean(liveNormalized) });
+
+  return {
+    range,
+    start,
+    end,
+    points: summaryRecords.length,
+    absoluteChange: change,
+    percentageChange: pctChange,
+    highest,
+    lowest,
+    resolution,
+  };
 }
 
 /**

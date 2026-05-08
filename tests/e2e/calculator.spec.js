@@ -51,6 +51,18 @@ test.describe('Calculator page', () => {
     await expect(methodLinks.first()).toBeVisible();
   });
 
+  test('trust note and tracker handoff remain available after a result', async ({ page }) => {
+    await page.waitForFunction(() => {
+      const spot = document.getElementById('calc-spot-price');
+      return spot && spot.textContent && spot.textContent.trim() !== '—';
+    });
+    await expect(page.locator('#calc-trust-note')).toContainText(/spot|reference|retail/i);
+    await page.locator('#val-weight').fill('10');
+    await expect(page.locator('#val-result')).toBeVisible();
+    await expect(page.locator('#calc-tracker-link')).toBeVisible();
+    await expect(page.locator('#calc-tracker-link')).toHaveAttribute('href', /tracker\.html#/);
+  });
+
   test('mobile result dock appears after entering a value', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForFunction(() => {
@@ -60,6 +72,7 @@ test.describe('Calculator page', () => {
     await page.locator('#val-weight').fill('10');
     await expect(page.locator('#val-result')).toBeVisible();
     await expect(page.locator('#calc-mobile-dock')).toBeVisible();
+    await expect(page.locator('#calc-mobile-dock-tracker')).toBeVisible();
   });
 
   test('JSON-LD structured data includes calculator breadcrumb schema', async ({ page }) => {

@@ -1090,6 +1090,116 @@ body.tracker-workspace-basic .tracker-advanced-only {
   margin-top: var(--space-3);
 }
 
+.tracker-chart-caption {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.tracker-history-month-field {
+  min-width: min(260px, 100%);
+}
+
+.tracker-history-month-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.tracker-history-month-row input {
+  min-height: 44px;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-default);
+  background: var(--surface-primary);
+}
+
+.comparison-workspace {
+  margin-bottom: var(--space-5);
+}
+
+.comparison-workspace__head {
+  align-items: flex-start;
+}
+
+.comparison-preset-row,
+.comparison-karat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.comparison-builder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.comparison-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.comparison-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.comparison-card__title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.comparison-card__meta {
+  font-size: var(--text-sm);
+}
+
+.comparison-card__body {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.comparison-card__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.comparison-card__karat {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+
+.comparison-card__price {
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.comparison-card__note {
+  font-size: var(--text-xs);
+}
+
+@media (width <= 960px) {
+  .comparison-builder-grid,
+  .comparison-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .tracker-control-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));

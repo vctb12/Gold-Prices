@@ -16,6 +16,12 @@ const T = {
     'method-h1': 'Data Sources & Methodology',
     'method-sub':
       'How we calculate every price you see — step by step, with full source attribution.',
+    'overview-p3':
+      'Historical views can mix live snapshots, browser cache checkpoints, and longer daily or monthly reference history. The tracker labels that resolution so monthly baselines are never presented as exact intraday history.',
+    'fx-rates-update-p2':
+      'Gold spot freshness and FX freshness do not always update at the same speed, so the tracker and exports label each layer separately.',
+    'fallback-export-p':
+      'CSV and JSON exports include generated timestamps, source notes, data-resolution context, and a reminder that values are reference prices rather than shop quotes.',
     'method-toc-label': 'Sections',
     'toc-overview': 'Overview',
     'toc-gold-data': 'Gold Price Data',
@@ -30,6 +36,12 @@ const T = {
     'method-hero-tag': 'الشفافية والثقة',
     'method-h1': 'مصادر البيانات والمنهجية',
     'method-sub': 'كيف نحسب كل سعر تراه — خطوة بخطوة، مع الإسناد الكامل للمصادر.',
+    'overview-p3':
+      'قد تمزج العروض التاريخية بين اللقطات المباشرة ونقاط التخزين في المتصفح والسجل المرجعي اليومي أو الشهري للنطاقات الأطول. يوضّح المتتبع هذه الدقة حتى لا يظهر الخط الأساسي الشهري وكأنه سجل لحظي دقيق.',
+    'fx-rates-update-p2':
+      'لا تتحرك حداثة سعر الذهب وحداثة الصرف بالسرعة نفسها دائماً، لذلك يضع المتتبع وملفات التصدير وسمًا مستقلاً لكل طبقة.',
+    'fallback-export-p':
+      'تتبع ملفات CSV وJSON هذا الوضوح نفسه، إذ تتضمن وقت الإنشاء وملاحظات المصدر وسياق دقة البيانات وتذكيراً بأن القيم مرجعية وليست أسعار محلات.',
     'method-toc-label': 'الأقسام',
     'toc-overview': 'نظرة عامة',
     'toc-gold-data': 'بيانات سعر الذهب',
