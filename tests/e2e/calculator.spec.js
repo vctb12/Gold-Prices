@@ -47,23 +47,27 @@ test.describe('Calculator page', () => {
   });
 
   test('link to methodology is present', async ({ page }) => {
-    const methodLinks = page.locator('a[href*="methodology"]');
+    const methodLinks = page.locator('main a[href*="methodology"]:visible');
     await expect(methodLinks.first()).toBeVisible();
   });
 
-  test('JSON-LD WebApplication schema is present', async ({ page }) => {
+  test('JSON-LD structured data includes calculator breadcrumb schema', async ({ page }) => {
     const schemaTag = page.locator('script[type="application/ld+json"]');
     const count = await schemaTag.count();
     expect(count).toBeGreaterThan(0);
-    // At least one schema block should reference WebApplication
+    // At least one schema block should include the calculator breadcrumb entry.
     let found = false;
     for (let i = 0; i < count; i++) {
       const content = await schemaTag.nth(i).textContent();
-      if (content && content.includes('WebApplication')) {
+      if (
+        content &&
+        content.includes('BreadcrumbList') &&
+        content.includes('https://goldtickerlive.com/calculator.html')
+      ) {
         found = true;
         break;
       }
     }
-    expect(found, 'WebApplication JSON-LD not found').toBe(true);
+    expect(found, 'Calculator breadcrumb JSON-LD not found').toBe(true);
   });
 });

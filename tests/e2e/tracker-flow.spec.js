@@ -1,9 +1,14 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+async function waitForTrackerReady(page) {
+  await page.waitForSelector('body[data-tracker-shell-ready="true"]', { timeout: 10000 });
+}
+
 test.describe('Tracker page — live mode & navigation', () => {
   test('tracker page loads with expected landmarks', async ({ page }) => {
     await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
     await expect(page).toHaveTitle(/tracker|gold|price/i);
     await expect(page.locator('main')).toBeVisible();
     // tracker hero uses .tracker-hero-wrap in markup
@@ -12,6 +17,7 @@ test.describe('Tracker page — live mode & navigation', () => {
 
   test('mode tabs are visible and navigable', async ({ page }) => {
     await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
     await page.waitForSelector('[role="tablist"]', { timeout: 10000 });
 
     const tabList = page.locator('[role="tablist"].tracker-modes').first();
@@ -24,6 +30,7 @@ test.describe('Tracker page — live mode & navigation', () => {
 
   test('live mode panel is visible by default', async ({ page }) => {
     await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
     await page.waitForSelector('#mode-live', { timeout: 10000 });
 
     const livePanel = page.locator('#mode-live');
@@ -32,9 +39,10 @@ test.describe('Tracker page — live mode & navigation', () => {
 
   test('clicking compare tab switches to compare panel', async ({ page }) => {
     await page.goto('/tracker.html');
-    await page.waitForSelector('[data-mode="compare"]', { timeout: 10000 });
+    await waitForTrackerReady(page);
+    await page.waitForSelector('.tracker-mode-tab[data-mode="compare"]', { timeout: 10000 });
 
-    await page.locator('[data-mode="compare"]').click();
+    await page.locator('.tracker-mode-tab[data-mode="compare"]').click();
 
     // Compare panel should become visible
     const comparePanel = page.locator('#mode-compare');
@@ -43,27 +51,32 @@ test.describe('Tracker page — live mode & navigation', () => {
 
   test('tracker has a link to methodology', async ({ page }) => {
     await page.goto('/tracker.html');
-    await page.waitForSelector('a[href*="methodology"]', { timeout: 10000 });
+    await waitForTrackerReady(page);
+    await page.waitForSelector('main a[href*="methodology"]', { timeout: 10000 });
 
-    const methodLink = page.locator('a[href*="methodology"]').first();
+    const methodLink = page.locator('main a[href*="methodology"]:visible').first();
     await expect(methodLink).toBeVisible();
   });
 
   test('method tab opens the methodology panel', async ({ page }) => {
     await page.goto('/tracker.html');
-    await page.waitForSelector('[data-mode="method"]', { timeout: 10000 });
+    await waitForTrackerReady(page);
+    await page.locator('#tp-workspace-toggle').click();
+    await expect(page.locator('body')).toHaveClass(/tracker-workspace-advanced/);
+    await page.waitForSelector('.tracker-mode-tab[data-mode="method"]', { timeout: 10000 });
 
-    await page.locator('[data-mode="method"]').click();
+    await page.locator('.tracker-mode-tab[data-mode="method"]').click();
 
     const methodPanel = page.locator('#mode-method');
     await expect(methodPanel).toBeVisible({ timeout: 5000 });
 
     // Should contain methodology link
-    await expect(page.locator('#mode-method a[href*="methodology"]')).toBeVisible();
+    await expect(page.locator('#mode-method a[href*="methodology"]:visible').first()).toBeVisible();
   });
 
   test('tracker has XAU/USD price element', async ({ page }) => {
     await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
     await page.waitForSelector('#tp-xauusd-value', { timeout: 10000 });
     await expect(page.locator('#tp-xauusd-value')).toBeVisible();
   });

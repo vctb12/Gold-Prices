@@ -86,9 +86,7 @@ test.describe('Shops directory page', () => {
     // Wait for shops to render
     await page.waitForSelector('.shop-card, #shops-grid', { timeout: 5000 }).catch(() => null);
 
-    const searchInput = page.locator(
-      '#shops-search, input[type="search"], input[placeholder*="search" i], input[aria-label*="search" i]'
-    );
+    const searchInput = page.locator('#shops-search:visible');
     const inputCount = await searchInput.count();
     if (inputCount === 0) {
       // Search input not present — skip gracefully (feature may not be on this build)
@@ -114,7 +112,7 @@ test.describe('Shops directory page', () => {
       .catch(() => null);
 
     const countrySelect = page.locator(
-      '#filter-country, select[aria-label*="country" i], select[id*="country" i]'
+      '#shops-country-filter, select[aria-label*="country" i], select[id*="country" i]'
     );
     if ((await countrySelect.count()) === 0) return; // graceful skip
 

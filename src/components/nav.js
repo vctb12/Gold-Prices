@@ -629,9 +629,10 @@ export function injectNav(lang = 'en', depth = 0) {
     const d = NAV_DATA[_currentLang] || NAV_DATA.en;
     navEl.classList.add('nav--open');
     drawer.classList.add('is-open');
-    drawer.removeAttribute('aria-hidden');
+    // Keep explicit open-state ARIA values for deterministic accessibility/state checks.
+    drawer.setAttribute('aria-hidden', 'false');
     backdrop.classList.add('is-visible');
-    backdrop.removeAttribute('aria-hidden');
+    backdrop.setAttribute('aria-hidden', 'false');
     burger.setAttribute('aria-expanded', 'true');
     burger.setAttribute('aria-label', d.closeMenu);
     burger.classList.add('is-open');

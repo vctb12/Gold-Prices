@@ -113,6 +113,8 @@ const T = {
     freshness_waiting: 'Freshness: waiting for source timestamp…',
     trust_note:
       'Labels used across Gold Ticker Live: Live, Delayed, Cached/Fallback, Estimated, Historical baseline. Calculator outputs are spot-linked reference estimates, not final retail jewelry quotes.',
+    trust_spot_link: 'Spot vs retail explained',
+    trust_method_link: 'Full methodology',
     copy_result: 'Copy result',
     copied_result: 'Copied!',
   },
@@ -169,6 +171,8 @@ const T = {
     freshness_waiting: 'حداثة البيانات: بانتظار الطابع الزمني من المصدر…',
     trust_note:
       'التسميات الموحدة عبر Gold Ticker Live: مباشر، متأخر، مخزن/احتياطي، تقديري، وخط أساس تاريخي. نتائج الحاسبة تقديرات مرجعية مرتبطة بالسعر الفوري وليست سعر تجزئة نهائي للمجوهرات.',
+    trust_spot_link: 'شرح الفرق بين السعر الفوري وسعر التجزئة',
+    trust_method_link: 'المنهجية الكاملة',
     copy_result: 'نسخ النتيجة',
     copied_result: 'تم النسخ!',
   },
@@ -468,6 +472,17 @@ function applyLang() {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
   };
+  const setTrustNote = () => {
+    const trustNote = document.getElementById('calc-trust-note');
+    if (!trustNote) return;
+    clear(trustNote);
+    trustNote.append(
+      `${t('trust_note')} `,
+      el('a', { href: 'content/spot-vs-retail-gold-price/' }, [`${t('trust_spot_link')} →`]),
+      ' · ',
+      el('a', { href: 'methodology.html' }, [`${t('trust_method_link')} →`])
+    );
+  };
 
   set('calc-hero-h1', t('pageTitle'));
   set('calc-hero-sub', t('pageSub'));
@@ -514,7 +529,7 @@ function applyLang() {
   set('conv-from-label', t('conv_from'));
   set('conv-results-title', t('conv_results_title'));
   set('calc-freshness-note', t('freshness_waiting'));
-  set('calc-trust-note', t('trust_note'));
+  setTrustNote();
   document.querySelectorAll('.calc-copy-btn').forEach((btn) => {
     btn.textContent = t('copy_result');
     btn.setAttribute('aria-label', t('copy_result'));
@@ -573,7 +588,13 @@ function updateSpotBadge() {
 // ── Tab switching ────────────────────────────────────────────────────────────
 function setupTabs() {
   // Map calc tab data-calc values to tool names
-  const TOOL_MAP = { value: 'weight', zakat: 'zakat', scrap: 'weight', buying: 'weight', convert: 'weight' };
+  const TOOL_MAP = {
+    value: 'weight',
+    zakat: 'zakat',
+    scrap: 'weight',
+    buying: 'weight',
+    convert: 'weight',
+  };
   document.querySelectorAll('.calc-tab').forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.calc;

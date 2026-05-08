@@ -40,6 +40,7 @@ export function mountShell(state, els, onModeChange, onLangChange) {
   const panels = Array.from(document.querySelectorAll('.tracker-mode-panel[data-mode-panel]'));
   const workspaceToggle = els.workspaceToggle || document.getElementById('tp-workspace-toggle');
   const isAdvancedMode = () => state.workspaceLevel === 'advanced';
+  document.body.setAttribute('data-tracker-shell-ready', 'false');
 
   function applyWorkspaceLevel() {
     const advanced = isAdvancedMode();
@@ -92,6 +93,7 @@ export function mountShell(state, els, onModeChange, onLangChange) {
   });
 
   // Initial mode selection (never allow alerts/planner as mode)
+  applyWorkspaceLevel();
   const safeMode = VALID_MODES.has(state.mode) ? state.mode : 'live';
   setMode(safeMode);
 
@@ -170,6 +172,7 @@ export function mountShell(state, els, onModeChange, onLangChange) {
   }
 
   syncOverlayFromState();
+  document.body.setAttribute('data-tracker-shell-ready', 'true');
 
   // Sync back/forward navigation
   window.addEventListener('hashchange', () => {
