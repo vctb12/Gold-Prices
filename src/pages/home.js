@@ -23,7 +23,6 @@ import { track, EVENTS } from '../lib/analytics.js';
 const LANG_KEY = 'user_prefs';
 const SKELETON_TIMEOUT_MS = 8000;
 const TOLA_GRAMS = 11.6638; // 1 tola = 11.6638 grams (international standard)
-const DEFAULT_18K_PURITY = 0.75;
 
 // Multiply per-gram AED price by this to get the chosen unit price.
 const KARAT_STRIP_UNIT_MULT = {
@@ -204,12 +203,13 @@ function renderHeroCard() {
   const k22 = KARATS.find((k) => k.code === '22');
   const k21 = KARATS.find((k) => k.code === '21');
   const k18 = KARATS.find((k) => k.code === '18');
+  if (!k24 || !k22 || !k21 || !k18) return;
 
   const usd24oz = goldPrice;
   const aed24g = calc.usdPerGram(goldPrice, k24.purity) * CONSTANTS.AED_PEG;
   const aed22g = calc.usdPerGram(goldPrice, k22.purity) * CONSTANTS.AED_PEG;
   const aed21g = calc.usdPerGram(goldPrice, k21.purity) * CONSTANTS.AED_PEG;
-  const aed18g = calc.usdPerGram(goldPrice, k18?.purity ?? DEFAULT_18K_PURITY) * CONSTANTS.AED_PEG;
+  const aed18g = calc.usdPerGram(goldPrice, k18.purity) * CONSTANTS.AED_PEG;
 
   // Update sticky spot bar
   updateSpotBar({

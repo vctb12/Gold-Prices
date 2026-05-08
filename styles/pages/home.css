@@ -1659,12 +1659,6 @@
   flex-direction: row-reverse;
 }
 
-@media (width <= 640px) {
-  [dir='rtl'] .hero-ctas-secondary {
-    direction: rtl;
-  }
-}
-
 [dir='rtl'] .hero-lead {
   text-align: right;
 }
