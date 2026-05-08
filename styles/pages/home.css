@@ -2172,6 +2172,61 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   PHASE 3 MOBILE POLISH — hero, karat strip, hlc grid
+   Adds compact sizing for 430 px phones (iPhone Plus range) and
+   tighter karat item tiles for horizontal scroll at ≤ 480 px.
+   ══════════════════════════════════════════════════════════════ */
+
+/* 430 px — iPhone 14/15 Plus / large Android range */
+@media (width <= 430px) {
+  .hero {
+    padding: 2.2rem 1rem 1.8rem;
+  }
+
+  .hero-ctas {
+    margin-top: 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .hero-lead {
+    margin-top: 0.85rem;
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .hero-trust-line {
+    margin-top: var(--space-3);
+    font-size: 0.78rem;
+  }
+
+  /* Larger AED karat values so they read like price data, not captions */
+  .hlc-item-val {
+    font-size: var(--text-base);
+  }
+
+  .hlc-item-label {
+    font-size: 0.62rem;
+  }
+}
+
+/* Karat strip: compact tiles for better horizontal touch-scroll ≤ 480 px */
+@media (width <= 480px) {
+  .karat-strip-item {
+    min-width: 90px;
+    min-height: 64px;
+    padding: 0.55rem 0.5rem;
+  }
+
+  .karat-strip-k {
+    font-size: 0.66rem;
+  }
+
+  .karat-strip-v {
+    font-size: 0.92rem;
+  }
+}
+
 /* RTL mirrors for karat strip buttons and markets */
 [dir='rtl'] .kstrip-unit-toggle {
   flex-direction: row-reverse;

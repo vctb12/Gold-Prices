@@ -882,3 +882,37 @@
     font-size: 1.5rem;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   PHASE 3 MOBILE POLISH — panel spacing, input sizing, tab bar
+   ══════════════════════════════════════════════════════════════ */
+
+/* Tighter panel horizontal padding on phones */
+@media (width <= 640px) {
+  .calc-panel {
+    padding-inline: var(--space-4);
+    margin-block: var(--space-5);
+  }
+
+  .calc-hero {
+    padding: var(--space-5) var(--space-4);
+  }
+}
+
+/* Comfortable touch targets for inputs and selects at ≤ 480 px */
+@media (width <= 480px) {
+  .calc-input,
+  .calc-select {
+    min-height: 48px;
+    font-size: var(--text-base);
+  }
+
+  .calc-panel {
+    padding-inline: var(--space-3);
+  }
+
+  /* Slightly larger result value so it reads well at small widths */
+  .calc-result-value {
+    font-size: clamp(1.6rem, 7.5vw, 2.2rem);
+  }
+}

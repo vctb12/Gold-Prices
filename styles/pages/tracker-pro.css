@@ -3000,8 +3000,9 @@ body.tracker-workspace-basic .tracker-advanced-only {
     width: 100%;
   }
 
+  /* Taller chart on mobile: 300 px gives a readable chart at 390×844 */
   .tracker-chart-wrap {
-    min-height: 280px;
+    min-height: 300px;
   }
 
   .tracker-table {
@@ -3187,4 +3188,29 @@ body.tracker-workspace-basic .tracker-advanced-only {
 
 [dir='rtl'] .tracker-hero-title-sub {
   letter-spacing: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PHASE 3 MOBILE POLISH — range pills, sticky-strip safe-area
+   ══════════════════════════════════════════════════════════════ */
+
+/* Range pills: larger touch targets at very small widths */
+@media (width <= 420px) {
+  .tracker-pill {
+    min-height: 44px;
+    padding-inline: 0.75rem;
+  }
+}
+
+/* Safe-area: sticky controls strip above iOS home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (width <= 640px) {
+    /* Toast stack clears the home bar on notched phones */
+    .tracker-toast-stack {
+      bottom: max(
+        var(--toast-offset-base, 46px),
+        calc(var(--toast-offset-base, 46px) + env(safe-area-inset-bottom))
+      );
+    }
+  }
 }

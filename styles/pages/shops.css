@@ -1946,7 +1946,8 @@
     width: 100%;
     justify-content: flex-start;
     font-size: 0.7rem;
-    padding: 0.3rem 0.5rem;
+    padding: 0.5rem 0.65rem;
+    min-height: 44px; /* WCAG 2.5.5 touch target */
   }
 
   .shop-confidence-grid {
@@ -2192,5 +2193,32 @@
   .shops-grid--upgrading::after {
     animation: none;
     opacity: 0.5;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PHASE 3 MOBILE POLISH — hero stats, empty state, card density
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hero stat values: slightly larger on small phones for readability */
+@media (width <= 480px) {
+  .shops-stat-value {
+    font-size: 1.2rem;
+  }
+
+  .shops-stat-label {
+    font-size: 0.65rem;
+  }
+
+  /* Tighter hero padding so filter bar is reached sooner */
+  .shops-hero {
+    padding: 1rem;
+  }
+}
+
+/* Featured card: ensure text never overflows inside small cells */
+@media (width <= 540px) {
+  .featured-card {
+    overflow-wrap: anywhere;
   }
 }
