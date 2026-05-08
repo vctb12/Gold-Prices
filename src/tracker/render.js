@@ -2,7 +2,12 @@
 import { CONSTANTS, KARATS, COUNTRIES, TRANSLATIONS } from '../config/index.js';
 import { persistState } from './state.js';
 import { updateShellTickerFromState } from './ui-shell.js';
-import { filterByRange } from '../lib/historical-data.js';
+import {
+  buildHistorySummary,
+  describeHistoryResolution,
+  filterByMonth,
+  filterByRange,
+} from '../lib/historical-data.js';
 import { clear, el, setText, escape } from '../lib/safe-dom.js';
 import { getLiveFreshness, getMarketStatus } from '../lib/live-status.js';
 import { pulseFreshness } from '../lib/freshness-pulse.js';
@@ -63,6 +68,63 @@ function formatUnitLabel(unit) {
   if (unit === 'oz') return 'أوقية';
   if (unit === 'tola') return 'تولة';
   return unit;
+}
+
+function formatPercent(value) {
+  if (!Number.isFinite(value)) return '—';
+  return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+}
+
+function getVisibleHistoryRows() {
+  const flatHistory = (_state.history || []).map((r) => ({
+    date: r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date),
+    price: r.spot,
+    spot: r.spot,
+    source: r.source,
+    granularity: r.granularity,
+  }));
+  const monthFiltered = _state.historyMonth
+    ? filterByMonth(flatHistory, _state.historyMonth)
+    : flatHistory;
+  const filtered = _state.historyMonth ? monthFiltered : filterByRange(flatHistory, _state.range);
+  const rows = filtered
+    .map((r) => ({ ...r, date: new Date(r.date) }))
+    .filter((row) => Number.isFinite(row.date.getTime()) && Number.isFinite(row.spot));
+  const liveSpot = _currentSpot();
+  const liveRecord =
+    liveSpot && !_state.historyMonth
+      ? {
+          date: new Date(),
+          price: liveSpot,
+          spot: liveSpot,
+          source: _state.hasLiveFailure ? 'cached' : 'live',
+          granularity: 'live',
+        }
+      : null;
+  if (liveRecord) rows.push(liveRecord);
+  rows.sort((a, b) => a.date - b.date);
+  return rows;
+}
+
+function getSelectedRangeLabel() {
+  if (_state.historyMonth) {
+    const monthDate = new Date(`${_state.historyMonth}-01T00:00:00Z`);
+    return monthDate.toLocaleDateString(_state.lang === 'ar' ? 'ar-AE' : 'en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+  return _state.range || 'ALL';
+}
+
+function historyDateLabel(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return '—';
+  return date.toLocaleDateString(_state.lang === 'ar' ? 'ar-AE' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function getFreshnessModel() {
@@ -364,22 +426,43 @@ export function renderMiniStrip() {
 
 export function renderChart() {
   if (!_el.chart) return;
-  const spot = _currentSpot();
-  if (!_state.history.length && !spot) {
+  const rows = getVisibleHistoryRows();
+  const historyOnly = rows.filter((row) => row.granularity !== 'live');
+  const livePoint = rows.find((row) => row.granularity === 'live') || null;
+  const rangeLabel = getSelectedRangeLabel();
+  const resolution = describeHistoryResolution(historyOnly, { hasLive: Boolean(livePoint) });
+  const summary = buildHistorySummary(historyOnly, {
+    range: rangeLabel,
+    liveRecord: livePoint,
+  });
+
+  if (!rows.length) {
     if (_el.chartEmpty) _el.chartEmpty.hidden = false;
+    if (_el.historyCaption)
+      setText(
+        _el.historyCaption,
+        _state.historyMonth
+          ? tx('historyCaptionUnavailableMonth', { month: rangeLabel })
+          : tx('historyCaptionUnavailable', { range: rangeLabel })
+      );
+    if (_el.chartStats && !_el.chartStats.children.length) {
+      _el.chartStats.append(
+        buildStatCard(
+          tx('historical.summary.rangeLabel'),
+          rangeLabel,
+          tx('historical.summary.rangeHint')
+        ),
+        buildStatCard(
+          tx('historical.summary.resolutionLabel'),
+          tx('source.unavailable'),
+          resolution.detail
+        )
+      );
+    }
+    if (_el.rangeNotes) clear(_el.rangeNotes);
     return;
   }
   if (_el.chartEmpty) _el.chartEmpty.hidden = true;
-  const flatHistory = _state.history.map((r) => ({
-    date: r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date),
-    price: r.spot,
-    spot: r.spot,
-    source: r.source,
-    granularity: r.granularity,
-  }));
-  const filtered = filterByRange(flatHistory, _state.range);
-  const rows = filtered.map((r) => ({ date: new Date(r.date), spot: r.spot, source: r.source }));
-  if (spot) rows.push({ date: new Date(), spot, source: 'live' });
   if (rows.length < 2) {
     const msg = _state.lang === 'ar' ? 'جمع البيانات…' : 'Collecting data…';
     const svgNs = 'http://www.w3.org/2000/svg';
@@ -391,62 +474,62 @@ export function renderChart() {
     t.setAttribute('font-size', '14');
     t.textContent = msg;
     _el.chart.replaceChildren(t);
-    return;
+  } else {
+    const prices = rows.map((r) => r.spot);
+    const min = Math.min(...prices) * 0.998;
+    const max = Math.max(...prices) * 1.002;
+    const W = _el.chartWrap?.clientWidth || 1200;
+    const H = _el.chartWrap?.clientHeight || 430;
+    _el.chart.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const pts = rows
+      .map((r, i) => {
+        const x = (i / (rows.length - 1)) * W;
+        const y = H - ((r.spot - min) / (max - min)) * (H - 40) - 20;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+    const sourceLabel = resolution.label;
+    const svgNs = 'http://www.w3.org/2000/svg';
+    function svgEl(tag, attrs, textContent) {
+      const node = document.createElementNS(svgNs, tag);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      if (textContent !== undefined) node.textContent = textContent;
+      return node;
+    }
+    const frag = document.createDocumentFragment();
+    frag.append(
+      svgEl('polyline', {
+        points: pts,
+        fill: 'none',
+        stroke: '#c49a44',
+        'stroke-width': '2.5',
+        'stroke-linejoin': 'round',
+        'stroke-linecap': 'round',
+      }),
+      svgEl(
+        'text',
+        { x: '8', y: '18', fill: '#9d8c72', 'font-size': '11' },
+        `High: ${max.toFixed(0)}`
+      ),
+      svgEl(
+        'text',
+        { x: '8', y: String(H - 6), fill: '#9d8c72', 'font-size': '11' },
+        `Low: ${min.toFixed(0)}`
+      ),
+      svgEl(
+        'text',
+        {
+          x: String(W - 8),
+          y: String(H - 6),
+          'text-anchor': 'end',
+          fill: '#9d8c72',
+          'font-size': '11',
+        },
+        `${sourceLabel} · ${rows.length} points`
+      )
+    );
+    _el.chart.replaceChildren(frag);
   }
-  const prices = rows.map((r) => r.spot);
-  const min = Math.min(...prices) * 0.998;
-  const max = Math.max(...prices) * 1.002;
-  const W = _el.chartWrap?.clientWidth || 1200;
-  const H = _el.chartWrap?.clientHeight || 430;
-  _el.chart.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const pts = rows
-    .map((r, i) => {
-      const x = (i / (rows.length - 1)) * W;
-      const y = H - ((r.spot - min) / (max - min)) * (H - 40) - 20;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-  const sourceLabel = _state.hasLiveFailure ? 'cached' : 'live';
-  const svgNs = 'http://www.w3.org/2000/svg';
-  function svgEl(tag, attrs, textContent) {
-    const node = document.createElementNS(svgNs, tag);
-    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-    if (textContent !== undefined) node.textContent = textContent;
-    return node;
-  }
-  const frag = document.createDocumentFragment();
-  frag.append(
-    svgEl('polyline', {
-      points: pts,
-      fill: 'none',
-      stroke: '#c49a44',
-      'stroke-width': '2.5',
-      'stroke-linejoin': 'round',
-      'stroke-linecap': 'round',
-    }),
-    svgEl(
-      'text',
-      { x: '8', y: '18', fill: '#9d8c72', 'font-size': '11' },
-      `High: ${max.toFixed(0)}`
-    ),
-    svgEl(
-      'text',
-      { x: '8', y: String(H - 6), fill: '#9d8c72', 'font-size': '11' },
-      `Low: ${min.toFixed(0)}`
-    ),
-    svgEl(
-      'text',
-      {
-        x: String(W - 8),
-        y: String(H - 6),
-        'text-anchor': 'end',
-        fill: '#9d8c72',
-        'font-size': '11',
-      },
-      `Source: ${sourceLabel} · ${rows.length} points`
-    )
-  );
-  _el.chart.replaceChildren(frag);
 
   // Keep the module-level snapshot up to date so the once-registered
   // mousemove handler always uses the latest rows without re-attaching.
@@ -478,22 +561,43 @@ export function renderChart() {
   }
 
   if (_el.chartStats) {
-    const stats = getHistoryStats(flatHistory);
+    const stats = getHistoryStats(historyOnly);
     const rangeMax = Math.max(...rows.map((r) => r.spot));
     const rangeMin = Math.min(...rows.map((r) => r.spot));
     const cards = [
-      buildStatCard('Points shown', String(rows.length), _state.range || 'ALL'),
-      buildStatCard('Data source', sourceLabel, 'LBMA baseline 2019–Aug 2025 + session'),
       buildStatCard(
-        'Range high',
+        tx('historical.summary.rangeLabel'),
+        rangeLabel,
+        tx('historical.summary.rangeHint')
+      ),
+      buildStatCard(
+        tx('historical.summary.startLabel'),
+        summary ? formatUsd(summary.start.price) : '—',
+        summary ? historyDateLabel(summary.start.date) : '—'
+      ),
+      buildStatCard(
+        tx('historical.summary.endLabel'),
+        summary ? formatUsd(summary.end.price) : '—',
+        summary ? historyDateLabel(summary.end.date) : '—'
+      ),
+      buildStatCard(
+        tx('historical.summary.changeLabel'),
+        summary
+          ? `${formatUsd(summary.absoluteChange)} · ${formatPercent(summary.percentageChange)}`
+          : '—',
+        tx('historical.summary.changeHint')
+      ),
+      buildStatCard(
+        tx('historical.summary.highLabel'),
         `$${rangeMax.toLocaleString('en', { maximumFractionDigits: 0 })}`,
-        'within selected range'
+        tx('historical.summary.highHint')
       ),
       buildStatCard(
-        'Range low',
+        tx('historical.summary.lowLabel'),
         `$${rangeMin.toLocaleString('en', { maximumFractionDigits: 0 })}`,
-        'within selected range'
+        tx('historical.summary.lowHint')
       ),
+      buildStatCard(tx('historical.summary.resolutionLabel'), resolution.label, resolution.detail),
     ];
     if (stats.ytdChange != null)
       cards.push(
@@ -514,6 +618,32 @@ export function renderChart() {
     clear(_el.chartStats);
     _el.chartStats.append(...cards);
     pulseFreshness(_el.chartStats);
+  }
+
+  if (_el.historyCaption) {
+    setText(
+      _el.historyCaption,
+      tx('historyCaption', { range: rangeLabel, resolution: resolution.label })
+    );
+  }
+
+  if (_el.rangeNotes) {
+    clear(_el.rangeNotes);
+    _el.rangeNotes.append(
+      el(
+        'div',
+        { class: 'tracker-note-item' },
+        tx('historical.note.resolution', { detail: resolution.detail })
+      ),
+      el(
+        'div',
+        { class: 'tracker-note-item' },
+        tx('historical.note.freshness', {
+          mode: livePoint ? tx('source.live') : tx('source.cached'),
+        })
+      ),
+      el('div', { class: 'tracker-note-item' }, tx('historical.note.methodology'))
+    );
   }
 }
 
@@ -749,6 +879,90 @@ export function renderMarkets() {
   if (_el.marketEmpty) _el.marketEmpty.hidden = filtered.length > 0;
 }
 
+export function renderComparisonWorkspace() {
+  if (!_el.comparisonCards) return;
+  const spot = _currentSpot();
+  const freshness = getFreshnessModel();
+  const countries = (_state.compareCountries || [])
+    .map((code) => COUNTRIES.find((country) => country.code === code))
+    .filter(Boolean);
+  const karats = (_state.compareKarats || []).filter(Boolean);
+
+  clear(_el.comparisonCards);
+  const canExport = Boolean(spot && countries.length && karats.length);
+  [_el.exportCompare, _el.exportCompare2].forEach((button) => {
+    if (!button) return;
+    button.disabled = !canExport;
+  });
+
+  if (!countries.length || !karats.length) {
+    if (_el.comparisonEmpty) _el.comparisonEmpty.hidden = false;
+    return;
+  }
+  if (_el.comparisonEmpty) _el.comparisonEmpty.hidden = true;
+
+  const fragment = document.createDocumentFragment();
+  countries.forEach((country) => {
+    const name = _state.lang === 'ar' ? country.nameAr || country.nameEn : country.nameEn;
+    const rows = karats.map((karatCode) => {
+      const price = spot
+        ? _priceFor({ currency: country.currency, karat: karatCode, unit: 'gram', spot })
+        : null;
+      return el('div', { class: 'comparison-card__row' }, [
+        el('span', { class: 'comparison-card__karat' }, `${karatCode}K`),
+        el(
+          'strong',
+          { class: 'comparison-card__price' },
+          price
+            ? `${country.currency} ${price.toLocaleString('en', {
+                minimumFractionDigits: country.decimals ?? 2,
+                maximumFractionDigits: country.decimals ?? 2,
+              })}`
+            : tx('source.unavailable')
+        ),
+      ]);
+    });
+
+    const notes = [
+      el(
+        'span',
+        { class: 'data-resolution-chip' },
+        country.currency === 'AED' ? tx('compare.fxPeg') : tx('compare.fxLive')
+      ),
+      buildSourceBadge(freshness),
+    ];
+    if (country.currency === 'AED') {
+      notes.push(el('span', { class: 'freshness-chip' }, tx('compare.aedPeg')));
+    }
+
+    fragment.append(
+      el('article', { class: 'comparison-card' }, [
+        el('div', { class: 'comparison-card__header' }, [
+          el('div', null, [
+            el('h3', { class: 'comparison-card__title' }, `${country.flag ?? ''} ${name}`.trim()),
+            el(
+              'p',
+              { class: 'comparison-card__meta' },
+              `${country.currency} · ${tx('compare.perGramLabel')}`
+            ),
+          ]),
+          el('div', { class: 'comparison-card__chips' }, notes),
+        ]),
+        el('div', { class: 'comparison-card__body' }, rows),
+        el(
+          'p',
+          { class: 'source-note comparison-card__note' },
+          tx('compare.cardNote', {
+            freshness: freshness.sourceLabel,
+            fxSource: country.currency === 'AED' ? tx('compare.fxPeg') : 'open.er-api.com',
+          })
+        ),
+      ])
+    );
+  });
+  _el.comparisonCards.append(fragment);
+}
+
 export function renderWatchlist() {
   if (!_el.watchlistGrid) return;
   const spot = _currentSpot();
@@ -850,23 +1064,59 @@ export function renderDecisionCues() {
   if (!_el.decisionCues) return;
   const spot = _currentSpot();
   const freshness = getFreshnessModel();
+  const rows = getVisibleHistoryRows();
+  const historyOnly = rows.filter((row) => row.granularity !== 'live');
+  const summary = buildHistorySummary(historyOnly, {
+    range: getSelectedRangeLabel(),
+    liveRecord: rows.find((row) => row.granularity === 'live') || null,
+  });
   if (!spot) {
     _el.decisionCues.replaceChildren();
     return;
   }
   clear(_el.decisionCues);
   _el.decisionCues.append(
-    el('div', { class: 'tracker-note-item' }, tx('liveSpotNote', { spot: spot.toFixed(2) })),
-    el(
-      'div',
-      { class: 'tracker-note-item' },
-      tx('dataSourceNote', { source: freshness.sourceLabel, age: freshness.ageText })
-    ),
-    el(
-      'div',
-      { class: 'tracker-note-item' },
-      tx('historyNote', { count: _state.snapshots?.length || 0 })
-    )
+    el('article', { class: 'trust-note-card' }, [
+      el('h3', null, tx('decision.directionTitle')),
+      el(
+        'p',
+        null,
+        tx(summary?.absoluteChange >= 0 ? 'decision.directionUp' : 'decision.directionDown', {
+          spot: spot.toFixed(2),
+          source: freshness.sourceLabel,
+        })
+      ),
+    ]),
+    el('article', { class: 'trust-note-card' }, [
+      el('h3', null, tx('decision.rangeMovementTitle')),
+      el(
+        'p',
+        null,
+        summary
+          ? tx('decision.rangeMovementCopy', {
+              range: summary.range,
+              change: formatPercent(summary.percentageChange),
+              move: formatUsd(summary.absoluteChange),
+            })
+          : tx('waitingLive')
+      ),
+    ]),
+    el('article', { class: 'trust-note-card' }, [
+      el('h3', null, tx('decision.shopReminderTitle')),
+      el('p', null, tx('decision.shopReminderCopy')),
+    ]),
+    el('article', { class: 'trust-note-card' }, [
+      el('h3', null, tx('decision.methodTitle')),
+      el('p', null, [
+        tx('decision.methodCopy'),
+        ' ',
+        el(
+          'a',
+          { href: 'methodology.html', class: 'tracker-inline-link' },
+          tx('referenceBannerLink')
+        ),
+      ]),
+    ])
   );
 }
 
@@ -1405,9 +1655,11 @@ export function renderAll() {
     renderChart();
     renderKaratTable();
     renderMarkets();
+    renderComparisonWorkspace();
     renderWatchlist();
     renderDecisionCues();
   } else if (_state.mode === 'compare') {
+    renderComparisonWorkspace();
     renderMarkets();
   } else if (_state.mode === 'archive') {
     renderArchive();

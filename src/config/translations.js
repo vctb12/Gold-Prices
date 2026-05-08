@@ -182,10 +182,48 @@ export const TRANSLATIONS = {
       'Compare, archive, export, and alerts stay one tap away from the live workspace.',
     'tracker.chartSourceNote':
       'Selected chart data may combine live, cached, and baseline points. Freshness remains visible in the workspace.',
+    'tracker.historyCaptionLoading': 'Preparing historical explorer…',
+    'tracker.historyCaption': '{range} · {resolution}',
+    'tracker.historyCaptionUnavailable':
+      'No historical data is available for the {range} window yet.',
+    'tracker.historyCaptionUnavailableMonth':
+      'No historical data is available for {month}. Try a wider range or a different month.',
+    'tracker.historical.summary.rangeLabel': 'Selected range',
+    'tracker.historical.summary.rangeHint': 'Current explorer window',
+    'tracker.historical.summary.startLabel': 'Range start',
+    'tracker.historical.summary.endLabel': 'Range end',
+    'tracker.historical.summary.changeLabel': 'Range movement',
+    'tracker.historical.summary.changeHint': 'Absolute and percentage change',
+    'tracker.historical.summary.highLabel': 'Highest point',
+    'tracker.historical.summary.highHint': 'Highest reference point in view',
+    'tracker.historical.summary.lowLabel': 'Lowest point',
+    'tracker.historical.summary.lowHint': 'Lowest reference point in view',
+    'tracker.historical.summary.resolutionLabel': 'Data resolution',
+    'tracker.historical.note.resolution': 'Resolution note: {detail}',
+    'tracker.historical.note.freshness':
+      'Freshness note: the current view keeps {mode} labeling visible on reference data.',
+    'tracker.historical.note.methodology':
+      'Methodology note: long ranges may rely on monthly reference history rather than exact intraday pricing.',
     'tracker.marketScrollHint':
       'Use cards for quick scans, then open a country page for deeper market context.',
     'tracker.archiveScrollHint':
       'Swipe the archive table sideways on mobile, or use the date lookup cards below for a faster checkpoint.',
+    'tracker.compare.builderTitle': 'Build a mobile comparison',
+    'tracker.compare.builderNote':
+      'Compare reference prices per gram across up to 3 countries and 4 common karats. Missing values stay labeled as unavailable.',
+    'tracker.compare.monthLabel': 'Month lookup',
+    'tracker.compare.clearMonth': 'Clear',
+    'tracker.compare.countryLabel': 'Country {index}',
+    'tracker.compare.exportLabel': 'Export comparison CSV',
+    'tracker.compare.presetGcc': 'GCC core',
+    'tracker.compare.presetUae': 'UAE 24K/22K/21K/18K',
+    'tracker.compare.presetArab': 'Arab markets',
+    'tracker.compare.fxPeg': 'AED fixed peg',
+    'tracker.compare.fxLive': 'FX source visible',
+    'tracker.compare.aedPeg': 'AED 3.6725 fixed peg',
+    'tracker.compare.perGramLabel': 'reference price / gram',
+    'tracker.compare.cardNote':
+      'Freshness: {freshness}. FX source: {fxSource}. Shop prices may still add making charges, VAT, and dealer premiums.',
     'tracker.referenceBannerTitle': 'Reference prices only',
     'tracker.referenceBannerBody':
       'Spot-linked estimates derived from GoldPriceZ spot snapshots, with FX from open.er-api.com for non-AED currencies. AED uses the fixed 3.6725 peg. Freshness labels stay visible: Live, Cached, Stale, Unavailable.',
@@ -244,6 +282,20 @@ export const TRANSLATIONS = {
     'tracker.share.unavailable': 'Gold data unavailable',
     'tracker.toast.briefCopied': 'Brief copied to clipboard',
     'tracker.toast.clipboardFailed': 'Failed to copy to clipboard',
+    'tracker.decision.directionTitle': "Today's reference direction",
+    'tracker.decision.directionUp':
+      'Reference prices are currently above the recent starting point, with spot at ${spot} and labeled {source}.',
+    'tracker.decision.directionDown':
+      'Reference prices are currently below the recent starting point, with spot at ${spot} and labeled {source}.',
+    'tracker.decision.rangeMovementTitle': 'What changed since range start',
+    'tracker.decision.rangeMovementCopy':
+      '{range} moved {change} ({move}) in the selected reference window.',
+    'tracker.decision.shopReminderTitle': 'Before you buy in a shop',
+    'tracker.decision.shopReminderCopy':
+      'Use the tracker as a spot-linked indication only. Final jewelry and bullion quotes can include making charges, VAT, and dealer premiums.',
+    'tracker.decision.methodTitle': 'Spot vs retail reminder',
+    'tracker.decision.methodCopy':
+      'Exports and comparisons stay tied to reference prices rather than retail quotes.',
     'tracker.alerts.empty': 'No alerts set.',
     'tracker.alerts.deleteAriaLabel': 'Delete alert',
     'tracker.presets.empty': 'No presets saved. Save the current view via the form above.',
@@ -689,10 +741,47 @@ export const TRANSLATIONS = {
       'تبقى المقارنة والأرشيف والتصدير والتنبيهات على بُعد لمسة واحدة من مساحة العمل المباشرة.',
     'tracker.chartSourceNote':
       'قد تجمع بيانات الرسم المحدد بين نقاط مباشرة ومخزنة وأخرى من الخط الأساسي. وتبقى حالات الحداثة ظاهرة داخل مساحة العمل.',
+    'tracker.historyCaptionLoading': 'جارٍ تجهيز المستكشف التاريخي…',
+    'tracker.historyCaption': '{range} · {resolution}',
+    'tracker.historyCaptionUnavailable': 'لا توجد بيانات تاريخية متاحة لنافذة {range} حالياً.',
+    'tracker.historyCaptionUnavailableMonth':
+      'لا توجد بيانات تاريخية متاحة لشهر {month}. جرّب نطاقاً أوسع أو شهراً آخر.',
+    'tracker.historical.summary.rangeLabel': 'النطاق المحدد',
+    'tracker.historical.summary.rangeHint': 'نافذة المستكشف الحالية',
+    'tracker.historical.summary.startLabel': 'بداية النطاق',
+    'tracker.historical.summary.endLabel': 'نهاية النطاق',
+    'tracker.historical.summary.changeLabel': 'حركة النطاق',
+    'tracker.historical.summary.changeHint': 'التغير المطلق والنسبة المئوية',
+    'tracker.historical.summary.highLabel': 'أعلى نقطة',
+    'tracker.historical.summary.highHint': 'أعلى نقطة مرجعية ضمن العرض',
+    'tracker.historical.summary.lowLabel': 'أدنى نقطة',
+    'tracker.historical.summary.lowHint': 'أدنى نقطة مرجعية ضمن العرض',
+    'tracker.historical.summary.resolutionLabel': 'دقة البيانات',
+    'tracker.historical.note.resolution': 'ملاحظة الدقة: {detail}',
+    'tracker.historical.note.freshness':
+      'ملاحظة الحداثة: يبقى وسم {mode} واضحاً على البيانات المرجعية في العرض الحالي.',
+    'tracker.historical.note.methodology':
+      'ملاحظة المنهجية: قد تعتمد النطاقات الطويلة على سجل مرجعي شهري وليس على تسعير لحظي دقيق.',
     'tracker.marketScrollHint':
       'استخدم البطاقات للمراجعة السريعة، ثم افتح صفحة الدولة لمزيد من سياق السوق.',
     'tracker.archiveScrollHint':
       'اسحب جدول الأرشيف أفقيًا على الموبايل، أو استخدم بطاقات البحث بالتاريخ أدناه للوصول الأسرع.',
+    'tracker.compare.builderTitle': 'أنشئ مقارنة مناسبة للموبايل',
+    'tracker.compare.builderNote':
+      'قارن الأسعار المرجعية لكل غرام عبر 3 دول كحد أقصى و4 عيارات شائعة. تبقى القيم غير المتاحة موضحة بوضوح.',
+    'tracker.compare.monthLabel': 'بحث بالشهر',
+    'tracker.compare.clearMonth': 'مسح',
+    'tracker.compare.countryLabel': 'الدولة {index}',
+    'tracker.compare.exportLabel': 'تصدير CSV للمقارنة',
+    'tracker.compare.presetGcc': 'الخليج الأساسي',
+    'tracker.compare.presetUae': 'الإمارات 24/22/21/18',
+    'tracker.compare.presetArab': 'الأسواق العربية',
+    'tracker.compare.fxPeg': 'ربط الدرهم الثابت',
+    'tracker.compare.fxLive': 'مصدر الصرف ظاهر',
+    'tracker.compare.aedPeg': 'درهم 3.6725 ربط ثابت',
+    'tracker.compare.perGramLabel': 'سعر مرجعي / غرام',
+    'tracker.compare.cardNote':
+      'الحداثة: {freshness}. مصدر الصرف: {fxSource}. قد تضيف أسعار المحلات المصنعية والضريبة وهوامش التاجر.',
     'tracker.referenceBannerTitle': 'أسعار مرجعية فقط',
     'tracker.referenceBannerBody':
       'تقديرات مرتبطة بالسعر الفوري مبنية على لقطات GoldPriceZ، مع أسعار صرف من open.er-api.com للعملات غير المرتبطة بالدرهم. الدرهم يستخدم الربط الثابت 3.6725. وتبقى حالات الحداثة ظاهرة دائمًا: مباشر، مخزن، قديم، غير متاح.',
@@ -751,6 +840,20 @@ export const TRANSLATIONS = {
     'tracker.share.unavailable': 'بيانات الذهب غير متاحة',
     'tracker.toast.briefCopied': 'تم نسخ الملخص إلى الحافظة',
     'tracker.toast.clipboardFailed': 'تعذر النسخ إلى الحافظة',
+    'tracker.decision.directionTitle': 'اتجاه المرجع اليوم',
+    'tracker.decision.directionUp':
+      'الأسعار المرجعية حالياً أعلى من نقطة البداية الأخيرة، مع سعر فوري ${spot} وموسوم بأنه {source}.',
+    'tracker.decision.directionDown':
+      'الأسعار المرجعية حالياً أدنى من نقطة البداية الأخيرة، مع سعر فوري ${spot} وموسوم بأنه {source}.',
+    'tracker.decision.rangeMovementTitle': 'ما الذي تغيّر منذ بداية النطاق',
+    'tracker.decision.rangeMovementCopy':
+      'تحرك {range} بمقدار {change} ({move}) داخل نافذة المرجع المحددة.',
+    'tracker.decision.shopReminderTitle': 'قبل الشراء من المحل',
+    'tracker.decision.shopReminderCopy':
+      'استخدم المتتبع كمؤشر مرتبط بالسعر الفوري فقط. قد تشمل الأسعار النهائية للمجوهرات والسبائك المصنعية والضريبة وهوامش التاجر.',
+    'tracker.decision.methodTitle': 'تذكير الفرق بين الفوري والتجزئة',
+    'tracker.decision.methodCopy':
+      'تظل المقارنات وملفات التصدير مرتبطة بالأسعار المرجعية وليست أسعار التجزئة.',
     'tracker.alerts.empty': 'لا توجد تنبيهات.',
     'tracker.alerts.deleteAriaLabel': 'حذف التنبيه',
     'tracker.presets.empty': 'لا توجد إعدادات محفوظة. احفظ العرض الحالي من النموذج أعلاه.',

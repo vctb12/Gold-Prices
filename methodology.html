@@ -118,6 +118,12 @@
             should be used for orientation, comparison, and research — not as the basis for
             executing trades or financial transactions.
           </p>
+          <p id="overview-p3">
+            Historical views combine different source layers depending on the range you choose. Short
+            windows may use live snapshots and browser cache checkpoints, while longer windows can
+            fall back to daily or monthly reference history. We label that resolution in the tracker
+            and in exported files so monthly baselines are never presented as exact intraday history.
+          </p>
 
           <div class="method-source-card-row">
             <div class="method-source-card">
@@ -223,6 +229,11 @@
             the rates locally in <code>localStorage</code> and display an "FX" chip in the tracker
             showing the last update time. When FX rates are stale (the provider's
             <code>next_update</code> timestamp has passed), a visual stale indicator is shown.
+          </p>
+          <p id="fx-rates-update-p2">
+            Gold spot freshness and FX freshness do not always move together. A gold snapshot can be
+            recent while the FX layer is still daily, so the tracker and exports label each layer
+            separately.
           </p>
 
           <div class="method-warning method-warning--info" id="fx-rates-warning">
@@ -491,6 +502,11 @@
             Because cached data is stored in <code>localStorage</code>, the site displays cached
             gold prices and FX rates immediately on load — even without a network connection. Cached
             data is labelled with its age so you always know what you are looking at.
+          </p>
+          <p id="fallback-export-p">
+            CSV and JSON exports keep that same honesty. Every export includes a generated timestamp,
+            source notes, data-resolution context, and a reminder that values are spot-linked
+            reference prices rather than shop quotes.
           </p>
         </section>
 

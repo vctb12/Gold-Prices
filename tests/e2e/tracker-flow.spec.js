@@ -46,9 +46,10 @@ test.describe('Tracker page — live mode & navigation', () => {
   });
 
   test('clicking compare tab switches to compare panel', async ({ page }) => {
-    await page.goto('/tracker.html');
+    await page.goto('/tracker.html#mode=live&cur=AED&k=24&u=gram&r=30D');
     await waitForTrackerReady(page);
     await dismissOnboardingIfPresent(page);
+    await page.locator('#tp-workspace-toggle').click();
     await page.waitForSelector('.tracker-mode-tab[data-mode="compare"]', { timeout: 10000 });
 
     await page.locator('.tracker-mode-tab[data-mode="compare"]').click();
@@ -88,5 +89,30 @@ test.describe('Tracker page — live mode & navigation', () => {
     await waitForTrackerReady(page);
     await page.waitForSelector('#tp-xauusd-value', { timeout: 10000 });
     await expect(page.locator('#tp-xauusd-value')).toBeVisible();
+  });
+
+  test('historical explorer controls and summary cards render', async ({ page }) => {
+    await page.goto('/tracker.html#mode=live&cur=AED&k=24&u=gram&r=30D');
+    await waitForTrackerReady(page);
+    await expect(page.locator('#tp-range-pills')).toBeVisible();
+    await expect(page.locator('[data-range="24H"]')).toBeVisible();
+    await expect(page.locator('[data-range="7D"]')).toBeVisible();
+    await expect(page.locator('#tp-history-month')).toBeVisible();
+    await expect(page.locator('#tp-chart-stats .tracker-stat-card').first()).toBeVisible();
+    await expect(page.locator('#tp-chart-source-note')).toBeVisible();
+  });
+
+  test('comparison builder supports presets and export', async ({ page }) => {
+    await page.goto('/tracker.html#mode=live&cur=AED&k=24&u=gram&r=30D');
+    await waitForTrackerReady(page);
+    await page.locator('#tp-workspace-toggle').click();
+    await page.locator('#tab-compare').click();
+    await page.locator('#tp-refresh-btn').click();
+    await expect(page.locator('#mode-compare')).toBeVisible();
+    await expect(page.locator('#tp-comparison-cards')).toBeVisible();
+    await expect(page.locator('#tp-export-compare')).toBeVisible();
+    await page.locator('[data-compare-preset="uae-karats"]').click();
+    await expect(page.locator('#tp-comparison-cards .comparison-card').first()).toBeVisible();
+    await expect(page.locator('#tp-export-compare')).toBeEnabled({ timeout: 10000 });
   });
 });

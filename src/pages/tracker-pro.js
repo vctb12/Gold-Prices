@@ -17,6 +17,7 @@ let initRender,
   renderAll,
   renderChart,
   renderMarkets,
+  renderComparisonWorkspace,
   renderAlerts,
   renderPresets,
   renderPlanners,
@@ -189,8 +190,28 @@ function localizeStaticTrackerCopy() {
   setNodeText('tp-mobile-cue-tools-title', trackerTx('mobileCueToolsTitle'));
   setNodeText('tp-mobile-cue-tools-copy', trackerTx('mobileCueToolsCopy'));
   setNodeText('tp-chart-source-note', trackerTx('chartSourceNote'));
+  setNodeText('tp-history-caption', trackerTx('historyCaptionLoading'));
   setNodeText('tp-market-scroll-hint', trackerTx('marketScrollHint'));
   setNodeText('tp-archive-scroll-hint', trackerTx('archiveScrollHint'));
+  setNodeText('tp-compare-builder-title', trackerTx('compare.builderTitle'));
+  setNodeText('tp-compare-note', trackerTx('compare.builderNote'));
+  const monthLabel = document.querySelector('.tracker-history-month-field > span');
+  if (monthLabel) monthLabel.textContent = trackerTx('compare.monthLabel');
+  setButtonCopy(document.getElementById('tp-history-month-clear'), trackerTx('compare.clearMonth'));
+  el.compareCountrySelects?.forEach((select, index) => {
+    const span = select?.closest('label')?.querySelector('span');
+    if (span) span.textContent = trackerTx('compare.countryLabel', { index: index + 1 });
+  });
+  setButtonCopy(document.getElementById('tp-export-compare'), trackerTx('compare.exportLabel'));
+  setButtonCopy(document.getElementById('tp-export-compare-2'), trackerTx('compare.exportLabel'));
+  const presetLabels = [
+    trackerTx('compare.presetGcc'),
+    trackerTx('compare.presetUae'),
+    trackerTx('compare.presetArab'),
+  ];
+  el.comparePresetButtons?.forEach((button, index) => {
+    if (presetLabels[index]) button.textContent = presetLabels[index];
+  });
 }
 
 function ui() {
@@ -205,6 +226,8 @@ function ui() {
     unit: document.getElementById('tp-unit'),
     compare: document.getElementById('tp-compare-country'),
     rangePills: document.querySelectorAll('.tracker-pill[data-range]'),
+    historyMonth: document.getElementById('tp-history-month'),
+    historyMonthClear: document.getElementById('tp-history-month-clear'),
     autoRefresh: document.getElementById('tp-auto-refresh'),
     liveBadgeText: document.getElementById('tp-live-badge-text'),
     xauUsdValue: document.getElementById('tp-xauusd-value'),
@@ -222,6 +245,7 @@ function ui() {
     legendCompare: document.getElementById('tp-legend-compare'),
     miniStrip: document.getElementById('tp-mini-strip'),
     chartStats: document.getElementById('tp-chart-stats'),
+    historyCaption: document.getElementById('tp-history-caption'),
     rangeNotes: document.getElementById('tp-range-notes'),
     playbackStrip: document.getElementById('tp-playback-strip'),
     playbackBtn: document.getElementById('tp-playback-btn'),
@@ -231,6 +255,15 @@ function ui() {
     marketView: document.getElementById('tp-market-view'),
     marketBoard: document.getElementById('tp-market-board'),
     marketEmpty: document.getElementById('tp-market-empty'),
+    compareCountrySelects: [
+      document.getElementById('tp-compare-country-1'),
+      document.getElementById('tp-compare-country-2'),
+      document.getElementById('tp-compare-country-3'),
+    ],
+    compareKaratButtons: document.querySelectorAll('[data-compare-karat]'),
+    comparePresetButtons: document.querySelectorAll('[data-compare-preset]'),
+    comparisonCards: document.getElementById('tp-comparison-cards'),
+    comparisonEmpty: document.getElementById('tp-comparison-empty'),
     watchlistGrid: document.getElementById('tp-watchlist-grid'),
     decisionCues: document.getElementById('tp-decision-cues'),
     alertScope: document.getElementById('tp-alert-scope'),
@@ -273,8 +306,9 @@ function ui() {
     seasonalResults: document.getElementById('tp-seasonal-results'),
     exportChart: document.getElementById('tp-export-chart'),
     exportChart2: document.getElementById('tp-export-chart-2'),
+    exportCompare: document.getElementById('tp-export-compare'),
+    exportCompare2: document.getElementById('tp-export-compare-2'),
     exportWatchlist: document.getElementById('tp-export-watchlist'),
-    exportCurrent: document.getElementById('tp-export-current'),
     downloadJson: document.getElementById('tp-download-json'),
     downloadJson2: document.getElementById('tp-download-json-2'),
     downloadBrief: document.getElementById('tp-download-brief'),
@@ -329,6 +363,17 @@ function priceFor({ currency, karat, unit, spot }) {
   }
   if (unit === 'oz') return local * CONSTANTS.TROY_OZ_GRAMS;
   return local;
+}
+
+function getSelectedComparisonCountries() {
+  return (state.compareCountries || [])
+    .map((code) => COUNTRIES.find((country) => country.code === code))
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function getSelectedComparisonKarats() {
+  return (state.compareKarats || []).filter(Boolean).slice(0, 4);
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
@@ -445,24 +490,33 @@ async function exportWatchlistData() {
   }
 }
 
-async function exportCurrentViewData() {
+async function exportComparisonData() {
   const spot = currentSpot();
   if (!spot) {
     showToast('Waiting for live price data.');
     return;
   }
+  const countries = getSelectedComparisonCountries();
+  const karats = getSelectedComparisonKarats();
+  if (!countries.length || !karats.length) {
+    showToast('Select at least one country and one karat.');
+    return;
+  }
   try {
     const expMod = await import('../lib/export.js');
-    expMod.exportCurrentViewCSV({
-      countries: COUNTRIES,
-      karatCode: state.selectedKarat,
+    expMod.exportComparisonCSV({
+      countries,
+      karatCodes: karats,
       priceFor,
       spot,
-      selectedUnit: state.selectedUnit,
-      selectedCurrency: state.selectedCurrency,
+      freshness: {
+        goldUpdatedAt: state.live?.updatedAt || null,
+        fxUpdatedAt: state.fxMeta?.lastUpdateUtc || null,
+        hasLiveFailure: state.hasLiveFailure,
+      },
       lang: state.lang,
     });
-    showToast('Current view CSV downloaded');
+    showToast('Comparison CSV downloaded');
   } catch (_e) {
     showToast('Export failed');
   }
@@ -501,9 +555,19 @@ async function exportJsonData() {
     freshness: {
       goldUpdatedAt: state.live?.updatedAt || new Date().toISOString(),
       fxUpdatedAt: state.fxMeta?.lastUpdateUtc || new Date().toISOString(),
+      hasLiveFailure: state.hasLiveFailure,
     },
     rates: state.rates,
     lang: state.lang,
+    compareCountries: getSelectedComparisonCountries().map((country) => ({
+      code: country.code,
+      currency: country.currency,
+      nameEn: country.nameEn,
+      nameAr: country.nameAr,
+    })),
+    compareKarats: getSelectedComparisonKarats(),
+    historyMonth: state.historyMonth || null,
+    range: state.range,
   };
   try {
     const expMod = await import('../lib/export.js');
@@ -602,6 +666,7 @@ function populateSelects() {
     el.unit.replaceChildren(frag);
   }
   if (el.language) el.language.value = state.lang;
+  if (el.historyMonth) el.historyMonth.value = state.historyMonth || '';
   // Sync range pills with persisted state (HTML default is 24H; state default is 30D).
   if (el.rangePills?.length) {
     el.rangePills.forEach((p) => {
@@ -616,6 +681,38 @@ function populateSelects() {
       frag.appendChild(safeEl('option', { value: k.code }, [`${k.code}K`]));
     });
     el.jewelryKarat.replaceChildren(frag);
+  }
+  if (el.compareCountrySelects?.length) {
+    const options = COUNTRIES.map((country) => ({
+      value: country.code,
+      label:
+        state.lang === 'ar'
+          ? `${country.flag ?? ''} ${country.nameAr || country.nameEn}`.trim()
+          : `${country.flag ?? ''} ${country.nameEn}`.trim(),
+    }));
+    el.compareCountrySelects.forEach((select, index) => {
+      if (!select) return;
+      const frag = document.createDocumentFragment();
+      frag.appendChild(safeEl('option', { value: '' }, ['—']));
+      options.forEach((option) => {
+        const node = safeEl('option', { value: option.value }, [option.label]);
+        if (option.value === state.compareCountries[index]) node.selected = true;
+        frag.appendChild(node);
+      });
+      select.replaceChildren(frag);
+    });
+  }
+  if (el.compareKaratButtons?.length) {
+    el.compareKaratButtons.forEach((button) => {
+      const active = state.compareKarats.includes(button.dataset.compareKarat);
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+  if (el.comparePresetButtons?.length) {
+    el.comparePresetButtons.forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.comparePreset === state.comparePreset);
+    });
   }
 }
 
@@ -740,6 +837,7 @@ async function init() {
     renderAll,
     renderChart,
     renderMarkets,
+    renderComparisonWorkspace,
     renderAlerts,
     renderPresets,
     renderPlanners,
@@ -759,6 +857,7 @@ async function init() {
     refreshData,
     renderAll,
     renderMarkets,
+    renderComparisonWorkspace,
     renderAlerts,
     renderPresets,
     renderPlanners,
@@ -775,7 +874,7 @@ async function init() {
     exportJsonData,
     exportChartData,
     exportWatchlistData,
-    exportCurrentViewData,
+    exportComparisonData,
     exportBriefData,
   });
 

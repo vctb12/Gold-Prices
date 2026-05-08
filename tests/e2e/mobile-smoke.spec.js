@@ -26,6 +26,7 @@ test.describe('Mobile smoke', () => {
     await page.waitForSelector('body[data-tracker-shell-ready="true"]', { timeout: 10000 });
     await expect(page.locator('.tracker-modes')).toBeVisible();
     await expect(page.locator('.tracker-mobile-workspace')).toBeVisible();
+    await expect(page.locator('#tp-chart-stats')).toBeVisible();
     await expectNoHorizontalOverflow(page, '/tracker.html');
 
     await page.goto('/calculator.html');
@@ -72,5 +73,18 @@ test.describe('Mobile smoke', () => {
     await expect(page.locator('.calc-nav-tabs')).toBeVisible();
     await expect(page.locator('#calc-flow-title')).toBeVisible();
     await expectNoHorizontalOverflow(page, '/calculator.html (forced rtl)');
+  });
+
+  test('tracker comparison and export controls stay reachable on mobile', async ({ page }) => {
+    await page.goto('/tracker.html');
+    await page.waitForSelector('body[data-tracker-shell-ready="true"]', { timeout: 10000 });
+    await page.locator('#tp-workspace-toggle').click();
+    await page.locator('#tab-compare').click();
+    await expect(page.locator('#tp-comparison-cards')).toBeVisible();
+    await expect(page.locator('#tp-export-compare')).toBeVisible();
+    await page.locator('#tab-exports').click();
+    await expect(page.locator('#tp-export-chart-2')).toBeVisible();
+    await expect(page.locator('#tp-download-json-2')).toBeVisible();
+    await expectNoHorizontalOverflow(page, '/tracker.html mobile compare/exports');
   });
 });

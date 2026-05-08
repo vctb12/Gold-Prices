@@ -195,6 +195,41 @@
   flex-wrap: wrap;
 }
 
+.calc-tracker-handoff {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-default);
+  background: var(--gradient-surface);
+  box-shadow: var(--elev-2);
+}
+
+.calc-tracker-handoff[hidden] {
+  display: none;
+}
+
+.calc-tracker-handoff__title,
+.calc-tracker-handoff__text,
+.calc-tracker-handoff__note {
+  margin: 0;
+}
+
+.calc-tracker-handoff__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.calc-tracker-handoff__note {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
 /* ── Panel ─────────────────────────────────────────── */
 .calc-panel {
   max-width: 680px;
@@ -362,6 +397,16 @@
   flex-direction: column;
   gap: 0.2rem;
   margin-bottom: 0.8rem;
+}
+
+@media (width <= 720px) {
+  .calc-tracker-handoff {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-tracker-handoff__actions {
+    justify-content: stretch;
+  }
 }
 
 .calc-result-label {

@@ -448,6 +448,15 @@
               <span>Compare market</span>
               <select id="tp-compare-country"></select>
             </label>
+            <label class="tracker-field tracker-field-inline tracker-history-month-field">
+              <span>Month lookup</span>
+              <div class="tracker-history-month-row">
+                <input type="month" id="tp-history-month" />
+                <button type="button" class="btn btn-sm btn-ghost" id="tp-history-month-clear">
+                  Clear
+                </button>
+              </div>
+            </label>
             <div class="tracker-range-pills" id="tp-range-pills" role="group" aria-label="Chart time range">
               <button type="button" class="tracker-pill is-active" data-range="24H" aria-pressed="true">24H</button>
               <button type="button" class="tracker-pill" data-range="7D" aria-pressed="false">7D</button>
@@ -655,12 +664,36 @@
                 <p>Waiting for live and history data…</p>
               </div>
             </div>
+            <p class="tracker-chart-caption" id="tp-history-caption" role="status" aria-live="polite">
+              Preparing historical explorer…
+            </p>
             <p class="source-note tracker-chart-source-note" id="tp-chart-source-note">
               Selected chart data may combine live, cached, and baseline points. Freshness remains
               visible in the workspace.
             </p>
 
-            <div class="tracker-stat-grid" id="tp-chart-stats"></div>
+            <div class="tracker-stat-grid" id="tp-chart-stats">
+              <div class="tracker-stat-card">
+                <div class="tracker-stat-k">Selected range</div>
+                <div class="tracker-stat-v">—</div>
+                <div class="tracker-stat-s">Waiting for history</div>
+              </div>
+              <div class="tracker-stat-card">
+                <div class="tracker-stat-k">Range start</div>
+                <div class="tracker-stat-v">—</div>
+                <div class="tracker-stat-s">Reference point</div>
+              </div>
+              <div class="tracker-stat-card">
+                <div class="tracker-stat-k">Range movement</div>
+                <div class="tracker-stat-v">—</div>
+                <div class="tracker-stat-s">Absolute and percentage change</div>
+              </div>
+              <div class="tracker-stat-card">
+                <div class="tracker-stat-k">Data resolution</div>
+                <div class="tracker-stat-v">—</div>
+                <div class="tracker-stat-s">Live, daily, or monthly reference history</div>
+              </div>
+            </div>
 
             <div class="tracker-two-up">
               <article class="tracker-subpanel">
@@ -767,6 +800,61 @@
               </div>
             </div>
           </div>
+
+          <section class="comparison-workspace trust-note-card" aria-labelledby="tp-compare-builder-title">
+            <div class="tracker-subpanel-head comparison-workspace__head">
+              <div>
+                <h3 id="tp-compare-builder-title">Build a mobile comparison</h3>
+                <p class="tracker-subpanel-intro">
+                  Compare up to 3 countries and 4 common karats in stacked cards. Missing or delayed
+                  data stays labeled.
+                </p>
+              </div>
+              <button class="btn btn-sm btn-outline" id="tp-export-compare" type="button">
+                Export comparison CSV
+              </button>
+            </div>
+            <div class="comparison-preset-row" id="tp-compare-presets" aria-label="Comparison presets">
+              <button type="button" class="tracker-pill is-active" data-compare-preset="gcc-core">
+                GCC core
+              </button>
+              <button type="button" class="tracker-pill" data-compare-preset="uae-karats">
+                UAE 24K/22K/21K/18K
+              </button>
+              <button type="button" class="tracker-pill" data-compare-preset="arab-markets">
+                Arab markets
+              </button>
+            </div>
+            <div class="comparison-builder-grid">
+              <label class="tracker-field">
+                <span>Country 1</span>
+                <select id="tp-compare-country-1"></select>
+              </label>
+              <label class="tracker-field">
+                <span>Country 2</span>
+                <select id="tp-compare-country-2"></select>
+              </label>
+              <label class="tracker-field">
+                <span>Country 3</span>
+                <select id="tp-compare-country-3"></select>
+              </label>
+            </div>
+            <div class="comparison-karat-row" id="tp-compare-karats" role="group" aria-label="Comparison karats">
+              <button type="button" class="tracker-pill is-active" data-compare-karat="24" aria-pressed="true">24K</button>
+              <button type="button" class="tracker-pill is-active" data-compare-karat="22" aria-pressed="true">22K</button>
+              <button type="button" class="tracker-pill is-active" data-compare-karat="21" aria-pressed="true">21K</button>
+              <button type="button" class="tracker-pill" data-compare-karat="18" aria-pressed="false">18K</button>
+              <button type="button" class="tracker-pill" data-compare-karat="14" aria-pressed="false">14K</button>
+            </div>
+            <p class="source-note comparison-workspace__note" id="tp-compare-note">
+              Comparison cards show spot-linked reference prices per gram only. FX freshness and the
+              AED fixed peg note stay attached to each card.
+            </p>
+            <div class="tracker-empty empty-state-card" id="tp-comparison-empty" hidden>
+              Select at least one country and one karat to compare.
+            </div>
+            <div class="comparison-card-grid" id="tp-comparison-cards"></div>
+          </section>
 
           <div class="tracker-compare-toolbar">
             <label class="tracker-search">
@@ -1182,8 +1270,8 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Visible chart CSV</h3></div>
               <p>
-                Exports only the currently visible chart slice with range, mode, and source-layer
-                annotations.
+                Exports the visible historical range with start/end dates, source, and data-resolution
+                notes.
               </p>
               <button class="btn btn-outline" id="tp-export-chart-2" type="button">
                 Export visible chart CSV
@@ -1191,13 +1279,13 @@
             </article>
 
             <article class="tracker-subpanel">
-              <div class="tracker-subpanel-head"><h3>Current view CSV</h3></div>
+              <div class="tracker-subpanel-head"><h3>Comparison CSV</h3></div>
               <p>
-                Snapshot of the current currency/karat/unit across markets, matching the compare
-                board ordering.
+                Download the current country + karat comparison cards in the same mobile-first order
+                shown in the compare workspace.
               </p>
-              <button class="btn btn-outline" id="tp-export-current" type="button">
-                Download current view CSV
+              <button class="btn btn-outline" id="tp-export-compare-2" type="button">
+                Download comparison CSV
               </button>
             </article>
 
@@ -1220,8 +1308,8 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Snapshot JSON</h3></div>
               <p>
-                Structured JSON payload with prices, FX, favorites, and selected view — useful for
-                tooling integration.
+                Structured JSON payload with live snapshot, freshness labels, selected comparison
+                setup, and export timestamp.
               </p>
               <button class="btn btn-outline" id="tp-download-json-2" type="button">
                 Download snapshot JSON
