@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------
-# Test Gold Providers — manual smoke test for every configured
+# Test Gold Providers — manual dry-run smoke test for every configured
 # provider adapter. Runs ONE bakeoff round, prints per-provider
 # success/error, uploads a sanitized artifact, and DOES NOT post
 # to X or commit anything.
@@ -80,6 +80,25 @@ jobs:
             --output ./out/provider_test_log.jsonl \
             --write-scorecard \
             --scorecard-output ./out/provider_test_scorecard.json
+
+      - name: Summarize smoke result
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "## Manual provider smoke"
+            echo
+            echo "- Providers input: `${{ inputs.providers || 'all known/enabled' }}`"
+            echo "- Raw payload logging: `${{ inputs.log_raw || 'false' }}`"
+            echo "- Posting: `disabled`"
+            echo "- Commits: `disabled`"
+            if [ -f out/provider_test_scorecard.json ]; then
+              echo
+              echo '```json'
+              python -c "import json; d=json.load(open('out/provider_test_scorecard.json')); print(json.dumps({k:v for k,v in d.items() if k!='providers'}, indent=2))"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload sanitized artifact
         if: always()

@@ -131,6 +131,9 @@ def _provider_stats(name: str, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         float(r["freshness_seconds"]) for r in successes
         if isinstance(r.get("freshness_seconds"), (int, float))
     ]
+    usable_count = sum(1 for r in rows if r.get("usable_for_posting") is True)
+    usable_rate = (usable_count / total) if total else 0.0
+    latest_row = rows[-1] if rows else {}
 
     # Per-hour bucket counts of unique price/timestamp values.
     by_hour_prices: Dict[str, set] = defaultdict(set)
@@ -225,6 +228,8 @@ def _provider_stats(name: str, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         "stale_response_count": stale_count,
         "missing_timestamp_count": missing_ts,
         "missing_price_count": missing_price,
+        "usable_for_posting_count": usable_count,
+        "usable_for_posting_rate": round(usable_rate, 4),
         "average_response_time_ms": round(sum(response_times) / len(response_times), 1)
             if response_times else None,
         "p95_response_time_ms": round(_percentile(response_times, 0.95), 1)
@@ -245,6 +250,12 @@ def _provider_stats(name: str, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
             if freshness_values else None,
         "freshness_p95_seconds": round(_percentile(freshness_values, 0.95), 1)
             if freshness_values else None,
+        "latest_parsed_xau_usd_oz": latest_row.get("parsed_xau_usd_oz", latest_row.get("price_usd_oz")),
+        "latest_provider_timestamp_utc": latest_row.get("provider_timestamp_utc"),
+        "latest_local_fetch_timestamp_utc": latest_row.get("local_fetch_timestamp_utc", latest_row.get("fetched_at_utc")),
+        "latest_freshness_age_seconds": latest_row.get("freshness_age_seconds", latest_row.get("freshness_seconds")),
+        "latest_price_changed": latest_row.get("did_price_change_vs_previous_provider_sample"),
+        "latest_usable_for_posting": latest_row.get("usable_for_posting"),
     }
 
 

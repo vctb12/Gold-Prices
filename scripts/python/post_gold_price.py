@@ -438,8 +438,6 @@ def format_hourly_tweet(data):
         f"\n"
         f"#GoldPrice #Gold #UAE #Dubai"
     )
-    if len(tweet) > 320:
-        raise ValueError(f"Hourly tweet exceeds 280 chars: {len(tweet)}")
     return tweet
 
 def format_market_open_tweet(data):
@@ -491,6 +489,16 @@ def format_tweet(data, post_type):
     if post_type == 'market_close':
         return format_market_close_tweet(data)
     return format_hourly_tweet(data)
+
+
+def check_tweet_length_guard(text, limit=280):
+    length = len(text or "")
+    if length <= limit:
+        return (False, None)
+    return (
+        True,
+        f"SKIP: tweet-length guard — {length} chars exceeds {limit}",
+    )
 
 # ── Step 3: Post to X / Twitter ──────────────────────────────────────────────
 def _log_tweet_error(exc, text, post_type):
@@ -639,7 +647,13 @@ def main():
     print(tweet)
     print(f"   ({len(tweet)} characters)")
 
-    # 10. Content-hash guard
+    # 10. Length guard
+    skip, reason = check_tweet_length_guard(tweet)
+    if skip:
+        print(reason)
+        sys.exit(0)
+
+    # 11. Content-hash guard
     tweet_hash = compute_content_hash(tweet)
     prev_hash = data.get('prev_content_hash')
     if (
@@ -653,7 +667,7 @@ def main():
         )
         sys.exit(0)
 
-    # 10b. New X duplicate-prevention guard (additive). Skips on:
+    # 11b. New X duplicate-prevention guard (additive). Skips on:
     #      • provider timestamp unchanged (GoldPriceZ freezing case)
     #      • exact tweet-text hash match
     #      • sub-threshold price movement when no force-summary window is due
@@ -687,8 +701,6 @@ def main():
             print("DRY_RUN_TWEET=true — would post; skipping actual X call")
             print(f"   would-post hash: {decision.tweet_hash[:12]}")
             sys.exit(0)
-
-    # 11. Length guard (enforced inside format_hourly_tweet; no extra check needed here)
 
     # 12. Post tweet
     post_tweet(tweet, post_type=post_type)

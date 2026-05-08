@@ -4,9 +4,10 @@
 # regenerates the scorecard.
 #
 # Strategy:
-#   * Manual: workflow_dispatch with providers / duration_hours /
-#     interval_seconds inputs. Default = one round so a single click
-#     is safe.
+#   * Manual: workflow_dispatch with smoke / micro / custom modes.
+#     Default = one round smoke so a single click is safe. Micro mode
+#     runs 50–90 minutes (default 60) at 6-minute intervals so we can
+#     gather quick evidence without waiting 24h.
 #   * Scheduled (hourly chunked accumulation): each hourly run
 #     samples the smoke-passing candidate trio
 #     (goldapi_io, twelvedata_xauusd, fmp_gcusd) every 6 minutes for
@@ -35,6 +36,14 @@ on:
         description: "Comma-separated provider names (blank = all known/enabled). Scheduled runs auto-pin the smoke-passing trio: goldapi_io,twelvedata_xauusd,fmp_gcusd"
         required: false
         default: ""
+      mode:
+        description: "smoke = one round, micro = 50-90 minute artifact-only run at 6-minute intervals, custom = use duration_hours/interval_seconds as entered."
+        required: false
+        default: "smoke"
+      duration_minutes:
+        description: "Used by mode=micro. Clamped to 50-90 minutes. Default 60."
+        required: false
+        default: "60"
       duration_hours:
         description: "Total runtime in hours (0 = single round). Hosted runners cap at 6h per run; scheduled runs use 0.83h chunks (~50 min) and accumulate via artifact restore across hourly runs."
         required: false
@@ -187,6 +196,8 @@ jobs:
         run: |
           set -euo pipefail
           EVENT="${{ github.event_name }}"
+          MODE="${{ github.event.inputs.mode || 'smoke' }}"
+          DURATION_MINUTES="${{ github.event.inputs.duration_minutes || '60' }}"
           DURATION="${{ github.event.inputs.duration_hours || '0' }}"
           INTERVAL="${{ github.event.inputs.interval_seconds || '360' }}"
           PROVIDERS="${{ github.event.inputs.providers || '' }}"
@@ -200,8 +211,30 @@ jobs:
             fi
             DURATION="0.83"
             INTERVAL="360"
+          elif [ "$MODE" = "micro" ]; then
+            if [ -z "$PROVIDERS" ]; then
+              PROVIDERS="goldapi_io,twelvedata_xauusd,fmp_gcusd"
+            fi
+            if ! printf '%s' "$DURATION_MINUTES" | grep -Eq '^[0-9]+$'; then
+              DURATION_MINUTES="60"
+            fi
+            if [ "$DURATION_MINUTES" -lt 50 ]; then
+              DURATION_MINUTES="50"
+            elif [ "$DURATION_MINUTES" -gt 90 ]; then
+              DURATION_MINUTES="90"
+            fi
+            DURATION="$(python - <<PY
+minutes = int("${DURATION_MINUTES}")
+print(f"{minutes / 60:.4f}")
+PY
+)"
+            INTERVAL="360"
           fi
 
+          echo "mode=$MODE"
+          echo "providers=$PROVIDERS"
+          echo "duration_hours=$DURATION"
+          echo "interval_seconds=$INTERVAL"
           ARGS=(--providers "$PROVIDERS" --interval-seconds "$INTERVAL" --write-scorecard)
           if [ "$DURATION" = "0" ] || [ -z "$DURATION" ]; then
             ARGS+=(--once)
@@ -209,6 +242,32 @@ jobs:
             ARGS+=(--duration-hours "$DURATION")
           fi
           python scripts/python/provider_bakeoff.py "${ARGS[@]}"
+
+      - name: Summarize bakeoff mode
+        if: always()
+        run: |
+          set -euo pipefail
+          LOG_PATH="data/provider_bakeoff_log.jsonl"
+          SCORECARD_PATH="data/provider_scorecard.json"
+          {
+            echo "## Gold Provider Bakeoff"
+            echo
+            echo "- Mode: `${{ github.event_name == 'schedule' && 'scheduled-hourly' || (github.event.inputs.mode || 'smoke') }}`"
+            echo "- Providers: `${{ github.event.inputs.providers || 'auto/default selection' }}`"
+            echo "- Interval seconds: `${{ github.event.inputs.interval_seconds || '360' }}`"
+            echo "- Commit results: `${{ github.event.inputs.commit_results || 'false' }}`"
+            echo "- Posting: `disabled`"
+            echo "- Storage default: `artifacts only`"
+            if [ -f "$LOG_PATH" ]; then
+              echo "- Sample rows in current artifact: `$(wc -l < "$LOG_PATH")`"
+            fi
+            if [ -f "$SCORECARD_PATH" ]; then
+              echo
+              echo '```json'
+              python -c "import json; d=json.load(open('$SCORECARD_PATH')); print(json.dumps({k:v for k,v in d.items() if k!='providers'}, indent=2))"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload bakeoff artifacts
         if: always()

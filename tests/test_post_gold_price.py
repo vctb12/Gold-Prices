@@ -129,6 +129,18 @@ def test_hourly_tweet_first_run_omits_prev_and_delta():
     assert "(-" not in tweet
 
 
+def test_tweet_length_guard_skips_over_280():
+    skip, reason = pg.check_tweet_length_guard("x" * 281)
+    assert skip is True
+    assert "281 chars exceeds 280" in reason
+
+
+def test_tweet_length_guard_allows_280():
+    skip, reason = pg.check_tweet_length_guard("x" * 280)
+    assert skip is False
+    assert reason is None
+
+
 # ── _load_last_price 3-tuple ──────────────────────────────────────────────────
 def test_load_last_price_returns_three_tuple(tmp_path, monkeypatch):
     state_file = tmp_path / "last_gold_price.json"
@@ -445,3 +457,55 @@ def test_tweet_429_logs_retry_after(capsys, monkeypatch):
     out = capsys.readouterr().out
     assert "Retry-After: 60s" in out
     assert "=== TWEET ERROR ===" in out
+
+
+def test_main_dry_run_does_not_post(tmp_path, monkeypatch, capsys):
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4731.2,
+                "timestamp_utc": "2026-05-07T10:34:52Z",
+                "fetched_at_utc": "2026-05-07T10:35:03Z",
+                "aed_per_gram_24k": 558.4,
+                "karats_aed_per_gram": {
+                    "24k": 558.4,
+                    "22k": 511.87,
+                    "21k": 488.6,
+                    "18k": 418.8,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    tweet_state_file.write_text(json.dumps({"schema_version": 1}))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(pg, "format_tweet", lambda *_args, **_kwargs: "short dry-run tweet")
+    monkeypatch.setattr(pg, "post_tweet", MagicMock())
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit after dry run")
+
+    pg.post_tweet.assert_not_called()
+    assert json.loads(tweet_state_file.read_text()) == {"schema_version": 1}
+    out = capsys.readouterr().out
+    assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out

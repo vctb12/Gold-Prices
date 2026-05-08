@@ -131,20 +131,30 @@ price-change, and duplicate-content guards; they are not force posts.
 
 The provider-adapter pipeline (`scripts/python/fetch_gold_price.py`,
 `scripts/python/provider_bakeoff.py`, `scripts/python/provider_scorecard.py`,
-`scripts/python/tweet_guard.py`) and its workflows
-(`gold-provider-bakeoff.yml`, `test-gold-providers.yml`) are landed but **not** wired into
-production. Legacy GoldPriceZ remains the active path until you flip it.
+`scripts/python/tweet_guard.py`) and its workflows (`gold-provider-bakeoff.yml`,
+`test-gold-providers.yml`) are landed but **not** wired into production. Legacy GoldPriceZ remains
+the active path until you flip it.
 
 Before activating, fill in the operator checklist:
-[`docs/operator-inputs-gold-provider-bakeoff.md`](./operator-inputs-gold-provider-bakeoff.md).
-For the owner-only pre-merge checklist see
-[`docs/OWNER_ACTIONS_REQUIRED_GOLD_BAKEOFF.md`](./OWNER_ACTIONS_REQUIRED_GOLD_BAKEOFF.md).
-Run the readiness gate before review/merge:
-`python scripts/python/gold_bakeoff_readiness.py --strict` (also available as
-**Actions → Gold Bakeoff Readiness**).
-See also [`gold-price-provider-bakeoff.md`](./gold-price-provider-bakeoff.md),
+[`docs/operator-inputs-gold-provider-bakeoff.md`](./operator-inputs-gold-provider-bakeoff.md). For
+the owner-only pre-merge checklist see
+[`docs/OWNER_ACTIONS_REQUIRED_GOLD_BAKEOFF.md`](./OWNER_ACTIONS_REQUIRED_GOLD_BAKEOFF.md). Run the
+readiness gate before review/merge: `python scripts/python/gold_bakeoff_readiness.py --strict` (also
+available as **Actions → Gold Bakeoff Readiness**). See also
+[`gold-price-provider-bakeoff.md`](./gold-price-provider-bakeoff.md),
 [`gold-price-provider-migration.md`](./gold-price-provider-migration.md), and
 [`x-automation-duplicate-policy.md`](./x-automation-duplicate-policy.md).
+
+Fast safe workflows:
+
+- **Immediate smoke:** **Actions → Test Gold Providers (manual)** → one round, artifact-only, no X
+  post, no commit.
+- **Micro-bakeoff:** **Actions → Gold Provider Bakeoff** with `mode=micro`,
+  `duration_minutes=50..90`, `interval_seconds=360`, `commit_results=false`.
+
+The 24h+ bakeoff is still the confidence gate for picking a winning provider and changing
+production, but it is **not** required to keep iterating on the automation or to gather quick
+same-day evidence.
 
 ### 9. Market events — `market_events.yml`
 

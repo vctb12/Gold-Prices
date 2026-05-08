@@ -24,9 +24,14 @@ def _row(provider, attempted, success=True, price=4550.0, ts="2026-05-01T10:00:0
         "provider_timestamp_utc": ts if success else None,
         "fetched_at_utc": attempted,
         "freshness_seconds": 10 if success else None,
+        "freshness_age_seconds": 10 if success else None,
         "is_fresh": fresh if success else False,
         "did_price_change_vs_previous_provider_sample": None,
         "did_timestamp_change_vs_previous_provider_sample": None,
+        "did_provider_sample_change_vs_previous_provider_sample": None,
+        "local_fetch_timestamp_utc": attempted,
+        "parsed_xau_usd_oz": price if success else None,
+        "usable_for_posting": bool(success and fresh and ts),
         "rate_limit_remaining": None,
         "rate_limit_reset": None,
         "error_category": error,
@@ -59,6 +64,8 @@ def test_scorecard_ranks_fresh_changing_provider_above_frozen(tmp_path: Path):
     assert by_name["good_provider"]["score"] > by_name["frozen_provider"]["score"]
     assert by_name["frozen_provider"]["longest_frozen_timestamp_seconds"] > 0
     assert by_name["good_provider"]["unique_timestamps_per_hour"] >= 5
+    assert by_name["good_provider"]["usable_for_posting_count"] == 10
+    assert by_name["good_provider"]["latest_usable_for_posting"] is True
 
 
 def test_scorecard_avoids_provider_with_only_failures(tmp_path: Path):

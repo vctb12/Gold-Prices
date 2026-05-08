@@ -160,6 +160,9 @@ def decide(
     if isinstance(cur_price, (int, float)) and isinstance(state.last_price_usd_oz, (int, float)) and state.last_price_usd_oz:
         move_usd = float(cur_price) - float(state.last_price_usd_oz)
         move_pct = (move_usd / float(state.last_price_usd_oz)) * 100.0
+    same_price: Optional[bool] = None
+    if isinstance(cur_price, (int, float)) and isinstance(state.last_price_usd_oz, (int, float)):
+        same_price = round(float(cur_price), 2) == round(float(state.last_price_usd_oz), 2)
 
     ts_changed: Optional[bool] = None
     if cur_ts and state.last_provider_timestamp_utc:
@@ -189,28 +192,27 @@ def decide(
     if state.last_tweet_text_hash is None:
         return Decision(True, None, h, move_usd, move_pct, ts_changed)
 
-    # Rule 2: provider timestamp unchanged → skip unless forced summary due.
+    # Rule 2: same provider sample (price + timestamp) → always skip.
+    if same_price is True and ts_changed is False:
+        return Decision(False, "provider_sample_unchanged", h, move_usd, move_pct, ts_changed)
+
+    # Rule 3: provider timestamp unchanged → skip unless forced summary due.
     if ts_changed is False and not force_summary_due:
         return Decision(False, "provider_timestamp_unchanged", h, move_usd, move_pct, ts_changed)
 
-    # Rule 3: identical text hash → ALWAYS skip (X rejects this anyway).
+    # Rule 4: identical text hash → ALWAYS skip (X rejects this anyway).
     if h == state.last_tweet_text_hash:
         return Decision(False, "duplicate_text_hash", h, move_usd, move_pct, ts_changed)
 
-    # Rule 4: fallback/cache with same price → skip. Evaluated before the
+    # Rule 5: fallback/cache with same price → skip. Evaluated before the
     # price-move threshold so a fallback replaying yesterday's price doesn't
     # masquerade as "below threshold" (it isn't a real micro-move; it's the
     # provider serving cached data).
     if is_fallback or source_type in ("cache_last_known", "spot_delayed"):
-        same_price = (
-            isinstance(state.last_price_usd_oz, (int, float))
-            and isinstance(cur_price, (int, float))
-            and round(float(cur_price), 2) == round(float(state.last_price_usd_oz), 2)
-        )
         if same_price:
             return Decision(False, "fallback_no_change", h, move_usd, move_pct, ts_changed)
 
-    # Rule 5: small price movement → skip unless forced summary due.
+    # Rule 6: small price movement → skip unless forced summary due.
     if move_usd is not None and move_pct is not None:
         if abs(move_usd) < min_move_usd and abs(move_pct) < min_move_pct and not force_summary_due:
             return Decision(False, "price_move_below_threshold", h, move_usd, move_pct, ts_changed)

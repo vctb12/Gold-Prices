@@ -67,8 +67,22 @@ def test_force_summary_due_overrides_unchanged_timestamp(monkeypatch):
         last_provider_timestamp_utc="2026-05-01T10:00:00Z",
         last_price_usd_oz=4550.0,
     )
-    d = tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:00:00Z"), tweet_text="NEW")
+    d = tg.decide(state, quote=_quote(price=4555.0, ts="2026-05-01T10:00:00Z"), tweet_text="NEW")
     assert d.should_post is True
+
+
+def test_skip_on_unchanged_provider_sample_even_when_force_summary_due(monkeypatch):
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    long_ago = (datetime.now(timezone.utc) - timedelta(minutes=120)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=long_ago,
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4550.0,
+    )
+    d = tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:00:00Z"), tweet_text="NEW")
+    assert d.should_post is False
+    assert d.skip_reason == "provider_sample_unchanged"
 
 
 def test_skip_on_duplicate_text_hash(monkeypatch):

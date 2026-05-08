@@ -97,6 +97,27 @@ def _previous_sample_for(provider: str, log_path: Path) -> Optional[Dict[str, An
     return last
 
 
+def _same_price(a: Any, b: Any) -> Optional[bool]:
+    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        return None
+    return round(float(a), 4) == round(float(b), 4)
+
+
+def _sample_change(price_changed: Optional[bool], ts_changed: Optional[bool]) -> Optional[bool]:
+    if price_changed is None and ts_changed is None:
+        return None
+    return bool(price_changed or ts_changed)
+
+
+def _usable_for_posting(normalized: Dict[str, Any]) -> bool:
+    return bool(
+        normalized.get("is_fresh")
+        and isinstance(normalized.get("xau_usd_per_oz"), (int, float))
+        and normalized.get("timestamp_utc")
+        and normalized.get("fetched_at_utc")
+    )
+
+
 def run_round(
     providers: List[str],
     output_path: Path,
@@ -123,15 +144,21 @@ def run_round(
                 "success": False,
                 "http_status": result.get("http_status"),
                 "response_time_ms": result.get("response_time_ms"),
+                "latency_ms": result.get("response_time_ms"),
                 "raw_symbol": None,
                 "source_type": None,
                 "price_usd_oz": None,
+                "parsed_xau_usd_oz": None,
                 "provider_timestamp_utc": None,
                 "fetched_at_utc": iso_z(attempted_at),
+                "local_fetch_timestamp_utc": iso_z(attempted_at),
                 "freshness_seconds": None,
+                "freshness_age_seconds": None,
                 "is_fresh": False,
                 "did_price_change_vs_previous_provider_sample": None,
                 "did_timestamp_change_vs_previous_provider_sample": None,
+                "did_provider_sample_change_vs_previous_provider_sample": None,
+                "usable_for_posting": False,
                 "rate_limit_remaining": result.get("rate_limit_remaining"),
                 "rate_limit_reset": result.get("rate_limit_reset"),
                 "error_category": result.get("error_category"),
@@ -145,26 +172,33 @@ def run_round(
             cur_price = normalized.get("xau_usd_per_oz")
             cur_ts = normalized.get("timestamp_utc")
             price_changed = (
-                None if prev_price is None or cur_price is None
-                else round(float(prev_price), 4) != round(float(cur_price), 4)
+                None if prev_price is None or cur_price is None else not _same_price(prev_price, cur_price)
             )
             ts_changed = (
                 None if prev_ts is None or cur_ts is None
                 else prev_ts != cur_ts
             )
+            sample_changed = _sample_change(price_changed, ts_changed)
+            usable_for_posting = _usable_for_posting(normalized)
             row.update({
                 "success": True,
                 "http_status": result.get("http_status"),
                 "response_time_ms": result.get("response_time_ms"),
+                "latency_ms": result.get("response_time_ms"),
                 "raw_symbol": normalized.get("raw_symbol"),
                 "source_type": normalized.get("source_type"),
                 "price_usd_oz": cur_price,
+                "parsed_xau_usd_oz": cur_price,
                 "provider_timestamp_utc": cur_ts,
                 "fetched_at_utc": normalized.get("fetched_at_utc"),
+                "local_fetch_timestamp_utc": normalized.get("fetched_at_utc"),
                 "freshness_seconds": normalized.get("freshness_seconds"),
+                "freshness_age_seconds": normalized.get("freshness_seconds"),
                 "is_fresh": normalized.get("is_fresh"),
                 "did_price_change_vs_previous_provider_sample": price_changed,
                 "did_timestamp_change_vs_previous_provider_sample": ts_changed,
+                "did_provider_sample_change_vs_previous_provider_sample": sample_changed,
+                "usable_for_posting": usable_for_posting,
                 "rate_limit_remaining": result.get("rate_limit_remaining"),
                 "rate_limit_reset": result.get("rate_limit_reset"),
                 "error_category": None,
@@ -194,7 +228,12 @@ def _print_summary(rows: List[Dict[str, Any]]) -> None:
             ts = r.get("provider_timestamp_utc") or "no-ts"
             fresh = "fresh" if r["is_fresh"] else "stale"
             price = r.get("price_usd_oz")
-            print(f"  ✓ {r['provider']:<22} ${price:>10.2f}  {ts}  ({fresh}, {r.get('response_time_ms')}ms)", flush=True)
+            usable = "usable" if r.get("usable_for_posting") else "hold"
+            print(
+                f"  ✓ {r['provider']:<22} ${price:>10.2f}  {ts}  "
+                f"({fresh}, {usable}, {r.get('response_time_ms')}ms)",
+                flush=True,
+            )
         else:
             print(
                 f"  ✗ {r['provider']:<22} {r.get('error_category'):<22} "
