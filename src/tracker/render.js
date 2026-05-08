@@ -109,6 +109,7 @@ function getVisibleHistoryRows() {
 function getSelectedRangeLabel() {
   if (_state.historyMonth) {
     const monthDate = new Date(`${_state.historyMonth}-01T00:00:00Z`);
+    if (!Number.isFinite(monthDate.getTime())) return _state.historyMonth;
     return monthDate.toLocaleDateString(_state.lang === 'ar' ? 'ar-AE' : 'en-US', {
       month: 'long',
       year: 'numeric',

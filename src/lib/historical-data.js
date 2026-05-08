@@ -130,15 +130,19 @@ export function toChartData(records) {
 }
 
 function normalizeHistoryDate(value) {
-  if (value instanceof Date) return new Date(value.getTime());
-  if (typeof value === 'string' && value.length === 7) return new Date(`${value}-01T00:00:00Z`);
-  return new Date(value);
+  const date =
+    value instanceof Date
+      ? new Date(value.getTime())
+      : typeof value === 'string' && /^\d{4}-\d{2}$/.test(value)
+        ? new Date(`${value}-01T00:00:00Z`)
+        : new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
 }
 
 function normalizeRecord(record) {
   const date = normalizeHistoryDate(record.date);
   const price = Number(record.price ?? record.spot);
-  if (!Number.isFinite(date.getTime()) || !Number.isFinite(price) || price <= 0) return null;
+  if (!date || !Number.isFinite(price) || price <= 0) return null;
   return {
     ...record,
     date,

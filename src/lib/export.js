@@ -35,8 +35,9 @@ function dateStamp(value = new Date()) {
 
 function historyDateLabel(value) {
   if (value instanceof Date) return dateStamp(value);
-  if (typeof value === 'string' && value.length === 7) return `${value}-01`;
-  return String(value).slice(0, 10);
+  if (typeof value === 'string' && /^\d{4}-\d{2}$/.test(value)) return `${value}-01`;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  return dateStamp();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
