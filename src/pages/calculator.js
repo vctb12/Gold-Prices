@@ -3,7 +3,7 @@
  * Handles 5 calculators: Value, Scrap, Zakat, Buying Power, Unit Converter.
  */
 
-import { CONSTANTS, KARATS } from '../config/index.js';
+import { CONSTANTS, KARATS, COUNTRIES } from '../config/index.js';
 import * as api from '../lib/api.js';
 import * as cache from '../lib/cache.js';
 import { usdPerGram } from '../lib/price-calculator.js';
@@ -45,6 +45,7 @@ const STATE = {
   fxMeta: { nextUpdateUtc: 0 },
   status: { goldStale: false, fxStale: false },
   freshness: { goldUpdatedAt: null },
+  countrySlug: null,
   favorites: [],
   history: [],
   activeTab: 'gcc',
@@ -87,7 +88,10 @@ const T = {
     tracker_note_live:
       'Live tracker helper: {currency} {price} per gram for {karat}K right now. Shop prices can still add making charges and VAT.',
     tracker_cta: 'Compare this in tracker',
+    country_link: 'Open country page',
     tracker_method: 'Methodology note',
+    country_note:
+      'Country context: {country} uses the same spot-linked reference logic. Local shop quotes can still add making charges, premiums, and taxes.',
     tab_value: 'Gold Value',
     tab_scrap: 'Scrap Gold',
     tab_zakat: 'Zakat',
@@ -175,7 +179,10 @@ const T = {
     tracker_note_live:
       'مساعد المتتبع المباشر: {currency} {price} لكل غرام لعيار {karat} حالياً. قد تضيف أسعار المحلات المصنعية والضريبة.',
     tracker_cta: 'قارن هذا في المتتبع',
+    country_link: 'افتح صفحة الدولة',
     tracker_method: 'ملاحظة المنهجية',
+    country_note:
+      'سياق الدولة: تستخدم {country} نفس المنهجية المرجعية المرتبطة بالسعر الفوري، بينما قد تضيف أسعار المحلات المصنعية والهوامش والضرائب.',
     tab_value: 'قيمة الذهب',
     tab_scrap: 'ذهب مستعمل',
     tab_zakat: 'زكاة الذهب',
@@ -263,9 +270,22 @@ function updateMobileDock({ title, value, meta, targetId }) {
   dock.hidden = false;
 }
 
+function getSelectedCountryContext(currency) {
+  return (
+    COUNTRIES.find((country) => country.slug === STATE.countrySlug) ||
+    COUNTRIES.find((country) => country.currency === currency) ||
+    null
+  );
+}
+
+function buildCountryPageHref(country) {
+  return country?.slug ? `countries/${country.slug}/gold-price/` : 'countries/index.html';
+}
+
 function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
   const handoff = document.getElementById('calc-tracker-handoff');
   const trackerLink = document.getElementById('calc-tracker-link');
+  const countryLink = document.getElementById('calc-country-link');
   const mobileTrackerLink = document.getElementById('calc-mobile-dock-tracker');
   const note = document.getElementById('calc-live-tracker-note');
   if (!handoff || !trackerLink || !mobileTrackerLink || !note) return;
@@ -283,6 +303,14 @@ function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
   mobileTrackerLink.href = href;
   handoff.hidden = false;
 
+  const selectedCountry = getSelectedCountryContext(currency);
+  if (countryLink) {
+    countryLink.href = buildCountryPageHref(selectedCountry);
+    countryLink.textContent = selectedCountry
+      ? `${t('country_link')} — ${STATE.lang === 'ar' ? selectedCountry.nameAr : selectedCountry.nameEn}`
+      : t('country_link');
+  }
+
   const rate = getRate(currency);
   const purity = getPurityForKarat(karat);
   if (STATE.spotUsdPerOz && rate) {
@@ -292,6 +320,9 @@ function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
       price,
       karat,
     });
+    if (selectedCountry) {
+      note.textContent += ` ${t('country_note', { country: STATE.lang === 'ar' ? selectedCountry.nameAr : selectedCountry.nameEn })}`;
+    }
   } else {
     note.textContent = t('tracker_note_waiting');
   }
@@ -698,6 +729,9 @@ function applyLang() {
   const setTrustNote = () => {
     const trustNote = document.getElementById('calc-trust-note');
     if (!trustNote) return;
+    const explicitCountry = STATE.countrySlug
+      ? COUNTRIES.find((country) => country.slug === STATE.countrySlug)
+      : null;
     clear(trustNote);
     trustNote.append(
       `${t('trust_note')} `,
@@ -705,6 +739,16 @@ function applyLang() {
       ' · ',
       el('a', { href: 'methodology.html' }, [`${t('trust_method_link')} →`])
     );
+    if (explicitCountry) {
+      trustNote.append(
+        ' · ',
+        t('country_note', {
+          country: STATE.lang === 'ar' ? explicitCountry.nameAr : explicitCountry.nameEn,
+        }),
+        ' ',
+        el('a', { href: buildCountryPageHref(explicitCountry) }, [`${t('country_link')} →`])
+      );
+    }
   };
 
   set('calc-hero-h1', t('pageTitle'));
@@ -777,6 +821,7 @@ function applyLang() {
   set('conv-results-title', t('conv_results_title'));
   set('calc-freshness-note', t('freshness_waiting'));
   setTrustNote();
+  set('calc-country-link', t('country_link'));
   document.querySelectorAll('.calc-copy-btn').forEach((btn) => {
     btn.textContent = t('copy_result');
     btn.setAttribute('aria-label', t('copy_result'));
@@ -1009,6 +1054,40 @@ function initCopyBtn() {
   });
 }
 
+function applyUrlPreset() {
+  const params = new URLSearchParams(location.search);
+  const requestedCountry = params.get('country');
+  const requestedCurrency = (params.get('currency') || '').toUpperCase();
+  const requestedKarat = params.get('karat');
+  const selectedCountry = COUNTRIES.find((country) => country.slug === requestedCountry);
+
+  if (selectedCountry?.slug) STATE.countrySlug = selectedCountry.slug;
+
+  const nextCurrency = selectedCountry?.currency || requestedCurrency;
+  if (nextCurrency) {
+    ['val-currency', 'scrap-currency', 'zakat-currency', 'buy-currency'].forEach((id) => {
+      const control = document.getElementById(id);
+      if (control?.querySelector(`option[value=\"${nextCurrency}\"]`)) {
+        control.value = nextCurrency;
+      }
+    });
+  }
+
+  if (requestedKarat && KARATS.some((karat) => karat.code === requestedKarat)) {
+    ['val-karat', 'scrap-karat', 'zakat-karat', 'buy-karat'].forEach((id) => {
+      const control = document.getElementById(id);
+      if (control?.querySelector(`option[value=\"${requestedKarat}\"]`)) {
+        control.value = requestedKarat;
+      }
+    });
+  }
+
+  updateTrackerHandoff({
+    currency: nextCurrency || 'AED',
+    karat: requestedKarat || '22',
+  });
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
   cache.loadState(STATE);
@@ -1041,6 +1120,7 @@ async function init() {
   applyLang();
   setupTabs();
   wireInputs();
+  applyUrlPreset();
   initCopyBtn();
   document.getElementById('calc-mobile-dock-action')?.addEventListener('click', () => {
     const targetId = document.getElementById('calc-mobile-dock-action')?.dataset.target;

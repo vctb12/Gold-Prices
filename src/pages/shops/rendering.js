@@ -47,30 +47,34 @@ function renderBadges(shop, isCluster, t) {
 function renderConfidenceBlock(shop, t) {
   const confidenceBadge = calculateConfidenceBadge(shop);
   const contactQualityLbl = contactQualityLabel(shop, t);
-  return el('section', { class: 'shop-confidence-block', 'aria-label': t('listingConfidenceTitle') }, [
-    el('p', { class: 'shop-confidence-title' }, [t('listingConfidenceTitle')]),
-    el('div', { class: 'shop-confidence-grid' }, [
-      el('p', { class: 'shop-confidence-item' }, [
-        el('span', null, [t('category')]),
-        el('strong', null, [listingTypeLabel(shop, t)]),
+  return el(
+    'section',
+    { class: 'shop-confidence-block', 'aria-label': t('listingConfidenceTitle') },
+    [
+      el('p', { class: 'shop-confidence-title' }, [t('listingConfidenceTitle')]),
+      el('div', { class: 'shop-confidence-grid' }, [
+        el('p', { class: 'shop-confidence-item' }, [
+          el('span', null, [t('category')]),
+          el('strong', null, [listingTypeLabel(shop, t)]),
+        ]),
+        el('p', { class: 'shop-confidence-item' }, [
+          el('span', null, [t('detailsConfidence')]),
+          el(
+            'strong',
+            {
+              class: 'shop-signal shop-signal--' + confidenceBadge.level,
+              style: { '--confidence-color': `var(--color-${confidenceBadge.color})` },
+            },
+            [confidenceBadge.label]
+          ),
+        ]),
+        el('p', { class: 'shop-confidence-item' }, [
+          el('span', null, [t('contactQuality')]),
+          el('strong', null, [contactQualityLbl]),
+        ]),
       ]),
-      el('p', { class: 'shop-confidence-item' }, [
-        el('span', null, [t('detailsConfidence')]),
-        el(
-          'strong',
-          {
-            class: 'shop-signal shop-signal--' + confidenceBadge.level,
-            style: { '--confidence-color': `var(--color-${confidenceBadge.color})` },
-          },
-          [confidenceBadge.label]
-        ),
-      ]),
-      el('p', { class: 'shop-confidence-item' }, [
-        el('span', null, [t('contactQuality')]),
-        el('strong', null, [contactQualityLbl]),
-      ]),
-    ]),
-  ]);
+    ]
+  );
 }
 
 function renderMetaGrid(shop, country, STATE, t) {
@@ -182,7 +186,7 @@ function renderPrimaryActions(shop, country, STATE, t) {
     const name = countryName(country, STATE.lang);
     row.appendChild(
       renderActionLink({
-        href: `countries/${country.slug}.html`,
+        href: `countries/${country.slug}/gold-price/`,
         className: 'shop-action-btn shop-action-btn--country',
         icon: '📄',
         label: name,
@@ -230,18 +234,14 @@ function renderSecondaryActions(shop, inShortlist, t) {
 function renderContactLine(shop, t) {
   const contactParts = [];
   if (shop.phone) {
-    contactParts.push(
-      el('span', null, [`${t('phone')}: ${shop.phone}`])
-    );
+    contactParts.push(el('span', null, [`${t('phone')}: ${shop.phone}`]));
   }
   const website = safeUrl(shop.website);
   if (website) {
     contactParts.push(
-      el(
-        'a',
-        { href: website, target: '_blank', rel: 'noopener', class: 'shop-site-link' },
-        [t('visitWebsite')]
-      )
+      el('a', { href: website, target: '_blank', rel: 'noopener', class: 'shop-site-link' }, [
+        t('visitWebsite'),
+      ])
     );
   }
   const p = el('p', { class: 'shop-contact' });

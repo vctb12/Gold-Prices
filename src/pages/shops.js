@@ -844,7 +844,7 @@ function renderCards(shops) {
         : '';
       const listingTypeBadge = `<span class="shop-listing-type ${isCluster ? 'shop-listing-type--market' : 'shop-listing-type--store'}">${listingTypeLabel(shop)}</span>`;
       const inShortlist = isInShortlist(shop.id);
-      const countryUrl = country?.slug ? `countries/${country.slug}.html` : '';
+      const countryUrl = country?.slug ? `countries/${country.slug}/gold-price/` : '';
       const areaGuideUrl = `${location.pathname}?country=${encodeURIComponent(shop.countryCode)}&search=${encodeURIComponent(shop.market)}`;
       const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shop.name}, ${shop.market}, ${shop.city}`)}`;
       const nextActionLabel = isCluster ? t('nextActionsMarket') : t('nextActionsStore');

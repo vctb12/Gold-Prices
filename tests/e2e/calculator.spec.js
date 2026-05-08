@@ -60,6 +60,7 @@ test.describe('Calculator page', () => {
     await page.locator('#val-weight').fill('10');
     await expect(page.locator('#val-result')).toBeVisible();
     await expect(page.locator('#calc-tracker-link')).toBeVisible();
+    await expect(page.locator('#calc-country-link')).toBeVisible();
     await expect(page.locator('#calc-tracker-link')).toHaveAttribute('href', /tracker\.html#/);
   });
 

@@ -136,7 +136,7 @@ export function getBreadcrumbs(pageName, extra = {}) {
     invest: [{ label: labels.invest, url: '/invest.html' }],
     tracker: [{ label: labels.tracker, url: '/tracker.html' }],
     country: [
-      { label: labels.countries, url: '/tracker.html' },
+      { label: labels.countries, url: '/countries/index.html' },
       { label: labels.country, url: extra.countryUrl || '#' },
     ],
   };

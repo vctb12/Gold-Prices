@@ -63,6 +63,22 @@ function setNodeText(id, text) {
   if (node) node.textContent = text;
 }
 
+function syncCurrentCountryPageLink() {
+  const link = document.getElementById('tp-country-page-link');
+  if (!link) return;
+  const selectedCountry = COUNTRIES.find((country) => country.currency === state.selectedCurrency);
+  if (!selectedCountry?.slug) {
+    link.href = 'countries/index.html';
+    link.textContent = trackerTx('quickToolsCountries');
+    return;
+  }
+  link.href = `countries/${selectedCountry.slug}/gold-price/`;
+  link.textContent =
+    state.lang === 'ar'
+      ? `📄 ${selectedCountry.nameAr || selectedCountry.nameEn}`
+      : `📄 ${selectedCountry.nameEn}`;
+}
+
 function localizeStaticTrackerCopy() {
   document.documentElement.lang = state.lang;
   document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
@@ -147,6 +163,7 @@ function localizeStaticTrackerCopy() {
   const quickToolLinks = document.querySelectorAll('.tracker-side-card--links a');
   const quickToolLabels = [
     trackerTx('quickToolsCalculator'),
+    trackerTx('quickToolsCountryPage'),
     trackerTx('quickToolsCountries'),
     trackerTx('quickToolsShops'),
     trackerTx('quickToolsMethodology'),
@@ -154,6 +171,7 @@ function localizeStaticTrackerCopy() {
   quickToolLinks.forEach((link, index) => {
     if (quickToolLabels[index]) link.textContent = quickToolLabels[index];
   });
+  syncCurrentCountryPageLink();
 
   const quickReference = document.querySelector('.tracker-hero-aside');
   if (quickReference)
@@ -895,6 +913,7 @@ async function init() {
   localizeStaticTrackerCopy();
   populateSelects();
   bindCoreEvents();
+  el.currency?.addEventListener('change', () => syncCurrentCountryPageLink());
   initMobileWorkspaceActions();
 
   if (localStorage.getItem('tracker_trust_banner_dismissed')) {
@@ -911,6 +930,7 @@ async function init() {
   // Skip fetching the market wire during initial load to reduce critical path
   await refreshData(false, false);
   renderAll();
+  syncCurrentCountryPageLink();
   if (state.autoRefresh) startAutoRefresh();
   startCountdown();
 

@@ -44,6 +44,12 @@ test.describe('Mobile smoke', () => {
     await page.goto('/methodology.html');
     await expect(page.locator('main')).toBeVisible();
     await expectNoHorizontalOverflow(page, '/methodology.html');
+
+    await page.goto('/countries/uae/gold-price/');
+    await expect(page.locator('#country-page-title')).toBeVisible();
+    await expect(page.locator('#country-karat-cards .country-karat-card').first()).toBeVisible();
+    await expect(page.locator('#country-actions .country-action-card').first()).toBeVisible();
+    await expectNoHorizontalOverflow(page, '/countries/uae/gold-price/');
   });
 
   test('mobile drawer is reachable and ARIA state updates', async ({ page }) => {

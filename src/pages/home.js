@@ -480,7 +480,11 @@ function renderGCCGrid() {
       el('div', { class: 'gcc-source' }, sourceText),
     ];
     const card = slug
-      ? el('a', { href: safeHref(`./countries/${slug}/`), class: 'gcc-card' }, cardChildren)
+      ? el(
+          'a',
+          { href: safeHref(`./countries/${slug}/gold-price/`), class: 'gcc-card' },
+          cardChildren
+        )
       : el('div', { class: 'gcc-card gcc-card--no-link' }, cardChildren);
 
     fragment.append(
