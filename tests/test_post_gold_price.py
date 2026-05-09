@@ -1708,7 +1708,7 @@ def test_allow_same_price_closed_market_repost_bypasses_tweet_guard_threshold(
     guard_state_file.write_text(json.dumps({
         "schema_version": 1,
         "last_tweet_time_utc": (fresh_now - timedelta(minutes=16, seconds=53)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "last_tweet_text_hash": "abc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+        "last_tweet_text_hash": "5e11dd7ff6ab3075f2ec1f1b77485c8ecfef64f057336f9b5f0cf48df277dbc4",
         "last_price_usd_oz": 4715.70,
         "last_provider_timestamp_utc": older_provider_ts,
     }))
