@@ -393,10 +393,12 @@ def test_decision_includes_force_summary_due_and_minutes_since_last(monkeypatch)
         last_price_usd_oz=4550.0,
     )
     d = tg.decide(state, quote=_quote(price=4550.5, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
-    # force_summary_due must be populated on every Decision
-    assert d.force_summary_due is not None
+    # force_summary_due must be False: last post was 30 min ago, threshold is 60 min
+    assert d.force_summary_due is False
     assert d.minutes_since_last is not None
     assert isinstance(d.minutes_since_last, float)
+    # minutes_since_last should be approximately 30 (within 1-minute tolerance for test timing)
+    assert 29.0 <= d.minutes_since_last <= 31.0
 
 
 def test_force_summary_due_false_when_recently_posted(monkeypatch):

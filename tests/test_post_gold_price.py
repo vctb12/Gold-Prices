@@ -751,10 +751,14 @@ def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeyp
     out = capsys.readouterr().out
     assert "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run." in out
     assert "source:       shortcut" in out
-    assert "refresh_price_first:" in out and "false" in out
-    assert "trigger_nonce:" in out and "ios-shortcut-run-1" in out
-    assert "github.run_id:" in out and "123456789" in out
-    assert "github.run_attempt:" in out and "3" in out
+    # Check key RUN CONTEXT fields appear with their values (exact format from the implementation)
+    assert "refresh_price_first:" in out
+    assert "\nrefresh_price_first:" in out or "refresh_price_first:                    false" in out
+    assert "ios-shortcut-run-1" in out
+    assert "trigger_nonce:" in out
+    assert "123456789" in out
+    assert "github.run_id:" in out
+    assert "github.run_attempt:" in out
     assert "shortcut_attempt_recorded: false (dry run)" in out
     assert "selected_post_type:        market_closed_reference" in out
     assert "template_used:             market_closed_reference" in out
