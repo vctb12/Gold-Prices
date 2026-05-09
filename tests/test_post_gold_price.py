@@ -1646,7 +1646,7 @@ def test_price_move_threshold_skip_includes_force_post_explanation_for_market_cl
     guard_state_file.write_text(json.dumps({
         "schema_version": 1,
         "last_tweet_time_utc": (fresh_now - timedelta(minutes=16, seconds=53)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "last_tweet_text_hash": "abc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+        "last_tweet_text_hash": "5e11dd7ff6ab3075f2ec1f1b77485c8ecfef64f057336f9b5f0cf48df277dbc4",
         "last_price_usd_oz": 4715.70,
         "last_provider_timestamp_utc": older_provider_ts,
     }))
@@ -1688,6 +1688,63 @@ def test_price_move_threshold_skip_includes_force_post_explanation_for_market_cl
     # The market_closed_reference specific message
     assert "market_closed_reference" in out
     assert "same closing/reference price" in out
+
+
+def test_allow_same_price_closed_market_repost_bypasses_tweet_guard_threshold(
+    tmp_path, monkeypatch, capsys
+):
+    fresh_now = datetime.now(timezone.utc)
+    source_ts = (fresh_now - timedelta(hours=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gold_file = _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=4)
+    legacy_state_file = tmp_path / "last_gold_price.json"
+    legacy_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "provider": "gold_api_com",
+        "xau_usd_per_oz": 4715.70,
+        "timestamp_utc": source_ts,
+    }))
+    guard_state_file = tmp_path / "last_tweet_state.json"
+    older_provider_ts = (fresh_now - timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    guard_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "last_tweet_time_utc": (fresh_now - timedelta(minutes=16, seconds=53)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_tweet_text_hash": "5e11dd7ff6ab3075f2ec1f1b77485c8ecfef64f057336f9b5f0cf48df277dbc4",
+        "last_price_usd_oz": 4715.70,
+        "last_provider_timestamp_utc": older_provider_ts,
+    }))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", legacy_state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", guard_state_file)
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: False)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("FORCE_POST", "true")
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST", "true")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected dry-run exit after override")
+
+    out = capsys.readouterr().out
+    assert "allow_same_price_closed_market_repost=true" in out
+    assert "price_move_below_threshold bypassed" in out
+    assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
+    assert "SKIP: tweet-guard — price_move_below_threshold" not in out
 
 
 def test_market_closed_reference_template_content(tmp_path, monkeypatch, capsys):
@@ -1751,4 +1808,3 @@ def test_force_post_only_bypasses_cooldown_not_price_move_threshold(monkeypatch)
     assert decision.should_post is False
     assert decision.skip_reason == "price_move_below_threshold"
     assert decision.force_summary_due is False
-
