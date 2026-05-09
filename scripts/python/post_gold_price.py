@@ -810,18 +810,22 @@ def main():
             print(reason)
         if skip:
             sys.exit(0)
-        try:
-            guard_state = tweet_guard.record_trigger_attempt(
-                guard_state,
-                trigger_source=trigger_source,
-                trigger_nonce=trigger_nonce,
-                run_id=run_id,
-                run_attempt=run_attempt,
-            )
-            tweet_guard.save_state(LAST_TWEET_STATE_FILE, guard_state)
-            print("shortcut_attempt_recorded: true")
-        except Exception as exc:  # pragma: no cover — best-effort
-            print(f"⚠️  Failed to record shortcut trigger attempt: {exc}")
+        is_dry_run_tweet = os.getenv("DRY_RUN_TWEET", "").strip().lower() == "true"
+        if is_dry_run_tweet:
+            print("shortcut_attempt_recorded: false (dry run)")
+        else:
+            try:
+                guard_state = tweet_guard.record_trigger_attempt(
+                    guard_state,
+                    trigger_source=trigger_source,
+                    trigger_nonce=trigger_nonce,
+                    run_id=run_id,
+                    run_attempt=run_attempt,
+                )
+                tweet_guard.save_state(LAST_TWEET_STATE_FILE, guard_state)
+                print("shortcut_attempt_recorded: true")
+            except Exception as exc:  # pragma: no cover — best-effort
+                print(f"⚠️  Failed to record shortcut trigger attempt: {exc}")
 
     # 5. Load gold price (includes previous-state fields)
     print("📡 Reading gold price from data/gold_price.json (canonical price payload)…")
