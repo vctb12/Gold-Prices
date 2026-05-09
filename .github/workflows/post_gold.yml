@@ -130,3 +130,27 @@ jobs:
           else
             echo "tweet state files not found, skipping commit."
           fi
+
+      - name: Operator run summary
+        if: always()
+        env:
+          GITHUB_EVENT_NAME_VAR: ${{ github.event_name }}
+          GITHUB_ACTOR_VAR:      ${{ github.actor }}
+          DRY_RUN_INPUT:         ${{ github.event.inputs.dry_run || 'false' }}
+          FORCE_POST_INPUT:      ${{ github.event.inputs.force_post || 'false' }}
+          SOURCE_INPUT:          ${{ github.event.inputs.source || 'scheduled' }}
+          ALLOW_SAME_PRICE_INPUT: ${{ github.event.inputs.allow_same_price_closed_market_repost || 'false' }}
+          TRIGGER_NONCE_INPUT:   ${{ github.event.inputs.trigger_nonce || '' }}
+        run: |
+          {
+            echo "### 🏅 Post Gold — Run Summary"
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| event | \`$GITHUB_EVENT_NAME_VAR\` |"
+            echo "| actor | \`$GITHUB_ACTOR_VAR\` |"
+            echo "| dry_run | \`$DRY_RUN_INPUT\` |"
+            echo "| force_post | \`$FORCE_POST_INPUT\` |"
+            echo "| source | \`$SOURCE_INPUT\` |"
+            echo "| allow_same_price_closed_market_repost | \`$ALLOW_SAME_PRICE_INPUT\` |"
+            echo "| trigger_nonce | \`${TRIGGER_NONCE_INPUT:-none}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

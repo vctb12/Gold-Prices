@@ -250,3 +250,115 @@ def test_persistence_round_trip(tmp_path: Path):
     assert loaded.last_trigger_run_attempt == "2"
     raw = json.loads(p.read_text())
     assert raw["schema_version"] == 1
+
+
+# ── New hardening tests ───────────────────────────────────────────────────────
+
+def test_load_state_warns_on_corrupt_file(tmp_path: Path, capsys):
+    """load_state must warn (not raise) when the state file is corrupt JSON."""
+    p = tmp_path / "last_tweet_state.json"
+    p.write_text("{{{broken json")
+    state = tg.load_state(p)
+    # Must return a clean default state
+    assert state.last_tweet_text_hash is None
+    assert state.last_price_usd_oz is None
+    out = capsys.readouterr().out
+    assert "corrupt or unreadable" in out
+
+
+def test_load_state_warns_on_missing_required_keys(tmp_path: Path, capsys):
+    """load_state must warn when required guard-state keys are missing/null."""
+    p = tmp_path / "last_tweet_state.json"
+    p.write_text(json.dumps({"schema_version": 1, "last_tweet_id": "999"}))
+    state = tg.load_state(p)
+    # Missing keys should NOT crash — treated as first-run for those fields
+    assert state.last_price_usd_oz is None
+    assert state.last_tweet_text_hash is None
+    out = capsys.readouterr().out
+    assert "missing/null keys" in out
+    assert "last_price_usd_oz" in out
+
+
+def test_load_state_no_warning_on_complete_state(tmp_path: Path, capsys):
+    """load_state must NOT warn when all required keys are present."""
+    p = tmp_path / "last_tweet_state.json"
+    p.write_text(json.dumps({
+        "schema_version": 1,
+        "last_price_usd_oz": 4550.0,
+        "last_tweet_time_utc": "2026-05-01T10:00:00Z",
+        "last_tweet_text_hash": "abc123",
+    }))
+    tg.load_state(p)
+    out = capsys.readouterr().out
+    assert "missing/null keys" not in out
+    assert "corrupt" not in out
+
+
+def test_decide_emits_guard_trace_for_stale(monkeypatch, capsys):
+    """decide() must emit [guard] trace lines for each evaluated rule."""
+    monkeypatch.delenv("ALLOW_STALE_TWEET", raising=False)
+    state = tg.TweetState(last_tweet_text_hash="x")
+    tg.decide(state, quote=_quote(is_fresh=False), tweet_text="Gold: $4,550")
+    out = capsys.readouterr().out
+    assert "[guard] stale_quote" in out
+    assert "SKIP" in out
+
+
+def test_decide_emits_guard_trace_for_cooldown(monkeypatch, capsys):
+    """decide() must emit a cooldown trace when skipping for cooldown."""
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(20),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4540.0,
+    )
+    tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    out = capsys.readouterr().out
+    assert "[guard] cooldown" in out
+    assert "SKIP" in out
+
+
+def test_decide_emits_pass_traces_when_posting(monkeypatch, capsys):
+    """When posting is allowed, all PASS trace lines must be present."""
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.delenv("ALLOW_STALE_TWEET", raising=False)
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(70),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4540.0,
+    )
+    d = tg.decide(state, quote=_quote(price=4560.0, ts="2026-05-01T10:10:00Z"), tweet_text="NEW")
+    assert d.should_post is True
+    out = capsys.readouterr().out
+    assert "[guard]" in out
+    assert "PASS" in out
+
+
+def test_force_post_bypasses_only_cooldown_not_duplicate_hash(monkeypatch, capsys):
+    """force_post=true must bypass cooldown but NOT duplicate_text_hash."""
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.setenv("FORCE_POST", "true")
+    text = "Gold price: $4,550"
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet(text),
+        last_tweet_time_utc=_minutes_ago_iso(10),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4540.0,
+    )
+    # Same text hash — must skip even with force_post
+    d = tg.decide(state, quote=_quote(price=4560.0, ts="2026-05-01T10:06:00Z"), tweet_text=text)
+    assert d.should_post is False
+    assert d.skip_reason == "duplicate_text_hash"
+
+
+def test_force_post_bypasses_only_cooldown_not_stale(monkeypatch, capsys):
+    """force_post=true must bypass cooldown but NOT stale_quote guard."""
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.setenv("FORCE_POST", "true")
+    monkeypatch.delenv("ALLOW_STALE_TWEET", raising=False)
+    state = tg.TweetState(last_tweet_text_hash="x", last_tweet_time_utc=_minutes_ago_iso(10))
+    d = tg.decide(state, quote=_quote(is_fresh=False), tweet_text="Gold: $4,555")
+    assert d.should_post is False
+    assert d.skip_reason == "stale_quote"

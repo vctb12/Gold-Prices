@@ -98,9 +98,16 @@ def load_state(path: Path) -> TweetState:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
+        print("⚠️  last_tweet_state.json is corrupt or unreadable; treating as first run.")
         return TweetState()
     if not isinstance(raw, dict):
+        print("⚠️  last_tweet_state.json is not a JSON object; treating as first run.")
         return TweetState()
+    # Warn on missing required fields without blocking startup.
+    required_keys = ("last_price_usd_oz", "last_tweet_time_utc", "last_tweet_text_hash")
+    missing = [k for k in required_keys if raw.get(k) is None]
+    if missing:
+        print(f"  [state] last_tweet_state.json missing/null keys: {missing} — first-run behaviour for those guards")
     return TweetState(
         schema_version=int(raw.get("schema_version") or SCHEMA_VERSION),
         last_tweet_id=raw.get("last_tweet_id"),
@@ -186,6 +193,7 @@ def decide(
 
     if not _truthy("SKIP_DUPLICATE_TWEETS", default=True):
         # Duplicate guard explicitly disabled — still return decision data.
+        print("  [guard] SKIP_DUPLICATE_TWEETS=false — all guards bypassed")
         return Decision(True, None, h, move_usd, move_pct, ts_changed)
 
     allow_stale = _truthy("ALLOW_STALE_TWEET", default=False)
@@ -202,10 +210,13 @@ def decide(
 
     # Rule 1: not fresh → skip unless explicit override.
     if not is_fresh and not allow_stale:
+        print(f"  [guard] stale_quote: is_fresh={is_fresh}, allow_stale={allow_stale} → SKIP")
         return Decision(False, "stale_quote", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] stale_quote: is_fresh={is_fresh}, allow_stale={allow_stale} → PASS")
 
     # First-ever post: nothing to compare against, just allow.
     if state.last_tweet_text_hash is None:
+        print("  [guard] first_post: no prior state → PASS")
         return Decision(True, None, h, move_usd, move_pct, ts_changed)
 
     # Rule 2: cooldown — keep scheduled + manual GitHub runs from double-posting.
@@ -214,19 +225,27 @@ def decide(
         and minutes_since_last is not None
         and minutes_since_last < min_interval_minutes
     ):
+        print(f"  [guard] cooldown: minutes_since_last={minutes_since_last:.1f} < {min_interval_minutes} → SKIP")
         return Decision(False, "cooldown_active", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] cooldown: minutes_since_last={minutes_since_last}, force_post={force_post} → PASS")
 
     # Rule 3: same provider sample (price + timestamp) → always skip.
     if same_price is True and ts_changed is False:
+        print(f"  [guard] provider_sample_unchanged: same_price={same_price}, ts_changed={ts_changed} → SKIP")
         return Decision(False, "provider_sample_unchanged", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] provider_sample_unchanged: same_price={same_price}, ts_changed={ts_changed} → PASS")
 
     # Rule 4: provider timestamp unchanged → skip unless forced summary due.
     if ts_changed is False and not force_summary_due:
+        print(f"  [guard] provider_timestamp_unchanged: ts_changed={ts_changed}, force_summary_due={force_summary_due} → SKIP")
         return Decision(False, "provider_timestamp_unchanged", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] provider_timestamp_unchanged: ts_changed={ts_changed}, force_summary_due={force_summary_due} → PASS")
 
     # Rule 5: identical text hash → ALWAYS skip (X rejects this anyway).
     if h == state.last_tweet_text_hash:
+        print(f"  [guard] duplicate_text_hash: hash={h[:12]} matches last → SKIP")
         return Decision(False, "duplicate_text_hash", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] duplicate_text_hash: hash={h[:12]} is new → PASS")
 
     # Rule 6: fallback/cache with same price → skip. Evaluated before the
     # price-move threshold so a fallback replaying yesterday's price doesn't
@@ -234,12 +253,16 @@ def decide(
     # provider serving cached data).
     if is_fallback or source_type in ("cache_last_known", "spot_delayed"):
         if same_price:
+            print(f"  [guard] fallback_no_change: is_fallback={is_fallback}, source_type={source_type!r}, same_price={same_price} → SKIP")
             return Decision(False, "fallback_no_change", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] fallback_no_change: is_fallback={is_fallback}, source_type={source_type!r} → PASS")
 
     # Rule 7: small price movement → skip unless forced summary due.
     if move_usd is not None and move_pct is not None:
         if abs(move_usd) < min_move_usd and abs(move_pct) < min_move_pct and not force_summary_due:
+            print(f"  [guard] price_move_below_threshold: move=${move_usd:.2f} ({move_pct:.3f}%) → SKIP")
             return Decision(False, "price_move_below_threshold", h, move_usd, move_pct, ts_changed)
+    print(f"  [guard] price_move_below_threshold: move_usd={move_usd}, move_pct={move_pct}, force_summary_due={force_summary_due} → PASS")
 
     return Decision(True, None, h, move_usd, move_pct, ts_changed)
 

@@ -1318,3 +1318,137 @@ def test_main_scheduled_run_cannot_use_allow_same_price_repost(
     # Must NOT bypass — is_allow_same_price... returns False for schedule event
     assert "price-change guard bypassed" not in out
     pg.post_tweet.assert_not_called()
+
+
+# ── New hardening tests ───────────────────────────────────────────────────────
+
+def test_format_tweet_emits_length_warning_for_over_280_chars(capsys):
+    """format_tweet must emit a ⚠️ warning when length > 280, but not block."""
+    data = {
+        "price": 4681.84,
+        "price_gram_24k": 150.38,
+        "price_gram_22k": 137.85,
+        "price_gram_21k": 131.58,
+        "price_gram_18k": 112.78,
+        "chp": 0.25,
+        "prev_price": None,
+        "prev_posted_at_utc": None,
+    }
+    # Monkey-patch the internal formatter to return a string > 280 chars.
+    original_format = pg.format_hourly_tweet
+    pg.format_hourly_tweet = lambda _d: "x" * 304
+    try:
+        result = pg.format_tweet(data, "hourly")
+    finally:
+        pg.format_hourly_tweet = original_format
+
+    assert len(result) == 304
+    out = capsys.readouterr().out
+    assert "⚠️  tweet_length=304 > 280" in out
+    assert "local posting NOT blocked" in out
+
+
+def test_format_tweet_no_warning_for_under_280_chars(capsys):
+    """format_tweet must NOT emit a length warning for normal tweets."""
+    data = {
+        "price": 4681.84,
+        "price_gram_24k": 150.38,
+        "price_gram_22k": 137.85,
+        "price_gram_21k": 131.58,
+        "price_gram_18k": 112.78,
+        "chp": 0.25,
+        "prev_price": None,
+        "prev_posted_at_utc": None,
+    }
+    original_format = pg.format_hourly_tweet
+    pg.format_hourly_tweet = lambda _d: "short tweet"
+    try:
+        result = pg.format_tweet(data, "hourly")
+    finally:
+        pg.format_hourly_tweet = original_format
+
+    out = capsys.readouterr().out
+    assert "tweet_length" not in out
+    assert len(result) == len("short tweet")
+
+
+def test_get_gold_price_fatal_on_missing_file(tmp_path, monkeypatch, capsys):
+    """main() must exit with code 1 (FATAL) when gold_price.json is missing."""
+    missing_file = tmp_path / "no_such_file.json"
+    state_file = tmp_path / "last_gold_price.json"
+    state_file.write_text("{}")
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", missing_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 1
+    else:
+        raise AssertionError("Expected main() to exit(1) on missing gold_price.json")
+
+    out = capsys.readouterr().out
+    assert "FATAL: data/gold_price.json not found" in out
+
+
+def test_get_gold_price_fatal_on_malformed_json(tmp_path, monkeypatch, capsys):
+    """main() must exit with code 1 (FATAL) when gold_price.json is malformed."""
+    gold_file = tmp_path / "gold_price.json"
+    gold_file.write_text("{{{not valid json")
+    state_file = tmp_path / "last_gold_price.json"
+    state_file.write_text("{}")
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 1
+    else:
+        raise AssertionError("Expected main() to exit(1) on malformed gold_price.json")
+
+    out = capsys.readouterr().out
+    assert "FATAL: data/gold_price.json unreadable" in out
+
+
+def test_duplicate_guard_market_closed_reference_log_uses_tree_format(monkeypatch):
+    """SKIP log for market_closed_reference must use ├── / └── tree style."""
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("POST_TRIGGER_NONCE", "nonce-xyz")
+    monkeypatch.setenv("REFRESH_PRICE_FIRST", "false")
+    _now = datetime(2026, 5, 9, 9, 0, 0, tzinfo=timezone.utc)
+    _prev = (_now - timedelta(hours=2, minutes=18)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    skip, reason = pg.check_duplicate_guard(
+        price=4724.10,
+        prev_price=4724.10,
+        prev_posted_at_utc=_prev,
+        post_type='market_closed_reference',
+        _now=_now,
+    )
+    assert skip is True
+    assert "├── current_price:" in reason
+    assert "├── previous_price:" in reason
+    assert "├── previous_post_ts:" in reason
+    assert "├── minutes_since_post:" in reason
+    assert "├── selected_post_type:   market_closed_reference" in reason
+    assert "├── source:               shortcut" in reason
+    assert "├── trigger_nonce:        nonce-xyz" in reason
+    assert "├── refresh_price_first:  false" in reason
+    assert "└── action:" in reason
+    assert "allow_same_price_closed_market_repost=true" in reason

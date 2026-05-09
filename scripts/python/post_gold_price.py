@@ -312,20 +312,20 @@ def check_duplicate_guard(price, prev_price, prev_posted_at_utc, post_type, _now
     if post_type == 'market_closed_reference':
         # Emit a richer operator-friendly message for the closed-market case.
         trigger_source = os.environ.get('POST_TRIGGER_SOURCE', '').strip().lower() or 'unknown'
-        trigger_nonce = os.environ.get('POST_TRIGGER_NONCE', '').strip() or '(none)'
+        trigger_nonce = os.environ.get('POST_TRIGGER_NONCE', '').strip() or 'NONE'
         refresh_price_first = os.environ.get('REFRESH_PRICE_FIRST', 'false')
-        age_str = f"{int(minutes_ago)} min ago" if minutes_ago is not None else "unknown"
+        min_str = str(int(minutes_ago)) if minutes_ago is not None else 'unknown'
         reason = (
-            f"SKIP: market_closed_reference — same closing/reference price already posted.\n"
-            f"  previous_price:       ${prev_price:,.2f}\n"
-            f"  current_price:        ${price:,.2f}\n"
-            f"  previous_post_at:     {prev_posted_at_utc or 'unknown'}\n"
-            f"  minutes_since_post:   {age_str}\n"
-            f"  selected_post_type:   {post_type}\n"
-            f"  source:               {trigger_source}\n"
-            f"  trigger_nonce:        {trigger_nonce}\n"
-            f"  refresh_price_first:  {refresh_price_first}\n"
-            f"  hint: use allow_same_price_closed_market_repost=true (workflow_dispatch, manual/shortcut only) to override"
+            f"SKIP: market_closed_reference — same closing/reference price already posted\n"
+            f"├── current_price:        ${price:,.2f}\n"
+            f"├── previous_price:       ${prev_price:,.2f}\n"
+            f"├── previous_post_ts:     {prev_posted_at_utc or 'unknown'}\n"
+            f"├── minutes_since_post:   {min_str}\n"
+            f"├── selected_post_type:   {post_type}\n"
+            f"├── source:               {trigger_source}\n"
+            f"├── trigger_nonce:        {trigger_nonce}\n"
+            f"├── refresh_price_first:  {refresh_price_first}\n"
+            f"└── action:               SKIPPED — use allow_same_price_closed_market_repost=true to override (manual/operator only)"
         )
     else:
         reason = (
@@ -543,7 +543,7 @@ def get_post_type(_now=None, schedule_cron=None):
     minute = now.minute
 
     # Local/manual fallback: only classify the first few minutes of the event
-    # hour as an event to avoid repeated event tweets on a 6-minute cadence.
+    # hour as an event to avoid duplicate event tweets on repeated runs.
     if weekday == 6 and hour == 21 and minute < 6:
         return 'market_open'
     if weekday == 4 and hour == 21 and minute < 6:
@@ -663,12 +663,16 @@ def format_market_closed_reference_tweet(data):
 def format_tweet(data, post_type):
     print(f"   Post type: {post_type}")
     if post_type == 'market_open':
-        return format_market_open_tweet(data)
-    if post_type == 'market_close':
-        return format_market_close_tweet(data)
-    if post_type == 'market_closed_reference':
-        return format_market_closed_reference_tweet(data)
-    return format_hourly_tweet(data)
+        tweet = format_market_open_tweet(data)
+    elif post_type == 'market_close':
+        tweet = format_market_close_tweet(data)
+    elif post_type == 'market_closed_reference':
+        tweet = format_market_closed_reference_tweet(data)
+    else:
+        tweet = format_hourly_tweet(data)
+    if len(tweet) > 280:
+        print(f"⚠️  tweet_length={len(tweet)} > 280 — X API may reject; local posting NOT blocked")
+    return tweet
 
 
 def get_template_name(post_type):
@@ -786,10 +790,14 @@ def main():
 
     # 2. Load raw gold price data
     if not GOLD_PRICE_FILE.exists():
-        print(f"⚠️  {GOLD_PRICE_FILE} not found."
+        print(f"FATAL: data/gold_price.json not found."
               " The gold-price-fetch.yml workflow must run first to populate it.")
-        sys.exit(0)
-    raw_data = json.loads(GOLD_PRICE_FILE.read_text(encoding="utf-8"))
+        sys.exit(1)
+    try:
+        raw_data = json.loads(GOLD_PRICE_FILE.read_text(encoding="utf-8"))
+    except Exception as _json_exc:
+        print(f"FATAL: data/gold_price.json unreadable — {_json_exc}")
+        sys.exit(1)
     source_ts = _provider_timestamp_iso(raw_data) or (
         raw_data.get("source_updated_at_gmt", "n/a") if isinstance(raw_data, dict) else "n/a"
     )
@@ -996,6 +1004,13 @@ def main():
             print(f"   would-post hash: {decision.tweet_hash[:12]}")
             sys.exit(0)
 
+    # 10c. Dry-run guard (applied unconditionally; also catches the case where
+    #      tweet_guard is unavailable and was not imported above).
+    if str(os.environ.get('DRY_RUN_TWEET', '')).strip().lower() in ('1', 'true', 'yes'):
+        print("DRY_RUN_TWEET=true — would post; skipping actual X call")
+        print(f"   would-post hash: {tweet_hash}")
+        sys.exit(0)
+
     # 11. Post tweet
     post_tweet(tweet, post_type=post_type)
 
@@ -1013,6 +1028,14 @@ def main():
             tweet_guard.save_state(LAST_TWEET_STATE_FILE, new_state)
         except Exception as exc:  # pragma: no cover — best-effort
             print(f"⚠️  Failed to update last_tweet_state.json: {exc}")
+
+    print("=== RUN RESULT ===")
+    print(f"outcome:      POSTED")
+    print(f"post_type:    {post_type}")
+    print(f"price:        ${data['price']:,.2f}/oz")
+    print(f"tweet_length: {len(tweet)}")
+    print(f"content_hash: {tweet_hash}")
+    print("===================")
 
 
 if __name__ == '__main__':

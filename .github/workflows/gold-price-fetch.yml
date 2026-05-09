@@ -10,9 +10,11 @@ name: Gold Price Fetch (provider-adapter)
 
 on:
   schedule:
-    - cron: '2 21-23 * * 0'  # Hourly from Sunday open
-    - cron: '2 * * * 1-4'    # Hourly Mon–Thu
-    - cron: '2 0-20 * * 5'   # Hourly Friday until close hour
+    # Market hours: Sunday 21:00 UTC (Monday 01:00 UAE/GMT+4) through Friday 20:59 UTC.
+    # Runs 7 minutes before post_gold.yml so fresh data is committed first.
+    - cron: '2 21-23 * * 0'  # Sunday 21:02–23:02 UTC (market open window)
+    - cron: '2 * * * 1-4'    # Monday–Thursday all hours (24/5 market open)
+    - cron: '2 0-20 * * 5'   # Friday 00:02–20:02 UTC (until market close)
   workflow_dispatch:
 
 permissions:
