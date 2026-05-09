@@ -149,11 +149,7 @@ jobs:
             elif [ "$DURATION_MINUTES" -gt 90 ]; then
               DURATION_MINUTES="90"
             fi
-            DURATION="$(python - <<PY
-minutes = int("${DURATION_MINUTES}")
-print(f"{minutes / 60:.4f}")
-PY
-)"
+            DURATION="$(python -c "minutes = int(${DURATION_MINUTES}); print(f'{minutes / 60:.4f}')")"
             INTERVAL="360"
           fi
 
