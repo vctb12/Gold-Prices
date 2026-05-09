@@ -153,6 +153,24 @@ example, to announce a market closure that was not posted earlier, or to post af
 closing price has not moved) can set `allow_same_price_closed_market_repost=true` in the
 `workflow_dispatch` inputs — see below.
 
+**Why two runs with identical visible inputs can behave differently:** The visible workflow inputs
+(`force_post`, `source`, `refresh_price_first`, `allow_same_price_closed_market_repost`,
+`trigger_nonce`) are set by the operator and do not change between runs. However, the internal
+`data/last_tweet_state.json` is updated after every successful post. If the first run posts and the
+second run arrives shortly after, `minutes_since_last_tweet` will be small, `force_summary_due` will
+be `False`, and the `price_move_below_threshold` guard will fire and skip the second run even though
+the visible inputs appear identical. This is correct behavior. See
+[`docs/x-automation-duplicate-policy.md § 8`](./x-automation-duplicate-policy.md) for the full
+analysis including the 18:29/18:46 example and the dual-state explanation.
+
+**State file dual-write issue:** `data/last_gold_price.json` is written by both
+`fetch_gold_price.py` (full normalized payload) and `post_gold_price.py` (legacy
+`{"price": ..., "posted_at_utc": ...}` schema). When `refresh_price_first=true` runs a fetch before
+posting, the fetcher overwrites `last_gold_price.json` with the normalized schema, causing the
+poster's legacy `_load_last_price()` to return `None` and print `"Previous post (legacy): none"`.
+This does not affect guard correctness — all cooldown/duplicate/price-move decisions read from
+`data/last_tweet_state.json`. The RUN CONTEXT block in the log now cross-references both files.
+
 **Workflow_dispatch inputs:**
 
 | Input                                   | Default  | Description                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -161,7 +179,7 @@ closing price has not moved) can set `allow_same_price_closed_market_repost=true
 | `force_post`                            | `false`  | Bypass cooldown only; duplicate and stale guards still apply                                                                                                                                                                                                                                                                                                                                                 |
 | `source`                                | `manual` | Trigger source label for logs/state (`manual`, `shortcut`)                                                                                                                                                                                                                                                                                                                                                   |
 | `refresh_price_first`                   | `false`  | Run one price refresh before posting (manual/operator only). Fetches `data/gold_price.json` from providers once before the normal posting path runs. Post type is still determined by market hours and the operator trigger — not the provider timestamp. If the market is closed and the price is unchanged, `allow_same_price_closed_market_repost=true` is also required to bypass the price-change guard |
-| `trigger_nonce`                         | `""`     | Optional unique manual trigger label                                                                                                                                                                                                                                                                                                                                                                         |
+| `trigger_nonce`                         | `""`     | Optional unique manual trigger label. Appears in logs and `last_tweet_state.json` for traceability. Does not affect tweet text or `duplicate_text_hash`. `trigger_nonce=none` / empty is allowed                                                                                                                                                                                                             |
 | `allow_same_price_closed_market_repost` | `false`  | Manual/operator only: allow `market_closed_reference` repost even if the closing price is unchanged, subject to duplicate/content-hash/cooldown protections. Scheduled runs ignore this                                                                                                                                                                                                                      |
 
 `refresh_price_first=true` only runs for manual `workflow_dispatch`; scheduled runs always post from

@@ -27,6 +27,7 @@ import sys
 import json
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
+from typing import Optional
 
 # ── Config ────────────────────────────────────────────────────────────────────
 AED_RATE = 3.6725  # UAE Dirham is pegged to USD
@@ -806,7 +807,18 @@ def main():
     run_id = os.environ.get('GITHUB_RUN_ID', '').strip()
     run_attempt = os.environ.get('GITHUB_RUN_ATTEMPT', '').strip()
     force_post_enabled = _env_truthy('FORCE_POST', default=False)
+    allow_same_price_repost = os.environ.get('ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST', 'false')
     guard_state = tweet_guard.load_state(LAST_TWEET_STATE_FILE) if tweet_guard is not None else None
+
+    # Pre-compute force_summary_due from guard state for the RUN CONTEXT block.
+    _force_summary_min = int(os.environ.get('FORCE_SUMMARY_AFTER_MINUTES', '60') or '60')
+    _minutes_since_last: Optional[float] = None
+    _force_summary_due: Optional[bool] = None
+    if tweet_guard is not None and guard_state is not None:
+        _minutes_since_last = tweet_guard._minutes_since(guard_state.last_tweet_time_utc)
+        _force_summary_due = (
+            _minutes_since_last is None or _minutes_since_last >= _force_summary_min
+        )
 
     # 3. Compute post type from the intended cron schedule when available.
     # GitHub scheduled workflows can start late, so using github.event.schedule
@@ -827,25 +839,41 @@ def main():
 
     # 4. Print RUN CONTEXT block
     sha = os.environ.get('GITHUB_SHA', '')
+    _gs_price = f"${guard_state.last_price_usd_oz:,.4f}/oz" if (guard_state and guard_state.last_price_usd_oz is not None) else "none"
+    _gs_time = guard_state.last_tweet_time_utc if (guard_state and guard_state.last_tweet_time_utc) else "none"
+    _gs_hash = guard_state.last_tweet_text_hash[:12] if (guard_state and guard_state.last_tweet_text_hash) else "none"
+    _mins_str = f"{_minutes_since_last:.2f}" if _minutes_since_last is not None else "none"
+    _ltp_utc = guard_state.last_provider_timestamp_utc if (guard_state and guard_state.last_provider_timestamp_utc) else "none"
     print("=== RUN CONTEXT ===")
     print(f"event:        {os.environ.get('GITHUB_EVENT_NAME', 'local')}")
     print(f"sha:          {sha[:7] if sha else 'local'}")
     print(f"actor:        {os.environ.get('GITHUB_ACTOR', 'local')}")
     print(f"schedule:     {schedule_cron or 'manual/local'}")
     print(f"source:       {trigger_source}")
-    print(f"refresh_price_first:      {refresh_price_first}")
-    print(f"trigger_nonce:            {trigger_nonce or '(none)'}")
+    print(f"refresh_price_first:                    {refresh_price_first}")
+    print(f"trigger_nonce:                          {trigger_nonce or '(none)'}")
     print(f"dry_run:      {os.environ.get('DRY_RUN_TWEET', 'false')}")
     print(f"force_post:   {os.environ.get('FORCE_POST', 'false')}")
+    print(f"allow_same_price_closed_market_repost:  {allow_same_price_repost}")
     print(f"github.run_id:            {run_id or 'local'}")
     print(f"github.run_attempt:       {run_attempt or 'local'}")
     print(f"market_open:               {market_open}")
     print(f"operator_trigger:          {operator_trigger}")
     print(f"post_type:                 {base_post_type}")
     print(f"selected_post_type:        {post_type}")
-    print("data_file:    data/gold_price.json")
-    print(f"source_ts:    {source_ts}")
     print(f"template_used:             {template_used}")
+    print(f"data_file:    data/gold_price.json (exists={GOLD_PRICE_FILE.exists()})")
+    print(f"state_file:   data/last_gold_price.json (exists={STATE_FILE.exists()})")
+    print(f"guard_state:  data/last_tweet_state.json (exists={LAST_TWEET_STATE_FILE.exists()})")
+    print(f"source_ts:    {source_ts}")
+    print(f"--- guard state (data/last_tweet_state.json) ---")
+    print(f"last_price_usd_oz (guard):              {_gs_price}")
+    print(f"last_tweet_time_utc (guard):            {_gs_time}")
+    print(f"last_provider_timestamp_utc (guard):    {_ltp_utc}")
+    print(f"last_tweet_text_hash (guard, 12ch):     {_gs_hash}")
+    print(f"minutes_since_last_tweet:               {_mins_str}")
+    print(f"force_summary_due:                      {_force_summary_due}")
+    print(f"force_summary_after_minutes:            {_force_summary_min}")
     print("===================")
 
     # 4a. Shortcut-triggered workflow_dispatch anti-spam guard. Record the
@@ -879,14 +907,27 @@ def main():
             except Exception as exc:  # pragma: no cover — best-effort
                 print(f"⚠️  Failed to record shortcut trigger attempt: {exc}")
 
-    # 5. Load gold price (includes previous-state fields)
+    # 5. Load gold price (includes previous-state fields from data/last_gold_price.json)
+    # NOTE: data/last_gold_price.json uses a legacy schema {"price":..., "posted_at_utc":...}.
+    # fetch_gold_price.py also writes to this file with the full normalized payload when a fresh
+    # quote is found — the two schemas are incompatible. If refresh_price_first=true ran before
+    # this step, the file may have been overwritten by the fetcher, causing _load_last_price() to
+    # return (None, None, None) and "Previous post (legacy): none". The authoritative duplicate-
+    # guard state (including last price and tweet time) lives in data/last_tweet_state.json and
+    # is shown in the guard state section above.
     print("📡 Reading gold price from data/gold_price.json (canonical price payload)…")
     data = get_gold_price()
     print(f"   Spot: ${data['price']:,.2f}/oz")
     if data.get('prev_price') is not None:
-        print(f"   Previous post: ${data['prev_price']:,.2f}/oz at {data.get('prev_posted_at_utc') or 'n/a'}")
+        print(f"   Previous post (legacy data/last_gold_price.json): ${data['prev_price']:,.2f}/oz at {data.get('prev_posted_at_utc') or 'n/a'}")
     else:
-        print("   Previous post: none")
+        print("   Previous post (legacy data/last_gold_price.json): none")
+        if guard_state is not None and guard_state.last_price_usd_oz is not None:
+            print(
+                f"   Previous post (data/last_tweet_state.json): "
+                f"${guard_state.last_price_usd_oz:,.4f}/oz at {guard_state.last_tweet_time_utc or 'n/a'}"
+                f" — guard state is the authoritative source for cooldown/duplicate checks"
+            )
 
     # 6. Staleness check
     staleness_details = get_staleness_details(raw_data)
@@ -993,12 +1034,54 @@ def main():
         )
         decision = tweet_guard.decide(guard_state, quote=guard_quote, tweet_text=tweet)
         if not decision.should_post:
-            print(
+            skip_msg = (
                 f"SKIP: tweet-guard — {decision.skip_reason}"
                 f" (hash={decision.tweet_hash[:12]}, move=${decision.price_move_usd or 0:.2f},"
                 f" ts_changed={decision.provider_timestamp_changed})"
             )
+            if decision.skip_reason == "price_move_below_threshold":
+                # Provide context-specific guidance so operators understand why force_post alone
+                # is not enough and what to do next.
+                mins_str = f"{decision.minutes_since_last:.1f}" if decision.minutes_since_last is not None else "unknown"
+                skip_msg += (
+                    f"\n   post_type:              {post_type}"
+                    f"\n   force_summary_due:      {decision.force_summary_due}"
+                    f"\n   minutes_since_last:     {mins_str}"
+                    f"\n   force_summary_after:    {_force_summary_min} min"
+                    f"\n   force_post:             {force_post_enabled}"
+                    f"\n   Note: force_post=True bypasses cooldown only, NOT price_move_below_threshold."
+                )
+                if post_type == "market_closed_reference":
+                    skip_msg += (
+                        f"\n   SKIP: market_closed_reference same closing/reference price already posted"
+                        f" and force_summary_due=False."
+                        f"\n   To allow same-price market_closed_reference repost:"
+                        f" set allow_same_price_closed_market_repost=true in workflow_dispatch inputs."
+                    )
+                else:
+                    skip_msg += (
+                        f"\n   Wait for force_summary_due=True (>={_force_summary_min} min since last post)"
+                        f" or for the price to move by ≥${_env_float('MIN_TWEET_MOVE_USD', 1.0):.2f}"
+                        f" (>{_env_float('MIN_TWEET_MOVE_PCT', 0.03):.2f}%)."
+                    )
+            elif decision.should_post is False and post_type == "market_closed_reference":
+                # For other skip reasons on market_closed_reference, add brief context.
+                skip_msg += f"\n   post_type: {post_type}, force_summary_due={decision.force_summary_due}"
+            print(skip_msg)
             sys.exit(0)
+        # Log why a same-price market_closed_reference was allowed through.
+        if post_type == "market_closed_reference" and decision.price_move_usd is not None and abs(decision.price_move_usd) < 0.01:
+            if decision.force_summary_due:
+                print(
+                    "  [guard] PASS: same-price market_closed_reference allowed because"
+                    f" force_summary_due=True (minutes_since_last={decision.minutes_since_last:.1f},"
+                    f" FORCE_SUMMARY_AFTER_MINUTES={_force_summary_min})"
+                )
+            elif _env_truthy('ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST', default=False):
+                print(
+                    "  [guard] PASS: same-price market_closed_reference allowed because"
+                    " allow_same_price_closed_market_repost=True and duplicate/cooldown guards passed."
+                )
         if str(os.environ.get('DRY_RUN_TWEET', '')).strip().lower() in ('1', 'true', 'yes'):
             print("DRY_RUN_TWEET=true — would post; skipping actual X call")
             print(f"   would-post hash: {decision.tweet_hash[:12]}")
