@@ -35,6 +35,7 @@ UAE_TZ    = timezone(timedelta(hours=4))
 TROY_OZ_GRAMS = 31.1034768
 MARKET_OPEN_EVENT_CRON = '3 21 * * 0'
 MARKET_CLOSE_EVENT_CRON = '3 21 * * 5'
+DEFAULT_CLOSED_MARKET_MAX_STALE_HOURS = 48
 
 # Canonical data file written by scripts/fetch_gold_price.py
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -181,20 +182,7 @@ def _provider_timestamp_iso(raw_data):
         return None
 
 
-# ── Staleness check ────────────────────────────────────────────────────────────
-def check_staleness(raw_data, _now=None):
-    """Check whether upstream gold price data is too old to post.
-
-    Reads `source_updated_at_gmt` from raw_data (format: "DD-MM-YYYY HH:MM:SS am/pm", GMT).
-
-    Returns (action, message):
-      'ok'          – age ≤ 4 h, no action needed.
-      'warn'        – 4 h < age ≤ 12 h, caller should log and continue.
-      'skip'        – age > 12 h, caller should log and skip posting.
-      'parse_error' – could not parse field, caller should log and continue.
-
-    Pass `_now` (a tz-aware UTC datetime) to pin the clock in tests.
-    """
+def _parse_provider_timestamp(raw_data):
     parsed = None
     source_label = "provider timestamp"
     value = raw_data.get("source_updated_at_gmt") if isinstance(raw_data, dict) else None
@@ -221,9 +209,21 @@ def check_staleness(raw_data, _now=None):
                 break
             except Exception:
                 continue
+    return parsed, source_label, value
+
+
+def get_staleness_details(raw_data, _now=None):
+    parsed, source_label, original_value = _parse_provider_timestamp(raw_data)
     if parsed is None:
-        msg = f"WARN: could not parse provider timestamp source_updated_at_gmt={value!r}"
-        return ('parse_error', msg)
+        msg = f"WARN: could not parse provider timestamp source_updated_at_gmt={original_value!r}"
+        return {
+            "action": "parse_error",
+            "message": msg,
+            "age_hours": None,
+            "age_str": None,
+            "timestamp_utc": None,
+            "source_label": source_label,
+        }
 
     now = _now if _now is not None else datetime.now(timezone.utc)
     age = now - parsed
@@ -235,12 +235,40 @@ def check_staleness(raw_data, _now=None):
     age_str = f"{h}:{m:02d}"
 
     if age_hours <= 4:
-        return ('ok', None)
-    if age_hours <= 12:
+        action = 'ok'
+        msg = None
+    elif age_hours <= 12:
+        action = 'warn'
         msg = f"WARN: UPSTREAM STALE: {source_label} is {age_str} old (last: {iso})"
-        return ('warn', msg)
-    msg = f"ERROR: UPSTREAM SEVERELY STALE: {source_label} is {age_str} old (last: {iso})"
-    return ('skip', msg)
+    else:
+        action = 'skip'
+        msg = f"ERROR: UPSTREAM SEVERELY STALE: {source_label} is {age_str} old (last: {iso})"
+    return {
+        "action": action,
+        "message": msg,
+        "age_hours": age_hours,
+        "age_str": age_str,
+        "timestamp_utc": iso,
+        "source_label": source_label,
+    }
+
+
+# ── Staleness check ────────────────────────────────────────────────────────────
+def check_staleness(raw_data, _now=None):
+    """Check whether upstream gold price data is too old to post.
+
+    Reads `source_updated_at_gmt` from raw_data (format: "DD-MM-YYYY HH:MM:SS am/pm", GMT).
+
+    Returns (action, message):
+      'ok'          – age ≤ 4 h, no action needed.
+      'warn'        – 4 h < age ≤ 12 h, caller should log and continue.
+      'skip'        – age > 12 h, caller should log and skip posting.
+      'parse_error' – could not parse field, caller should log and continue.
+
+    Pass `_now` (a tz-aware UTC datetime) to pin the clock in tests.
+    """
+    details = get_staleness_details(raw_data, _now=_now)
+    return (details["action"], details["message"])
 
 
 # ── Duplicate guard ────────────────────────────────────────────────────────────
@@ -316,6 +344,11 @@ def should_skip_market_closed(post_type, now=None, event_name=None, trigger_sour
     """Skip scheduled hourly price posts outside 24/5 market hours."""
     if post_type in ('market_open', 'market_close'):
         return (False, None)
+    if post_type == 'market_closed_reference':
+        return (
+            False,
+            "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run.",
+        )
     if is_market_open_time(now):
         return (False, None)
     if is_operator_market_hours_bypass(event_name=event_name, trigger_source=trigger_source):
@@ -328,6 +361,45 @@ def should_skip_market_closed(post_type, now=None, event_name=None, trigger_sour
         "SKIP: market closed — regular hourly price posts run only "
         "from Sunday 21:00 UTC through Friday 20:59 UTC",
     )
+
+
+def select_post_type(base_post_type, market_open, operator_trigger):
+    if base_post_type in ('market_open', 'market_close'):
+        return base_post_type
+    if not market_open and operator_trigger:
+        return 'market_closed_reference'
+    return 'hourly'
+
+
+def _env_float(name, default):
+    raw = os.environ.get(name, '')
+    if raw == '':
+        return float(default)
+    try:
+        return float(raw)
+    except ValueError:
+        print(f"WARN: invalid {name}={raw!r}; falling back to {float(default):g}")
+        return float(default)
+
+
+def should_allow_closed_market_stale_reference(
+    *,
+    post_type,
+    market_open,
+    operator_trigger,
+    staleness_details,
+    price,
+):
+    if post_type != 'market_closed_reference' or market_open or not operator_trigger:
+        return False
+    if not isinstance(price, (int, float)) or price <= 0:
+        return False
+    timestamp_utc = staleness_details.get("timestamp_utc")
+    age_hours = staleness_details.get("age_hours")
+    if not timestamp_utc or age_hours is None:
+        return False
+    max_hours = _env_float("CLOSED_MARKET_MAX_STALE_HOURS", DEFAULT_CLOSED_MARKET_MAX_STALE_HOURS)
+    return age_hours <= max_hours
 
 
 # ── Step 2: Format the tweet ─────────────────────────────────────────────────
@@ -396,6 +468,21 @@ def _uae_datetime():
     date_str = now.strftime('%b %-d, %Y')
     time_str = now.strftime('%I:%M %p').lstrip('0')
     return date_str, time_str
+
+
+def _uae_time_from_iso(ts):
+    try:
+        raw = ts[:-1] + '+00:00' if ts.endswith('Z') else ts
+        dt = datetime.fromisoformat(raw)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(UAE_TZ).strftime('%b %-d, %Y · %I:%M %p').lstrip('0')
+    except Exception as exc:
+        print(
+            f"WARN: unable to format source timestamp {ts!r}"
+            f" ({type(exc).__name__}: {exc}); using raw value"
+        )
+        return ts
 
 
 # ── Detect post type ──────────────────────────────────────────────────────────
@@ -494,13 +581,76 @@ def format_market_close_tweet(data):
         f"#GoldPrice #Gold #XAU #UAE #Dubai"
     )
 
+def format_market_closed_reference_tweet(data):
+    """Format a labeled market-closed reference post from cached spot data."""
+    price, g24, g22, g21, g18, _chp = _parse_fields(data)
+    source_updated_at = data.get('source_updated_at_utc') or 'timestamp unavailable'
+    stale_age_hours = data.get('stale_age_hours')
+    stale_note = ''
+    if isinstance(stale_age_hours, (int, float)):
+        stale_note = f"\nCached reference · {stale_age_hours:.1f}h old"
+    return (
+        f"🌙 Gold Market Closed — Last Reference Price\n"
+        f"\n"
+        f"Last spot/reference XAU/USD\n"
+        f"24K · ${price:,.2f}/oz\n"
+        f"\n"
+        f"🇦🇪 Reference prices:\n"
+        f"24K  {_aed(g24)} AED/g\n"
+        f"22K  {_aed(g22)} AED/g\n"
+        f"21K  {_aed(g21)} AED/g\n"
+        f"18K  {_aed(g18)} AED/g\n"
+        f"\n"
+        f"Last updated: {_uae_time_from_iso(source_updated_at)} UAE{stale_note}\n"
+        f"Not live retail price\n"
+        f"goldtickerlive.com\n"
+        f"\n"
+        f"#GoldPrice #Gold #UAE #Dubai"
+    )
+
+
 def format_tweet(data, post_type):
     print(f"   Post type: {post_type}")
     if post_type == 'market_open':
         return format_market_open_tweet(data)
     if post_type == 'market_close':
         return format_market_close_tweet(data)
+    if post_type == 'market_closed_reference':
+        return format_market_closed_reference_tweet(data)
     return format_hourly_tweet(data)
+
+
+def get_template_name(post_type):
+    if post_type == 'market_open':
+        return 'market_open'
+    if post_type == 'market_close':
+        return 'market_close'
+    if post_type == 'market_closed_reference':
+        return 'market_closed_reference'
+    return 'hourly'
+
+
+def build_guard_quote(raw_data, data, *, staleness_action, post_type, closed_market_stale_allowed):
+    """Build the tweet-guard quote payload with closed-market reference overrides."""
+    source_type = (
+        raw_data.get("source_type") if isinstance(raw_data, dict) else None
+    ) or "spot_reference"
+    is_fresh = staleness_action == 'ok'
+    if closed_market_stale_allowed and post_type == 'market_closed_reference':
+        source_type = 'market_closed_reference'
+        is_fresh = True
+    return {
+        "xau_usd_per_oz": data['price'],
+        "timestamp_utc": _provider_timestamp_iso(raw_data),
+        "is_fresh": is_fresh,
+        "is_fallback": False,
+        "provider": (
+            (raw_data.get("provider") if isinstance(raw_data, dict) else None)
+            or (raw_data.get("source") if isinstance(raw_data, dict) else None)
+            or "goldpricez"
+        ),
+        "source_type": source_type,
+    }
 
 
 # ── Step 3: Post to X / Twitter ──────────────────────────────────────────────
@@ -600,7 +750,14 @@ def main():
     trigger_source = os.environ.get('POST_TRIGGER_SOURCE', '').strip() or (
         'scheduled' if schedule_cron else 'manual'
     )
-    post_type = get_post_type(schedule_cron=schedule_cron)
+    base_post_type = get_post_type(schedule_cron=schedule_cron)
+    market_open = is_market_open_time()
+    operator_trigger = is_operator_market_hours_bypass(
+        event_name=os.environ.get('GITHUB_EVENT_NAME'),
+        trigger_source=trigger_source,
+    )
+    post_type = select_post_type(base_post_type, market_open, operator_trigger)
+    template_used = get_template_name(post_type)
 
     # 4. Print RUN CONTEXT block
     sha = os.environ.get('GITHUB_SHA', '')
@@ -612,19 +769,16 @@ def main():
     print(f"source:       {trigger_source}")
     print(f"dry_run:      {os.environ.get('DRY_RUN_TWEET', 'false')}")
     print(f"force_post:   {os.environ.get('FORCE_POST', 'false')}")
-    print(f"post_type:    {post_type}")
+    print(f"market_open:               {market_open}")
+    print(f"operator_trigger:          {operator_trigger}")
+    print(f"post_type:                 {base_post_type}")
+    print(f"selected_post_type:        {post_type}")
     print("data_file:    data/gold_price.json")
     print(f"source_ts:    {source_ts}")
+    print(f"template_used:             {template_used}")
     print("===================")
 
-    # 5. Staleness check
-    staleness_action, staleness_msg = check_staleness(raw_data)
-    if staleness_msg:
-        print(staleness_msg)
-    if staleness_action == 'skip':
-        sys.exit(0)
-
-    # 6. Load gold price (includes previous-state fields)
+    # 5. Load gold price (includes previous-state fields)
     print("📡 Reading gold price from data/gold_price.json (canonical price payload)…")
     data = get_gold_price()
     print(f"   Spot: ${data['price']:,.2f}/oz")
@@ -632,6 +786,32 @@ def main():
         print(f"   Previous post: ${data['prev_price']:,.2f}/oz at {data.get('prev_posted_at_utc') or 'n/a'}")
     else:
         print("   Previous post: none")
+
+    # 6. Staleness check
+    staleness_details = get_staleness_details(raw_data)
+    staleness_action = staleness_details["action"]
+    staleness_msg = staleness_details["message"]
+    if staleness_msg:
+        print(staleness_msg)
+    closed_market_stale_allowed = should_allow_closed_market_stale_reference(
+        post_type=post_type,
+        market_open=market_open,
+        operator_trigger=operator_trigger,
+        staleness_details=staleness_details,
+        price=data['price'],
+    )
+    stale_age_hours = staleness_details.get("age_hours")
+    stale_age_label = "n/a" if stale_age_hours is None else f"{stale_age_hours:.2f}"
+    print(f"stale_age_hours:          {stale_age_label}")
+    print(f"closed_market_stale_allowed: {closed_market_stale_allowed}")
+    if staleness_action == 'skip' and not closed_market_stale_allowed:
+        sys.exit(0)
+    if staleness_action == 'parse_error' and post_type == 'market_closed_reference':
+        print(
+            "SKIP: market-closed reference post requires a valid source timestamp"
+            f" ({staleness_msg or 'provider timestamp missing or invalid'})."
+        )
+        sys.exit(0)
 
     # 7. 24/5 market-hours guard for regular price posts
     skip, reason = should_skip_market_closed(
@@ -643,6 +823,10 @@ def main():
         print(reason)
     if skip:
         sys.exit(0)
+
+    if post_type == 'market_closed_reference':
+        data['source_updated_at_utc'] = staleness_details.get("timestamp_utc")
+        data['stale_age_hours'] = stale_age_hours
 
     # 8. Price-change guard
     skip, reason = check_duplicate_guard(
@@ -682,20 +866,13 @@ def main():
     #      • fallback/cache source with same price+timestamp
     # Controlled by SKIP_DUPLICATE_TWEETS (default true). Set false to bypass.
     if tweet_guard is not None:
-        guard_quote = {
-            "xau_usd_per_oz": data['price'],
-            "timestamp_utc": _provider_timestamp_iso(raw_data),
-            "is_fresh": staleness_action == 'ok',
-            "is_fallback": False,
-            "provider": (
-                (raw_data.get("provider") if isinstance(raw_data, dict) else None)
-                or (raw_data.get("source") if isinstance(raw_data, dict) else None)
-                or "goldpricez"
-            ),
-            "source_type": (
-                raw_data.get("source_type") if isinstance(raw_data, dict) else None
-            ) or "spot_reference",
-        }
+        guard_quote = build_guard_quote(
+            raw_data,
+            data,
+            staleness_action=staleness_action,
+            post_type=post_type,
+            closed_market_stale_allowed=closed_market_stale_allowed,
+        )
         guard_state = tweet_guard.load_state(LAST_TWEET_STATE_FILE)
         decision = tweet_guard.decide(guard_state, quote=guard_quote, tweet_text=tweet)
         if not decision.should_post:

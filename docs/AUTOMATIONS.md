@@ -116,8 +116,9 @@ Pings the site every **30 minutes**. Alerts via Telegram and/or Discord if site 
 
 Runs **hourly** while the global gold market is open (Sunday 21:00 UTC through Friday 20:59 UTC),
 offset a few minutes after the fetch workflow so it reads freshly committed data. Scheduled hourly
-runs still skip when the market is closed, and they post only when the cached result passes the
-stale, duplicate, and cooldown guards.
+runs are market-aware: regular hourly posts use the live / market-open template only during open
+hours, scheduled runs still skip when the market is closed, and they post only when the cached
+result passes the stale, duplicate, and cooldown guards.
 
 Manual `workflow_dispatch` is supported for GitHub UI and iPhone Shortcut triggers.
 Operator-triggered manual / Shortcut runs may still attempt a post outside market hours, but they do
@@ -128,6 +129,13 @@ only overrides the cooldown guard; it does not bypass stale, duplicate, content-
 provider-based safety checks. The repo also logs the generated post and character count but does not
 block locally when the text is longer than 280 characters; X still enforces its own posting
 eligibility and length rules externally, including any Premium-only longer-post allowance.
+
+Outside market hours, a manual GitHub UI / Shortcut run now switches to a **market-closed
+reference** post type instead of reusing the normal hourly live-update template. That closed-market
+path uses the last cached spot/reference price, includes the provider timestamp / last-updated time
+in the post, labels the copy as market closed and not live retail pricing, and only allows stale
+cached data in this narrow case when the timestamp exists and the data age is within
+`CLOSED_MARKET_MAX_STALE_HOURS` (default `48`). Market-open hourly posts still block stale quotes.
 
 - Script: `scripts/python/post_gold_price.py`
 - Secrets needed: `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_TOKEN`, `ACCESS_TOKEN_SECRET`

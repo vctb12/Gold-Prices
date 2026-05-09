@@ -19,6 +19,10 @@ Production posture:
 - manual GitHub `workflow_dispatch` is supported for GitHub UI and iPhone Shortcut triggers
 - manual runs still use the cached `data/gold_price.json` source-of-truth and the same GitHub
   guardrails
+- manual / Shortcut runs outside market hours switch to a labeled `market_closed_reference` post
+  type instead of the live hourly template
+- that closed-market reference path may use cached last-known spot/reference data only when the
+  source timestamp exists and the age is within `CLOSED_MARKET_MAX_STALE_HOURS` (default 48h)
 - `force_post=true` only overrides the cooldown guard; stale and duplicate checks still apply
 - long posts are logged and attempted locally; if X rejects them, the API error is surfaced in the
   workflow logs
@@ -45,15 +49,15 @@ The fix is twofold:
 `tweet_guard.decide()` evaluates these in order and returns the first match. `should_post=False`
 means the bot exits 0 with a `skip_reason`.
 
-| #   | Skip reason                    | Trigger                                                                                                   |
-| --- | ------------------------------ | --------------------------------------------------------------------------------------------------------- | -------- | ------------------------- | -------- | ------------------------------------------------------------------------ |
-| 1   | `stale_quote`                  | `is_fresh=false` and `ALLOW_STALE_TWEET≠true`. Fresh = `freshness_seconds ≤ MAX_GOLD_FRESHNESS_SECONDS`.  |
-| 2   | `cooldown_active`              | Last successful tweet was less than `MIN_TWEET_INTERVAL_MINUTES` ago (default 55) and `FORCE_POST≠true`.  |
-| 3   | `provider_sample_unchanged`    | Provider price **and** provider timestamp both match the last successful post. Always skipped.            |
-| 4   | `provider_timestamp_unchanged` | Provider timestamp equals the last successful post's, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed.   |
-| 5   | `duplicate_text_hash`          | SHA-256 of generated tweet text equals the last posted hash. Always skipped — X would reject anyway.      |
-| 6   | `fallback_no_change`           | `is_fallback=true` (or `source_type` is `cache_last_known` / `spot_delayed`) AND price equals last price. |
-| 7   | `price_move_below_threshold`   | `                                                                                                         | move_usd | < MIN_TWEET_MOVE_USD`AND` | move_pct | < MIN_TWEET_MOVE_PCT`, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed. |
+| #   | Skip reason                    | Trigger                                                                                                                                                                                                                   |
+| --- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------- | -------- | ------------------------------------------------------------------------ |
+| 1   | `stale_quote`                  | `is_fresh=false` and `ALLOW_STALE_TWEET≠true`. Fresh = `freshness_seconds ≤ MAX_GOLD_FRESHNESS_SECONDS`. Closed-market reference posts are explicitly labeled and pass `is_fresh=true` only in their narrow allowed case. |
+| 2   | `cooldown_active`              | Last successful tweet was less than `MIN_TWEET_INTERVAL_MINUTES` ago (default 55) and `FORCE_POST≠true`.                                                                                                                  |
+| 3   | `provider_sample_unchanged`    | Provider price **and** provider timestamp both match the last successful post. Always skipped.                                                                                                                            |
+| 4   | `provider_timestamp_unchanged` | Provider timestamp equals the last successful post's, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed.                                                                                                                   |
+| 5   | `duplicate_text_hash`          | SHA-256 of generated tweet text equals the last posted hash. Always skipped — X would reject anyway.                                                                                                                      |
+| 6   | `fallback_no_change`           | `is_fallback=true` (or `source_type` is `cache_last_known` / `spot_delayed`) AND price equals last price.                                                                                                                 |
+| 7   | `price_move_below_threshold`   | `                                                                                                                                                                                                                         | move_usd | < MIN_TWEET_MOVE_USD`AND` | move_pct | < MIN_TWEET_MOVE_PCT`, and `FORCE_SUMMARY_AFTER_MINUTES` hasn't elapsed. |
 
 When all seven rules pass, the bot posts and updates `data/last_tweet_state.json`.
 
@@ -107,19 +111,27 @@ tolerated and treated as "no prior post."
 The normalized quote payload exposes a `source_type` field. Tweet templates **must** be honest about
 it:
 
-| `source_type`         | Suggested copy fragment                   |
-| --------------------- | ----------------------------------------- |
-| `spot_live`           | "Spot XAU/USD"                            |
-| `spot_reference`      | "Spot reference price"                    |
-| `spot_delayed`        | "Delayed spot reference"                  |
-| `futures_reference`   | "GCUSD futures reference (not pure spot)" |
-| `commodity_reference` | "Commodity reference price"               |
-| `daily_fix`           | "Daily fix"                               |
-| `cache_last_known`    | "Last known price (provider cached)"      |
-| `unknown`             | "Reference price"                         |
+| `source_type`             | Suggested copy fragment                     |
+| ------------------------- | ------------------------------------------- |
+| `spot_live`               | "Spot XAU/USD"                              |
+| `spot_reference`          | "Spot reference price"                      |
+| `market_closed_reference` | "Last spot/reference price (market closed)" |
+| `spot_delayed`            | "Delayed spot reference"                    |
+| `futures_reference`       | "GCUSD futures reference (not pure spot)"   |
+| `commodity_reference`     | "Commodity reference price"                 |
+| `daily_fix`               | "Daily fix"                                 |
+| `cache_last_known`        | "Last known price (provider cached)"        |
+| `unknown`                 | "Reference price"                           |
 
 A fallback (`is_fallback=true`) should additionally include a short "(fallback source)" disclaimer
 in the tweet text.
+
+For Gold Ticker Live's market-closed manual / Shortcut path, the copy must make all of these clear:
+
+- the gold market is closed
+- the quoted figure is the **last** spot/reference price, not a live retail price
+- the source timestamp / last updated time is shown
+- the data came from cached `data/gold_price.json`, not a fresh provider call in `post_gold.yml`
 
 ## 6. Why we never bypass X duplicate detection
 

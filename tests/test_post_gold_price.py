@@ -274,6 +274,56 @@ def test_market_closed_guard_bypasses_workflow_dispatch_shortcut_runs():
     assert reason == "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run."
 
 
+def test_select_post_type_uses_closed_market_reference_for_operator_run():
+    assert pg.select_post_type('hourly', market_open=False, operator_trigger=True) == 'market_closed_reference'
+    assert pg.select_post_type('hourly', market_open=True, operator_trigger=True) == 'hourly'
+    assert pg.select_post_type('market_open', market_open=False, operator_trigger=True) == 'market_open'
+
+
+def test_closed_market_stale_reference_allowed_within_max_hours(monkeypatch):
+    monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
+    details = pg.get_staleness_details({"timestamp_utc": "2026-05-01T12:00:00Z"}, _now=datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc))
+    assert pg.should_allow_closed_market_stale_reference(
+        post_type='market_closed_reference',
+        market_open=False,
+        operator_trigger=True,
+        staleness_details=details,
+        price=4700.0,
+    ) is True
+
+
+def test_closed_market_stale_reference_allows_exact_max_hour_boundary(monkeypatch):
+    monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
+    details = pg.get_staleness_details({"timestamp_utc": "2026-04-30T12:00:00Z"}, _now=datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc))
+    assert pg.should_allow_closed_market_stale_reference(
+        post_type='market_closed_reference',
+        market_open=False,
+        operator_trigger=True,
+        staleness_details=details,
+        price=4700.0,
+    ) is True
+
+
+def test_closed_market_stale_reference_rejects_old_or_missing_timestamp(monkeypatch):
+    monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
+    old_details = pg.get_staleness_details({"timestamp_utc": "2026-04-29T11:00:00Z"}, _now=datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc))
+    missing_details = pg.get_staleness_details({}, _now=_NOW)
+    assert pg.should_allow_closed_market_stale_reference(
+        post_type='market_closed_reference',
+        market_open=False,
+        operator_trigger=True,
+        staleness_details=old_details,
+        price=4700.0,
+    ) is False
+    assert pg.should_allow_closed_market_stale_reference(
+        post_type='market_closed_reference',
+        market_open=False,
+        operator_trigger=True,
+        staleness_details=missing_details,
+        price=4700.0,
+    ) is False
+
+
 # ── Content-hash tests ────────────────────────────────────────────────────────
 def test_content_hash_computed_stable():
     h1 = pg.compute_content_hash("hello world")
@@ -409,6 +459,56 @@ def test_staleness_supports_normalized_timestamp_utc():
     action, msg = pg.check_staleness(raw, _now=_NOW)
     assert action == 'ok'
     assert msg is None
+
+
+def test_market_closed_reference_template_labels_cached_reference():
+    tweet = pg.format_market_closed_reference_tweet(
+        {
+            **_sample_data(prev_price=4669.34, prev_posted_at_utc="2026-04-24T10:00:00Z", chp=0.2677),
+            "source_updated_at_utc": "2026-05-08T20:06:54Z",
+            "stale_age_hours": 9.6,
+        }
+    )
+    assert "Gold Market Closed" in tweet
+    assert "Last spot/reference XAU/USD" in tweet
+    assert "Last updated:" in tweet
+    assert "Not live retail price" in tweet
+
+
+def test_build_guard_quote_marks_closed_market_reference_as_fresh():
+    raw = {
+        "provider": "gold_api_com",
+        "timestamp_utc": "2026-05-08T20:06:54Z",
+        "source_type": "spot_reference",
+    }
+    data = _sample_data()
+    quote = pg.build_guard_quote(
+        raw,
+        data,
+        staleness_action='skip',
+        post_type='market_closed_reference',
+        closed_market_stale_allowed=True,
+    )
+    assert quote["is_fresh"] is True
+    assert quote["source_type"] == "market_closed_reference"
+
+
+def test_build_guard_quote_keeps_market_open_stale_blocking():
+    raw = {
+        "provider": "gold_api_com",
+        "timestamp_utc": "2026-05-08T20:06:54Z",
+        "source_type": "spot_reference",
+    }
+    data = _sample_data()
+    quote = pg.build_guard_quote(
+        raw,
+        data,
+        staleness_action='warn',
+        post_type='hourly',
+        closed_market_stale_allowed=False,
+    )
+    assert quote["is_fresh"] is False
+    assert quote["source_type"] == "spot_reference"
 
 
 # ── Error-logging tests ───────────────────────────────────────────────────────
@@ -573,7 +673,185 @@ def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeyp
     pg.post_tweet.assert_not_called()
     out = capsys.readouterr().out
     assert "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run." in out
+    assert "selected_post_type:        market_closed_reference" in out
+    assert "template_used:             market_closed_reference" in out
     assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
+
+
+def test_main_market_closed_shortcut_allows_cached_reference_within_limit(tmp_path, monkeypatch, capsys):
+    stale_now = datetime.now(timezone.utc)
+    source_ts = (stale_now - timedelta(hours=9, minutes=33)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4731.2,
+                "timestamp_utc": source_ts,
+                "fetched_at_utc": stale_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "aed_per_gram_24k": 558.4,
+                "karats_aed_per_gram": {
+                    "24k": 558.4,
+                    "22k": 511.87,
+                    "21k": 488.6,
+                    "18k": 418.8,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    tweet_state_file.write_text(json.dumps({"schema_version": 1}))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(pg, "post_tweet", MagicMock())
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: False)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
+    monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit after dry run")
+
+    out = capsys.readouterr().out
+    assert "selected_post_type:        market_closed_reference" in out
+    assert "closed_market_stale_allowed: True" in out
+    assert "Gold Market Closed — Last Reference Price" in out
+    assert "Not live retail price" in out
+    assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
+
+
+def test_main_market_open_stale_data_still_blocks(tmp_path, monkeypatch, capsys):
+    stale_now = datetime.now(timezone.utc)
+    source_ts = (stale_now - timedelta(hours=9, minutes=33)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4731.2,
+                "timestamp_utc": source_ts,
+                "fetched_at_utc": stale_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "aed_per_gram_24k": 558.4,
+                "karats_aed_per_gram": {
+                    "24k": 558.4,
+                    "22k": 511.87,
+                    "21k": 488.6,
+                    "18k": 418.8,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    tweet_state_file.write_text(json.dumps({"schema_version": 1}))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(pg, "post_tweet", MagicMock())
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: True)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit when stale data is blocked")
+
+    pg.post_tweet.assert_not_called()
+    out = capsys.readouterr().out
+    assert "selected_post_type:        hourly" in out
+    assert "WARN: UPSTREAM STALE" in out
+    assert "closed_market_stale_allowed: False" in out
+    assert "would post" not in out
+
+
+def test_main_market_closed_shortcut_blocks_extremely_old_cache(tmp_path, monkeypatch, capsys):
+    stale_now = datetime.now(timezone.utc)
+    source_ts = (stale_now - timedelta(hours=60)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4731.2,
+                "timestamp_utc": source_ts,
+                "fetched_at_utc": stale_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "aed_per_gram_24k": 558.4,
+                "karats_aed_per_gram": {
+                    "24k": 558.4,
+                    "22k": 511.87,
+                    "21k": 488.6,
+                    "18k": 418.8,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    tweet_state_file.write_text(json.dumps({"schema_version": 1}))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(pg, "post_tweet", MagicMock())
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: False)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
+    monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit when cache is too old")
+
+    pg.post_tweet.assert_not_called()
+    out = capsys.readouterr().out
+    assert "selected_post_type:        market_closed_reference" in out
+    assert "closed_market_stale_allowed: False" in out
+    assert "ERROR: UPSTREAM SEVERELY STALE" in out
+    assert "would post" not in out
 
 
 def test_main_dry_run_over_280_char_post_does_not_call_x(tmp_path, monkeypatch, capsys):
