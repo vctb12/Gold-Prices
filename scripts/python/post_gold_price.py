@@ -1033,42 +1033,59 @@ def main():
             closed_market_stale_allowed=closed_market_stale_allowed,
         )
         decision = tweet_guard.decide(guard_state, quote=guard_quote, tweet_text=tweet)
-        if not decision.should_post:
-            skip_msg = (
-                f"SKIP: tweet-guard — {decision.skip_reason}"
-                f" (hash={decision.tweet_hash[:12]}, move=${decision.price_move_usd or 0:.2f},"
-                f" ts_changed={decision.provider_timestamp_changed})"
+        allow_same_price_threshold_override = (
+            not decision.should_post
+            and decision.skip_reason == "price_move_below_threshold"
+            and post_type == "market_closed_reference"
+            and is_allow_same_price_closed_market_repost(
+                event_name=os.environ.get('GITHUB_EVENT_NAME'),
+                trigger_source=trigger_source,
             )
-            if decision.skip_reason == "price_move_below_threshold":
-                # Provide context-specific guidance so operators understand why force_post alone
-                # is not enough and what to do next.
-                mins_str = f"{decision.minutes_since_last:.1f}" if decision.minutes_since_last is not None else "unknown"
-                skip_msg += (
-                    f"\n   post_type:              {post_type}"
-                    f"\n   force_summary_due:      {decision.force_summary_due}"
-                    f"\n   minutes_since_last:     {mins_str}"
-                    f"\n   force_summary_after:    {_force_summary_min} min"
-                    f"\n   force_post:             {force_post_enabled}"
-                    f"\n   Note: force_post=True bypasses cooldown only, NOT price_move_below_threshold."
+        )
+        if not decision.should_post:
+            if allow_same_price_threshold_override:
+                print(
+                    "allow_same_price_closed_market_repost=true — tweet-guard "
+                    "price_move_below_threshold bypassed for this manual/operator "
+                    "market_closed_reference run. duplicate_text_hash, cooldown, "
+                    "and X duplicate rules still apply."
                 )
-                if post_type == "market_closed_reference":
+            else:
+                skip_msg = (
+                    f"SKIP: tweet-guard — {decision.skip_reason}"
+                    f" (hash={decision.tweet_hash[:12]}, move=${decision.price_move_usd or 0:.2f},"
+                    f" ts_changed={decision.provider_timestamp_changed})"
+                )
+                if decision.skip_reason == "price_move_below_threshold":
+                    # Provide context-specific guidance so operators understand why force_post alone
+                    # is not enough and what to do next.
+                    mins_str = f"{decision.minutes_since_last:.1f}" if decision.minutes_since_last is not None else "unknown"
                     skip_msg += (
-                        f"\n   SKIP: market_closed_reference same closing/reference price already posted"
-                        f" and force_summary_due=False."
-                        f"\n   To allow same-price market_closed_reference repost:"
-                        f" set allow_same_price_closed_market_repost=true in workflow_dispatch inputs."
+                        f"\n   post_type:              {post_type}"
+                        f"\n   force_summary_due:      {decision.force_summary_due}"
+                        f"\n   minutes_since_last:     {mins_str}"
+                        f"\n   force_summary_after:    {_force_summary_min} min"
+                        f"\n   force_post:             {force_post_enabled}"
+                        f"\n   Note: force_post=True bypasses cooldown only, NOT price_move_below_threshold."
                     )
-                else:
-                    skip_msg += (
-                        f"\n   Wait for force_summary_due=True (>={_force_summary_min} min since last post)"
-                        f" or for the price to move by ≥${_env_float('MIN_TWEET_MOVE_USD', 1.0):.2f}"
-                        f" (>{_env_float('MIN_TWEET_MOVE_PCT', 0.03):.2f}%)."
-                    )
-            elif decision.should_post is False and post_type == "market_closed_reference":
-                # For other skip reasons on market_closed_reference, add brief context.
-                skip_msg += f"\n   post_type: {post_type}, force_summary_due={decision.force_summary_due}"
-            print(skip_msg)
-            sys.exit(0)
+                    if post_type == "market_closed_reference":
+                        skip_msg += (
+                            f"\n   SKIP: market_closed_reference same closing/reference price already posted"
+                            f" and force_summary_due=False."
+                            f"\n   To allow same-price market_closed_reference repost:"
+                            f" set allow_same_price_closed_market_repost=true in workflow_dispatch inputs."
+                        )
+                    else:
+                        skip_msg += (
+                            f"\n   Wait for force_summary_due=True (>={_force_summary_min} min since last post)"
+                            f" or for the price to move by ≥${_env_float('MIN_TWEET_MOVE_USD', 1.0):.2f}"
+                            f" (>{_env_float('MIN_TWEET_MOVE_PCT', 0.03):.2f}%)."
+                        )
+                elif decision.should_post is False and post_type == "market_closed_reference":
+                    # For other skip reasons on market_closed_reference, add brief context.
+                    skip_msg += f"\n   post_type: {post_type}, force_summary_due={decision.force_summary_due}"
+                print(skip_msg)
+                sys.exit(0)
         # Log why a same-price market_closed_reference was allowed through.
         if post_type == "market_closed_reference" and decision.price_move_usd is not None and abs(decision.price_move_usd) < 0.01:
             if decision.force_summary_due:
