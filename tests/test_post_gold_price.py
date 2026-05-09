@@ -751,10 +751,10 @@ def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeyp
     out = capsys.readouterr().out
     assert "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run." in out
     assert "source:       shortcut" in out
-    assert "refresh_price_first:      false" in out
-    assert "trigger_nonce:            ios-shortcut-run-1" in out
-    assert "github.run_id:            123456789" in out
-    assert "github.run_attempt:       3" in out
+    assert "refresh_price_first:" in out and "false" in out
+    assert "trigger_nonce:" in out and "ios-shortcut-run-1" in out
+    assert "github.run_id:" in out and "123456789" in out
+    assert "github.run_attempt:" in out and "3" in out
     assert "shortcut_attempt_recorded: false (dry run)" in out
     assert "selected_post_type:        market_closed_reference" in out
     assert "template_used:             market_closed_reference" in out
@@ -1456,3 +1456,295 @@ def test_duplicate_guard_market_closed_reference_log_uses_tree_format(monkeypatc
     assert "├── refresh_price_first:  false" in reason
     assert "└── action:" in reason
     assert "allow_same_price_closed_market_repost=true" in reason
+
+
+# ── "Previous post: none" vs guard state clarification tests ─────────────────
+
+def _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=0.1):
+    """Return a gold_price.json in normalized (fetch_gold_price.py) format.
+    This is what data/last_gold_price.json looks like after refresh_price_first=true runs
+    and fetch_gold_price.py overwrites it — causing _load_last_price() to return None.
+    """
+    now = datetime.now(timezone.utc)
+    ts = (now - timedelta(hours=hours_old)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gold_file = tmp_path / "gold_price.json"
+    gold_file.write_text(json.dumps({
+        "schema_version": 1,
+        "provider": "gold_api_com",
+        "xau_usd_per_oz": price,
+        "timestamp_utc": ts,
+        "fetched_at_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "aed_per_gram_24k": 557.79,
+        "karats_aed_per_gram": {
+            "24k": 557.79,
+            "22k": 511.31,
+            "21k": 488.07,
+            "18k": 418.34,
+        },
+    }))
+    return gold_file
+
+
+def test_previous_post_none_from_legacy_state_cross_references_guard_state(
+    tmp_path, monkeypatch, capsys
+):
+    """
+    When data/last_gold_price.json is in normalized format (written by fetch_gold_price.py
+    after refresh_price_first=true), _load_last_price() returns (None, None, None) and the
+    log prints "Previous post (legacy): none".
+    The log must also print the guard state from data/last_tweet_state.json for clarity.
+    This reproduces the confusing "Previous post: none" seen in both 18:29 and 18:46 runs.
+    """
+    fresh_now = datetime.now(timezone.utc)
+    gold_file = _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=0.1)
+
+    # The legacy state file is in normalized format (as if overwritten by fetcher)
+    legacy_state_file = tmp_path / "last_gold_price.json"
+    legacy_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "provider": "gold_api_com",
+        "xau_usd_per_oz": 4715.70,
+        "timestamp_utc": (fresh_now - timedelta(hours=0.5)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }))
+
+    # Guard state has valid prior post data
+    guard_state_file = tmp_path / "last_tweet_state.json"
+    guard_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "last_tweet_time_utc": (fresh_now - timedelta(minutes=16, seconds=53)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_price_usd_oz": 4715.7002,
+        "last_tweet_text_hash": "3d058e70a48a695ab9b1fccd169697479e2fcfed4b646a68db33d3247383f421",
+    }))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", legacy_state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", guard_state_file)
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: False)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("FORCE_POST", "true")
+    monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit:
+        pass
+
+    out = capsys.readouterr().out
+    # Legacy state shows "none" because the normalized schema has no "price" key
+    assert "Previous post (legacy data/last_gold_price.json): none" in out
+    # Guard state cross-reference must be printed when guard state has info
+    assert "Previous post (data/last_tweet_state.json):" in out
+    assert "4,715.7002" in out or "4715.7002" in out
+    assert "authoritative source" in out
+
+
+def test_run_context_block_includes_guard_state_and_force_summary_due(
+    tmp_path, monkeypatch, capsys
+):
+    """
+    The RUN CONTEXT block must include:
+    - allow_same_price_closed_market_repost
+    - last_price_usd_oz from guard state
+    - last_tweet_time_utc from guard state
+    - minutes_since_last_tweet
+    - force_summary_due
+    - force_summary_after_minutes
+    """
+    fresh_now = datetime.now(timezone.utc)
+    gold_file = _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=0.1)
+    legacy_state_file = tmp_path / "last_gold_price.json"
+    legacy_state_file.write_text(json.dumps({"price": 4715.70, "posted_at_utc": "2026-05-09T17:00:00Z"}))
+    guard_state_file = tmp_path / "last_tweet_state.json"
+    guard_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "last_tweet_time_utc": (fresh_now - timedelta(minutes=16)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_price_usd_oz": 4715.7002,
+        "last_tweet_text_hash": "abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456abcd",
+    }))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", legacy_state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", guard_state_file)
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: True)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setenv("ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST", "true")
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
+    monkeypatch.delenv("GITHUB_EVENT_NAME", raising=False)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit:
+        pass
+
+    out = capsys.readouterr().out
+    assert "allow_same_price_closed_market_repost:" in out
+    assert "last_price_usd_oz (guard):" in out
+    assert "last_tweet_time_utc (guard):" in out
+    assert "minutes_since_last_tweet:" in out
+    assert "force_summary_due:" in out
+    assert "force_summary_after_minutes:" in out
+    # Guard state file path must be mentioned
+    assert "data/last_tweet_state.json" in out
+    assert "data/last_gold_price.json" in out
+    assert "data/gold_price.json" in out
+
+
+def test_price_move_threshold_skip_includes_force_post_explanation_for_market_closed_reference(
+    tmp_path, monkeypatch, capsys
+):
+    """
+    When price_move_below_threshold fires for market_closed_reference, the SKIP message must:
+    - Explain that force_post=True only bypasses cooldown
+    - Tell the operator how to override (allow_same_price_closed_market_repost=true)
+    - Show force_summary_due=False and minutes_since_last
+    This covers the 18:46 run scenario.
+    """
+    fresh_now = datetime.now(timezone.utc)
+    source_ts = (fresh_now - timedelta(hours=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gold_file = _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=4)
+    # Use NORMALIZED legacy state (as if fetch_gold_price.py overwrote it) so that
+    # _load_last_price() returns prev_price=None, check_duplicate_guard passes, and
+    # the flow reaches tweet_guard.decide() — reproducing the 18:46 run scenario.
+    legacy_state_file = tmp_path / "last_gold_price.json"
+    legacy_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "provider": "gold_api_com",
+        "xau_usd_per_oz": 4715.70,
+        "timestamp_utc": source_ts,
+    }))
+
+    # Guard state: last tweet was only 16 min ago (force_summary_due=False).
+    # The last_provider_timestamp_utc is OLDER than the current gold file's timestamp,
+    # simulating refresh_price_first=true having advanced the provider timestamp.
+    # This makes ts_changed=True, so provider_timestamp_unchanged passes and
+    # price_move_below_threshold fires (the 18:46 scenario).
+    guard_state_file = tmp_path / "last_tweet_state.json"
+    older_provider_ts = (fresh_now - timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    guard_state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "last_tweet_time_utc": (fresh_now - timedelta(minutes=16, seconds=53)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_tweet_text_hash": "abc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+        "last_price_usd_oz": 4715.70,
+        "last_provider_timestamp_utc": older_provider_ts,
+    }))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", legacy_state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", guard_state_file)
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: False)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("FORCE_POST", "true")  # bypasses cooldown only
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST", "false")
+    monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected skip exit")
+
+    out = capsys.readouterr().out
+    assert "price_move_below_threshold" in out
+    assert "force_summary_due" in out
+    # force_post explanation must appear
+    assert "force_post" in out.lower()
+    assert "cooldown" in out.lower()
+    # Must tell operator about allow_same_price_closed_market_repost
+    assert "allow_same_price_closed_market_repost" in out
+    # The market_closed_reference specific message
+    assert "market_closed_reference" in out
+    assert "same closing/reference price" in out
+
+
+def test_market_closed_reference_template_content(tmp_path, monkeypatch, capsys):
+    """market_closed_reference template must match the expected public format."""
+    tweet = pg.format_market_closed_reference_tweet({
+        "price": 4715.70,
+        "price_gram_24k": 556.80,
+        "price_gram_22k": 510.40,
+        "price_gram_21k": 487.20,
+        "price_gram_18k": 417.60,
+        "chp": None,
+        "source_updated_at_utc": "2026-05-09T18:45:00Z",
+        "stale_age_hours": 10.0,
+    })
+    assert "🔴 Gold Market Is Now Closed" in tweet
+    assert "Closing Spot XAU/USD" in tweet
+    assert "$4,715.70/oz" in tweet
+    assert "AED/g" in tweet
+    assert "Reopens Monday" in tweet
+    assert "UAE (GMT+4)" in tweet
+    assert "Last updated:" in tweet
+    assert "Spot reference · Not retail price" in tweet
+    assert "🖥️ goldtickerlive.com" in tweet
+    assert "#GoldPrice #Gold #XAU #UAE #Dubai" in tweet
+    # Stale age must NOT be in the public post
+    assert "10.0h old" not in tweet
+    assert "Cached reference" not in tweet
+    assert "cached" not in tweet.lower().replace("Spot reference", "")
+    assert "Last Reference Price" not in tweet
+    assert "Reference prices:" not in tweet
+
+
+def test_force_post_only_bypasses_cooldown_not_price_move_threshold(monkeypatch):
+    """
+    force_post=True must bypass cooldown (Rule 2) but NOT price_move_below_threshold (Rule 7).
+    This is the core behavioral rule for the 18:46 run scenario.
+    """
+    import tweet_guard as tg
+    monkeypatch.setenv("FORCE_POST", "true")
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD DIFFERENT TEXT"),
+        last_tweet_time_utc=(datetime.now(timezone.utc) - timedelta(minutes=16)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        last_provider_timestamp_utc="2026-05-09T14:00:00Z",
+        last_price_usd_oz=4715.70,
+    )
+    quote = {
+        "xau_usd_per_oz": 4715.70,  # same price
+        "timestamp_utc": "2026-05-09T14:10:00Z",  # timestamp advanced slightly
+        "is_fresh": True,
+        "is_fallback": False,
+        "provider": "gold_api_com",
+        "source_type": "market_closed_reference",
+    }
+    decision = tg.decide(state, quote=quote, tweet_text="NEW DIFFERENT TEXT")
+    # force_post bypassed cooldown (which would have been ~55 min for 16-min gap)
+    assert decision.skip_reason != "cooldown_active"
+    # But price_move_below_threshold fires because price=0 move and force_summary_due=False
+    assert decision.should_post is False
+    assert decision.skip_reason == "price_move_below_threshold"
+    assert decision.force_summary_due is False
+

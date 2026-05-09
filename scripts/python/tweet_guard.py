@@ -163,6 +163,8 @@ class Decision:
     price_move_usd: Optional[float]
     price_move_pct: Optional[float]
     provider_timestamp_changed: Optional[bool]
+    force_summary_due: Optional[bool] = None
+    minutes_since_last: Optional[float] = None
 
 
 def decide(
@@ -199,7 +201,8 @@ def decide(
     if not _truthy("SKIP_DUPLICATE_TWEETS", default=True):
         # Duplicate guard explicitly disabled — still return decision data.
         print("  [guard] SKIP_DUPLICATE_TWEETS=false — all guards bypassed")
-        return Decision(True, None, h, move_usd, move_pct, ts_changed)
+        return Decision(True, None, h, move_usd, move_pct, ts_changed,
+                        force_summary_due=None, minutes_since_last=None)
 
     allow_stale = _truthy("ALLOW_STALE_TWEET", default=False)
     force_post = _truthy("FORCE_POST", default=False)
@@ -216,13 +219,15 @@ def decide(
     # Rule 1: not fresh → skip unless explicit override.
     if not is_fresh and not allow_stale:
         print(f"  [guard] stale_quote: is_fresh={is_fresh}, allow_stale={allow_stale} → SKIP")
-        return Decision(False, "stale_quote", h, move_usd, move_pct, ts_changed)
+        return Decision(False, "stale_quote", h, move_usd, move_pct, ts_changed,
+                        force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] stale_quote: is_fresh={is_fresh}, allow_stale={allow_stale} → PASS")
 
     # First-ever post: nothing to compare against, just allow.
     if state.last_tweet_text_hash is None:
-        print("  [guard] first_post: no prior state → PASS")
-        return Decision(True, None, h, move_usd, move_pct, ts_changed)
+        print("  [guard] first_post: no prior tweet state (last_tweet_state.json empty or missing) → PASS")
+        return Decision(True, None, h, move_usd, move_pct, ts_changed,
+                        force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
 
     # Rule 2: cooldown — keep scheduled + manual GitHub runs from double-posting.
     if (
@@ -231,25 +236,29 @@ def decide(
         and minutes_since_last < min_interval_minutes
     ):
         print(f"  [guard] cooldown: minutes_since_last={minutes_since_last:.1f} < {min_interval_minutes} → SKIP")
-        return Decision(False, "cooldown_active", h, move_usd, move_pct, ts_changed)
+        return Decision(False, "cooldown_active", h, move_usd, move_pct, ts_changed,
+                        force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] cooldown: minutes_since_last={minutes_since_last}, force_post={force_post} → PASS")
 
     # Rule 3: same provider sample (price + timestamp) → always skip.
     if same_price is True and ts_changed is False:
         print(f"  [guard] provider_sample_unchanged: same_price={same_price}, ts_changed={ts_changed} → SKIP")
-        return Decision(False, "provider_sample_unchanged", h, move_usd, move_pct, ts_changed)
+        return Decision(False, "provider_sample_unchanged", h, move_usd, move_pct, ts_changed,
+                        force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] provider_sample_unchanged: same_price={same_price}, ts_changed={ts_changed} → PASS")
 
     # Rule 4: provider timestamp unchanged → skip unless forced summary due.
     if ts_changed is False and not force_summary_due:
         print(f"  [guard] provider_timestamp_unchanged: ts_changed={ts_changed}, force_summary_due={force_summary_due} → SKIP")
-        return Decision(False, "provider_timestamp_unchanged", h, move_usd, move_pct, ts_changed)
+        return Decision(False, "provider_timestamp_unchanged", h, move_usd, move_pct, ts_changed,
+                        force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] provider_timestamp_unchanged: ts_changed={ts_changed}, force_summary_due={force_summary_due} → PASS")
 
     # Rule 5: identical text hash → ALWAYS skip (X rejects this anyway).
     if h == state.last_tweet_text_hash:
         print(f"  [guard] duplicate_text_hash: hash={h[:12]} matches last → SKIP")
-        return Decision(False, "duplicate_text_hash", h, move_usd, move_pct, ts_changed)
+        return Decision(False, "duplicate_text_hash", h, move_usd, move_pct, ts_changed,
+                        force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] duplicate_text_hash: hash={h[:12]} is new → PASS")
 
     # Rule 6: fallback/cache with same price → skip. Evaluated before the
@@ -259,17 +268,25 @@ def decide(
     if is_fallback or source_type in ("cache_last_known", "spot_delayed"):
         if same_price:
             print(f"  [guard] fallback_no_change: is_fallback={is_fallback}, source_type={source_type!r}, same_price={same_price} → SKIP")
-            return Decision(False, "fallback_no_change", h, move_usd, move_pct, ts_changed)
+            return Decision(False, "fallback_no_change", h, move_usd, move_pct, ts_changed,
+                            force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] fallback_no_change: is_fallback={is_fallback}, source_type={source_type!r} → PASS")
 
     # Rule 7: small price movement → skip unless forced summary due.
     if move_usd is not None and move_pct is not None:
         if abs(move_usd) < min_move_usd and abs(move_pct) < min_move_pct and not force_summary_due:
-            print(f"  [guard] price_move_below_threshold: move=${move_usd:.2f} ({move_pct:.3f}%) → SKIP")
-            return Decision(False, "price_move_below_threshold", h, move_usd, move_pct, ts_changed)
+            mins_str = f"{minutes_since_last:.1f}" if minutes_since_last is not None else "unknown"
+            print(
+                f"  [guard] price_move_below_threshold: move=${move_usd:.2f} ({move_pct:.3f}%),"
+                f" force_summary_due={force_summary_due}"
+                f" (minutes_since_last={mins_str}, FORCE_SUMMARY_AFTER_MINUTES={force_summary_min}) → SKIP"
+            )
+            return Decision(False, "price_move_below_threshold", h, move_usd, move_pct, ts_changed,
+                            force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
     print(f"  [guard] price_move_below_threshold: move_usd={move_usd}, move_pct={move_pct}, force_summary_due={force_summary_due} → PASS")
 
-    return Decision(True, None, h, move_usd, move_pct, ts_changed)
+    return Decision(True, None, h, move_usd, move_pct, ts_changed,
+                    force_summary_due=force_summary_due, minutes_since_last=minutes_since_last)
 
 
 def update_state_after_post(

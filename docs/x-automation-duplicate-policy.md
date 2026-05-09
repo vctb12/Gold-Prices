@@ -189,9 +189,8 @@ figure repeatedly.
 
 If an operator needs to re-post the same closing reference price (for example, to announce a market
 closure that was not posted earlier, or to post after a gap where the closing price has not moved),
-they can set
-`allow_same_price_closed_market_repost=true` in the `workflow_dispatch` inputs. This bypasses
-**only** the price-change guard. All other protections remain active:
+they can set `allow_same_price_closed_market_repost=true` in the `workflow_dispatch` inputs. This
+bypasses **only** the price-change guard. All other protections remain active:
 
 - `duplicate_text_hash` — if the tweet text is byte-for-byte identical to the last post, it still
   skips (and X would reject it anyway).
@@ -217,8 +216,8 @@ last-known closing price — `xau_usd_per_oz` will not change, and the price-cha
 fire and skip. In that case `allow_same_price_closed_market_repost=true` is also required to bypass
 the price-change guard.
 
-Use both inputs together when the operator wants to fetch the latest provider snapshot and then force
-a `market_closed_reference` post regardless of whether the price moved:
+Use both inputs together when the operator wants to fetch the latest provider snapshot and then
+force a `market_closed_reference` post regardless of whether the price moved:
 
 ```
 refresh_price_first: true
@@ -228,3 +227,128 @@ allow_same_price_closed_market_repost: true
 The `duplicate_text_hash` guard remains active; if the fetched price and all tweet fields are
 byte-for-byte identical to the last post, the post will still be skipped (and X would reject it
 anyway).
+
+---
+
+## 8. Why two runs with identical visible inputs can behave differently
+
+This is the most common source of operator confusion and is not a bug — it is the intended design.
+Two `workflow_dispatch` runs with the **same visible inputs** (same `force_post`, `source`,
+`refresh_price_first`, `allow_same_price_closed_market_repost`, `trigger_nonce`) can produce
+different outcomes because internal persisted state changes between runs.
+
+### The 18:29 / 18:46 example
+
+On 2026-05-09 two manual Shortcut-triggered runs used identical visible inputs:
+
+```
+source=shortcut  dry_run=false  force_post=true  refresh_price_first=true
+allow_same_price_closed_market_repost=true  trigger_nonce=none
+selected_post_type=market_closed_reference  price=$4,715.70
+```
+
+Run 1 (18:29 UTC) **posted**. Run 2 (18:46 UTC) **skipped**.
+
+The difference was `force_summary_due`:
+
+| Guard                        | Run 1 (18:29)                             | Run 2 (18:46) |
+| ---------------------------- | ----------------------------------------- | ------------- |
+| `minutes_since_last`         | `60.1` min                                | `16.9` min    |
+| `force_summary_due`          | `True`                                    | `False`       |
+| `price_move_below_threshold` | PASS (force_summary_due=True bypasses it) | SKIP          |
+
+After run 1 posted, `data/last_tweet_state.json` was updated with the new tweet time. When run 2
+arrived only ~17 minutes later, `minutes_since_last` was below `FORCE_SUMMARY_AFTER_MINUTES` (60),
+so `force_summary_due=False`. Because the price had not moved (`move=$0.00`), the
+`price_move_below_threshold` guard fired and the run cleanly skipped.
+
+### Why logs showed "Previous post: none"
+
+Both runs printed `"Previous post (legacy data/last_gold_price.json): none"`. This is because
+`data/last_gold_price.json` is written by **two different writers with incompatible schemas**:
+
+1. **`fetch_gold_price.py`** (the price fetcher) writes the full normalized payload:
+   `{ "schema_version": 1, "provider": "gold_api_com", "xau_usd_per_oz": 4715.70, ... }`
+
+2. **`post_gold_price.py`** (the poster) writes the legacy state:
+   `{ "price": 4715.70, "posted_at_utc": "..." }`
+
+When `refresh_price_first=true` is used, the fetcher runs first and overwrites
+`last_gold_price.json` with the normalized format. The poster's `_load_last_price()` then reads this
+file and looks for a `"price"` key — which doesn't exist in the normalized schema — so it returns
+`(None, None, None)` and logs `"Previous post (legacy): none"`.
+
+This does **not** affect guard correctness: all cooldown, duplicate, and price-move decisions use
+`data/last_tweet_state.json` (the authoritative guard state), not `data/last_gold_price.json`. The
+improved RUN CONTEXT block now cross-references both files explicitly, including the last tweet time
+and last price from `last_tweet_state.json`, so the log is no longer misleading.
+
+### State file roles
+
+| File                         | Written by                                          | Contains                                  | Used for                                                          |
+| ---------------------------- | --------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- |
+| `data/gold_price.json`       | `fetch_gold_price.py`                               | Current normalized gold price             | Source of truth for price/timestamp to post                       |
+| `data/last_gold_price.json`  | Both `fetch_gold_price.py` AND `post_gold_price.py` | See note below                            | Legacy "last posted price" display; schema collision exists       |
+| `data/last_tweet_state.json` | `post_gold_price.py` (via `tweet_guard`)            | Last tweet time, price, hash, provider ts | Authoritative source for cooldown / duplicate / force_summary_due |
+
+`data/last_gold_price.json` is written with **two incompatible schemas** by two different scripts.
+The legacy `{"price": ..., "posted_at_utc": ...}` format is used by `post_gold_price.py`; the
+normalized `{"xau_usd_per_oz": ..., "provider": ...}` format is used by `fetch_gold_price.py`.
+Prefer `data/last_tweet_state.json` for any guard logic; the legacy file is informational only.
+
+### Intended relationship between operator inputs and guards
+
+```
+force_post=true
+  → bypasses: cooldown (Rule 2)
+  → does NOT bypass: stale_quote, provider_sample_unchanged,
+                     provider_timestamp_unchanged, duplicate_text_hash,
+                     fallback_no_change, price_move_below_threshold
+
+allow_same_price_closed_market_repost=true  (manual/operator + market_closed_reference only)
+  → bypasses: check_duplicate_guard price-change check
+  → does NOT bypass: duplicate_text_hash (tweet_guard Rule 5), stale_quote, cooldown
+
+force_summary_due=true  (computed from last tweet time vs FORCE_SUMMARY_AFTER_MINUTES)
+  → bypasses: price_move_below_threshold (Rule 7), provider_timestamp_unchanged (Rule 4)
+  → NOT an operator input — derived from persisted state in last_tweet_state.json
+
+refresh_price_first=true  (manual/operator workflow_dispatch only)
+  → runs one provider fetch before the posting path
+  → does NOT guarantee price change; if market is closed, price stays the same
+  → side effect: overwrites data/last_gold_price.json with normalized schema,
+                 causing _load_last_price() to return None ("Previous post: none")
+
+trigger_nonce  (optional label, any value including none/empty)
+  → appears in logs and last_tweet_state.json for traceability
+  → does NOT affect tweet text content hash or duplicate_text_hash guard
+  → trigger_nonce=none (empty) is allowed and expected for untriggered runs
+```
+
+### How to tell why a run skipped
+
+Always inspect the Python posting step log, not just the workflow result. Look for:
+
+1. `SKIP: price-change guard` → `check_duplicate_guard` fired (same price as `last_gold_price.json`)
+2. `SKIP: tweet-guard — price_move_below_threshold` → `tweet_guard.decide()` fired because price
+   didn't move and `force_summary_due=False`. Check `minutes_since_last_tweet` and
+   `force_summary_after_minutes` in the RUN CONTEXT block.
+3. `SKIP: tweet-guard — cooldown_active` → last tweet was too recent; use `force_post=true` to
+   bypass.
+4. `SKIP: tweet-guard — duplicate_text_hash` → tweet text is byte-for-byte identical to last post.
+   Wait for data to change, or use `trigger_nonce` if you need a new hash (note: nonce is in logs
+   only, not tweet text by default).
+
+### When a second run skips after a first run posts
+
+If you run the Shortcut twice quickly with identical inputs and the second run skips
+`price_move_below_threshold`:
+
+- This is **correct behavior** — the first run already posted; the price hasn't moved.
+- Wait until `force_summary_due=True` (`FORCE_SUMMARY_AFTER_MINUTES=60` elapses) before the bot will
+  post a same-price summary again.
+- `force_post=true` alone is not enough — it only bypasses cooldown, not
+  `price_move_below_threshold`.
+- To force a second post within the cooldown/summary window: use both `force_post=true` AND
+  `allow_same_price_closed_market_repost=true`, and ensure the generated tweet text is not
+  byte-for-byte identical to the last post (otherwise `duplicate_text_hash` will still block).

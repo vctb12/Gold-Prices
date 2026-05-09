@@ -378,3 +378,245 @@ def test_load_state_handles_non_integer_schema_version(tmp_path: Path, capsys):
     assert state.schema_version == tg.SCHEMA_VERSION
     out = capsys.readouterr().out
     assert "non-integer schema_version" in out
+
+
+# ── Decision.force_summary_due and .minutes_since_last ───────────────────────
+
+def test_decision_includes_force_summary_due_and_minutes_since_last(monkeypatch):
+    """Decision dataclass exposes force_summary_due and minutes_since_last for callers."""
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(30),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4550.0,
+    )
+    d = tg.decide(state, quote=_quote(price=4550.5, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    # force_summary_due must be populated on every Decision
+    assert d.force_summary_due is not None
+    assert d.minutes_since_last is not None
+    assert isinstance(d.minutes_since_last, float)
+
+
+def test_force_summary_due_false_when_recently_posted(monkeypatch):
+    """force_summary_due is False when last post was recent (< FORCE_SUMMARY_AFTER_MINUTES)."""
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(16),  # only 16 min ago
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4715.70,
+    )
+    # Same price, timestamp advanced → will hit price_move_below_threshold
+    d = tg.decide(state, quote=_quote(price=4715.70, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    assert d.force_summary_due is False
+    assert d.minutes_since_last is not None
+    assert d.minutes_since_last < 60
+
+
+def test_force_summary_due_true_when_enough_time_has_passed(monkeypatch):
+    """force_summary_due is True when last post was >= FORCE_SUMMARY_AFTER_MINUTES ago."""
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(61),  # 61 min ago
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4715.70,
+    )
+    d = tg.decide(state, quote=_quote(price=4715.70, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    assert d.force_summary_due is True
+    assert d.should_post is True
+
+
+# ── Two sequential same-input runs can differ due to state ───────────────────
+
+def test_two_sequential_runs_same_inputs_different_outcome(monkeypatch):
+    """
+    Regression test: two runs with identical workflow inputs behave differently
+    because force_summary_due changed between them (state was written after first post).
+
+    Run 1: state has no last_tweet_time → force_summary_due=True → posts.
+    Run 2: state updated after run 1 → minutes_since_last=16 → force_summary_due=False → skips.
+    """
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.setenv("FORCE_POST", "true")
+
+    # Run 1: guard state has no prior post (first run or state missing)
+    state_run1 = tg.TweetState(
+        last_tweet_text_hash=None,  # no prior state → force_summary_due=True
+        last_tweet_time_utc=None,
+        last_provider_timestamp_utc=None,
+        last_price_usd_oz=None,
+    )
+    quote = _quote(price=4715.70, ts="2026-05-09T18:28:55Z")
+    d1 = tg.decide(state_run1, quote=quote, tweet_text="Market Closed $4,715.70")
+    assert d1.should_post is True  # first_post path → always allow
+    assert d1.force_summary_due is True  # minutes_since_last is None → True
+
+    # Simulate: after run 1 posts, state is updated with last_tweet_time_utc ~16 min ago
+    state_run2 = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD_DIFFERENT_TEXT"),  # different text, not a dup
+        last_tweet_time_utc=_minutes_ago_iso(16),  # only 16 min ago
+        last_provider_timestamp_utc="2026-05-09T18:28:55Z",
+        last_price_usd_oz=4715.70,
+    )
+    # Run 2 gets same price, timestamp advanced slightly
+    quote2 = _quote(price=4715.70, ts="2026-05-09T18:34:00Z")
+    d2 = tg.decide(state_run2, quote=quote2, tweet_text="Market Closed $4,715.70 v2")
+    assert d2.should_post is False
+    assert d2.skip_reason == "price_move_below_threshold"
+    assert d2.force_summary_due is False
+    assert d2.minutes_since_last is not None
+    assert d2.minutes_since_last < 60
+
+
+def test_price_move_threshold_skip_log_includes_force_summary_due(monkeypatch, capsys):
+    """price_move_below_threshold skip log must include force_summary_due and minutes_since_last."""
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    monkeypatch.setenv("FORCE_POST", "true")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(16),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4715.70,
+    )
+    d = tg.decide(state, quote=_quote(price=4715.70, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    assert d.should_post is False
+    assert d.skip_reason == "price_move_below_threshold"
+    out = capsys.readouterr().out
+    assert "force_summary_due=False" in out
+    assert "minutes_since_last" in out
+    assert "FORCE_SUMMARY_AFTER_MINUTES" in out
+
+
+# ── first_post log clarity ────────────────────────────────────────────────────
+
+def test_first_post_log_mentions_no_prior_tweet_state(capsys):
+    """first_post guard log must explicitly mention that last_tweet_state.json has no prior state."""
+    state = tg.TweetState()  # no prior state at all
+    tg.decide(state, quote=_quote(), tweet_text="First tweet ever")
+    out = capsys.readouterr().out
+    assert "first_post" in out
+    assert "no prior tweet state" in out
+    assert "last_tweet_state.json" in out
+
+
+# ── allow_same_price_closed_market_repost interaction ────────────────────────
+
+def test_same_price_closed_market_blocked_by_price_move_threshold_by_default(monkeypatch):
+    """
+    market_closed_reference same price skips via price_move_below_threshold when:
+    - force_summary_due=False
+    - allow_same_price_closed_market_repost is not set (default False)
+    This matches the SKIP behavior in the 18:46 run.
+    """
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("FORCE_POST", "true")  # bypasses cooldown only
+    monkeypatch.delenv("ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST", raising=False)
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("DIFFERENT TEXT"),
+        last_tweet_time_utc=_minutes_ago_iso(16),
+        last_provider_timestamp_utc="2026-05-09T18:28:55Z",
+        last_price_usd_oz=4715.70,
+    )
+    quote = _quote(price=4715.70, ts="2026-05-09T18:34:00Z",
+                   source_type="market_closed_reference")
+    d = tg.decide(state, quote=quote, tweet_text="Market Closed $4,715.70 — new text")
+    assert d.should_post is False
+    assert d.skip_reason == "price_move_below_threshold"
+    assert d.force_summary_due is False
+
+
+def test_duplicate_text_hash_still_blocks_even_with_force_post_and_force_summary(monkeypatch):
+    """
+    duplicate_text_hash must block even when force_post=True and force_summary_due=True.
+    The 18:46 run had a *different* hash, so this is a separate safety check.
+    """
+    monkeypatch.setenv("FORCE_POST", "true")
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "1")  # force_summary_due=True
+    text = "🔴 Gold Market Is Now Closed\n24K · $4,715.70/oz"
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet(text),
+        last_tweet_time_utc=_minutes_ago_iso(120),  # force_summary_due=True
+        last_provider_timestamp_utc="2026-05-09T18:28:55Z",
+        last_price_usd_oz=4715.70,
+    )
+    quote = _quote(price=4715.70, ts="2026-05-09T18:34:00Z",
+                   source_type="market_closed_reference")
+    d = tg.decide(state, quote=quote, tweet_text=text)
+    assert d.should_post is False
+    assert d.skip_reason == "duplicate_text_hash"
+
+
+def test_force_summary_due_true_allows_same_price_through_threshold_guard(monkeypatch):
+    """
+    When force_summary_due=True and ts_changed=True, same-price posts pass price_move threshold.
+    This matches the PASS behavior in the 18:29 run.
+    """
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("FORCE_POST", "true")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD TEXT"),
+        last_tweet_time_utc=_minutes_ago_iso(61),  # force_summary_due=True
+        last_provider_timestamp_utc="2026-05-09T17:28:55Z",
+        last_price_usd_oz=4715.70,
+    )
+    quote = _quote(price=4715.70, ts="2026-05-09T18:28:55Z",
+                   source_type="market_closed_reference")
+    d = tg.decide(state, quote=quote, tweet_text="NEW DIFFERENT TEXT")
+    assert d.should_post is True
+    assert d.force_summary_due is True
+
+
+def test_scheduled_source_cannot_use_skip_duplicate_bypass(monkeypatch):
+    """
+    Scheduled runs have no mechanism to set allow_same_price_closed_market_repost.
+    The price_move_below_threshold guard fires for them as normal.
+    This test confirms tweet_guard.decide() itself has no source-awareness bypass.
+    """
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    # Scheduled runs never set FORCE_POST in a way that bypasses price_move
+    monkeypatch.delenv("FORCE_POST", raising=False)
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD TEXT"),
+        last_tweet_time_utc=_minutes_ago_iso(30),  # within cooldown
+        last_provider_timestamp_utc="2026-05-09T17:28:55Z",
+        last_price_usd_oz=4715.70,
+    )
+    quote = _quote(price=4715.70, ts="2026-05-09T18:28:55Z")
+    d = tg.decide(state, quote=quote, tweet_text="DIFFERENT TEXT")
+    # Cooldown fires first for scheduled runs (no FORCE_POST)
+    assert d.should_post is False
+    assert d.skip_reason == "cooldown_active"
+
+
+def test_decision_force_summary_due_populated_on_stale_skip(monkeypatch):
+    """force_summary_due is populated even when stale_quote is the skip reason."""
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.delenv("ALLOW_STALE_TWEET", raising=False)
+    state = tg.TweetState(
+        last_tweet_text_hash="x",
+        last_tweet_time_utc=_minutes_ago_iso(30),
+    )
+    d = tg.decide(state, quote=_quote(is_fresh=False), tweet_text="any")
+    assert d.skip_reason == "stale_quote"
+    assert d.force_summary_due is not None  # must always be set
+
+
+def test_decision_force_summary_due_populated_on_cooldown_skip(monkeypatch):
+    """force_summary_due is populated even when cooldown_active is the skip reason."""
+    monkeypatch.setenv("FORCE_SUMMARY_AFTER_MINUTES", "60")
+    monkeypatch.setenv("MIN_TWEET_INTERVAL_MINUTES", "55")
+    state = tg.TweetState(
+        last_tweet_text_hash=tg.hash_tweet("OLD"),
+        last_tweet_time_utc=_minutes_ago_iso(20),
+        last_provider_timestamp_utc="2026-05-01T10:00:00Z",
+        last_price_usd_oz=4540.0,
+    )
+    d = tg.decide(state, quote=_quote(price=4550.0, ts="2026-05-01T10:06:00Z"), tweet_text="NEW")
+    assert d.skip_reason == "cooldown_active"
+    assert d.force_summary_due is not None
+    assert d.minutes_since_last is not None
