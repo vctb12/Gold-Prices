@@ -579,6 +579,7 @@ def format_market_close_tweet(data):
     )
 
 def format_market_closed_reference_tweet(data):
+    """Format a labeled market-closed reference post from cached spot data."""
     price, g24, g22, g21, g18, _chp = _parse_fields(data)
     source_updated_at = data.get('source_updated_at_utc') or 'timestamp unavailable'
     stale_age_hours = data.get('stale_age_hours')
@@ -627,6 +628,7 @@ def get_template_name(post_type):
 
 
 def build_guard_quote(raw_data, data, *, staleness_action, post_type, closed_market_stale_allowed):
+    """Build the tweet-guard quote payload with closed-market reference overrides."""
     source_type = (
         raw_data.get("source_type") if isinstance(raw_data, dict) else None
     ) or "spot_reference"

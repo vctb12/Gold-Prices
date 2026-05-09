@@ -292,6 +292,18 @@ def test_closed_market_stale_reference_allowed_within_max_hours(monkeypatch):
     ) is True
 
 
+def test_closed_market_stale_reference_allows_exact_max_hour_boundary(monkeypatch):
+    monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
+    details = pg.get_staleness_details({"timestamp_utc": "2026-04-30T12:00:00Z"}, _now=datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc))
+    assert pg.should_allow_closed_market_stale_reference(
+        post_type='market_closed_reference',
+        market_open=False,
+        operator_trigger=True,
+        staleness_details=details,
+        price=4700.0,
+    ) is True
+
+
 def test_closed_market_stale_reference_rejects_old_or_missing_timestamp(monkeypatch):
     monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
     old_details = pg.get_staleness_details({"timestamp_utc": "2026-04-29T11:00:00Z"}, _now=datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc))
@@ -463,7 +475,7 @@ def test_market_closed_reference_template_labels_cached_reference():
     assert "Not live retail price" in tweet
 
 
-def test_build_guard_quote_allows_closed_market_reference_without_stale_flag():
+def test_build_guard_quote_marks_closed_market_reference_as_fresh():
     raw = {
         "provider": "gold_api_com",
         "timestamp_utc": "2026-05-08T20:06:54Z",
