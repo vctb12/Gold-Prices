@@ -248,7 +248,7 @@ def test_market_open_time_covers_24_5_window():
     assert pg.is_market_open_time(datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc)) is False
 
 
-def test_market_closed_guard_skips_scheduled_hourly_posts_only():
+def test_market_closed_guard_skips_scheduled_runs():
     saturday = datetime(2026, 5, 2, 12, 0, 0, tzinfo=timezone.utc)
     skip, reason = pg.should_skip_market_closed(
         'hourly',
@@ -465,7 +465,7 @@ def test_tweet_429_logs_retry_after(capsys, monkeypatch):
     assert "=== TWEET ERROR ===" in out
 
 
-def test_main_dry_run_does_not_post_when_other_guards_pass(tmp_path, monkeypatch, capsys):
+def test_main_dry_run_does_not_post(tmp_path, monkeypatch, capsys):
     fresh_now = datetime.now(timezone.utc)
     gold_file = tmp_path / "gold_price.json"
     state_file = tmp_path / "last_gold_price.json"

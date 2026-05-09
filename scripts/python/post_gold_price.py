@@ -306,6 +306,7 @@ def is_market_open_time(now=None):
 
 
 def is_operator_market_hours_bypass(event_name=None, trigger_source=None):
+    """Return True for workflow_dispatch runs from manual or shortcut operators."""
     event = (event_name or os.environ.get('GITHUB_EVENT_NAME', '')).strip().lower()
     source = (trigger_source or os.environ.get('POST_TRIGGER_SOURCE', '')).strip().lower()
     return event == 'workflow_dispatch' and source in ('manual', 'shortcut')
