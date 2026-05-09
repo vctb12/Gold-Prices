@@ -29,30 +29,22 @@ Go to **Settings → Secrets and variables → Actions → New repository secret
 
 ## Workflows
 
-> ### ⚠️ Dual Twitter Bot Systems — Action Required
->
-> Two X/Twitter posting systems exist and overlap:
->
-> | System                 | Script                             | Workflow                                                                      | Status                                                                   |
-> | ---------------------- | ---------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-> | **Node.js** (original) | `scripts/node/tweet-gold-price.js` | `gold-price-tweet.yml`                                                        | Active — simple hourly tweet with 10 rotating templates                  |
-> | **Python** (newer)     | `scripts/python/gold_poster.py`    | `hourly_post.yml`, `market_events.yml`, `spike_alert.yml`, `health_check.yml` | Active — richer templates, Supabase logging, market events, spike alerts |
->
-> **Recommendation:** Keep the **Python** system active. It is more capable (supports market events,
-> spike alerts, health checks, and Supabase logging). Deactivate the Node.js system by disabling
-> `gold-price-tweet.yml` in GitHub Actions (or deleting it). Both systems use the same Twitter API
-> credentials (`CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_TOKEN`, `ACCESS_TOKEN_SECRET`). Running
-> both will cause duplicate tweets.
->
-> See `docs/twitter_bot_architecture.md` for the Python system's full architecture. See
-> `MANUAL_INPUTS.md` item for deactivation instructions.
+### 1. Price fetch — `gold-price-fetch.yml`
 
-### 1. Hourly X/Twitter posts (JS) — `gold-price-tweet.yml`
+Runs on a cron schedule during the 24/5 gold market window (Sunday 21:00 UTC → Friday 20:59 UTC).
+Calls the provider waterfall (`gold_api_com → twelvedata_xauusd → fmp_gcusd`) via
+`scripts/python/fetch_gold_price.py` and commits `data/gold_price.json` if the price changed.
 
-Posts every hour. Rotates 10 templates by Dubai time.
+**This is the only workflow that calls external price APIs on a schedule.**
 
-- Script: `scripts/tweet-gold-price.js`
-- See `docs/TWITTER_AUTOMATION.md` for detailed setup.
+- Cron: `2 21-23 * * 0`, `2 * * * 1-4`, `2 0-20 * * 5` (`:02` of each open hour)
+- State file: `data/gold_price.json`, `data/last_gold_price.json`
+- No X API calls.
+
+### 1a. Manual price refresh via post_gold.yml dispatch
+
+`workflow_dispatch` on `post_gold.yml` supports `refresh_price_first=true` to trigger a one-shot
+provider fetch before posting. This is the only non-scheduled provider call path.
 
 ### 2. Telegram posts — `gold-price-telegram.yml`
 
@@ -99,7 +91,7 @@ Both `sitemap.xml` and `feed.xml` are regenerated on every deploy:
 - `node scripts/generate-rss.js` — generates `feed.xml`
 - Both are copied to `dist/` automatically
 
-The RSS feed is live at: `https://vctb12.github.io/Gold-Prices/feed.xml`
+The RSS feed is live at: `https://goldtickerlive.com/feed.xml`
 
 ### 6. Weekly dead-link checker — `weekly-link-check.yml`
 
@@ -114,14 +106,13 @@ Pings the site every **30 minutes**. Alerts via Telegram and/or Discord if site 
 
 ### 8. Python X/Twitter posts — `post_gold.yml`
 
-Runs **hourly** while the global gold market is open (Sunday 21:00 UTC through Friday 20:59 UTC),
-offset a few minutes after the fetch workflow so it reads freshly committed data. Scheduled hourly
-runs are market-aware: regular hourly posts use the live / market-open template only during open
-hours, scheduled runs still skip when the market is closed, and they post only when the cached
-result passes the stale, duplicate, and cooldown guards.
+Runs **hourly** during the gold market window (Sunday 21:09 UTC → Friday 20:09 UTC), offset 9
+minutes after the fetch workflow so it reads freshly committed data. Scheduled hourly runs are
+market-aware: regular hourly posts only go out when the market is open, and they post only when the
+cached result passes the stale, duplicate, and cooldown guards.
 
 **Architecture:** `post_gold.yml` posts from cached `data/gold_price.json` only. It never fetches
-prices itself on scheduled runs. The gold price is written by `gold-price-fetch.yml` (see §8b). This
+prices itself on scheduled runs. The gold price is written by `gold-price-fetch.yml` (see §1). This
 separation keeps the posting workflow free of provider API keys on scheduled runs and makes the two
 responsibilities independently testable.
 
@@ -159,19 +150,19 @@ message that includes the previous price, current price, previous post timestamp
 post, `selected_post_type`, `source`, `trigger_nonce`, and `refresh_price_first`. This is a clean
 successful skip — not a workflow failure. Operators who need to repost the same closing price (for
 example, to announce a market closure that was not posted earlier, or to post after a gap where the
-closing price has not moved) can set
-`allow_same_price_closed_market_repost=true` in the `workflow_dispatch` inputs — see below.
+closing price has not moved) can set `allow_same_price_closed_market_repost=true` in the
+`workflow_dispatch` inputs — see below.
 
 **Workflow_dispatch inputs:**
 
-| Input                                   | Default  | Description                                                                                                                                                                                           |
-| --------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dry_run`                               | `false`  | Evaluate all guards; skip the real X API call                                                                                                                                                         |
-| `force_post`                            | `false`  | Bypass cooldown only; duplicate and stale guards still apply                                                                                                                                          |
-| `source`                                | `manual` | Trigger source label for logs/state (`manual`, `shortcut`)                                                                                                                                            |
+| Input                                   | Default  | Description                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dry_run`                               | `false`  | Evaluate all guards; skip the real X API call                                                                                                                                                                                                                                                                                                                                                                |
+| `force_post`                            | `false`  | Bypass cooldown only; duplicate and stale guards still apply                                                                                                                                                                                                                                                                                                                                                 |
+| `source`                                | `manual` | Trigger source label for logs/state (`manual`, `shortcut`)                                                                                                                                                                                                                                                                                                                                                   |
 | `refresh_price_first`                   | `false`  | Run one price refresh before posting (manual/operator only). Fetches `data/gold_price.json` from providers once before the normal posting path runs. Post type is still determined by market hours and the operator trigger — not the provider timestamp. If the market is closed and the price is unchanged, `allow_same_price_closed_market_repost=true` is also required to bypass the price-change guard |
-| `trigger_nonce`                         | `""`     | Optional unique manual trigger label                                                                                                                                                                  |
-| `allow_same_price_closed_market_repost` | `false`  | Manual/operator only: allow `market_closed_reference` repost even if the closing price is unchanged, subject to duplicate/content-hash/cooldown protections. Scheduled runs ignore this               |
+| `trigger_nonce`                         | `""`     | Optional unique manual trigger label                                                                                                                                                                                                                                                                                                                                                                         |
+| `allow_same_price_closed_market_repost` | `false`  | Manual/operator only: allow `market_closed_reference` repost even if the closing price is unchanged, subject to duplicate/content-hash/cooldown protections. Scheduled runs ignore this                                                                                                                                                                                                                      |
 
 `refresh_price_first=true` only runs for manual `workflow_dispatch`; scheduled runs always post from
 cached data and never trigger a provider fetch inside `post_gold.yml`.
@@ -206,10 +197,10 @@ It does NOT apply to scheduled runs and does NOT bypass `duplicate_text_hash`, c
 The provider-adapter pipeline (`scripts/python/fetch_gold_price.py`,
 `scripts/python/provider_bakeoff.py`, `scripts/python/provider_scorecard.py`,
 `scripts/python/tweet_guard.py`) and its workflows (`gold-provider-bakeoff.yml`,
-`test-gold-providers.yml`) are landed but **not** wired into production. Legacy GoldPriceZ remains
-the active path until you flip it.
+`test-gold-providers.yml`) support provider testing and migration. The active provider waterfall
+(`gold_api_com → twelvedata_xauusd → fmp_gcusd`) is configured in `gold-price-fetch.yml`.
 
-Before activating, fill in the operator checklist:
+Before changing providers, fill in the operator checklist:
 [`docs/operator-inputs-gold-provider-bakeoff.md`](./operator-inputs-gold-provider-bakeoff.md). For
 the owner-only pre-merge checklist see
 [`docs/OWNER_ACTIONS_REQUIRED_GOLD_BAKEOFF.md`](./OWNER_ACTIONS_REQUIRED_GOLD_BAKEOFF.md). Run the
@@ -230,42 +221,21 @@ The 24h+ bakeoff is still the confidence gate for picking a winning provider and
 production, but it is **not** required to keep iterating on the automation or to gather quick
 same-day evidence.
 
-### 9. Market events — `market_events.yml`
-
-Posts session open/close alerts (e.g. London open, New York close) to X/Twitter.
-
-- Script: `scripts/gold_poster.py` (market events mode)
-- Secrets needed: same as workflow 8
-
-### 10. Spike alerts (Python) — `spike_alert.yml`
-
-Python-based price spike detection. Fires alerts when gold moves significantly.
-
-- Script: `scripts/gold_poster.py` (spike alert mode)
-- Secrets needed: same as workflow 8
-
-### 11. Health check — `health_check.yml`
-
-Daily system health verification. Checks API connectivity, credential validity, and posting status.
-
-- Script: `scripts/gold_poster.py` (health check mode)
-- Secrets needed: same as workflow 8
-
-### 12. Sync DB to Git — `sync-db-to-git.yml`
+### 9. Sync DB to Git — `sync-db-to-git.yml`
 
 Syncs Supabase shops data to `data/shops.js` and commits the result.
 
 - Secrets needed: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
 
-### 13. CI validation — `ci.yml`
+### 10. CI validation — `ci.yml`
 
 Runs on pull requests. Executes tests, validation, and build checks.
 
-### 14. Deploy — `deploy.yml`
+### 11. Deploy — `deploy.yml`
 
 Builds and deploys the site to GitHub Pages on push to `main`.
 
-- Also regenerates `sitemap.xml` and `feed.xml` (see workflow 5).
+- Also regenerates `sitemap.xml` and `feed.xml` (see the deploy workflow).
 
 ---
 
@@ -281,12 +251,14 @@ This triggers it immediately without waiting for the cron schedule.
 
 ## Reducing X post frequency (Free tier)
 
-X Free tier allows ~17 posts per 24 hours. To post every 2 hours instead of every hour, change the
-cron in `gold-price-tweet.yml`:
+X Free tier allows ~17 posts per 24 hours. To reduce posting frequency, change the market-hours cron
+schedules in `post_gold.yml` to run every 2 hours:
 
 ```yaml
-# Every 2 hours instead of every hour
-- cron: '0 */2 * * *'
+# Every 2 hours, offset from fetch workflow
+- cron: '9 21,23 * * 0'
+- cron: '9 1,3,5,7,9,11,13,15,17,19 * * 1-4'
+- cron: '9 1,3,5,7,9,11,13,15,17,19 * * 5'
 ```
 
 ---

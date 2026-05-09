@@ -10,7 +10,8 @@ A bilingual gold-price platform built for users who need more than a basic spot 
 live spot-linked pricing, market comparison, calculator tools, historical views, exports, alerts,
 country pages, and Arabic-first accessibility.
 
-> **For coding agents:** see [`AGENTS.md`](AGENTS.md) and the [Agent Prompt Library v2](docs/GOLD_TICKER_LIVE_AGENT_PROMPTS.md).
+> **For coding agents:** see [`AGENTS.md`](AGENTS.md) and the
+> [Agent Prompt Library v2](docs/GOLD_TICKER_LIVE_AGENT_PROMPTS.md).
 
 <p>
   <a href="https://goldtickerlive.com/">
@@ -25,7 +26,7 @@ country pages, and Arabic-first accessibility.
   <a href="https://goldtickerlive.com/shops.html">
     <img src="https://img.shields.io/badge/Shops-Directory-E67E22?style=for-the-badge&logo=google-maps&logoColor=white" alt="Shops" />
   </a>
-  <a href="https://github.com/vctb12/Gold-Prices/wiki">
+  <a href="https://github.com/vctb12/GoldTickerLive/wiki">
     <img src="https://img.shields.io/badge/Wiki-Full%20Docs-6F42C1?style=for-the-badge&logo=github&logoColor=white" alt="Wiki" />
   </a>
 </p>
@@ -186,8 +187,8 @@ practice**, combining:
 ### Run locally (no build required)
 
 ```bash
-git clone https://github.com/vctb12/Gold-Prices.git
-cd Gold-Prices
+git clone https://github.com/vctb12/GoldTickerLive.git
+cd GoldTickerLive
 python3 -m http.server 8080
 # Open http://localhost:8080
 ```
@@ -246,61 +247,61 @@ template ships in repo root.
 
 ### Core Pages
 
-| Page            | URL                                                                          | Description                                                            |
-| --------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **Homepage**    | [`/`](https://vctb12.github.io/Gold-Prices/)                                 | Live price hero, GCC grid, tool cards                                  |
-| **Tracker**     | [`/tracker.html`](https://vctb12.github.io/Gold-Prices/tracker.html)         | Multi-mode workspace: live, compare, archive, alerts, planner, exports |
-| **Calculator**  | [`/calculator.html`](https://vctb12.github.io/Gold-Prices/calculator.html)   | Value, scrap, zakat, buying power, unit converter                      |
-| **Shops**       | [`/shops.html`](https://vctb12.github.io/Gold-Prices/shops.html)             | Gold shop directory by country/city/market                             |
-| **Invest**      | [`/invest.html`](https://vctb12.github.io/Gold-Prices/invest.html)           | Gold investing guide for UAE, Saudi & Egypt                            |
-| **Learn**       | [`/learn.html`](https://vctb12.github.io/Gold-Prices/learn.html)             | Educational content, glossary, FAQ                                     |
-| **Insights**    | [`/insights.html`](https://vctb12.github.io/Gold-Prices/insights.html)       | Market analysis and weekly briefs                                      |
-| **Methodology** | [`/methodology.html`](https://vctb12.github.io/Gold-Prices/methodology.html) | Data sources, formulas, transparency                                   |
+| Page            | URL                                                                | Description                                                            |
+| --------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **Homepage**    | [`/`](https://goldtickerlive.com/)                                 | Live price hero, GCC grid, tool cards                                  |
+| **Tracker**     | [`/tracker.html`](https://goldtickerlive.com/tracker.html)         | Multi-mode workspace: live, compare, archive, alerts, planner, exports |
+| **Calculator**  | [`/calculator.html`](https://goldtickerlive.com/calculator.html)   | Value, scrap, zakat, buying power, unit converter                      |
+| **Shops**       | [`/shops.html`](https://goldtickerlive.com/shops.html)             | Gold shop directory by country/city/market                             |
+| **Invest**      | [`/invest.html`](https://goldtickerlive.com/invest.html)           | Gold investing guide for UAE, Saudi & Egypt                            |
+| **Learn**       | [`/learn.html`](https://goldtickerlive.com/learn.html)             | Educational content, glossary, FAQ                                     |
+| **Insights**    | [`/insights.html`](https://goldtickerlive.com/insights.html)       | Market analysis and weekly briefs                                      |
+| **Methodology** | [`/methodology.html`](https://goldtickerlive.com/methodology.html) | Data sources, formulas, transparency                                   |
 
 ### Tools & Features
 
-| Tool                  | URL                                                                                                                  | Description                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **Order Gold**        | [`/content/order-gold/`](https://vctb12.github.io/Gold-Prices/content/order-gold/)                                   | Order 1g–100g bars with live pricing + UAE VAT |
-| **X Post Generator**  | [`/content/social/x-post-generator.html`](https://vctb12.github.io/Gold-Prices/content/social/x-post-generator.html) | Generate ready-to-post X/Twitter updates       |
-| **Price History**     | [`/content/gold-price-history/`](https://vctb12.github.io/Gold-Prices/content/gold-price-history/)                   | Historical gold price data and charts          |
-| **Search**            | [`/content/search/`](https://vctb12.github.io/Gold-Prices/content/search/)                                           | Bilingual full-text search                     |
-| **Weight Converter**  | [`/content/tools/weight-converter.html`](https://vctb12.github.io/Gold-Prices/content/tools/weight-converter.html)   | Grams ↔ Troy oz ↔ Tola ↔ Baht ↔ Mithqal        |
-| **Zakat Calculator**  | [`/content/tools/zakat-calculator.html`](https://vctb12.github.io/Gold-Prices/content/tools/zakat-calculator.html)   | Interactive gold zakat calculation             |
-| **Investment Return** | [`/content/tools/investment-return.html`](https://vctb12.github.io/Gold-Prices/content/tools/investment-return.html) | Historical investment return calculator        |
-| **Embed Widget**      | [`/content/embed/gold-ticker.html`](https://vctb12.github.io/Gold-Prices/content/embed/gold-ticker.html)             | Embeddable gold price ticker                   |
+| Tool                  | URL                                                                                                        | Description                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Order Gold**        | [`/content/order-gold/`](https://goldtickerlive.com/content/order-gold/)                                   | Order 1g–100g bars with live pricing + UAE VAT |
+| **X Post Generator**  | [`/content/social/x-post-generator.html`](https://goldtickerlive.com/content/social/x-post-generator.html) | Generate ready-to-post X/Twitter updates       |
+| **Price History**     | [`/content/gold-price-history/`](https://goldtickerlive.com/content/gold-price-history/)                   | Historical gold price data and charts          |
+| **Search**            | [`/content/search/`](https://goldtickerlive.com/content/search/)                                           | Bilingual full-text search                     |
+| **Weight Converter**  | [`/content/tools/weight-converter.html`](https://goldtickerlive.com/content/tools/weight-converter.html)   | Grams ↔ Troy oz ↔ Tola ↔ Baht ↔ Mithqal        |
+| **Zakat Calculator**  | [`/content/tools/zakat-calculator.html`](https://goldtickerlive.com/content/tools/zakat-calculator.html)   | Interactive gold zakat calculation             |
+| **Investment Return** | [`/content/tools/investment-return.html`](https://goldtickerlive.com/content/tools/investment-return.html) | Historical investment return calculator        |
+| **Embed Widget**      | [`/content/embed/gold-ticker.html`](https://goldtickerlive.com/content/embed/gold-ticker.html)             | Embeddable gold price ticker                   |
 
 ### Guides
 
-| Guide                 | URL                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| How to Buy Gold       | [`/content/guides/buying-guide.html`](https://vctb12.github.io/Gold-Prices/content/guides/buying-guide.html)                   |
-| 24K vs 22K Gold       | [`/content/guides/24k-vs-22k.html`](https://vctb12.github.io/Gold-Prices/content/guides/24k-vs-22k.html)                       |
-| Gold Karat Comparison | [`/content/guides/gold-karat-comparison.html`](https://vctb12.github.io/Gold-Prices/content/guides/gold-karat-comparison.html) |
-| AED Peg Explained     | [`/content/guides/aed-peg-explained.html`](https://vctb12.github.io/Gold-Prices/content/guides/aed-peg-explained.html)         |
-| GCC Market Hours      | [`/content/guides/gcc-market-hours.html`](https://vctb12.github.io/Gold-Prices/content/guides/gcc-market-hours.html)           |
-| Invest in Gold (GCC)  | [`/content/guides/invest-in-gold-gcc.html`](https://vctb12.github.io/Gold-Prices/content/guides/invest-in-gold-gcc.html)       |
-| Zakat on Gold         | [`/content/guides/zakat-gold-guide.html`](https://vctb12.github.io/Gold-Prices/content/guides/zakat-gold-guide.html)           |
+| Guide                 | URL                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| How to Buy Gold       | [`/content/guides/buying-guide.html`](https://goldtickerlive.com/content/guides/buying-guide.html)                   |
+| 24K vs 22K Gold       | [`/content/guides/24k-vs-22k.html`](https://goldtickerlive.com/content/guides/24k-vs-22k.html)                       |
+| Gold Karat Comparison | [`/content/guides/gold-karat-comparison.html`](https://goldtickerlive.com/content/guides/gold-karat-comparison.html) |
+| AED Peg Explained     | [`/content/guides/aed-peg-explained.html`](https://goldtickerlive.com/content/guides/aed-peg-explained.html)         |
+| GCC Market Hours      | [`/content/guides/gcc-market-hours.html`](https://goldtickerlive.com/content/guides/gcc-market-hours.html)           |
+| Invest in Gold (GCC)  | [`/content/guides/invest-in-gold-gcc.html`](https://goldtickerlive.com/content/guides/invest-in-gold-gcc.html)       |
+| Zakat on Gold         | [`/content/guides/zakat-gold-guide.html`](https://goldtickerlive.com/content/guides/zakat-gold-guide.html)           |
 
 ### Country Pages (15 countries, 45+ cities)
 
-| Country         | URL                                                                                                | Cities                                               |
-| --------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| 🇦🇪 UAE          | [`/countries/uae.html`](https://vctb12.github.io/Gold-Prices/countries/uae.html)                   | Dubai, Abu Dhabi, Sharjah, Ajman, Fujairah, RAK, UAQ |
-| 🇸🇦 Saudi Arabia | [`/countries/saudi-arabia.html`](https://vctb12.github.io/Gold-Prices/countries/saudi-arabia.html) | Riyadh, Jeddah, Mecca, Medina, Dammam                |
-| 🇰🇼 Kuwait       | [`/countries/kuwait.html`](https://vctb12.github.io/Gold-Prices/countries/kuwait.html)             | Kuwait City, Hawalli, Salmiya                        |
-| 🇶🇦 Qatar        | [`/countries/qatar.html`](https://vctb12.github.io/Gold-Prices/countries/qatar.html)               | Doha, Al Rayyan, Al Wakrah                           |
-| 🇧🇭 Bahrain      | [`/countries/bahrain.html`](https://vctb12.github.io/Gold-Prices/countries/bahrain.html)           | Manama, Muharraq, Rifaa                              |
-| 🇴🇲 Oman         | [`/countries/oman.html`](https://vctb12.github.io/Gold-Prices/countries/oman.html)                 | Muscat, Salalah, Sohar                               |
-| 🇪🇬 Egypt        | [`/countries/egypt.html`](https://vctb12.github.io/Gold-Prices/countries/egypt.html)               | Cairo, Alexandria, Giza                              |
-| 🇯🇴 Jordan       | [`/countries/jordan.html`](https://vctb12.github.io/Gold-Prices/countries/jordan.html)             | Amman, Irbid, Zarqa                                  |
-| 🇱🇧 Lebanon      | [`/countries/lebanon.html`](https://vctb12.github.io/Gold-Prices/countries/lebanon.html)           | Beirut, Tripoli, Sidon                               |
-| 🇲🇦 Morocco      | [`/countries/morocco.html`](https://vctb12.github.io/Gold-Prices/countries/morocco.html)           | Casablanca, Rabat, Marrakech                         |
-| 🇹🇳 Tunisia      | [`/countries/tunisia.html`](https://vctb12.github.io/Gold-Prices/countries/tunisia.html)           | Tunis, Sfax, Sousse                                  |
-| 🇩🇿 Algeria      | [`/countries/algeria.html`](https://vctb12.github.io/Gold-Prices/countries/algeria.html)           | Algiers, Oran, Constantine                           |
-| 🇱🇾 Libya        | [`/countries/libya.html`](https://vctb12.github.io/Gold-Prices/countries/libya.html)               | Tripoli, Benghazi, Misrata                           |
-| 🇸🇩 Sudan        | [`/countries/sudan.html`](https://vctb12.github.io/Gold-Prices/countries/sudan.html)               | Khartoum, Omdurman, Port Sudan                       |
-| 🇮🇳 India        | [`/countries/india.html`](https://vctb12.github.io/Gold-Prices/countries/india.html)               | Mumbai, Delhi, Chennai                               |
+| Country         | URL                                                                                      | Cities                                               |
+| --------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 🇦🇪 UAE          | [`/countries/uae.html`](https://goldtickerlive.com/countries/uae.html)                   | Dubai, Abu Dhabi, Sharjah, Ajman, Fujairah, RAK, UAQ |
+| 🇸🇦 Saudi Arabia | [`/countries/saudi-arabia.html`](https://goldtickerlive.com/countries/saudi-arabia.html) | Riyadh, Jeddah, Mecca, Medina, Dammam                |
+| 🇰🇼 Kuwait       | [`/countries/kuwait.html`](https://goldtickerlive.com/countries/kuwait.html)             | Kuwait City, Hawalli, Salmiya                        |
+| 🇶🇦 Qatar        | [`/countries/qatar.html`](https://goldtickerlive.com/countries/qatar.html)               | Doha, Al Rayyan, Al Wakrah                           |
+| 🇧🇭 Bahrain      | [`/countries/bahrain.html`](https://goldtickerlive.com/countries/bahrain.html)           | Manama, Muharraq, Rifaa                              |
+| 🇴🇲 Oman         | [`/countries/oman.html`](https://goldtickerlive.com/countries/oman.html)                 | Muscat, Salalah, Sohar                               |
+| 🇪🇬 Egypt        | [`/countries/egypt.html`](https://goldtickerlive.com/countries/egypt.html)               | Cairo, Alexandria, Giza                              |
+| 🇯🇴 Jordan       | [`/countries/jordan.html`](https://goldtickerlive.com/countries/jordan.html)             | Amman, Irbid, Zarqa                                  |
+| 🇱🇧 Lebanon      | [`/countries/lebanon.html`](https://goldtickerlive.com/countries/lebanon.html)           | Beirut, Tripoli, Sidon                               |
+| 🇲🇦 Morocco      | [`/countries/morocco.html`](https://goldtickerlive.com/countries/morocco.html)           | Casablanca, Rabat, Marrakech                         |
+| 🇹🇳 Tunisia      | [`/countries/tunisia.html`](https://goldtickerlive.com/countries/tunisia.html)           | Tunis, Sfax, Sousse                                  |
+| 🇩🇿 Algeria      | [`/countries/algeria.html`](https://goldtickerlive.com/countries/algeria.html)           | Algiers, Oran, Constantine                           |
+| 🇱🇾 Libya        | [`/countries/libya.html`](https://goldtickerlive.com/countries/libya.html)               | Tripoli, Benghazi, Misrata                           |
+| 🇸🇩 Sudan        | [`/countries/sudan.html`](https://goldtickerlive.com/countries/sudan.html)               | Khartoum, Omdurman, Port Sudan                       |
+| 🇮🇳 India        | [`/countries/india.html`](https://goldtickerlive.com/countries/india.html)               | Mumbai, Delhi, Chennai                               |
 
 ---
 
@@ -367,72 +368,40 @@ AED price         = usdPrice × 3.6725 (fixed peg)
 
 ## Automation & Social Posting
 
-Gold Ticker Live runs **8 GitHub Actions workflows** for automated operations:
+Gold Ticker Live runs **GitHub Actions workflows** for automated operations:
 
-| Workflow                  | Schedule        | Description                                                 |
-| ------------------------- | --------------- | ----------------------------------------------------------- |
-| `gold-price-tweet.yml`    | Hourly          | Posts live gold prices to X/Twitter with rotating templates |
-| `gold-price-telegram.yml` | 3×/day          | Posts to Telegram channel (07:00, 12:00, 18:00 UTC)         |
-| `gold-price-discord.yml`  | Daily           | Posts to Discord server at noon Dubai time                  |
-| `gold-price-spike.yml`    | Hourly          | Alerts on >2% intra-day price spikes                        |
-| `uptime-monitor.yml`      | Every 30min     | Pings the live site and alerts on failure                   |
-| `weekly-link-check.yml`   | Weekly (Mon)    | Checks for broken internal links                            |
-| `deploy.yml`              | On push to main | Builds with Vite and deploys to GitHub Pages                |
-| `sync-db-to-git.yml`      | On dispatch     | Syncs Supabase shop data to Git                             |
+| Workflow                  | Schedule                              | Description                                                                 |
+| ------------------------- | ------------------------------------- | --------------------------------------------------------------------------- |
+| `gold-price-fetch.yml`    | Hourly (market hours, :02)            | Fetches gold prices from provider waterfall; commits `data/gold_price.json` |
+| `post_gold.yml`           | Hourly (market hours, :09) + dispatch | Posts to X/Twitter from cached price; full guard stack                      |
+| `gold-price-telegram.yml` | 3×/day                                | Posts to Telegram channel (07:00, 12:00, 18:00 UTC)                         |
+| `gold-price-discord.yml`  | Daily                                 | Posts to Discord server at noon Dubai time                                  |
+| `gold-price-spike.yml`    | Hourly                                | Alerts on >2% intra-day price spikes                                        |
+| `uptime-monitor.yml`      | Every 30min                           | Pings the live site and alerts on failure                                   |
+| `weekly-link-check.yml`   | Weekly (Mon)                          | Checks for broken internal links                                            |
+| `deploy.yml`              | On push to main                       | Builds with Vite and deploys to GitHub Pages                                |
+| `sync-db-to-git.yml`      | On dispatch                           | Syncs Supabase shop data to Git                                             |
+
+**X / Twitter posting architecture:** `gold-price-fetch.yml` (at `:02`) fetches and caches the
+price; `post_gold.yml` (at `:09`) reads the cache and posts. Only the fetch workflow calls provider
+APIs. See `docs/twitter_bot_architecture.md` for the full guard stack, post types, and operator
+inputs.
 
 ### Required GitHub Secrets
 
-| Secret                        | Used by                                         |
-| ----------------------------- | ----------------------------------------------- |
-| `GOLDPRICEZ_API_KEY`          | Tweet, Telegram, Discord, Spike alert workflows |
-| `TWITTER_API_KEY`             | Tweet workflow                                  |
-| `TWITTER_API_SECRET`          | Tweet workflow                                  |
-| `TWITTER_ACCESS_TOKEN`        | Tweet workflow                                  |
-| `TWITTER_ACCESS_TOKEN_SECRET` | Tweet workflow                                  |
-| `TELEGRAM_BOT_TOKEN`          | Telegram workflow                               |
-| `TELEGRAM_CHAT_ID`            | Telegram workflow                               |
-| `DISCORD_WEBHOOK_URL`         | Discord workflow                                |
-
-### Tweet template rotation
-
-The tweet script (`scripts/node/tweet-gold-price.js`) rotates across 10+ templates based on time of
-day (Dubai timezone):
-
-- 🌅 Morning update (06:00)
-- 🕐 Hourly snapshot
-- ☀️ Midday report (12:00)
-- 🌆 Evening close (20:00)
-- 🌙 Daily summary (00:00)
-- 🕌 Arabic language post (08:00)
-- 📅 Weekend recap (Fri/Sat)
-- 📊 Comparison post (vs yesterday)
-- 🏆 Milestone post (round numbers)
-- 🌍 Country-specific post
-
-### @GoldTickerLive Posting System (Python)
-
-A production-grade, fully automated, config-driven gold price posting system for the @GoldTickerLive
-X account. Runs via four additional GitHub Actions workflows.
-
-| Workflow            | Schedule           | Description                                                           |
-| ------------------- | ------------------ | --------------------------------------------------------------------- |
-| `hourly_post.yml`   | Every hour         | Fetches price from GoldAPI, posts hourly update with AED karat prices |
-| `market_events.yml` | Session open/close | Posts at Sydney open, London open, COMEX close, Dubai open            |
-| `spike_alert.yml`   | Every 15 minutes   | Detects ≥2% price spikes, rate-limited to 4 alerts/day                |
-| `health_check.yml`  | Daily 08:00 GST    | Verifies API, Supabase freshness, and Twitter credentials             |
-
-#### Quick Start
-
-1. **Set up secrets** — add these in GitHub → Settings → Secrets → Actions:
-   - `GOLDPRICEZ_API_KEY` — from [goldapi.io](https://www.goldapi.io)
-   - `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_TOKEN`, `ACCESS_TOKEN_SECRET` — from
-     [X Developer Portal](https://developer.twitter.com)
-   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — from your Supabase project dashboard
-
-2. **Create Supabase tables** — run the SQL in
-   [`docs/twitter_bot_schema.md`](docs/twitter_bot_schema.md)
-
-3. **Test manually** — go to Actions → pick any workflow → click "Run workflow"
+| Secret                | Used by                                           |
+| --------------------- | ------------------------------------------------- |
+| `CONSUMER_KEY`        | `post_gold.yml` (X / Twitter posting)             |
+| `CONSUMER_SECRET`     | `post_gold.yml`                                   |
+| `ACCESS_TOKEN`        | `post_gold.yml`                                   |
+| `ACCESS_TOKEN_SECRET` | `post_gold.yml`                                   |
+| `GOLD_API_COM_KEY`    | `gold-price-fetch.yml`, `post_gold.yml` (refresh) |
+| `TWELVEDATA_API_KEY`  | `gold-price-fetch.yml`, `post_gold.yml` (refresh) |
+| `FMP_API_KEY`         | `gold-price-fetch.yml`, `post_gold.yml` (refresh) |
+| `GOLDPRICEZ_API_KEY`  | `gold-price-fetch.yml` (legacy fallback)          |
+| `TELEGRAM_BOT_TOKEN`  | Telegram workflow                                 |
+| `TELEGRAM_CHAT_ID`    | Telegram workflow                                 |
+| `DISCORD_WEBHOOK_URL` | Discord workflow                                  |
 
 4. **Adjust spike threshold** — edit `config/twitter_bot/thresholds.json` (no code changes needed)
 
@@ -560,7 +529,7 @@ npm start  # Starts Express server on port 3000
 ## Project Structure
 
 ```text
-Gold-Prices/
+GoldTickerLive/
 ├── index.html                 # Landing page / homepage
 ├── tracker.html               # Multi-mode live gold tracker workspace
 ├── calculator.html            # Gold calculator page (5 calculators)
