@@ -9,8 +9,8 @@
   "last_source_type": "market_closed_reference",
   "last_post_reason": "shortcut_price_moved",
   "last_trigger_source": "shortcut",
-  "last_trigger_attempt_time_utc": "2026-05-09T17:05:39Z",
+  "last_trigger_attempt_time_utc": "2026-05-09T17:11:40Z",
   "last_trigger_nonce": "none",
-  "last_trigger_run_id": "25606769706",
+  "last_trigger_run_id": "25606895720",
   "last_trigger_run_attempt": "1"
 }
