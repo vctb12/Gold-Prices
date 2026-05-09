@@ -342,8 +342,13 @@ def is_operator_market_hours_bypass(event_name=None, trigger_source=None):
 
 def should_skip_market_closed(post_type, now=None, event_name=None, trigger_source=None):
     """Skip scheduled hourly price posts outside 24/5 market hours."""
-    if post_type in ('market_open', 'market_close', 'market_closed_reference'):
+    if post_type in ('market_open', 'market_close'):
         return (False, None)
+    if post_type == 'market_closed_reference':
+        return (
+            False,
+            "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run.",
+        )
     if is_market_open_time(now):
         return (False, None)
     if is_operator_market_hours_bypass(event_name=event_name, trigger_source=trigger_source):
@@ -757,13 +762,13 @@ def main():
     print(f"source:       {trigger_source}")
     print(f"dry_run:      {os.environ.get('DRY_RUN_TWEET', 'false')}")
     print(f"force_post:   {os.environ.get('FORCE_POST', 'false')}")
-    print(f"market_open:  {market_open}")
-    print(f"operator:     {operator_trigger}")
-    print(f"post_type:    {base_post_type}")
-    print(f"selected:     {post_type}")
+    print(f"market_open:               {market_open}")
+    print(f"operator_trigger:          {operator_trigger}")
+    print(f"post_type:                 {base_post_type}")
+    print(f"selected_post_type:        {post_type}")
     print("data_file:    data/gold_price.json")
     print(f"source_ts:    {source_ts}")
-    print(f"template:     {template_used}")
+    print(f"template_used:             {template_used}")
     print("===================")
 
     # 5. Load gold price (includes previous-state fields)
@@ -790,8 +795,8 @@ def main():
     )
     stale_age_hours = staleness_details.get("age_hours")
     stale_age_label = "n/a" if stale_age_hours is None else f"{stale_age_hours:.2f}"
-    print(f"stale_hours:  {stale_age_label}")
-    print(f"stale_ok:     {closed_market_stale_allowed}")
+    print(f"stale_age_hours:          {stale_age_label}")
+    print(f"closed_market_stale_allowed: {closed_market_stale_allowed}")
     if staleness_action == 'skip' and not closed_market_stale_allowed:
         sys.exit(0)
     if staleness_action == 'parse_error' and post_type == 'market_closed_reference':

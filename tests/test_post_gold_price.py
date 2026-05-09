@@ -661,8 +661,8 @@ def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeyp
     pg.post_tweet.assert_not_called()
     out = capsys.readouterr().out
     assert "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run." in out
-    assert "selected:     market_closed_reference" in out
-    assert "template:     market_closed_reference" in out
+    assert "selected_post_type:        market_closed_reference" in out
+    assert "template_used:             market_closed_reference" in out
     assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
 
 
@@ -719,8 +719,8 @@ def test_main_market_closed_shortcut_allows_cached_reference_within_limit(tmp_pa
         raise AssertionError("Expected main() to exit after dry run")
 
     out = capsys.readouterr().out
-    assert "selected:     market_closed_reference" in out
-    assert "stale_ok:     True" in out
+    assert "selected_post_type:        market_closed_reference" in out
+    assert "closed_market_stale_allowed: True" in out
     assert "Gold Market Closed — Last Reference Price" in out
     assert "Not live retail price" in out
     assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
@@ -776,9 +776,9 @@ def test_main_market_open_stale_data_still_blocks(tmp_path, monkeypatch, capsys)
 
     pg.post_tweet.assert_not_called()
     out = capsys.readouterr().out
-    assert "selected:     hourly" in out
+    assert "selected_post_type:        hourly" in out
     assert "WARN: UPSTREAM STALE" in out
-    assert "stale_ok:     False" in out
+    assert "closed_market_stale_allowed: False" in out
     assert "would post" not in out
 
 
@@ -836,8 +836,8 @@ def test_main_market_closed_shortcut_blocks_extremely_old_cache(tmp_path, monkey
 
     pg.post_tweet.assert_not_called()
     out = capsys.readouterr().out
-    assert "selected:     market_closed_reference" in out
-    assert "stale_ok:     False" in out
+    assert "selected_post_type:        market_closed_reference" in out
+    assert "closed_market_stale_allowed: False" in out
     assert "ERROR: UPSTREAM SEVERELY STALE" in out
     assert "would post" not in out
 
