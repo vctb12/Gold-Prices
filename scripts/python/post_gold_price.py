@@ -314,13 +314,13 @@ def check_duplicate_guard(price, prev_price, prev_posted_at_utc, post_type, _now
         trigger_source = os.environ.get('POST_TRIGGER_SOURCE', '').strip().lower() or 'unknown'
         trigger_nonce = os.environ.get('POST_TRIGGER_NONCE', '').strip() or 'NONE'
         refresh_price_first = os.environ.get('REFRESH_PRICE_FIRST', 'false')
-        min_str = str(int(minutes_ago)) if minutes_ago is not None else 'unknown'
+        minutes_age_str = str(int(minutes_ago)) if minutes_ago is not None else 'unknown'
         reason = (
             f"SKIP: market_closed_reference — same closing/reference price already posted\n"
             f"├── current_price:        ${price:,.2f}\n"
             f"├── previous_price:       ${prev_price:,.2f}\n"
             f"├── previous_post_ts:     {prev_posted_at_utc or 'unknown'}\n"
-            f"├── minutes_since_post:   {min_str}\n"
+            f"├── minutes_since_post:   {minutes_age_str}\n"
             f"├── selected_post_type:   {post_type}\n"
             f"├── source:               {trigger_source}\n"
             f"├── trigger_nonce:        {trigger_nonce}\n"
