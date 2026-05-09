@@ -656,7 +656,7 @@ def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeyp
     monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
     monkeypatch.setenv("DRY_RUN_TWEET", "true")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
-    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "Shortcut")
     monkeypatch.setenv("POST_TRIGGER_NONCE", "ios-shortcut-run-1")
     monkeypatch.setenv("REFRESH_PRICE_FIRST", "false")
     monkeypatch.setenv("GITHUB_RUN_ID", "123456789")
@@ -677,19 +677,16 @@ def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeyp
     pg.post_tweet.assert_not_called()
     out = capsys.readouterr().out
     assert "Manual workflow_dispatch trigger; market-hours guard bypassed for operator-triggered run." in out
+    assert "source:       shortcut" in out
     assert "refresh_price_first:      false" in out
     assert "trigger_nonce:            ios-shortcut-run-1" in out
     assert "github.run_id:            123456789" in out
     assert "github.run_attempt:       3" in out
-    assert "shortcut_attempt_recorded: true" in out
+    assert "shortcut_attempt_recorded: false (dry run)" in out
     assert "selected_post_type:        market_closed_reference" in out
     assert "template_used:             market_closed_reference" in out
     assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
-    recorded_state = json.loads(tweet_state_file.read_text())
-    assert recorded_state["last_trigger_source"] == "shortcut"
-    assert recorded_state["last_trigger_nonce"] == "ios-shortcut-run-1"
-    assert recorded_state["last_trigger_run_id"] == "123456789"
-    assert recorded_state["last_trigger_run_attempt"] == "3"
+    assert json.loads(tweet_state_file.read_text()) == {"schema_version": 1}
 
 
 def test_main_market_closed_shortcut_allows_cached_reference_within_limit(tmp_path, monkeypatch, capsys):
@@ -729,7 +726,7 @@ def test_main_market_closed_shortcut_allows_cached_reference_within_limit(tmp_pa
     monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
     monkeypatch.setenv("DRY_RUN_TWEET", "true")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
-    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "SHORTCUT")
     monkeypatch.setenv("CLOSED_MARKET_MAX_STALE_HOURS", "48")
     monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
     monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
@@ -799,7 +796,7 @@ def test_main_shortcut_spam_guard_skips_recent_shortcut_attempt(tmp_path, monkey
     monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
     monkeypatch.setenv("DRY_RUN_TWEET", "true")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
-    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "SHORTCUT")
     monkeypatch.delenv("FORCE_POST", raising=False)
     monkeypatch.delenv("GITHUB_EVENT_SCHEDULE", raising=False)
     monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")

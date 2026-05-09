@@ -761,8 +761,9 @@ def main():
     # GitHub scheduled workflows can start late, so using github.event.schedule
     # prevents repeated event tweets during the whole delayed start hour.
     schedule_cron = os.environ.get('GITHUB_EVENT_SCHEDULE', '').strip() or None
-    trigger_source = os.environ.get('POST_TRIGGER_SOURCE', '').strip() or (
-        'scheduled' if schedule_cron else 'manual'
+    trigger_source = (
+        os.environ.get('POST_TRIGGER_SOURCE', '').strip().lower()
+        or ('scheduled' if schedule_cron else 'manual')
     )
     base_post_type = get_post_type(schedule_cron=schedule_cron)
     market_open = is_market_open_time()

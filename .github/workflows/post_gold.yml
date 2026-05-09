@@ -27,6 +27,10 @@ on:
         description: "Trigger source label for logs/state (manual, shortcut, scheduled)"
         required: false
         default: "manual"
+      refresh_price_first:
+        description: "Optional operator note for run-context logs only; this workflow still posts from cached data/gold_price.json"
+        required: false
+        default: "false"
       trigger_nonce:
         description: "Optional unique manual trigger label"
         required: false
