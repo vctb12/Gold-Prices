@@ -545,7 +545,8 @@ def test_market_closed_reference_template_uses_closing_wording():
     # Must include reopens line
     assert "Reopens Mon" in tweet
     # Must include site URL
-    assert "goldtickerlive.com" in tweet.splitlines()
+    visible_lines = [line for line in tweet.splitlines() if line]
+    assert visible_lines[-2] == "goldtickerlive.com"
 
 
 def test_build_guard_quote_marks_closed_market_reference_as_fresh():
@@ -1863,8 +1864,10 @@ def test_market_closed_reference_template_content(tmp_path, monkeypatch, capsys)
     assert "Reopens Mon 1:00 AM UAE" in tweet
     assert "Updated " in tweet
     assert "Spot ref · Not retail" in tweet
-    assert "goldtickerlive.com" in tweet.splitlines()
+    visible_lines = [line for line in tweet.splitlines() if line]
+    assert visible_lines[-2] == "goldtickerlive.com"
     assert "#GoldPrice #XAU #UAE" in tweet
+    # Representative closed-market prices around the current ~$4.7k/oz range must still fit X.
     assert len(tweet) <= 280
     # Stale age must NOT be in the public post
     assert "10.0h old" not in tweet

@@ -514,6 +514,7 @@ def _uae_datetime():
 
 
 def _format_uae_date_time_parts(dt):
+    # Platform-agnostic day formatting; avoids %-d portability issues.
     local_dt = dt.astimezone(UAE_TZ)
     date_str = f"{local_dt.strftime('%b')} {local_dt.day}, {local_dt.year}"
     time_str = local_dt.strftime('%I:%M %p').lstrip('0')
