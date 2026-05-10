@@ -25,6 +25,7 @@ import hashlib
 import os
 import sys
 import json
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Optional
@@ -58,6 +59,71 @@ TWITTER_API_KEY = os.environ.get('TWITTER_API_KEY', '')
 TWITTER_API_SECRET = os.environ.get('TWITTER_API_SECRET', '')
 TWITTER_ACCESS_TOKEN = os.environ.get('TWITTER_ACCESS_TOKEN', '')
 TWITTER_ACCESS_TOKEN_SECRET = os.environ.get('TWITTER_ACCESS_TOKEN_SECRET', '')
+
+
+@dataclass
+class RunResult:
+    outcome: str
+    status: str
+    post_type: Optional[str] = None
+    template_used: Optional[str] = None
+    price_usd_oz: Optional[float] = None
+    tweet_length: Optional[int] = None
+    content_hash: Optional[str] = None
+    skip_reason: Optional[str] = None
+    operator_action: Optional[str] = None
+    reset_date: Optional[str] = None
+    retry_after_seconds: Optional[str] = None
+    trigger_source: Optional[str] = None
+    trigger_nonce: Optional[str] = None
+    detail: Optional[str] = None
+
+
+def _run_result_path():
+    raw = os.environ.get("POST_GOLD_RESULT_PATH", "").strip()
+    return Path(raw) if raw else None
+
+
+def _persist_run_result(result):
+    path = _run_result_path()
+    if path is None:
+        return
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(asdict(result), indent=2) + "\n", encoding="utf-8")
+    except Exception as exc:  # pragma: no cover — best-effort
+        print(f"⚠️  Failed to persist run result to {path}: {exc}")
+
+
+def emit_run_result(result):
+    _persist_run_result(result)
+    print("=== RUN RESULT ===")
+    ordered_fields = [
+        ("outcome", result.outcome),
+        ("status", result.status),
+        ("post_type", result.post_type),
+        ("template_used", result.template_used),
+        ("price", f"${result.price_usd_oz:,.2f}/oz" if isinstance(result.price_usd_oz, (int, float)) else None),
+        ("tweet_length", result.tweet_length),
+        ("content_hash", result.content_hash),
+        ("skip_reason", result.skip_reason),
+        ("operator_action", result.operator_action),
+        ("reset_date", result.reset_date),
+        ("retry_after_seconds", result.retry_after_seconds),
+        ("trigger_source", result.trigger_source),
+        ("trigger_nonce", result.trigger_nonce),
+        ("detail", result.detail),
+    ]
+    for label, value in ordered_fields:
+        if value is None:
+            continue
+        print(f"{label + ':':<20} {value}")
+    print("===================")
+
+
+def finish_run(result, exit_code=0):
+    emit_run_result(result)
+    sys.exit(exit_code)
 
 
 
@@ -109,7 +175,20 @@ def _save_last_price(price, posted_at_utc=None, content_hash=None):
         print(f"⚠️  Failed to save state to {STATE_FILE}: {err}")
         print("   The tweet was posted successfully but duplicate-guard state was not saved.")
 
-def get_gold_price():
+
+def _previous_post_from_guard_state(guard_state):
+    if guard_state is None:
+        return None
+    if not isinstance(getattr(guard_state, "last_price_usd_oz", None), (int, float)):
+        return None
+    return (
+        float(guard_state.last_price_usd_oz),
+        guard_state.last_tweet_time_utc,
+        guard_state.last_tweet_text_hash,
+    )
+
+
+def get_gold_price(previous_post=None):
     """Read gold price from data/gold_price.json (written by
     scripts/fetch_gold_price.py from goldpricez.com) and shape it
     the way the rest of this file expects."""
@@ -131,7 +210,7 @@ def get_gold_price():
         raise ValueError("gold_price.json missing or invalid spot price (xau_usd_per_oz / gold.ounce_usd)")
     price = float(price)
 
-    previous_price, previous_posted_at_utc, previous_content_hash = _load_last_price()
+    previous_price, previous_posted_at_utc, previous_content_hash = previous_post or _load_last_price()
     chp = None
     if previous_price and previous_price > 0:
         chp = ((price - previous_price) / previous_price) * 100
@@ -691,19 +770,130 @@ def format_market_closed_reference_tweet(data):
     )
 
 
-def format_tweet(data, post_type):
+def format_hourly_tweet_compact(data):
+    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    prev_price = data.get('prev_price')
+    prev_posted_at_utc = data.get('prev_posted_at_utc')
+    date_str, time_str = _uae_datetime()
+    spot_line = f"24K ${price:,.2f}/oz"
+    if prev_price is not None:
+        spot_line += _delta_str(price, prev_price)
+    prev_line = ""
+    if prev_price is not None and prev_posted_at_utc:
+        try:
+            raw_prev = prev_posted_at_utc[:-1] + '+00:00' if prev_posted_at_utc.endswith('Z') else prev_posted_at_utc
+            prev_dt = datetime.fromisoformat(raw_prev)
+            if prev_dt.tzinfo is None:
+                prev_dt = prev_dt.replace(tzinfo=timezone.utc)
+            prev_line = f"Prev ${prev_price:,.2f} · {_format_uae_compact_stamp(prev_dt)} UAE\n"
+        except Exception:
+            prev_line = f"Prev ${prev_price:,.2f}\n"
+    return (
+        f"🥇 Gold Update · {date_str}\n"
+        f"{time_str} UAE\n"
+        f"\n"
+        f"Spot XAU/USD\n"
+        f"{spot_line}\n"
+        f"\n"
+        f"🇦🇪 AED/g\n"
+        f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
+        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"\n"
+        f"{prev_line}"
+        f"Spot ref · Not retail\n"
+        f"goldtickerlive.com\n"
+        f"#GoldPrice #XAU #UAE"
+    )
+
+
+def format_market_open_tweet_compact(data):
+    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    return (
+        f"🟢 Gold Market Open\n"
+        f"Mon 1:00 AM UAE\n"
+        f"\n"
+        f"Opening Spot XAU/USD\n"
+        f"24K ${price:,.2f}/oz{_change_str(chp)}\n"
+        f"\n"
+        f"🇦🇪 AED/g\n"
+        f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
+        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"\n"
+        f"Track live prices\n"
+        f"goldtickerlive.com\n"
+        f"#GoldPrice #XAU #UAE"
+    )
+
+
+def format_market_close_tweet_compact(data):
+    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    return (
+        f"🔴 Gold Market Closed\n"
+        f"Sat 1:00 AM UAE\n"
+        f"\n"
+        f"Closing Spot XAU/USD\n"
+        f"24K ${price:,.2f}/oz{_change_str(chp)}\n"
+        f"\n"
+        f"🇦🇪 AED/g\n"
+        f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
+        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"\n"
+        f"Reopens Mon 1:00 AM UAE\n"
+        f"goldtickerlive.com\n"
+        f"#GoldPrice #XAU #UAE"
+    )
+
+
+def _render_tweet(data, post_type):
     print(f"   Post type: {post_type}")
     if post_type == 'market_open':
-        tweet = format_market_open_tweet(data)
+        variants = [
+            ('market_open', format_market_open_tweet),
+            ('market_open_compact', format_market_open_tweet_compact),
+        ]
     elif post_type == 'market_close':
-        tweet = format_market_close_tweet(data)
+        variants = [
+            ('market_close', format_market_close_tweet),
+            ('market_close_compact', format_market_close_tweet_compact),
+        ]
     elif post_type == 'market_closed_reference':
-        tweet = format_market_closed_reference_tweet(data)
+        variants = [('market_closed_reference', format_market_closed_reference_tweet)]
     else:
-        tweet = format_hourly_tweet(data)
-    if len(tweet) > 280:
-        print(f"⚠️  tweet_length={len(tweet)} > 280 — X API may reject; local posting NOT blocked")
-    return tweet
+        variants = [
+            ('hourly', format_hourly_tweet),
+            ('hourly_compact', format_hourly_tweet_compact),
+        ]
+
+    last_variant_name = variants[0][0]
+    last_tweet = ""
+    for variant_name, formatter in variants:
+        candidate = formatter(data)
+        if len(candidate) <= 280:
+            if variant_name != variants[0][0]:
+                print(f"   template_variant: {variant_name} (fallback to stay within 280 chars)")
+            return {
+                "text": candidate,
+                "template_used": variant_name,
+                "tweet_length": len(candidate),
+                "fits_limit": True,
+            }
+        last_variant_name = variant_name
+        last_tweet = candidate
+
+    print(f"⚠️  tweet_length={len(last_tweet)} > 280 — X API may reject; local posting NOT blocked")
+    return {
+        "text": last_tweet,
+        "template_used": last_variant_name,
+        "tweet_length": len(last_tweet),
+        "fits_limit": False,
+    }
+
+
+def format_tweet(data, post_type, return_meta=False):
+    rendered = _render_tweet(data, post_type)
+    if return_meta:
+        return rendered
+    return rendered["text"]
 
 
 def get_template_name(post_type):
@@ -788,6 +978,43 @@ def _is_spend_cap_problem(problem):
     )
 
 
+def classify_post_exception(exc, *, post_type, template_used, price, tweet_length, trigger_source, trigger_nonce):
+    exc_name = type(exc).__name__
+    operator_action = "inspect_x_workflow_logs"
+    status = "failed"
+    outcome = "FAILED_X_API"
+    retry_after = None
+    if exc_name == "Unauthorized":
+        outcome = "FAILED_UNAUTHORIZED"
+        status = "operator_action_needed"
+        operator_action = "rotate_or_restore_x_credentials"
+    elif exc_name == "TooManyRequests":
+        outcome = "FAILED_RATE_LIMIT"
+        status = "operator_action_needed"
+        operator_action = "wait_for_x_rate_limit_reset"
+        resp = getattr(exc, "response", None)
+        retry_after = getattr(resp, "headers", {}).get("Retry-After") if resp is not None else None
+    elif exc_name == "BadRequest":
+        outcome = "FAILED_BAD_REQUEST"
+        operator_action = "inspect_x_payload_and_response"
+    elif exc_name == "Forbidden":
+        outcome = "FAILED_FORBIDDEN"
+        operator_action = "inspect_duplicate_or_account_policy_state"
+    return RunResult(
+        outcome=outcome,
+        status=status,
+        post_type=post_type,
+        template_used=template_used,
+        price_usd_oz=price,
+        tweet_length=tweet_length,
+        trigger_source=trigger_source,
+        trigger_nonce=trigger_nonce or "(none)",
+        operator_action=operator_action,
+        retry_after_seconds=retry_after,
+        detail=exc_name,
+    )
+
+
 def post_tweet(text, post_type='hourly'):
     """Post the tweet using tweepy (X API v2)."""
     import tweepy
@@ -856,18 +1083,42 @@ def main():
         print(f"⚠️  {count} required environment variable(s) not set.")
         print("   Set these as GitHub Secrets in Settings → Secrets → Actions.")
         print("   Skipping tweet.")
-        sys.exit(0)  # Exit 0 so the workflow doesn't report as failed
+        finish_run(
+            RunResult(
+                outcome="SKIPPED_MISSING_CREDENTIALS",
+                status="skip",
+                operator_action="set_missing_x_secrets",
+                detail=", ".join(missing),
+            ),
+            exit_code=0,
+        )
 
     # 2. Load raw gold price data
     if not GOLD_PRICE_FILE.exists():
         print(f"FATAL: {GOLD_PRICE_FILE} not found."
               " The gold-price-fetch.yml workflow must run first to populate it.")
-        sys.exit(1)
+        finish_run(
+            RunResult(
+                outcome="FAILED_MISSING_GOLD_PRICE_FILE",
+                status="fatal",
+                operator_action="run_gold_price_fetch_workflow_first",
+                detail=str(GOLD_PRICE_FILE),
+            ),
+            exit_code=1,
+        )
     try:
         raw_data = json.loads(GOLD_PRICE_FILE.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as _json_exc:
         print(f"FATAL: {GOLD_PRICE_FILE} unreadable — {_json_exc}")
-        sys.exit(1)
+        finish_run(
+            RunResult(
+                outcome="FAILED_UNREADABLE_GOLD_PRICE_FILE",
+                status="fatal",
+                operator_action="repair_gold_price_json",
+                detail=str(_json_exc),
+            ),
+            exit_code=1,
+        )
     source_ts = _provider_timestamp_iso(raw_data) or (
         raw_data.get("source_updated_at_gmt", "n/a") if isinstance(raw_data, dict) else "n/a"
     )
@@ -958,7 +1209,18 @@ def main():
         if reason:
             print(reason)
         if skip:
-            sys.exit(0)
+            finish_run(
+                RunResult(
+                    outcome="SKIPPED_SHORTCUT_ANTI_SPAM",
+                    status="skip",
+                    skip_reason="shortcut_anti_spam",
+                    post_type=post_type,
+                    template_used=template_used,
+                    trigger_source=trigger_source,
+                    trigger_nonce=trigger_nonce or "(none)",
+                ),
+                exit_code=0,
+            )
         is_dry_run_tweet = os.getenv("DRY_RUN_TWEET", "").strip().lower() == "true"
         if is_dry_run_tweet:
             print("shortcut_attempt_recorded: false (dry run)")
@@ -985,18 +1247,20 @@ def main():
     # guard state (including last price and tweet time) lives in data/last_tweet_state.json and
     # is shown in the guard state section above.
     print("📡 Reading gold price from data/gold_price.json (canonical price payload)…")
-    data = get_gold_price()
+    previous_post = _previous_post_from_guard_state(guard_state)
+    data = get_gold_price(previous_post=previous_post)
     print(f"   Spot: ${data['price']:,.2f}/oz")
-    if data.get('prev_price') is not None:
+    if previous_post is not None:
+        print(
+            f"   Previous post (authoritative data/last_tweet_state.json): "
+            f"${data['prev_price']:,.4f}/oz at {data.get('prev_posted_at_utc') or 'n/a'}"
+        )
+        if STATE_FILE.exists():
+            print("   Legacy data/last_gold_price.json retained for compatibility; tweet guard state remains authoritative.")
+    elif data.get('prev_price') is not None:
         print(f"   Previous post (legacy data/last_gold_price.json): ${data['prev_price']:,.2f}/oz at {data.get('prev_posted_at_utc') or 'n/a'}")
     else:
-        print("   Previous post (legacy data/last_gold_price.json): none")
-        if guard_state is not None and guard_state.last_price_usd_oz is not None:
-            print(
-                f"   Previous post (data/last_tweet_state.json): "
-                f"${guard_state.last_price_usd_oz:,.4f}/oz at {guard_state.last_tweet_time_utc or 'n/a'}"
-                f" — guard state is the authoritative source for cooldown/duplicate checks"
-            )
+        print("   Previous post: none")
 
     # 6. Staleness check
     staleness_details = get_staleness_details(raw_data)
@@ -1016,13 +1280,37 @@ def main():
     print(f"stale_age_hours:          {stale_age_label}")
     print(f"closed_market_stale_allowed: {closed_market_stale_allowed}")
     if staleness_action == 'skip' and not closed_market_stale_allowed:
-        sys.exit(0)
+        finish_run(
+            RunResult(
+                outcome="SKIPPED_STALE_QUOTE",
+                status="skip",
+                skip_reason="stale_quote",
+                post_type=post_type,
+                template_used=template_used,
+                price_usd_oz=data['price'],
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce or "(none)",
+            ),
+            exit_code=0,
+        )
     if staleness_action == 'parse_error' and post_type == 'market_closed_reference':
         print(
             "SKIP: market-closed reference post requires a valid source timestamp"
             f" ({staleness_msg or 'provider timestamp missing or invalid'})."
         )
-        sys.exit(0)
+        finish_run(
+            RunResult(
+                outcome="SKIPPED_INVALID_PROVIDER_TIMESTAMP",
+                status="skip",
+                skip_reason="provider_timestamp_parse_error",
+                post_type=post_type,
+                template_used=template_used,
+                price_usd_oz=data['price'],
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce or "(none)",
+            ),
+            exit_code=0,
+        )
 
     # 7. 24/5 market-hours guard for regular price posts
     skip, reason = should_skip_market_closed(
@@ -1033,7 +1321,19 @@ def main():
     if reason:
         print(reason)
     if skip:
-        sys.exit(0)
+        finish_run(
+            RunResult(
+                outcome="SKIPPED_MARKET_CLOSED",
+                status="skip",
+                skip_reason="market_closed",
+                post_type=post_type,
+                template_used=template_used,
+                price_usd_oz=data['price'],
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce or "(none)",
+            ),
+            exit_code=0,
+        )
 
     if post_type == 'market_closed_reference':
         data['source_updated_at_utc'] = staleness_details.get("timestamp_utc")
@@ -1065,13 +1365,35 @@ def main():
                 "duplicate_text_hash, cooldown, and X duplicate rules still apply."
             )
         else:
-            sys.exit(0)
+            finish_run(
+                RunResult(
+                    outcome="SKIPPED_PRICE_CHANGE_GUARD",
+                    status="skip",
+                    skip_reason="price_change_guard",
+                    post_type=post_type,
+                    template_used=template_used,
+                    price_usd_oz=data['price'],
+                    trigger_source=trigger_source,
+                    trigger_nonce=trigger_nonce or "(none)",
+                ),
+                exit_code=0,
+            )
 
     # 9. Format tweet
-    tweet = format_tweet(data, post_type)
+    tweet_render = format_tweet(data, post_type, return_meta=True)
+    if isinstance(tweet_render, str):
+        tweet_render = {
+            "text": tweet_render,
+            "template_used": template_used,
+            "tweet_length": len(tweet_render),
+            "fits_limit": len(tweet_render) <= 280,
+        }
+    tweet = tweet_render["text"]
+    template_used = tweet_render["template_used"]
+    tweet_length = tweet_render["tweet_length"]
     print("📝 Generated tweet:")
     print(tweet)
-    print(f"   ({len(tweet)} characters)")
+    print(f"   ({tweet_length} characters)")
 
     # 10. Content-hash guard
     tweet_hash = compute_content_hash(tweet)
@@ -1085,7 +1407,21 @@ def main():
             f"SKIP: content-hash guard — tweet content identical to last post"
             f" (hash {tweet_hash})"
         )
-        sys.exit(0)
+        finish_run(
+            RunResult(
+                outcome="SKIPPED_DUPLICATE_CONTENT_HASH",
+                status="skip",
+                skip_reason="content_hash_duplicate",
+                post_type=post_type,
+                template_used=template_used,
+                price_usd_oz=data['price'],
+                tweet_length=tweet_length,
+                content_hash=tweet_hash,
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce or "(none)",
+            ),
+            exit_code=0,
+        )
 
     # 10b. New X duplicate-prevention guard (additive). Skips on:
     #      • provider timestamp unchanged (GoldPriceZ freezing case)
@@ -1154,7 +1490,21 @@ def main():
                     # For other skip reasons on market_closed_reference, add brief context.
                     skip_msg += f"\n   post_type: {post_type}, force_summary_due={decision.force_summary_due}"
                 print(skip_msg)
-                sys.exit(0)
+                finish_run(
+                    RunResult(
+                        outcome="SKIPPED_TWEET_GUARD",
+                        status="skip",
+                        skip_reason=decision.skip_reason,
+                        post_type=post_type,
+                        template_used=template_used,
+                        price_usd_oz=data['price'],
+                        tweet_length=tweet_length,
+                        content_hash=decision.tweet_hash[:12],
+                        trigger_source=trigger_source,
+                        trigger_nonce=trigger_nonce or "(none)",
+                    ),
+                    exit_code=0,
+                )
         # Log why a same-price market_closed_reference was allowed through.
         if post_type == "market_closed_reference" and decision.price_move_usd is not None and abs(decision.price_move_usd) < 0.01:
             if decision.force_summary_due:
@@ -1171,26 +1521,76 @@ def main():
         if str(os.environ.get('DRY_RUN_TWEET', '')).strip().lower() in ('1', 'true', 'yes'):
             print("DRY_RUN_TWEET=true — would post; skipping actual X call")
             print(f"   would-post hash: {decision.tweet_hash[:12]}")
-            sys.exit(0)
+            finish_run(
+                RunResult(
+                    outcome="DRY_RUN_READY",
+                    status="skip",
+                    skip_reason="dry_run",
+                    post_type=post_type,
+                    template_used=template_used,
+                    price_usd_oz=data['price'],
+                    tweet_length=tweet_length,
+                    content_hash=decision.tweet_hash[:12],
+                    trigger_source=trigger_source,
+                    trigger_nonce=trigger_nonce or "(none)",
+                ),
+                exit_code=0,
+            )
 
     # 10c. Dry-run guard (applied unconditionally; also catches the case where
     #      tweet_guard is unavailable and was not imported above).
     if str(os.environ.get('DRY_RUN_TWEET', '')).strip().lower() in ('1', 'true', 'yes'):
         print("DRY_RUN_TWEET=true — would post; skipping actual X call")
         print(f"   would-post hash: {tweet_hash}")
-        sys.exit(0)
+        finish_run(
+            RunResult(
+                outcome="DRY_RUN_READY",
+                status="skip",
+                skip_reason="dry_run",
+                post_type=post_type,
+                template_used=template_used,
+                price_usd_oz=data['price'],
+                tweet_length=tweet_length,
+                content_hash=tweet_hash,
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce or "(none)",
+            ),
+            exit_code=0,
+        )
 
     # 11. Post tweet
-    post_result = post_tweet(tweet, post_type=post_type)
+    try:
+        post_result = post_tweet(tweet, post_type=post_type)
+    except Exception as exc:
+        emit_run_result(
+            classify_post_exception(
+                exc,
+                post_type=post_type,
+                template_used=template_used,
+                price=data['price'],
+                tweet_length=tweet_length,
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce,
+            )
+        )
+        raise
     if isinstance(post_result, dict) and not post_result.get("posted", False):
-        print("=== RUN RESULT ===")
-        print("outcome:      SKIPPED_SPEND_CAP")
-        print(f"post_type:    {post_type}")
-        print(f"price:        ${data['price']:,.2f}/oz")
-        print(f"tweet_length: {len(tweet)}")
-        print(f"reset_date:   {post_result.get('reset_date', 'unknown')}")
-        print("===================")
-        sys.exit(0)
+        finish_run(
+            RunResult(
+                outcome="OPERATOR_ACTION_SPEND_CAP",
+                status="operator_action_needed",
+                skip_reason=post_result.get("skip_reason"),
+                operator_action="increase_x_spend_cap_or_wait_for_reset",
+                reset_date=post_result.get('reset_date', 'unknown'),
+                post_type=post_type,
+                template_used=template_used,
+                price_usd_oz=data['price'],
+                tweet_length=tweet_length,
+                trigger_source=trigger_source,
+                trigger_nonce=trigger_nonce or "(none)",
+            ),
+            exit_code=0,
+        )
 
     # 12. Save state (only reached on successful post)
     _save_last_price(data["price"], content_hash=tweet_hash)
@@ -1207,13 +1607,19 @@ def main():
         except Exception as exc:  # pragma: no cover — best-effort
             print(f"⚠️  Failed to update last_tweet_state.json: {exc}")
 
-    print("=== RUN RESULT ===")
-    print(f"outcome:      POSTED")
-    print(f"post_type:    {post_type}")
-    print(f"price:        ${data['price']:,.2f}/oz")
-    print(f"tweet_length: {len(tweet)}")
-    print(f"content_hash: {tweet_hash}")
-    print("===================")
+    emit_run_result(
+        RunResult(
+            outcome="POSTED",
+            status="posted",
+            post_type=post_type,
+            template_used=template_used,
+            price_usd_oz=data['price'],
+            tweet_length=tweet_length,
+            content_hash=tweet_hash,
+            trigger_source=trigger_source,
+            trigger_nonce=trigger_nonce or "(none)",
+        )
+    )
 
 
 if __name__ == '__main__':

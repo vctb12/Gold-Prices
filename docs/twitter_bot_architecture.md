@@ -142,11 +142,11 @@ All inputs default to their safe values. Scheduled cron runs see `dry_run=false`
 
 ## State Files
 
-| File                         | Written by                | Contents                                                                                   |
-| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------ |
-| `data/gold_price.json`       | `fetch_gold_price.py`     | Canonical price payload, provider, timestamps, karat prices                                |
-| `data/last_gold_price.json`  | `post_gold_price.py`      | Last successfully posted price + timestamp + content hash                                  |
-| `data/last_tweet_state.json` | `tweet_guard.py` / poster | Full guard state: last price, provider ts, tweet hash, cooldown, Shortcut attempt metadata |
+| File                         | Written by                | Contents                                                                                    |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
+| `data/gold_price.json`       | `fetch_gold_price.py`     | Canonical price payload, provider, timestamps, karat prices                                 |
+| `data/last_gold_price.json`  | `post_gold_price.py`      | Legacy compatibility record of the last posted price + timestamp + content hash             |
+| `data/last_tweet_state.json` | `tweet_guard.py` / poster | Authoritative guard state: last price, provider ts, tweet hash, cooldown, Shortcut metadata |
 
 All three files are committed back to the repo by their respective workflows (with `[skip ci]` to
 avoid triggering a deploy). `data/last_tweet_state.json` is written atomically (write-to-temp →
@@ -186,6 +186,7 @@ without updating the workflow.
 | X API 401 (bad credentials)                  | Log structured error; re-raise; workflow fails                                              |
 | X API 429 (rate limit)                       | Log with `Retry-After`; re-raise; workflow fails                                            |
 | market_closed_reference template             | Compact copy stays within the normal 280-char X limit for realistic prices                  |
+| Hourly / open / close over-budget templates  | Fallback to compact variants first; warn only if every variant still exceeds 280            |
 | Other tweets > 280 characters                | Warning-only log (`⚠️ tweet_length=N > 280`); still attempts post; X enforces its own limit |
 | Missing Twitter credentials                  | Warning log, `exit(0)` — workflow succeeds silently (safe for environments without secrets) |
 | `last_tweet_state.json` corrupt              | Warning log; treated as first run; no crash                                                 |
@@ -223,6 +224,7 @@ When a manual/Shortcut run exits unexpectedly:
 3. Check the `stale_age_hours` and `closed_market_stale_allowed` lines.
 4. Look for `SKIP:` lines to identify which guard fired.
 5. Check `[guard]` trace lines (from `tweet_guard.decide()`) for sub-guard evaluation.
-6. Check the `=== RUN RESULT ===` block at the bottom — present only on a successful post.
+6. Check the `=== RUN RESULT ===` block at the bottom — it now appears for posted, skipped, and
+   operator-action-needed outcomes.
 7. For `market_closed_reference` same-price skips, the skip log uses `├──` / `└──` tree format with
    all relevant fields. Re-run with `allow_same_price_closed_market_repost=true` if needed.

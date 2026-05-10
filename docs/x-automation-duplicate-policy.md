@@ -27,8 +27,9 @@ Production posture:
   attempt inside a 2-minute window unless `force_post=true`
 - `force_post=true` only overrides the cooldown guard; stale and duplicate checks still apply
 - the market-closed reference template is compact by design and stays within the normal 280-char X
-  limit for realistic prices; other long posts are still logged and attempted locally so X can
-  enforce account-specific eligibility
+  limit for realistic prices
+- hourly / market-open / market-close posts can fall back to compact variants before the workflow
+  relies on X's own length enforcement
 
 ---
 
@@ -70,11 +71,10 @@ all seven rules pass, the bot posts and updates `data/last_tweet_state.json`.
 
 `post_gold_price.py` prints the generated post text and character count before calling the X API.
 The market-closed reference copy is now shortened to fit the standard 280-character limit with
-realistic price widths. Other templates are still not blocked locally just because they are longer
-than 280 characters; X still owns its own eligibility rules, including Premium / verified
-longer-post capability, so any external length rejection should come back from X and be logged by
-the workflow. Dry-run mode (`DRY_RUN_TWEET=true`) still evaluates all guards but never posts or
-mutates state.
+realistic price widths. Hourly / market-open / market-close posts try compact fallback variants
+before the workflow relies on X's own length enforcement. If every variant is still too long, X
+still owns the final eligibility decision, including Premium / verified longer-post capability.
+Dry-run mode (`DRY_RUN_TWEET=true`) still evaluates all guards but never posts or mutates state.
 
 The legacy guards (`check_duplicate_guard` and the content-hash check in `post_gold_price.py`) still
 run before `tweet_guard.decide()` — this layer is **additive**.
@@ -265,7 +265,7 @@ arrived only ~17 minutes later, `minutes_since_last` was below `FORCE_SUMMARY_AF
 so `force_summary_due=False`. Because the price had not moved (`move=$0.00`), the
 `price_move_below_threshold` guard fired and the run cleanly skipped.
 
-### Why logs showed "Previous post: none"
+### Why logs used to show "Previous post: none"
 
 Both runs printed `"Previous post (legacy data/last_gold_price.json): none"`. This is because
 `data/last_gold_price.json` is written by **two different writers with incompatible schemas**:
@@ -277,21 +277,20 @@ Both runs printed `"Previous post (legacy data/last_gold_price.json): none"`. Th
    `{ "price": 4715.70, "posted_at_utc": "..." }`
 
 When `refresh_price_first=true` is used, the fetcher runs first and overwrites
-`last_gold_price.json` with the normalized format. The poster's `_load_last_price()` then reads this
-file and looks for a `"price"` key — which doesn't exist in the normalized schema — so it returns
-`(None, None, None)` and logs `"Previous post (legacy): none"`.
+`last_gold_price.json` with the normalized format. That used to make the poster's legacy
+`_load_last_price()` return `(None, None, None)` and log `"Previous post (legacy): none"`.
 
 This does **not** affect guard correctness: all cooldown, duplicate, and price-move decisions use
 `data/last_tweet_state.json` (the authoritative guard state), not `data/last_gold_price.json`. The
-improved RUN CONTEXT block now cross-references both files explicitly, including the last tweet time
-and last price from `last_tweet_state.json`, so the log is no longer misleading.
+poster now prefers `data/last_tweet_state.json` as the previous-post source whenever it has valid
+values, while still logging that `data/last_gold_price.json` is a compatibility-only file.
 
 ### State file roles
 
 | File                         | Written by                                          | Contains                                  | Used for                                                          |
 | ---------------------------- | --------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------- |
 | `data/gold_price.json`       | `fetch_gold_price.py`                               | Current normalized gold price             | Source of truth for price/timestamp to post                       |
-| `data/last_gold_price.json`  | Both `fetch_gold_price.py` AND `post_gold_price.py` | See note below                            | Legacy "last posted price" display; schema collision exists       |
+| `data/last_gold_price.json`  | Both `fetch_gold_price.py` AND `post_gold_price.py` | See note below                            | Legacy compatibility record only                                  |
 | `data/last_tweet_state.json` | `post_gold_price.py` (via `tweet_guard`)            | Last tweet time, price, hash, provider ts | Authoritative source for cooldown / duplicate / force_summary_due |
 
 `data/last_gold_price.json` is written with **two incompatible schemas** by two different scripts.
@@ -319,8 +318,8 @@ force_summary_due=true  (computed from last tweet time vs FORCE_SUMMARY_AFTER_MI
 refresh_price_first=true  (manual/operator workflow_dispatch only)
   → runs one provider fetch before the posting path
   → does NOT guarantee price change; if market is closed, price stays the same
-  → side effect: overwrites data/last_gold_price.json with normalized schema,
-                 causing _load_last_price() to return None ("Previous post: none")
+  → may still overwrite data/last_gold_price.json with normalized schema,
+     but the poster now prefers data/last_tweet_state.json when it has valid prior-post data
 
 trigger_nonce  (optional label, any value including none/empty)
   → appears in logs and last_tweet_state.json for traceability
@@ -332,7 +331,8 @@ trigger_nonce  (optional label, any value including none/empty)
 
 Always inspect the Python posting step log, not just the workflow result. Look for:
 
-1. `SKIP: price-change guard` → `check_duplicate_guard` fired (same price as `last_gold_price.json`)
+1. `SKIP: price-change guard` → `check_duplicate_guard` fired (same price as the authoritative prior
+   post)
 2. `SKIP: tweet-guard — price_move_below_threshold` → `tweet_guard.decide()` fired because price
    didn't move and `force_summary_due=False`. Check `minutes_since_last_tweet` and
    `force_summary_after_minutes` in the RUN CONTEXT block.

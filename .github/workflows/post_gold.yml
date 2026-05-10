@@ -116,6 +116,7 @@ jobs:
           POST_TRIGGER_NONCE:          ${{ github.event.inputs.trigger_nonce || '' }}
           ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST: ${{ github.event.inputs.allow_same_price_closed_market_repost || 'false' }}
           MIN_TWEET_INTERVAL_MINUTES:  '55'
+          POST_GOLD_RESULT_PATH:       ${{ runner.temp }}/post-gold-result.json
         run: python scripts/python/post_gold_price.py
 
       - name: Commit last price state
@@ -142,6 +143,7 @@ jobs:
           REFRESH_PRICE_FIRST_INPUT: ${{ github.event.inputs.refresh_price_first || 'false' }}
           ALLOW_SAME_PRICE_INPUT: ${{ github.event.inputs.allow_same_price_closed_market_repost || 'false' }}
           TRIGGER_NONCE_INPUT:    ${{ github.event.inputs.trigger_nonce || '' }}
+          POST_GOLD_RESULT_PATH:  ${{ runner.temp }}/post-gold-result.json
         run: |
           {
             echo "### 🏅 Post Gold — Run Summary"
@@ -156,3 +158,39 @@ jobs:
             echo "| allow_same_price_closed_market_repost | \`$ALLOW_SAME_PRICE_INPUT\` |"
             echo "| trigger_nonce | \`${TRIGGER_NONCE_INPUT:-none}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["POST_GOLD_RESULT_PATH"])
+          if not path.exists():
+              print("\n### Runtime outcome\nNo structured runtime outcome file was written.")
+              raise SystemExit(0)
+
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          print("\n### Runtime outcome")
+          print("| Field | Value |")
+          print("| --- | --- |")
+          ordered_fields = [
+              "outcome",
+              "status",
+              "post_type",
+              "template_used",
+              "price_usd_oz",
+              "tweet_length",
+              "content_hash",
+              "skip_reason",
+              "operator_action",
+              "reset_date",
+              "retry_after_seconds",
+              "trigger_source",
+              "trigger_nonce",
+              "detail",
+          ]
+          for key in ordered_fields:
+              value = payload.get(key)
+              if value in (None, ""):
+                  continue
+              print(f"| {key} | `{value}` |")
+          PY

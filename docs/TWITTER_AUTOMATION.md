@@ -148,11 +148,10 @@ Make sure all 5 secrets are added in GitHub Settings → Secrets → Actions.
 ### Tweet > 280 characters
 
 The market-closed reference template is now compact enough to fit the normal 280-character limit for
-realistic price widths. Other cached-data posts still are not blocked locally when they run long:
-the repo logs the generated text and character count, then lets X decide whether the account can
-publish it. If X rejects the post because of platform-level character rules or account eligibility,
-the API error should appear in the workflow logs. X Premium / verified longer-post eligibility is
-handled by X, not by this repo.
+realistic price widths. Hourly / market-open / market-close posts now try compact fallback variants
+before the repo relies on X's own length enforcement. If X still rejects a post because of
+platform-level character rules or account eligibility, the API error should appear in the workflow
+logs. X Premium / verified longer-post eligibility is handled by X, not by this repo.
 
 ---
 

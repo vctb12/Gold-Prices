@@ -727,6 +727,63 @@ def test_main_dry_run_does_not_post(tmp_path, monkeypatch, capsys):
     assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
 
 
+def test_main_writes_structured_result_file_for_dry_run(tmp_path, monkeypatch, capsys):
+    fresh_now = datetime.now(timezone.utc)
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    result_file = tmp_path / "post-gold-result.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4731.2,
+                "timestamp_utc": (fresh_now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "fetched_at_utc": fresh_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "aed_per_gram_24k": 558.4,
+                "karats_aed_per_gram": {
+                    "24k": 558.4,
+                    "22k": 511.87,
+                    "21k": 488.6,
+                    "18k": 418.8,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    tweet_state_file.write_text(json.dumps({"schema_version": 1}))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(pg, "format_tweet", lambda *_args, **_kwargs: "short dry-run tweet")
+    monkeypatch.setattr(pg, "post_tweet", MagicMock())
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: True)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("DRY_RUN_TWEET", "true")
+    monkeypatch.setenv("POST_GOLD_RESULT_PATH", str(result_file))
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit after dry run")
+
+    payload = json.loads(result_file.read_text())
+    assert payload["outcome"] == "DRY_RUN_READY"
+    assert payload["status"] == "skip"
+    assert payload["skip_reason"] == "dry_run"
+    assert payload["tweet_length"] == len("short dry-run tweet")
+
+
 def test_main_workflow_dispatch_shortcut_bypasses_market_hours(tmp_path, monkeypatch, capsys):
     fresh_now = datetime.now(timezone.utc)
     gold_file = tmp_path / "gold_price.json"
@@ -1217,8 +1274,10 @@ def test_main_skips_cleanly_when_x_spend_cap_is_reached(tmp_path, monkeypatch, c
     assert json.loads(state_file.read_text()) == {"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}
     assert json.loads(tweet_state_file.read_text()) == {"schema_version": 1}
     out = capsys.readouterr().out
-    assert "outcome:      SKIPPED_SPEND_CAP" in out
-    assert "reset_date:   2026-05-13" in out
+    assert "outcome:" in out
+    assert "OPERATOR_ACTION_SPEND_CAP" in out
+    assert "reset_date:" in out
+    assert "2026-05-13" in out
 
 
 # ── allow_same_price_closed_market_repost tests ─────────────────────────────
@@ -1424,8 +1483,8 @@ def test_main_scheduled_run_cannot_use_allow_same_price_repost(
 
 # ── New hardening tests ───────────────────────────────────────────────────────
 
-def test_format_tweet_emits_length_warning_for_over_280_chars(capsys):
-    """format_tweet must emit a ⚠️ warning when length > 280, but not block."""
+def test_format_tweet_uses_compact_hourly_variant_when_standard_is_over_280(capsys):
+    """format_tweet should fall back to the compact hourly variant before warning."""
     data = {
         "price": 4681.84,
         "price_gram_24k": 150.38,
@@ -1436,7 +1495,6 @@ def test_format_tweet_emits_length_warning_for_over_280_chars(capsys):
         "prev_price": None,
         "prev_posted_at_utc": None,
     }
-    # Monkey-patch the internal formatter to return a string > 280 chars.
     original_format = pg.format_hourly_tweet
     pg.format_hourly_tweet = lambda _d: "x" * 304
     try:
@@ -1444,9 +1502,36 @@ def test_format_tweet_emits_length_warning_for_over_280_chars(capsys):
     finally:
         pg.format_hourly_tweet = original_format
 
-    assert len(result) == 304
     out = capsys.readouterr().out
-    assert "⚠️  tweet_length=304 > 280" in out
+    assert len(result) <= 280
+    assert "template_variant: hourly_compact" in out
+    assert "tweet_length=304" not in out
+
+
+def test_format_tweet_emits_length_warning_when_all_variants_are_over_280(capsys):
+    data = {
+        "price": 4681.84,
+        "price_gram_24k": 150.38,
+        "price_gram_22k": 137.85,
+        "price_gram_21k": 131.58,
+        "price_gram_18k": 112.78,
+        "chp": 0.25,
+        "prev_price": None,
+        "prev_posted_at_utc": None,
+    }
+    original_standard = pg.format_hourly_tweet
+    original_compact = pg.format_hourly_tweet_compact
+    pg.format_hourly_tweet = lambda _d: "x" * 304
+    pg.format_hourly_tweet_compact = lambda _d: "y" * 299
+    try:
+        result = pg.format_tweet(data, "hourly")
+    finally:
+        pg.format_hourly_tweet = original_standard
+        pg.format_hourly_tweet_compact = original_compact
+
+    assert len(result) == 299
+    out = capsys.readouterr().out
+    assert "⚠️  tweet_length=299 > 280" in out
     assert "local posting NOT blocked" in out
 
 
@@ -1591,11 +1676,9 @@ def test_previous_post_none_from_legacy_state_cross_references_guard_state(
     tmp_path, monkeypatch, capsys
 ):
     """
-    When data/last_gold_price.json is in normalized format (written by fetch_gold_price.py
-    after refresh_price_first=true), _load_last_price() returns (None, None, None) and the
-    log prints "Previous post (legacy): none".
-    The log must also print the guard state from data/last_tweet_state.json for clarity.
-    This reproduces the confusing "Previous post: none" seen in both 18:29 and 18:46 runs.
+    When data/last_gold_price.json is in normalized format but last_tweet_state.json has a
+    valid prior post, the poster should prefer the guard state as the authoritative previous
+    post source and explain that the legacy file is compatibility-only.
     """
     fresh_now = datetime.now(timezone.utc)
     gold_file = _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=0.1)
@@ -1642,12 +1725,9 @@ def test_previous_post_none_from_legacy_state_cross_references_guard_state(
         pass
 
     out = capsys.readouterr().out
-    # Legacy state shows "none" because the normalized schema has no "price" key
-    assert "Previous post (legacy data/last_gold_price.json): none" in out
-    # Guard state cross-reference must be printed when guard state has info
-    assert "Previous post (data/last_tweet_state.json):" in out
+    assert "Previous post (authoritative data/last_tweet_state.json):" in out
     assert "4,715.7002" in out or "4715.7002" in out
-    assert "authoritative source" in out
+    assert "compatibility" in out
 
 
 def test_run_context_block_includes_guard_state_and_force_summary_due(
@@ -1723,9 +1803,7 @@ def test_price_move_threshold_skip_includes_force_post_explanation_for_market_cl
     fresh_now = datetime.now(timezone.utc)
     source_ts = (fresh_now - timedelta(hours=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
     gold_file = _make_normalized_gold_file(tmp_path, price=4715.70, hours_old=4)
-    # Use NORMALIZED legacy state (as if fetch_gold_price.py overwrote it) so that
-    # _load_last_price() returns prev_price=None, check_duplicate_guard passes, and
-    # the flow reaches tweet_guard.decide() — reproducing the 18:46 run scenario.
+    # Legacy state is normalized-only and should be ignored in favour of guard-state history.
     legacy_state_file = tmp_path / "last_gold_price.json"
     legacy_state_file.write_text(json.dumps({
         "schema_version": 1,
@@ -1737,15 +1815,15 @@ def test_price_move_threshold_skip_includes_force_post_explanation_for_market_cl
     # Guard state: last tweet was only 16 min ago (force_summary_due=False).
     # The last_provider_timestamp_utc is OLDER than the current gold file's timestamp,
     # simulating refresh_price_first=true having advanced the provider timestamp.
-    # This makes ts_changed=True, so provider_timestamp_unchanged passes and
-    # price_move_below_threshold fires (the 18:46 scenario).
+    # Use a small but non-zero price move so the legacy price-change guard passes and
+    # tweet_guard still owns the sub-threshold skip.
     guard_state_file = tmp_path / "last_tweet_state.json"
     older_provider_ts = (fresh_now - timedelta(hours=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
     guard_state_file.write_text(json.dumps({
         "schema_version": 1,
         "last_tweet_time_utc": (fresh_now - timedelta(minutes=16, seconds=53)).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "last_tweet_text_hash": "5e11dd7ff6ab3075f2ec1f1b77485c8ecfef64f057336f9b5f0cf48df277dbc4",
-        "last_price_usd_oz": 4715.70,
+        "last_price_usd_oz": 4715.60,
         "last_provider_timestamp_utc": older_provider_ts,
     }))
 
