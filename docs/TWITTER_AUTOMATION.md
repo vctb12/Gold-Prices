@@ -142,14 +142,17 @@ Make sure all 5 secrets are added in GitHub Settings → Secrets → Actions.
 
 - You may be on the X Free tier which restricts posting to 17 tweets per 24 hours.
 - Reduce frequency by changing `cron: '0 * * * *'` to e.g. `cron: '0 */3 * * *'` (every 3 hours).
+- If the response body says `SpendCapReached`, the workflow now logs the reset date and exits
+  cleanly without updating tweet-state files because no post was sent.
 
 ### Tweet > 280 characters
 
-The repo no longer blocks long posts locally in the cached-data posting flow. It logs the generated
-text and character count, then lets X decide whether the account can publish it. If X rejects the
-post because of platform-level character rules or account eligibility, the API error should appear
-in the workflow logs. X Premium / verified longer-post eligibility is handled by X, not by this
-repo.
+The market-closed reference template is now compact enough to fit the normal 280-character limit for
+realistic price widths. Other cached-data posts still are not blocked locally when they run long:
+the repo logs the generated text and character count, then lets X decide whether the account can
+publish it. If X rejects the post because of platform-level character rules or account eligibility,
+the API error should appear in the workflow logs. X Premium / verified longer-post eligibility is
+handled by X, not by this repo.
 
 ---
 

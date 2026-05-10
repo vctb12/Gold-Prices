@@ -533,19 +533,19 @@ def test_market_closed_reference_template_uses_closing_wording():
             "stale_age_hours": 9.6,
         }
     )
-    assert "🔴 Gold Market Is Now Closed" in tweet
-    assert "Closing Spot XAU/USD" in tweet
-    assert "Last updated:" in tweet
-    assert "Spot reference · Not retail price" in tweet
+    assert "🔴 Gold Market Closed" in tweet
+    assert "Spot ref XAU/USD" in tweet
+    assert "Updated " in tweet
+    assert "Spot ref · Not retail" in tweet
     # Stale age must NOT appear in the public tweet body
     assert "Cached reference" not in tweet
     assert "9.6h old" not in tweet
     # Must include AED karat prices
-    assert "AED/g" in tweet
+    assert "🇦🇪 AED/g" in tweet
     # Must include reopens line
-    assert "Reopens Monday" in tweet
+    assert "Reopens Mon" in tweet
     # Must include site URL
-    assert "🖥️ goldtickerlive.com" in tweet
+    assert "goldtickerlive.com" in tweet
 
 
 def test_build_guard_quote_marks_closed_market_reference_as_fresh():
@@ -609,6 +609,40 @@ def test_tweet_403_logs_response_body(capsys, monkeypatch):
     out = capsys.readouterr().out
     assert '{"detail":"This request looks automated"}' in out
     assert "Likely cause: duplicate" in out
+    assert "=== TWEET ERROR ===" in out
+
+
+def test_tweet_403_spend_cap_returns_skip_payload(capsys):
+    import tweepy
+
+    mock_response = MagicMock()
+    mock_response.status_code = 403
+    mock_response.text = json.dumps(
+        {
+            "title": "SpendCapReached",
+            "detail": "Your enrolled account has reached its billing cycle spend cap.",
+            "reset_date": "2026-05-13",
+            "type": "https://api.twitter.com/2/problems/credits",
+        }
+    )
+    mock_response.headers = {}
+
+    exc = tweepy.errors.Forbidden(response=mock_response)
+
+    mock_client = MagicMock()
+    mock_client.create_tweet.side_effect = exc
+
+    with patch('tweepy.Client', return_value=mock_client):
+        result = pg.post_tweet("test tweet text", post_type='market_closed_reference')
+
+    out = capsys.readouterr().out
+    assert result == {
+        "posted": False,
+        "skip_reason": "spend_cap_reached",
+        "reset_date": "2026-05-13",
+    }
+    assert "SKIP: X API spend cap reached" in out
+    assert "Billing cycle reset date: 2026-05-13" in out
     assert "=== TWEET ERROR ===" in out
 
 
@@ -821,8 +855,8 @@ def test_main_market_closed_shortcut_allows_cached_reference_within_limit(tmp_pa
     out = capsys.readouterr().out
     assert "selected_post_type:        market_closed_reference" in out
     assert "closed_market_stale_allowed: True" in out
-    assert "🔴 Gold Market Is Now Closed" in out
-    assert "Spot reference · Not retail price" in out
+    assert "🔴 Gold Market Closed" in out
+    assert "Spot ref · Not retail" in out
     assert "DRY_RUN_TWEET=true — would post; skipping actual X call" in out
 
 
@@ -1121,6 +1155,69 @@ def test_main_over_280_char_post_attempts_x_call_when_other_guards_pass(tmp_path
     assert "📝 Generated tweet:" in out
     assert "304 characters" in out
     assert "tweet-length guard" not in out
+
+
+def test_main_skips_cleanly_when_x_spend_cap_is_reached(tmp_path, monkeypatch, capsys):
+    fresh_now = datetime.now(timezone.utc)
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4715.7,
+                "timestamp_utc": (fresh_now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "fetched_at_utc": fresh_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "aed_per_gram_24k": 556.8,
+                "karats_aed_per_gram": {
+                    "24k": 556.8,
+                    "22k": 510.4,
+                    "21k": 487.2,
+                    "18k": 417.6,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    tweet_state_file.write_text(json.dumps({"schema_version": 1}))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(
+        pg,
+        "post_tweet",
+        MagicMock(
+            return_value={
+                "posted": False,
+                "skip_reason": "spend_cap_reached",
+                "reset_date": "2026-05-13",
+            }
+        ),
+    )
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: True)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit cleanly when X spend cap is reached")
+
+    assert json.loads(state_file.read_text()) == {"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}
+    assert json.loads(tweet_state_file.read_text()) == {"schema_version": 1}
+    out = capsys.readouterr().out
+    assert "outcome:      SKIPPED_SPEND_CAP" in out
+    assert "reset_date:   2026-05-13" in out
 
 
 # ── allow_same_price_closed_market_repost tests ─────────────────────────────
@@ -1759,16 +1856,16 @@ def test_market_closed_reference_template_content(tmp_path, monkeypatch, capsys)
         "source_updated_at_utc": "2026-05-09T18:45:00Z",
         "stale_age_hours": 10.0,
     })
-    assert "🔴 Gold Market Is Now Closed" in tweet
-    assert "Closing Spot XAU/USD" in tweet
+    assert "🔴 Gold Market Closed" in tweet
+    assert "Spot ref XAU/USD" in tweet
     assert "$4,715.70/oz" in tweet
-    assert "AED/g" in tweet
-    assert "Reopens Monday" in tweet
-    assert "UAE (GMT+4)" in tweet
-    assert "Last updated:" in tweet
-    assert "Spot reference · Not retail price" in tweet
-    assert "🖥️ goldtickerlive.com" in tweet
-    assert "#GoldPrice #Gold #XAU #UAE #Dubai" in tweet
+    assert "🇦🇪 AED/g" in tweet
+    assert "Reopens Mon 1:00 AM UAE" in tweet
+    assert "Updated " in tweet
+    assert "Spot ref · Not retail" in tweet
+    assert "goldtickerlive.com" in tweet
+    assert "#GoldPrice #XAU #UAE" in tweet
+    assert len(tweet) <= 280
     # Stale age must NOT be in the public post
     assert "10.0h old" not in tweet
     assert "Cached reference" not in tweet

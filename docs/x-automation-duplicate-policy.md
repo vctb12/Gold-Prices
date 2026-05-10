@@ -26,8 +26,9 @@ Production posture:
 - `source=shortcut` records the latest Shortcut-triggered attempt and soft-skips another Shortcut
   attempt inside a 2-minute window unless `force_post=true`
 - `force_post=true` only overrides the cooldown guard; stale and duplicate checks still apply
-- long posts are logged and attempted locally; if X rejects them, the API error is surfaced in the
-  workflow logs
+- the market-closed reference template is compact by design and stays within the normal 280-char X
+  limit for realistic prices; other long posts are still logged and attempted locally so X can
+  enforce account-specific eligibility
 
 ---
 
@@ -68,10 +69,12 @@ earlier, unless `FORCE_POST=true`. Scheduled runs are not affected. When the pre
 all seven rules pass, the bot posts and updates `data/last_tweet_state.json`.
 
 `post_gold_price.py` prints the generated post text and character count before calling the X API.
-The repo no longer skips locally just because the text is longer than 280 characters. X still owns
-its own eligibility rules, including Premium / verified longer-post capability, so any external
-length rejection should come back from X and be logged by the workflow. Dry-run mode
-(`DRY_RUN_TWEET=true`) still evaluates all guards but never posts or mutates state.
+The market-closed reference copy is now shortened to fit the standard 280-character limit with
+realistic price widths. Other templates are still not blocked locally just because they are longer
+than 280 characters; X still owns its own eligibility rules, including Premium / verified
+longer-post capability, so any external length rejection should come back from X and be logged by
+the workflow. Dry-run mode (`DRY_RUN_TWEET=true`) still evaluates all guards but never posts or
+mutates state.
 
 The legacy guards (`check_duplicate_guard` and the content-hash check in `post_gold_price.py`) still
 run before `tweet_guard.decide()` — this layer is **additive**.

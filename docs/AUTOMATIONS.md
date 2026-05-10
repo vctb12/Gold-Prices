@@ -125,9 +125,10 @@ not fetch gold prices on the normal posting path and still reuse the same cached
 `data/gold_price.json` source-of-truth. Those operator-triggered runs still obey stale-data checks,
 duplicate/content-hash checks, cooldown rules, and normal X API behavior. `dry_run=true` never
 posts. `force_post=true` only overrides the cooldown guard; it does not bypass stale, duplicate,
-content-hash, or provider-based safety checks. The repo logs the generated post and character count
-but does not block locally when the text is longer than 280 characters; X still enforces its own
-posting eligibility and length rules, including any Premium-only longer-post allowance.
+content-hash, or provider-based safety checks. The repo logs the generated post and character count;
+the `market_closed_reference` template now stays within the normal 280-character X limit for
+realistic price widths, while other templates still rely on X to enforce account-specific length
+eligibility if they run long.
 
 Shortcut anti-spam protection is also enabled for `source=shortcut`: the workflow still keeps
 workflow-level concurrency (`group: post-gold`, `cancel-in-progress: true`), and the Python poster
@@ -200,6 +201,8 @@ It does NOT apply to scheduled runs and does NOT bypass `duplicate_text_hash`, c
   deploy workflow to avoid redeploying the site for tweet-state-only commits.
 - `data/last_tweet_state.json` stores duplicate/cooldown state plus the latest Shortcut-triggered
   attempt metadata used by the soft anti-spam guard.
+- X billing-cap failures (`SpendCapReached`) are treated as a clean skip: the workflow logs the
+  reset date, exits `0`, and does not update tweet-state files because no post was sent.
 
 **Shortcut safety note**
 

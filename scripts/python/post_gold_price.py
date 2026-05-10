@@ -530,6 +530,21 @@ def _uae_time_from_iso(ts):
         return ts
 
 
+def _uae_compact_time_from_iso(ts):
+    try:
+        raw = ts[:-1] + '+00:00' if ts.endswith('Z') else ts
+        dt = datetime.fromisoformat(raw)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(UAE_TZ).strftime('%b %-d · %I:%M %p').lstrip('0')
+    except Exception as exc:
+        print(
+            f"WARN: unable to format compact source timestamp {ts!r}"
+            f" ({type(exc).__name__}: {exc}); using raw value"
+        )
+        return ts
+
+
 # ── Detect post type ──────────────────────────────────────────────────────────
 def get_post_type(_now=None, schedule_cron=None):
     """Return event type based on the intended schedule, not delayed start time."""
@@ -640,24 +655,22 @@ def format_market_closed_reference_tweet(data):
         print(f"   [log] cache age: {stale_age_hours:.1f}h (not shown in public post)")
     date_str, time_str = _uae_datetime()
     return (
-        f"🔴 Gold Market Is Now Closed\n"
-        f"🕐 {date_str} · {time_str} (UAE · GMT+4)\n"
+        f"🔴 Gold Market Closed\n"
+        f"{date_str} · {time_str} UAE\n"
         f"\n"
-        f"Closing Spot XAU/USD\n"
+        f"Spot ref XAU/USD\n"
         f"24K · ${price:,.2f}/oz{_change_str(chp)}\n"
         f"\n"
-        f"🇦🇪 Prices:\n"
-        f"24K  {_aed(g24)} AED/g\n"
-        f"22K  {_aed(g22)} AED/g\n"
-        f"21K  {_aed(g21)} AED/g\n"
-        f"18K  {_aed(g18)} AED/g\n"
+        f"🇦🇪 AED/g\n"
+        f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
+        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
         f"\n"
-        f"Reopens Monday 1:00 AM UAE (GMT+4) 🌙\n"
-        f"Last updated: {_uae_time_from_iso(source_updated_at)} UAE\n"
-        f"Spot reference · Not retail price\n"
-        f"🖥️ goldtickerlive.com\n"
+        f"Reopens Mon 1:00 AM UAE 🌙\n"
+        f"Updated {_uae_compact_time_from_iso(source_updated_at)} UAE\n"
+        f"Spot ref · Not retail\n"
+        f"goldtickerlive.com\n"
         f"\n"
-        f"#GoldPrice #Gold #XAU #UAE #Dubai"
+        f"#GoldPrice #XAU #UAE"
     )
 
 
@@ -731,6 +744,34 @@ def _log_tweet_error(exc, text, post_type):
     print("===================")
 
 
+def _parse_x_api_problem(exc):
+    resp = getattr(exc, 'response', None)
+    raw_text = getattr(resp, 'text', '')
+    try:
+        payload = json.loads(raw_text) if isinstance(raw_text, str) and raw_text.strip() else {}
+    except Exception:
+        payload = {}
+    if not isinstance(payload, dict):
+        payload = {}
+    return {
+        "title": str(payload.get("title") or "").strip(),
+        "detail": str(payload.get("detail") or "").strip(),
+        "type": str(payload.get("type") or "").strip(),
+        "reset_date": str(payload.get("reset_date") or "").strip(),
+    }
+
+
+def _is_spend_cap_problem(problem):
+    title = problem.get("title", "").lower()
+    detail = problem.get("detail", "").lower()
+    type_url = problem.get("type", "").lower()
+    return (
+        title == "spendcapreached"
+        or "spend cap" in detail
+        or "/problems/credits" in type_url
+    )
+
+
 def post_tweet(text, post_type='hourly'):
     """Post the tweet using tweepy (X API v2)."""
     import tweepy
@@ -744,8 +785,20 @@ def post_tweet(text, post_type='hourly'):
     try:
         client.create_tweet(text=text)
         print("✅ Tweet posted successfully")
+        return True
     except tweepy.errors.Forbidden as exc:
         _log_tweet_error(exc, text, post_type)
+        problem = _parse_x_api_problem(exc)
+        if _is_spend_cap_problem(problem):
+            reset_date = problem.get("reset_date") or "unknown"
+            print("   SKIP: X API spend cap reached; no post was sent.")
+            print(f"   Billing cycle reset date: {reset_date}")
+            print("   Increase the spend cap in the developer console or wait for the reset date.")
+            return {
+                "posted": False,
+                "skip_reason": "spend_cap_reached",
+                "reset_date": reset_date,
+            }
         print("   Likely cause: duplicate/near-duplicate content, or automation-rule violation."
               " Check recent posts from @GoldTickerLive.")
         raise
@@ -1112,7 +1165,16 @@ def main():
         sys.exit(0)
 
     # 11. Post tweet
-    post_tweet(tweet, post_type=post_type)
+    post_result = post_tweet(tweet, post_type=post_type)
+    if isinstance(post_result, dict) and not post_result.get("posted", True):
+        print("=== RUN RESULT ===")
+        print("outcome:      SKIPPED_SPEND_CAP")
+        print(f"post_type:    {post_type}")
+        print(f"price:        ${data['price']:,.2f}/oz")
+        print(f"tweet_length: {len(tweet)}")
+        print(f"reset_date:   {post_result.get('reset_date', 'unknown')}")
+        print("===================")
+        sys.exit(0)
 
     # 12. Save state (only reached on successful post)
     _save_last_price(data["price"], content_hash=tweet_hash)

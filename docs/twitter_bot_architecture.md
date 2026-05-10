@@ -176,17 +176,19 @@ without updating the workflow.
 
 ## Error Handling
 
-| Failure                          | Behaviour                                                                                   |
-| -------------------------------- | ------------------------------------------------------------------------------------------- |
-| `data/gold_price.json` missing   | `FATAL` log, `exit(1)` — workflow fails visibly                                             |
-| `data/gold_price.json` malformed | `FATAL` log, `exit(1)` — workflow fails visibly                                             |
-| Provider quote stale (> 12 h)    | Skip post; log `ERROR: UPSTREAM SEVERELY STALE`; `exit(0)` unless `market_closed_reference` |
-| X API 403 (duplicate)            | Log structured error with response body; re-raise; workflow fails                           |
-| X API 401 (bad credentials)      | Log structured error; re-raise; workflow fails                                              |
-| X API 429 (rate limit)           | Log with `Retry-After`; re-raise; workflow fails                                            |
-| Tweet > 280 characters           | Warning-only log (`⚠️ tweet_length=N > 280`); still attempts post; X enforces its own limit |
-| Missing Twitter credentials      | Warning log, `exit(0)` — workflow succeeds silently (safe for environments without secrets) |
-| `last_tweet_state.json` corrupt  | Warning log; treated as first run; no crash                                                 |
+| Failure                                      | Behaviour                                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `data/gold_price.json` missing               | `FATAL` log, `exit(1)` — workflow fails visibly                                             |
+| `data/gold_price.json` malformed             | `FATAL` log, `exit(1)` — workflow fails visibly                                             |
+| Provider quote stale (> 12 h)                | Skip post; log `ERROR: UPSTREAM SEVERELY STALE`; `exit(0)` unless `market_closed_reference` |
+| X API 403 (duplicate / automation violation) | Log structured error with response body; re-raise; workflow fails                           |
+| X API 403 (`SpendCapReached`)                | Log structured error, print reset date, exit 0 without mutating tweet state                 |
+| X API 401 (bad credentials)                  | Log structured error; re-raise; workflow fails                                              |
+| X API 429 (rate limit)                       | Log with `Retry-After`; re-raise; workflow fails                                            |
+| market_closed_reference template             | Compact copy stays within the normal 280-char X limit for realistic prices                  |
+| Other tweets > 280 characters                | Warning-only log (`⚠️ tweet_length=N > 280`); still attempts post; X enforces its own limit |
+| Missing Twitter credentials                  | Warning log, `exit(0)` — workflow succeeds silently (safe for environments without secrets) |
+| `last_tweet_state.json` corrupt              | Warning log; treated as first run; no crash                                                 |
 
 ---
 
