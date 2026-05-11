@@ -39,7 +39,7 @@ on:
       refresh_price_first:
         description: "Run one price refresh before posting (manual/operator only). Fetches data/gold_price.json from providers once, then continues with the regular post guards."
         required: false
-        default: "true"
+        default: "false"
       trigger_nonce:
         description: "Optional unique manual trigger label"
         required: false

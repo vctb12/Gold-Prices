@@ -2298,10 +2298,10 @@ def test_must_post_does_not_send_literal_duplicate_text(tmp_path, monkeypatch, c
     s1 = pg._add_uniqueness_suffix("text", now=fixed_now)
     s2 = pg._add_uniqueness_suffix("text", now=fixed_now)
     assert s1 == s2  # deterministic for same time
-    # Verify that two different times produce different results (unique per run-window)
-    later = fixed_now + timedelta(minutes=1)
+    # Verify that two different times produce different results (unique for rapid retries)
+    later = fixed_now + timedelta(seconds=1)
     s3 = pg._add_uniqueness_suffix("text", now=later)
-    assert s1 != s3  # different minutes → different suffix
+    assert s1 != s3  # different seconds → different suffix
 
 
 def test_must_post_mode_is_false_by_default(monkeypatch):

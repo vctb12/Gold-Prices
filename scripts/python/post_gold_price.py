@@ -611,7 +611,7 @@ def _add_uniqueness_suffix(tweet_text, now=None):
     otherwise be a literal duplicate of the previous post.
     """
     local_now = (now or datetime.now(timezone.utc)).astimezone(UAE_TZ)
-    time_str = local_now.strftime('%I:%M %p').lstrip('0')
+    time_str = local_now.strftime('%I:%M:%S %p').lstrip('0')
     return tweet_text + f"\nLatest check: {time_str} UAE"
 
 
