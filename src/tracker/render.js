@@ -781,7 +781,7 @@ export function renderKaratTable() {
       {
         'data-karat-chg': k.code,
         class: isUp ? 'tracker-chg-up' : 'tracker-chg-down',
-        'aria-label': `Day change: ${text}`,
+        'aria-label': tx('karatDayChangeAria', { text }),
       },
       text
     );
@@ -796,7 +796,7 @@ export function renderKaratTable() {
   if (thead) {
     const hasChgTh = thead.querySelector('[data-col="chg"]');
     if (dayOpenSpot && !hasChgTh) {
-      thead.append(el('th', { 'data-col': 'chg' }, 'Day change'));
+      thead.append(el('th', { 'data-col': 'chg' }, tx('karatColDayChange')));
     } else if (!dayOpenSpot && hasChgTh) {
       hasChgTh.remove();
     }
@@ -835,6 +835,7 @@ export function renderKaratTable() {
         spot,
       });
       const vs = price24 && p ? `${((p / price24) * 100).toFixed(1)}%` : '—';
+      const row = _el.karatTable.querySelector(`[data-karat-price="${k.code}"]`)?.closest('tr');
       const priceCell = _el.karatTable.querySelector(`[data-karat-price="${k.code}"]`);
       const vsCell = _el.karatTable.querySelector(`[data-karat-vs="${k.code}"]`);
       if (priceCell && p) {
@@ -844,21 +845,33 @@ export function renderKaratTable() {
         setText(priceCell, '—');
       }
       if (vsCell) setText(vsCell, vs);
-      // Update day-change cell if present
+
+      // Sync day-change cell: insert if newly available, update if present, remove if gone
       const chgCell = _el.karatTable.querySelector(`[data-karat-chg="${k.code}"]`);
-      if (chgCell && dayOpenSpot) {
-        const open = _priceFor({
-          currency: _state.selectedCurrency,
-          karat: k.code,
-          unit: _state.selectedUnit,
-          spot: dayOpenSpot,
-        });
-        if (p && open) {
-          const pct = ((p - open) / open) * 100;
-          const isUp = pct >= 0;
-          chgCell.textContent = `${isUp ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
-          chgCell.className = isUp ? 'tracker-chg-up' : 'tracker-chg-down';
+      if (dayOpenSpot) {
+        if (chgCell) {
+          // Update existing cell
+          const open = _priceFor({
+            currency: _state.selectedCurrency,
+            karat: k.code,
+            unit: _state.selectedUnit,
+            spot: dayOpenSpot,
+          });
+          if (p && open) {
+            const pct = ((p - open) / open) * 100;
+            const isUp = pct >= 0;
+            const text = `${isUp ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
+            chgCell.textContent = text;
+            chgCell.className = isUp ? 'tracker-chg-up' : 'tracker-chg-down';
+            chgCell.setAttribute('aria-label', tx('karatDayChangeAria', { text }));
+          }
+        } else if (row) {
+          // Day-open just became available — append the change cell to this row
+          row.append(buildChangeIndicator(k));
         }
+      } else if (chgCell) {
+        // Day-open is no longer available — remove the stale change cell
+        chgCell.remove();
       }
     }
   }
