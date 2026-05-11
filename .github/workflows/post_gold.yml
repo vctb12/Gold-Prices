@@ -153,8 +153,13 @@ jobs:
                   print("unknown")
           PY
           )"
-          if [ "$RESULT_STATUS" = "operator_action_needed" ]; then
-            echo "runtime result status=operator_action_needed; skipping state commit."
+          # Only commit state after a real successful post.  Dry-run, skipped, and
+          # failed runs must not advance the tweet-guard state — the Python script
+          # already guarantees this (state files are only written at section 12,
+          # after a successful X API call), but we add an explicit gate here so the
+          # commit step is never triggered for non-post outcomes.
+          if [ "$RESULT_STATUS" != "posted" ]; then
+            echo "runtime result status=$RESULT_STATUS (not 'posted'); skipping state commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -162,7 +167,15 @@ jobs:
           if [ -f data/last_gold_price.json ] || [ -f data/last_tweet_state.json ]; then
             git add data/last_gold_price.json data/last_tweet_state.json || true
             git diff --cached --quiet || git commit -m "chore: update gold tweet state [skip ci]"
-            git push
+            git push || {
+              echo "ERROR: git push failed after successful X post!"
+              echo "Recovery: The tweet was posted to X but the state file could not be committed."
+              echo "  Run ID:  ${GITHUB_RUN_ID:-unknown}"
+              echo "  Run URL: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+              echo "  Action:  Manually update data/last_tweet_state.json with the latest post hash,"
+              echo "           or the duplicate guard may re-post or block the next run."
+              exit 1
+            }
           else
             echo "tweet state files not found, skipping commit."
           fi
@@ -225,6 +238,7 @@ jobs:
                           "price_usd_oz",
                           "tweet_length",
                           "content_hash",
+                          "tweet_id",
                           "skip_reason",
                           "operator_action",
                           "reset_date",

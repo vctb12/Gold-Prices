@@ -2184,7 +2184,7 @@ def test_force_post_only_bypasses_cooldown_not_price_move_threshold(monkeypatch)
 # These tests verify that POST_INTENT=must_post bypasses all soft guard reasons
 # and converts them into published posts rather than skipped runs.
 
-def _make_fresh_gold_file(tmp_path, price=4675.20, prev_price=4674.80):
+def _make_fresh_gold_file(tmp_path, price=4675.20):
     """Return a fresh gold_price.json and matching state/guard files."""
     now = datetime.now(timezone.utc)
     gold_file = tmp_path / "gold_price.json"
@@ -2482,7 +2482,7 @@ def test_must_post_micro_template_fallback_under_280(tmp_path, monkeypatch, caps
 
 
 def test_soft_skip_reasons_set_is_correct():
-    """_MUST_POST_SOFT_SKIP_REASONS must include all the expected guard reasons."""
+    """_MUST_POST_SOFT_SKIP_REASONS must contain exactly the expected guard reasons."""
     expected = {
         "price_move_below_threshold",
         "provider_sample_unchanged",
@@ -2491,8 +2491,65 @@ def test_soft_skip_reasons_set_is_correct():
         "cooldown_active",
         "stale_quote",
     }
-    assert expected.issubset(pg._MUST_POST_SOFT_SKIP_REASONS), (
-        f"Missing reasons: {expected - pg._MUST_POST_SOFT_SKIP_REASONS}"
+    assert pg._MUST_POST_SOFT_SKIP_REASONS == expected, (
+        f"Set mismatch — extra: {pg._MUST_POST_SOFT_SKIP_REASONS - expected!r}, "
+        f"missing: {expected - pg._MUST_POST_SOFT_SKIP_REASONS!r}"
     )
     # duplicate_text_hash is NOT a soft reason — it requires text regeneration
     assert "duplicate_text_hash" not in pg._MUST_POST_SOFT_SKIP_REASONS
+
+
+def test_duplicate_text_regeneration_produces_different_hash():
+    """The hash of the uniqueness-suffixed tweet must differ from the original hash.
+
+    This proves that _add_uniqueness_suffix() + compute_content_hash() together
+    guarantee the regenerated tweet cannot be a literal duplicate of the previous post.
+    """
+    original_tweet = (
+        "Gold Update — May 11 2026\n"
+        "XAU/USD $4,675.20/oz · little changed (+$0.40)\n"
+        "UAE 24K ref: AED 552.02/g\n"
+        "Spot ref · not retail\n"
+        "goldtickerlive.com"
+    )
+    original_hash = pg.compute_content_hash(original_tweet)
+
+    suffixed_tweet = pg._add_uniqueness_suffix(original_tweet)
+    suffixed_hash = pg.compute_content_hash(suffixed_tweet)
+
+    # Core requirement: hashes must differ so the duplicate guard passes.
+    assert original_hash != suffixed_hash, (
+        "compute_content_hash must return different values for original vs. suffixed tweet"
+    )
+    # Original content must be preserved in the suffixed version.
+    assert original_tweet in suffixed_tweet
+    # The suffix must contain a factual uniqueness marker.
+    assert "Latest check:" in suffixed_tweet
+    # The suffixed tweet must still be reasonably short.
+    assert len(suffixed_tweet) < 400, (
+        f"Suffixed tweet too long ({len(suffixed_tweet)} chars): {suffixed_tweet!r}"
+    )
+
+
+def test_post_tweet_returns_tweet_id(monkeypatch):
+    """post_tweet() must return the X post ID from the tweepy response."""
+    import tweepy
+    from unittest.mock import MagicMock, patch
+
+    mock_response = MagicMock()
+    mock_response.data.id = "1921000000000000001"
+
+    mock_client = MagicMock()
+    mock_client.create_tweet.return_value = mock_response
+
+    # Set dummy credentials so post_tweet does not abort early.
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "k")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "s")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "t")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "ts")
+
+    with patch.object(tweepy, "Client", return_value=mock_client):
+        result = pg.post_tweet("Gold Update test", post_type="hourly")
+
+    assert result.get("posted") is True
+    assert result.get("id") == "1921000000000000001"

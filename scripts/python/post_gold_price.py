@@ -72,6 +72,7 @@ class RunResult:
     price_usd_oz: Optional[float] = None
     tweet_length: Optional[int] = None
     content_hash: Optional[str] = None
+    tweet_id: Optional[str] = None
     skip_reason: Optional[str] = None
     operator_action: Optional[str] = None
     reset_date: Optional[str] = None
@@ -123,6 +124,7 @@ def emit_run_result(result):
         ("price", f"${result.price_usd_oz:,.2f}/oz" if isinstance(result.price_usd_oz, (int, float)) else None),
         ("tweet_length", result.tweet_length),
         ("content_hash", result.content_hash),
+        ("tweet_id", result.tweet_id),
         ("skip_reason", result.skip_reason),
         ("operator_action", result.operator_action),
         ("reset_date", result.reset_date),
@@ -1235,9 +1237,15 @@ def post_tweet(text, post_type='hourly'):
         access_token_secret=TWITTER_ACCESS_TOKEN_SECRET,
     )
     try:
-        client.create_tweet(text=text)
-        print("✅ Tweet posted successfully")
-        return {"posted": True}
+        response = client.create_tweet(text=text)
+        tweet_id = None
+        if hasattr(response, "data") and response.data and hasattr(response.data, "id"):
+            tweet_id = str(response.data.id)
+        if tweet_id:
+            print(f"✅ Tweet posted successfully — X post ID: {tweet_id}")
+        else:
+            print("✅ Tweet posted successfully")
+        return {"posted": True, "id": tweet_id}
     except tweepy.errors.Forbidden as exc:
         _log_tweet_error(exc, text, post_type)
         problem = _parse_x_api_problem(exc)
@@ -1914,6 +1922,7 @@ def main():
         )
 
     # 12. Save state (only reached on successful post)
+    posted_tweet_id = post_result.get("id") if isinstance(post_result, dict) else None
     _save_last_price(data["price"], content_hash=tweet_hash)
     if tweet_guard is not None:
         try:
@@ -1921,7 +1930,7 @@ def main():
                 guard_state,  # noqa: F821 — defined when tweet_guard is loaded
                 quote=guard_quote,  # noqa: F821
                 tweet_text=tweet,
-                tweet_id=None,
+                tweet_id=posted_tweet_id,
                 reason=f"{trigger_source}_price_moved",
             )
             tweet_guard.save_state(LAST_TWEET_STATE_FILE, new_state)
@@ -1937,6 +1946,7 @@ def main():
             price_usd_oz=data['price'],
             tweet_length=tweet_length,
             content_hash=tweet_hash,
+            tweet_id=posted_tweet_id,
             trigger_source=trigger_source,
             trigger_nonce=trigger_nonce or "(none)",
         )
