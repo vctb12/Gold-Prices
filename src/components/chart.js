@@ -85,9 +85,13 @@ export class GoldChart {
 
     container.replaceChildren();
 
+    // Derive height from the parent chart-wrap so it fills the panel
+    const wrap = container.closest('.tracker-chart-wrap');
+    const chartHeight = wrap ? Math.max(240, wrap.clientHeight - 4) : 380;
+
     this._chart = this._LW.createChart(container, {
       width: container.clientWidth,
-      height: 240,
+      height: chartHeight,
       layout: {
         background: { color: 'transparent' },
         textColor: '#6a6050',
@@ -124,7 +128,8 @@ export class GoldChart {
     const ro = new ResizeObserver(() => {
       if (this._chart) {
         const w = container.clientWidth;
-        if (w > 0) this._chart.resize(w, 240);
+        const h = wrap ? Math.max(240, wrap.clientHeight - 4) : chartHeight;
+        if (w > 0) this._chart.resize(w, h);
       }
     });
     ro.observe(container);
