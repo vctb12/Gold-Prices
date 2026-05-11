@@ -88,8 +88,16 @@ def _run_result_path():
 def _atomic_write_text(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(text, encoding="utf-8")
-    tmp.replace(path)
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        tmp.replace(path)
+    except Exception:
+        try:
+            if tmp.exists():
+                tmp.unlink()
+        except OSError:
+            pass
+        raise
 
 
 def _persist_run_result(result):
