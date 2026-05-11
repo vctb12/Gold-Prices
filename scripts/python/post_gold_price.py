@@ -85,13 +85,19 @@ def _run_result_path():
     return Path(raw) if raw else None
 
 
+def _atomic_write_text(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(path)
+
+
 def _persist_run_result(result):
     path = _run_result_path()
     if path is None:
         return
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(asdict(result), indent=2) + "\n", encoding="utf-8")
+        _atomic_write_text(path, json.dumps(asdict(result), indent=2) + "\n")
     except Exception as exc:  # pragma: no cover — best-effort
         print(f"⚠️  Failed to persist run result to {path} ({type(exc).__name__}): {exc}")
 
@@ -125,6 +131,34 @@ def emit_run_result(result):
 def finish_run(result, exit_code=0):
     emit_run_result(result)
     sys.exit(exit_code)
+
+
+def _snapshot_text_file(path):
+    try:
+        return {
+            "exists": path.exists(),
+            "text": path.read_text(encoding="utf-8") if path.exists() else None,
+        }
+    except Exception as exc:  # pragma: no cover — best-effort
+        print(f"⚠️  Failed to snapshot {path} ({type(exc).__name__}): {exc}")
+        return {
+            "exists": path.exists(),
+            "text": None,
+        }
+
+
+def _restore_text_file(path, snapshot):
+    if snapshot is None:
+        return
+    try:
+        if snapshot.get("exists"):
+            text = snapshot.get("text")
+            if text is not None:
+                _atomic_write_text(path, text)
+        elif path.exists():
+            path.unlink()
+    except Exception as exc:  # pragma: no cover — best-effort
+        print(f"⚠️  Failed to restore {path} ({type(exc).__name__}): {exc}")
 
 
 
@@ -1130,6 +1164,8 @@ def main():
     force_post_enabled = _env_truthy('FORCE_POST', default=False)
     allow_same_price_repost = os.environ.get('ALLOW_SAME_PRICE_CLOSED_MARKET_REPOST', 'false')
     guard_state = tweet_guard.load_state(LAST_TWEET_STATE_FILE) if tweet_guard is not None else None
+    shortcut_state_snapshot = _snapshot_text_file(LAST_TWEET_STATE_FILE)
+    shortcut_attempt_recorded = False
 
     # Pre-compute force_summary_due from guard state for the RUN CONTEXT block.
     _force_summary_min = int(os.environ.get('FORCE_SUMMARY_AFTER_MINUTES', '60') or '60')
@@ -1235,6 +1271,7 @@ def main():
                     run_attempt=run_attempt,
                 )
                 tweet_guard.save_state(LAST_TWEET_STATE_FILE, guard_state)
+                shortcut_attempt_recorded = True
                 print("shortcut_attempt_recorded: true")
             except Exception as exc:  # pragma: no cover — best-effort
                 print(f"⚠️  Failed to record shortcut trigger attempt: {exc}")
@@ -1576,6 +1613,8 @@ def main():
         )
         raise
     if isinstance(post_result, dict) and not post_result.get("posted", False):
+        if shortcut_attempt_recorded:
+            _restore_text_file(LAST_TWEET_STATE_FILE, shortcut_state_snapshot)
         finish_run(
             RunResult(
                 outcome="OPERATOR_ACTION_SPEND_CAP",

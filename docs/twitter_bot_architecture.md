@@ -145,8 +145,12 @@ All inputs default to their safe values. Scheduled cron runs see `dry_run=false`
 | File                         | Written by                | Contents                                                                                    |
 | ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
 | `data/gold_price.json`       | `fetch_gold_price.py`     | Canonical price payload, provider, timestamps, karat prices                                 |
-| `data/last_gold_price.json`  | `post_gold_price.py`      | Legacy compatibility record of the last posted price + timestamp + content hash             |
+| `data/last_gold_price.json`  | `fetch_gold_price.py`, `post_gold_price.py` | Legacy compatibility record of the last posted price + timestamp + content hash             |
 | `data/last_tweet_state.json` | `tweet_guard.py` / poster | Authoritative guard state: last price, provider ts, tweet hash, cooldown, Shortcut metadata |
+
+`data/last_gold_price.json` has a dual-writer history: the fetcher can write a normalized payload,
+while the poster writes the legacy compatibility shape. `data/last_tweet_state.json` remains the
+authoritative guard-state file when those two files differ.
 
 All three files are committed back to the repo by their respective workflows (with `[skip ci]` to
 avoid triggering a deploy). `data/last_tweet_state.json` is written atomically (write-to-temp →

@@ -120,8 +120,33 @@ jobs:
         run: python scripts/python/post_gold_price.py
 
       - name: Commit last price state
+        env:
+          POST_GOLD_RESULT_PATH: ${{ runner.temp }}/post-gold-result.json
         run: |
           set -euo pipefail
+          RESULT_STATUS="$(python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["POST_GOLD_RESULT_PATH"])
+          try:
+              if not path.exists():
+                  print("unknown")
+                  raise SystemExit(0)
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              if not isinstance(payload, dict):
+                  print("unknown")
+                  raise SystemExit(0)
+              print(payload.get("status") or "unknown")
+          except (OSError, json.JSONDecodeError):
+              print("unknown")
+          PY
+          )"
+          if [ "$RESULT_STATUS" = "operator_action_needed" ]; then
+            echo "runtime result status=operator_action_needed; skipping state commit."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f data/last_gold_price.json ] || [ -f data/last_tweet_state.json ]; then
@@ -167,8 +192,16 @@ jobs:
           if not path.exists():
               print("\n### Runtime outcome\nNo structured runtime outcome file was written.")
               raise SystemExit(0)
-
-          payload = json.loads(path.read_text(encoding="utf-8"))
+          try:
+              payload = json.loads(path.read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError) as exc:
+              print("\n### Runtime outcome")
+              print(f"Best-effort summary unavailable: `{type(exc).__name__}: {exc}`")
+              raise SystemExit(0)
+          if not isinstance(payload, dict):
+              print("\n### Runtime outcome")
+              print("Best-effort summary unavailable: runtime outcome payload was not a JSON object.")
+              raise SystemExit(0)
           print("\n### Runtime outcome")
           print("| Field | Value |")
           print("| --- | --- |")

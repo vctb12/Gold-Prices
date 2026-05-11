@@ -1281,6 +1281,81 @@ def test_main_skips_cleanly_when_x_spend_cap_is_reached(tmp_path, monkeypatch, c
     assert "2026-05-13" in out
 
 
+def test_main_shortcut_spend_cap_restores_guard_state(tmp_path, monkeypatch, capsys):
+    fresh_now = datetime.now(timezone.utc)
+    gold_file = tmp_path / "gold_price.json"
+    state_file = tmp_path / "last_gold_price.json"
+    tweet_state_file = tmp_path / "last_tweet_state.json"
+    result_file = tmp_path / "post-gold-result.json"
+    gold_file.write_text(
+        json.dumps(
+            {
+                "provider": "gold_api_com",
+                "xau_usd_per_oz": 4715.7,
+                "timestamp_utc": (fresh_now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "fetched_at_utc": fresh_now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "aed_per_gram_24k": 556.8,
+                "karats_aed_per_gram": {
+                    "24k": 556.8,
+                    "22k": 510.4,
+                    "21k": 487.2,
+                    "18k": 417.6,
+                },
+            }
+        )
+    )
+    state_file.write_text(json.dumps({"price": 4700.0, "posted_at_utc": "2026-05-07T09:00:00Z"}))
+    original_tweet_state = {
+        "schema_version": 1,
+        "last_trigger_source": "manual",
+        "last_trigger_attempt_time_utc": "2026-05-07T09:00:00Z",
+    }
+    tweet_state_file.write_text(json.dumps(original_tweet_state))
+
+    monkeypatch.setattr(pg, "GOLD_PRICE_FILE", gold_file)
+    monkeypatch.setattr(pg, "STATE_FILE", state_file)
+    monkeypatch.setattr(pg, "LAST_TWEET_STATE_FILE", tweet_state_file)
+    monkeypatch.setattr(
+        pg,
+        "post_tweet",
+        MagicMock(
+            return_value={
+                "posted": False,
+                "skip_reason": "spend_cap_reached",
+                "reset_date": "2026-05-13",
+            }
+        ),
+    )
+    monkeypatch.setattr(pg, "is_market_open_time", lambda _now=None: True)
+    monkeypatch.setenv("TWITTER_API_KEY", "key")
+    monkeypatch.setenv("TWITTER_API_SECRET", "secret")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setenv("TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    monkeypatch.setenv("POST_TRIGGER_SOURCE", "shortcut")
+    monkeypatch.setenv("POST_TRIGGER_NONCE", "shortcut-001")
+    monkeypatch.setenv("POST_GOLD_RESULT_PATH", str(result_file))
+    monkeypatch.setattr(pg, "TWITTER_API_KEY", "key")
+    monkeypatch.setattr(pg, "TWITTER_API_SECRET", "secret")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN", "token")
+    monkeypatch.setattr(pg, "TWITTER_ACCESS_TOKEN_SECRET", "token-secret")
+
+    try:
+        pg.main()
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("Expected main() to exit cleanly when X spend cap is reached")
+
+    assert json.loads(tweet_state_file.read_text()) == original_tweet_state
+    payload = json.loads(result_file.read_text())
+    assert payload["status"] == "operator_action_needed"
+    assert payload["outcome"] == "OPERATOR_ACTION_SPEND_CAP"
+    out = capsys.readouterr().out
+    assert "shortcut_attempt_recorded: true" in out
+    assert "increase_x_spend_cap_or_wait_for_reset" in out
+
+
 # ── allow_same_price_closed_market_repost tests ─────────────────────────────
 
 def test_main_allow_same_price_closed_market_repost_bypasses_price_guard(
