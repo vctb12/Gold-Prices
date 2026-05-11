@@ -596,6 +596,11 @@ def _is_must_post_mode():
     return os.environ.get('POST_INTENT', '').strip().lower() == 'must_post'
 
 
+def _safe_hash12(h):
+    """Return the first 12 characters of a hash string, or 'none' if absent."""
+    return h[:12] if h else "none"
+
+
 def _add_uniqueness_suffix(tweet_text, now=None):
     """Append a factual current-check timestamp to prevent duplicate text hash.
 
@@ -1726,10 +1731,9 @@ def main():
                 )
             elif must_post and decision.skip_reason == "duplicate_text_hash":
                 # Literal duplicate text: add uniqueness suffix and re-run guard.
-                _thash = (decision.tweet_hash[:12] if decision.tweet_hash else "none")
                 print(
                     f"  [must_post] duplicate_text_hash: tweet text is literally the "
-                    f"same as last post (hash {_thash}) — "
+                    f"same as last post (hash {_safe_hash12(decision.tweet_hash)}) — "
                     f"adding uniqueness suffix."
                 )
                 tweet = _add_uniqueness_suffix(tweet)
@@ -1738,7 +1742,6 @@ def main():
                 # Re-run guard with the updated tweet so state records the new hash.
                 decision = tweet_guard.decide(guard_state, quote=guard_quote, tweet_text=tweet)
                 if not decision.should_post and decision.skip_reason not in _MUST_POST_SOFT_SKIP_REASONS:
-                    _thash2 = (decision.tweet_hash[:12] if decision.tweet_hash else "none")
                     print(
                         f"  [must_post] FAILED_HARD: tweet guard rejected regenerated tweet "
                         f"({decision.skip_reason}) — cannot produce valid non-duplicate post."
@@ -1752,7 +1755,7 @@ def main():
                             template_used=template_used,
                             price_usd_oz=data['price'],
                             tweet_length=tweet_length,
-                            content_hash=_thash2,
+                            content_hash=_safe_hash12(decision.tweet_hash),
                             trigger_source=trigger_source,
                             trigger_nonce=trigger_nonce or "(none)",
                         ),
@@ -1761,20 +1764,18 @@ def main():
                 print(f"  [must_post] uniqueness suffix applied — proceeding to post.")
             elif must_post and decision.skip_reason in _MUST_POST_SOFT_SKIP_REASONS:
                 # Soft guard reason: log context and proceed.
-                _thash = (decision.tweet_hash[:12] if decision.tweet_hash else "none")
                 mins_str = f"{decision.minutes_since_last:.1f}" if decision.minutes_since_last is not None else "unknown"
                 print(
                     f"  [must_post] soft guard bypassed: {decision.skip_reason}"
-                    f" (hash={_thash}, move=${decision.price_move_usd or 0:.2f},"
+                    f" (hash={_safe_hash12(decision.tweet_hash)}, move=${decision.price_move_usd or 0:.2f},"
                     f" ts_changed={decision.provider_timestamp_changed},"
                     f" minutes_since_last={mins_str})"
                     f" — posting with current run-window timestamp ensuring unique text."
                 )
             else:
-                _thash = (decision.tweet_hash[:12] if decision.tweet_hash else "none")
                 skip_msg = (
                     f"SKIP: tweet-guard — {decision.skip_reason}"
-                    f" (hash={_thash}, move=${decision.price_move_usd or 0:.2f},"
+                    f" (hash={_safe_hash12(decision.tweet_hash)}, move=${decision.price_move_usd or 0:.2f},"
                     f" ts_changed={decision.provider_timestamp_changed})"
                 )
                 if decision.skip_reason == "price_move_below_threshold":
@@ -1836,7 +1837,7 @@ def main():
                     " allow_same_price_closed_market_repost=True and duplicate/cooldown guards passed."
                 )
         if str(os.environ.get('DRY_RUN_TWEET', '')).strip().lower() in ('1', 'true', 'yes'):
-            _dhash = (decision.tweet_hash[:12] if decision.tweet_hash else tweet_hash)
+            _dhash = _safe_hash12(decision.tweet_hash) if decision.tweet_hash else tweet_hash
             print("DRY_RUN_TWEET=true — would post; skipping actual X call")
             print(f"   would-post hash: {_dhash}")
             finish_run(

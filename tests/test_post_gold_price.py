@@ -2294,13 +2294,11 @@ def test_must_post_does_not_send_literal_duplicate_text(tmp_path, monkeypatch, c
     assert original in suffixed            # original content preserved
     assert "Latest check:" in suffixed     # uniqueness line added
     # Verify that two calls at the same second produce the same result (deterministic)
-    from datetime import datetime, timezone
     fixed_now = datetime(2026, 5, 11, 12, 0, 0, tzinfo=timezone.utc)
     s1 = pg._add_uniqueness_suffix("text", now=fixed_now)
     s2 = pg._add_uniqueness_suffix("text", now=fixed_now)
     assert s1 == s2  # deterministic for same time
     # Verify that two different times produce different results (unique per run-window)
-    from datetime import timedelta
     later = fixed_now + timedelta(minutes=1)
     s3 = pg._add_uniqueness_suffix("text", now=later)
     assert s1 != s3  # different minutes → different suffix
@@ -2354,7 +2352,7 @@ def test_format_micro_tweet_contains_required_fields():
     tweet = pg.format_micro_tweet(data)
     assert "4,675.20" in tweet
     assert "UAE" in tweet
-    assert tweet.endswith("goldtickerlive.com")
+    assert tweet.splitlines()[-1] == "goldtickerlive.com"
     assert "Spot ref" in tweet
 
 
