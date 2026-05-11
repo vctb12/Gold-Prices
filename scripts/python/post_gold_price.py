@@ -40,6 +40,7 @@ MARKET_CLOSE_EVENT_CRON = '3 21 * * 5'
 DEFAULT_CLOSED_MARKET_MAX_STALE_HOURS = 48
 SHORTCUT_TRIGGER_SPAM_WINDOW_MINUTES = 2
 MARKET_REOPENS_UAE_LABEL = "Mon 1:00 AM UAE"
+SPIKE_THRESHOLD_PCT = 1.5  # abs % change that triggers an alert headline
 
 # Canonical data file written by scripts/fetch_gold_price.py
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -282,7 +283,10 @@ def get_gold_price(previous_post=None):
         "price_gram_24k": g24,
         "price_gram_22k": g22,
         "price_gram_21k": g21,
+        "price_gram_20k": g24 * (20 / 24),
         "price_gram_18k": g18,
+        "price_gram_16k": g24 * (16 / 24),
+        "price_gram_14k": g24 * (14 / 24),
         "chp": chp,
         "prev_price": previous_price,
         "prev_posted_at_utc": previous_posted_at_utc,
@@ -585,7 +589,11 @@ def _parse_fields(data):
     chp   = data.get('chp')
     if not all([price, g24, g22, g21, g18]):
         raise ValueError("gold_price.json missing required price fields")
-    return price, g24, g22, g21, g18, chp
+    # Additional karats derived from 24K purity ratio when not supplied
+    g20 = data.get('price_gram_20k') or g24 * (20 / 24)
+    g16 = data.get('price_gram_16k') or g24 * (16 / 24)
+    g14 = data.get('price_gram_14k') or g24 * (14 / 24)
+    return price, g24, g22, g21, g20, g18, g16, g14, chp
 
 def _aed(gram_usd):
     return f'{gram_usd * AED_RATE:.2f}'
@@ -612,7 +620,7 @@ def _delta_str(price, prev_price):
     return f' {sign}${abs(delta):,.2f} ({sign}{abs(pct):.2f}%)'
 
 def _prev_line(prev_price, prev_posted_at_utc):
-    """Return the "Prev: $X,XXX.XX at H:MM AM/PM\\n\\n" line, or "" if unavailable."""
+    """Return the "Prev: $X,XXX.XX at H:MM AM/PM UAE\\n" line, or "" if unavailable."""
     if prev_price is None or prev_posted_at_utc is None:
         return ''
     try:
@@ -625,13 +633,26 @@ def _prev_line(prev_price, prev_posted_at_utc):
         uae_time_str = dt.astimezone(UAE_TZ).strftime('%I:%M %p').lstrip('0')
     except Exception:
         return ''
-    return f'Prev: ${prev_price:,.2f} at {uae_time_str}\n\n'
+    return f'Prev: ${prev_price:,.2f} at {uae_time_str} UAE\n'
 
 def _trend_emoji(chp):
     if chp is None: return '📊'
     if chp > 0:     return '📈'
     if chp < 0:     return '📉'
     return '➡️'
+
+def _spike_headline(chp, date_str):
+    """Return a catchy alert headline when |chp| >= SPIKE_THRESHOLD_PCT, else None."""
+    if chp is None or abs(chp) < SPIKE_THRESHOLD_PCT:
+        return None
+    if chp >= 3.0:
+        return f"🚀 GOLD SPIKES +{chp:.1f}% — {date_str}"
+    elif chp > 0:
+        return f"⚡️ GOLD SURGES +{chp:.1f}% — {date_str}"
+    elif chp <= -3.0:
+        return f"🔥 GOLD PLUNGES {chp:.1f}% — {date_str}"
+    else:
+        return f"⚠️ GOLD DROPS {chp:.1f}% — {date_str}"
 
 def _uae_datetime():
     now = datetime.now(UAE_TZ)
@@ -641,7 +662,7 @@ def _uae_datetime():
 def _format_uae_date_time_parts(dt):
     # Platform-agnostic day formatting; avoids %-d portability issues.
     local_dt = dt.astimezone(UAE_TZ)
-    date_str = f"{local_dt.strftime('%b')} {local_dt.day}, {local_dt.year}"
+    date_str = f"{local_dt.strftime('%b')} {local_dt.day} {local_dt.year}"
     time_str = local_dt.strftime('%I:%M %p').lstrip('0')
     return date_str, time_str
 
@@ -711,16 +732,19 @@ def get_post_type(_now=None, schedule_cron=None):
 
 # ── Tweet templates ───────────────────────────────────────────────────────────
 def format_hourly_tweet(data):
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     prev_price = data.get('prev_price')
     prev_posted_at_utc = data.get('prev_posted_at_utc')
     date_str, time_str = _uae_datetime()
+    trend = _trend_emoji(chp)
+    spike = _spike_headline(chp, date_str)
+    header = spike if spike else f"{trend} Gold Update — {date_str}"
     if prev_price is None:
         spot_line = f"24K · ${price:,.2f}/oz"
     else:
-        spot_line = f"24K · ${price:,.2f}/oz {_trend_emoji(chp)}{_delta_str(price, prev_price)}"
+        spot_line = f"24K · ${price:,.2f}/oz {trend}{_delta_str(price, prev_price)}"
     tweet = (
-        f"📍 Gold Price Update {_trend_emoji(chp)} - {date_str}\n"
+        f"{header}\n"
         f"\n"
         f"🕐 {time_str} (UAE · GMT+4)\n"
         f"\n"
@@ -728,21 +752,25 @@ def format_hourly_tweet(data):
         f"{spot_line}\n"
         f"{_prev_line(prev_price, prev_posted_at_utc)}"
         f"\n"
-        f"🇦🇪 Prices:\n"
-        f"24K  {_aed(g24)} AED/g\n"
-        f"22K  {_aed(g22)} AED/g\n"
-        f"21K  {_aed(g21)} AED/g\n"
-        f"18K  {_aed(g18)} AED/g\n"
+        f"🇦🇪 AED/g\n"
+        f"24K  {_aed(g24)}\n"
+        f"22K  {_aed(g22)}\n"
+        f"21K  {_aed(g21)}\n"
+        f"20K  {_aed(g20)}\n"
+        f"18K  {_aed(g18)}\n"
+        f"16K  {_aed(g16)}\n"
+        f"14K  {_aed(g14)}\n"
         f"\n"
-        f"{_trend_emoji(chp)} goldtickerlive.com\n"
-        f"Spot rate · Not retail price\n"
+        f"Spot ref · Not retail price\n"
+        f"\n"
+        f"goldtickerlive.com\n"
         f"\n"
         f"#GoldPrice #Gold #UAE #Dubai"
     )
     return tweet
 
 def format_market_open_tweet(data):
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     return (
         f"🟢 Gold Market Is Now Open\n"
         f"🕐 Monday · 1:00 AM (UAE · GMT+4)\n"
@@ -750,20 +778,24 @@ def format_market_open_tweet(data):
         f"Opening Spot XAU/USD\n"
         f"24K · ${price:,.2f}/oz{_change_str(chp)}\n"
         f"\n"
-        f"🇦🇪 Prices:\n"
-        f"24K  {_aed(g24)} AED/g\n"
-        f"22K  {_aed(g22)} AED/g\n"
-        f"21K  {_aed(g21)} AED/g\n"
-        f"18K  {_aed(g18)} AED/g\n"
+        f"🇦🇪 AED/g\n"
+        f"24K  {_aed(g24)}\n"
+        f"22K  {_aed(g22)}\n"
+        f"21K  {_aed(g21)}\n"
+        f"20K  {_aed(g20)}\n"
+        f"18K  {_aed(g18)}\n"
+        f"16K  {_aed(g16)}\n"
+        f"14K  {_aed(g14)}\n"
         f"\n"
         f"New week. Track live prices 👇\n"
-        f"📲: goldtickerlive.com\n"
+        f"\n"
+        f"goldtickerlive.com\n"
         f"\n"
         f"#GoldPrice #Gold #XAU #UAE #Dubai"
     )
 
 def format_market_close_tweet(data):
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     return (
         f"🔴 Gold Market Is Now Closed\n"
         f"🕐 Saturday · 1:00 AM (UAE · GMT+4)\n"
@@ -771,14 +803,18 @@ def format_market_close_tweet(data):
         f"Closing Spot XAU/USD\n"
         f"24K · ${price:,.2f}/oz{_change_str(chp)}\n"
         f"\n"
-        f"🇦🇪 Prices:\n"
-        f"24K  {_aed(g24)} AED/g\n"
-        f"22K  {_aed(g22)} AED/g\n"
-        f"21K  {_aed(g21)} AED/g\n"
-        f"18K  {_aed(g18)} AED/g\n"
+        f"🇦🇪 AED/g\n"
+        f"24K  {_aed(g24)}\n"
+        f"22K  {_aed(g22)}\n"
+        f"21K  {_aed(g21)}\n"
+        f"20K  {_aed(g20)}\n"
+        f"18K  {_aed(g18)}\n"
+        f"16K  {_aed(g16)}\n"
+        f"14K  {_aed(g14)}\n"
         f"\n"
         f"Reopens Monday 1:00 AM 🌙\n"
-        f"🖥️: goldtickerlive.com\n"
+        f"\n"
+        f"goldtickerlive.com\n"
         f"\n"
         f"#GoldPrice #Gold #XAU #UAE #Dubai"
     )
@@ -790,7 +826,7 @@ def format_market_closed_reference_tweet(data):
     in workflow logs only (via stale_age_hours in the data dict) and is NOT
     included in the public post body.
     """
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     source_updated_at = data.get('source_updated_at_utc') or 'timestamp unavailable'
     stale_age_hours = data.get('stale_age_hours')
     if isinstance(stale_age_hours, (int, float)):
@@ -804,12 +840,19 @@ def format_market_closed_reference_tweet(data):
         f"24K · ${price:,.2f}/oz{_change_str(chp)}\n"
         f"\n"
         f"🇦🇪 AED/g\n"
-        f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
-        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"24K  {_aed(g24)}\n"
+        f"22K  {_aed(g22)}\n"
+        f"21K  {_aed(g21)}\n"
+        f"20K  {_aed(g20)}\n"
+        f"18K  {_aed(g18)}\n"
+        f"16K  {_aed(g16)}\n"
+        f"14K  {_aed(g14)}\n"
         f"\n"
         f"Reopens {MARKET_REOPENS_UAE_LABEL} 🌙\n"
         f"Updated {_uae_compact_time_from_iso(source_updated_at)} UAE\n"
+        f"\n"
         f"Spot ref · Not retail\n"
+        f"\n"
         f"goldtickerlive.com\n"
         f"\n"
         f"#GoldPrice #XAU #UAE"
@@ -817,10 +860,13 @@ def format_market_closed_reference_tweet(data):
 
 
 def format_hourly_tweet_compact(data):
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     prev_price = data.get('prev_price')
     prev_posted_at_utc = data.get('prev_posted_at_utc')
     date_str, time_str = _uae_datetime()
+    trend = _trend_emoji(chp)
+    spike = _spike_headline(chp, date_str)
+    header = spike if spike else f"{trend} Gold Update · {date_str}"
     spot_line = f"24K ${price:,.2f}/oz"
     if prev_price is not None:
         spot_line += _delta_str(price, prev_price)
@@ -835,17 +881,18 @@ def format_hourly_tweet_compact(data):
         except Exception:
             prev_line = f"Prev ${prev_price:,.2f}\n"
     return (
-        f"🥇 Gold Update · {date_str}\n"
+        f"{header}\n"
         f"{time_str} UAE\n"
         f"\n"
         f"Spot XAU/USD\n"
         f"{spot_line}\n"
+        f"{prev_line}"
         f"\n"
         f"🇦🇪 AED/g\n"
         f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
-        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"21K {_aed(g21)} · 20K {_aed(g20)}\n"
+        f"18K {_aed(g18)} · 16K {_aed(g16)} · 14K {_aed(g14)}\n"
         f"\n"
-        f"{prev_line}"
         f"Spot ref · Not retail\n"
         f"goldtickerlive.com\n"
         f"#GoldPrice #XAU #UAE"
@@ -853,7 +900,7 @@ def format_hourly_tweet_compact(data):
 
 
 def format_market_open_tweet_compact(data):
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     return (
         f"🟢 Gold Market Open\n"
         f"{MARKET_REOPENS_UAE_LABEL}\n"
@@ -863,7 +910,8 @@ def format_market_open_tweet_compact(data):
         f"\n"
         f"🇦🇪 AED/g\n"
         f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
-        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"21K {_aed(g21)} · 20K {_aed(g20)}\n"
+        f"18K {_aed(g18)} · 16K {_aed(g16)} · 14K {_aed(g14)}\n"
         f"\n"
         f"Track live prices\n"
         f"goldtickerlive.com\n"
@@ -872,7 +920,7 @@ def format_market_open_tweet_compact(data):
 
 
 def format_market_close_tweet_compact(data):
-    price, g24, g22, g21, g18, chp = _parse_fields(data)
+    price, g24, g22, g21, g20, g18, g16, g14, chp = _parse_fields(data)
     return (
         f"🔴 Gold Market Closed\n"
         f"Sat 1:00 AM UAE\n"
@@ -882,7 +930,8 @@ def format_market_close_tweet_compact(data):
         f"\n"
         f"🇦🇪 AED/g\n"
         f"24K {_aed(g24)} · 22K {_aed(g22)}\n"
-        f"21K {_aed(g21)} · 18K {_aed(g18)}\n"
+        f"21K {_aed(g21)} · 20K {_aed(g20)}\n"
+        f"18K {_aed(g18)} · 16K {_aed(g16)} · 14K {_aed(g14)}\n"
         f"\n"
         f"Reopens {MARKET_REOPENS_UAE_LABEL}\n"
         f"goldtickerlive.com\n"
@@ -890,47 +939,73 @@ def format_market_close_tweet_compact(data):
     )
 
 
+def _tweet_max_chars():
+    """Return the active character limit.
+
+    Reads TWEET_MAX_CHARS from the environment (default: 25000 for X Premium).
+    Set to 280 for a standard non-Premium account to restore compact-fallback
+    behaviour.  The value is clamped to [280, 25000].
+    """
+    raw = os.environ.get('TWEET_MAX_CHARS', '25000').strip()
+    try:
+        return max(280, min(25000, int(raw)))
+    except (ValueError, TypeError):
+        return 25000
+
+
 def _render_tweet(data, post_type):
-    print(f"   Post type: {post_type}")
+    """Format a tweet and enforce the active character limit.
+
+    When TWEET_MAX_CHARS is 280 (non-Premium account) the function tries the
+    standard template first and falls back to the compact variant if the
+    standard template exceeds the limit.  For X Premium accounts (default
+    25,000-char limit) the standard template is always used.
+
+    If all available variants still exceed the active limit the longest
+    variant is returned with a warning — the X API will reject it if the
+    account is not Premium, which is the correct fail-fast behaviour.
+    """
+    max_chars = _tweet_max_chars()
+    print(f"   Post type: {post_type}  |  tweet_max_chars: {max_chars}")
+
     if post_type == 'market_open':
-        variants = [
-            ('market_open', format_market_open_tweet),
-            ('market_open_compact', format_market_open_tweet_compact),
-        ]
+        variants = [('market_open', format_market_open_tweet),
+                    ('market_open_compact', format_market_open_tweet_compact)]
     elif post_type == 'market_close':
-        variants = [
-            ('market_close', format_market_close_tweet),
-            ('market_close_compact', format_market_close_tweet_compact),
-        ]
+        variants = [('market_close', format_market_close_tweet),
+                    ('market_close_compact', format_market_close_tweet_compact)]
     elif post_type == 'market_closed_reference':
         variants = [('market_closed_reference', format_market_closed_reference_tweet)]
     else:
-        variants = [
-            ('hourly', format_hourly_tweet),
-            ('hourly_compact', format_hourly_tweet_compact),
-        ]
+        variants = [('hourly', format_hourly_tweet),
+                    ('hourly_compact', format_hourly_tweet_compact)]
 
-    current_variant_name = variants[0][0]
-    current_tweet = ""
+    last_variant_name = variants[0][0]
+    last_tweet = ""
     for variant_name, formatter in variants:
         candidate = formatter(data)
-        if len(candidate) <= 280:
+        last_variant_name = variant_name
+        last_tweet = candidate
+        if len(candidate) <= max_chars:
             if variant_name != variants[0][0]:
-                print(f"   template_variant: {variant_name} (fallback to stay within 280 chars)")
+                print(f"   template_variant: {variant_name} (compact fallback; standard exceeded {max_chars}-char limit)")
             return {
                 "text": candidate,
                 "template_used": variant_name,
                 "tweet_length": len(candidate),
                 "fits_limit": True,
             }
-        current_variant_name = variant_name
-        current_tweet = candidate
 
-    print(f"⚠️  tweet_length={len(current_tweet)} > 280 — X API may reject; local posting NOT blocked")
+    # All variants exceed the limit — return the last (most compact) one with a warning.
+    tweet_len = len(last_tweet)
+    print(
+        f"⚠️  tweet_length={tweet_len} > {max_chars} — all variants exceed the active limit;"
+        f" posting anyway (X API will reject if account is not Premium)."
+    )
     return {
-        "text": current_tweet,
-        "template_used": current_variant_name,
-        "tweet_length": len(current_tweet),
+        "text": last_tweet,
+        "template_used": last_variant_name,
+        "tweet_length": tweet_len,
         "fits_limit": False,
     }
 

@@ -85,14 +85,15 @@ All env vars; sensible defaults baked into the code so a missing variable behave
 
 | Env var                       | Default | Effect                                                                                                                                                        |
 | ----------------------------- | ------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SKIP_DUPLICATE_TWEETS`       |  `true` | Master switch for the new guard. `false` → bypass (tests only).                                                                                               |
-| `ALLOW_STALE_TWEET`           | `false` | Allow posting when `is_fresh=false`. Use only for forced summaries with explicit "delayed" copy.                                                              |
-| `MIN_TWEET_INTERVAL_MINUTES`  |    `55` | Cooldown between successful tweets so scheduled + manual runs do not double-post.                                                                             |
-| `MIN_TWEET_MOVE_USD`          |  `1.00` | Skip below this absolute USD/oz move (when timestamp has changed).                                                                                            |
-| `MIN_TWEET_MOVE_PCT`          |  `0.03` | Skip below this percentage move.                                                                                                                              |
-| `FORCE_SUMMARY_AFTER_MINUTES` |    `60` | Override "no movement" suppression after N minutes since the last post (so the feed always has a recent reference).                                           |
-| `FORCE_POST`                  | `false` | Override the cooldown guard only. It does **not** bypass stale or duplicate checks, and it does not change how X enforces its own external post-length rules. |
-| `DRY_RUN_TWEET`               | `false` | Run the full pipeline including the guard but never call the X API. Useful for the migration sign-off.                                                        |
+| `SKIP_DUPLICATE_TWEETS`       |  `true`  | Master switch for the new guard. `false` → bypass (tests only).                                                                                               |
+| `ALLOW_STALE_TWEET`           | `false`  | Allow posting when `is_fresh=false`. Use only for forced summaries with explicit "delayed" copy.                                                              |
+| `MIN_TWEET_INTERVAL_MINUTES`  |    `55`  | Cooldown between successful tweets so scheduled + manual runs do not double-post.                                                                             |
+| `MIN_TWEET_MOVE_USD`          |  `1.00`  | Skip below this absolute USD/oz move (when timestamp has changed).                                                                                            |
+| `MIN_TWEET_MOVE_PCT`          |  `0.03`  | Skip below this percentage move.                                                                                                                              |
+| `FORCE_SUMMARY_AFTER_MINUTES` |    `60`  | Override "no movement" suppression after N minutes since the last post (so the feed always has a recent reference).                                           |
+| `FORCE_POST`                  | `false`  | Override the cooldown guard only. It does **not** bypass stale or duplicate checks, and it does not change how X enforces its own external post-length rules. |
+| `DRY_RUN_TWEET`               | `false`  | Run the full pipeline including the guard but never call the X API. Useful for the migration sign-off.                                                        |
+| `TWEET_MAX_CHARS`             | `25000`  | Active character limit for tweet formatting. Default 25,000 for X Premium. Set to `280` on a standard non-Premium account to restore compact-template fallback behaviour. Clamped to [280, 25000]. |
 
 ## 4. State file
 
