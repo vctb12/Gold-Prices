@@ -309,12 +309,18 @@ export function renderHero() {
     const aed22 = _priceFor({ currency: 'AED', karat: '22', unit: 'gram', spot });
     const usd24g =
       (spot / CONSTANTS.TROY_OZ_GRAMS) * (KARATS.find((k) => k.code === '24')?.purity ?? 1);
+    const dayOpenSpot = getDayOpenPrice();
+
+    // Build day-change suffix for the XAU/USD stat card
+    let spotSubText = tx('heroStatSpotSub', { source: freshness.sourceLabel });
+    if (dayOpenSpot && dayOpenSpot > 0) {
+      const pct = ((spot - dayOpenSpot) / dayOpenSpot) * 100;
+      const sign = pct >= 0 ? '▲' : '▼';
+      spotSubText = `${tx('heroStatSpotSub', { source: freshness.sourceLabel })} · ${sign} ${Math.abs(pct).toFixed(2)}% today`;
+    }
+
     const stats = [
-      buildHeroStatCard(
-        'XAU/USD',
-        formatUsd(spot),
-        tx('heroStatSpotSub', { source: freshness.sourceLabel })
-      ),
+      buildHeroStatCard('XAU/USD', formatUsd(spot), spotSubText),
       buildHeroStatCard('UAE 24K', aed24 ? `AED ${aed24.toFixed(2)}` : '—', tx('heroStatGramSub')),
       buildHeroStatCard('UAE 22K', aed22 ? `AED ${aed22.toFixed(2)}` : '—', tx('heroStatGramSub')),
       buildHeroStatCard('USD/g 24K', usd24g ? formatUsd(usd24g, 3) : '—', tx('heroStatGramSub')),
