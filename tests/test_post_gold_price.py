@@ -160,13 +160,15 @@ def test_spike_headline_negative_huge_move():
 
 def test_hourly_tweet_spike_headline_replaces_normal_header():
     """When |chp| >= SPIKE_THRESHOLD_PCT, the spike headline replaces the normal header."""
-    data = _sample_data(chp=2.0)
+    data = _sample_data(prev_price=4588.84, prev_posted_at_utc="2026-04-24T10:00:00Z", chp=2.0)
     tweet = pg.format_hourly_tweet(data)
     assert "📍" not in tweet          # Static pin emoji must never appear
     # Spike headline must be the first non-blank line
     first_line = [l for l in tweet.splitlines() if l][0]
     assert "GOLD" in first_line.upper()
     assert "2.0" in first_line
+    # The trend emoji (📈) must still appear in the spot line (prev_price is set)
+    assert "📈" in tweet
 
 
 def test_hourly_tweet_prev_line_directly_under_spot():
