@@ -2278,30 +2278,32 @@ def test_must_post_posts_when_price_unchanged(tmp_path, monkeypatch, capsys):
         assert exc.code == 0
     out = capsys.readouterr().out
     assert "SKIPPED_TWEET_GUARD" not in out
-    assert "SKIP: price-change guard" not in out or "must_post" in out
+    # Either the price-change guard was bypassed by must_post or it passed normally;
+    # either way, must not see an unoveridden SKIPPED_PRICE_CHANGE_GUARD.
+    assert "SKIPPED_PRICE_CHANGE_GUARD" not in out
     assert "DRY_RUN_TWEET=true" in out
 
 
 def test_must_post_does_not_send_literal_duplicate_text(tmp_path, monkeypatch, capsys):
-    """must_post must NOT send literal duplicate text; it must add a uniqueness suffix."""
-    now = datetime.now(timezone.utc)
-    # Generate the tweet text that would be produced, then set it as last hash
-    gold_file = _make_fresh_gold_file(tmp_path, price=4675.20)
-    data = {
-        "price": 4675.20,
-        "price_gram_24k": 552.02,
-        "price_gram_22k": 506.02,
-        "price_gram_21k": 483.02,
-        "price_gram_18k": 414.02,
-        "chp": 0.01,
-        "prev_price": 4675.20,
-        "prev_posted_at_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "prev_content_hash": None,
-    }
-    import tweet_guard as tg
-    # Use the real uniqueness suffix function
-    assert pg._add_uniqueness_suffix("sample text") != "sample text"
-    assert "Latest check:" in pg._add_uniqueness_suffix("sample text")
+    """must_post must NOT send literal duplicate text; it must add a uniqueness suffix.
+    This tests the _add_uniqueness_suffix helper that is used when duplicate_text_hash fires."""
+    # Verify the suffix function itself
+    original = "Gold Update — May 11 2026\nXAU/USD $4,675.20/oz"
+    suffixed = pg._add_uniqueness_suffix(original)
+    assert suffixed != original
+    assert original in suffixed            # original content preserved
+    assert "Latest check:" in suffixed     # uniqueness line added
+    # Verify that two calls at the same second produce the same result (deterministic)
+    from datetime import datetime, timezone
+    fixed_now = datetime(2026, 5, 11, 12, 0, 0, tzinfo=timezone.utc)
+    s1 = pg._add_uniqueness_suffix("text", now=fixed_now)
+    s2 = pg._add_uniqueness_suffix("text", now=fixed_now)
+    assert s1 == s2  # deterministic for same time
+    # Verify that two different times produce different results (unique per run-window)
+    from datetime import timedelta
+    later = fixed_now + timedelta(minutes=1)
+    s3 = pg._add_uniqueness_suffix("text", now=later)
+    assert s1 != s3  # different minutes → different suffix
 
 
 def test_must_post_mode_is_false_by_default(monkeypatch):
@@ -2352,7 +2354,7 @@ def test_format_micro_tweet_contains_required_fields():
     tweet = pg.format_micro_tweet(data)
     assert "4,675.20" in tweet
     assert "UAE" in tweet
-    assert "goldtickerlive.com" in tweet
+    assert tweet.endswith("goldtickerlive.com")
     assert "Spot ref" in tweet
 
 
