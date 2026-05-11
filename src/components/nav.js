@@ -420,6 +420,15 @@ export function injectNav(lang = 'en', depth = 0) {
        aria-hidden="true"
   >
     <div class="nav-drawer-inner">
+      <button id="nav-drawer-close"
+              class="nav-drawer-close"
+              type="button"
+              aria-label="${escapeHtml(data.closeMenu)}"
+      >
+        <span aria-hidden="true">✕</span>
+        <span>${escapeHtml(data.closeMenu)}</span>
+      </button>
+
       <!-- Drawer search (progressive enhancement) -->
       <div class="nav-drawer-search">
         <input id="nav-drawer-search-input"
@@ -597,6 +606,11 @@ export function injectNav(lang = 'en', depth = 0) {
   const burger = document.getElementById('nav-hamburger');
   const drawer = document.getElementById('nav-drawer');
   const backdrop = document.getElementById('nav-backdrop');
+  const drawerCloseBtn = document.getElementById('nav-drawer-close');
+  const drawerFocusableSelector =
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const mobileDrawerMedia =
+    typeof window.matchMedia === 'function' ? window.matchMedia('(max-width: 640px)') : null;
 
   // ── Drawer search — forward typed text to the main nav search overlay ───────
   const drawerSearchInput = document.getElementById('nav-drawer-search-input');
@@ -625,40 +639,30 @@ export function injectNav(lang = 'en', depth = 0) {
   }
 
   // ── Drawer helpers ──────────────────────────────────────────────────────────
-  function openDrawer() {
+  function setDrawerState(isOpen) {
     const d = NAV_DATA[_currentLang] || NAV_DATA.en;
-    navEl.classList.add('nav--open');
-    drawer.classList.add('is-open');
-    // Keep explicit open-state ARIA values for deterministic accessibility/state checks.
-    drawer.setAttribute('aria-hidden', 'false');
-    backdrop.classList.add('is-visible');
-    backdrop.setAttribute('aria-hidden', 'false');
-    burger.setAttribute('aria-expanded', 'true');
-    burger.setAttribute('aria-label', d.closeMenu);
-    burger.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    navEl.classList.toggle('nav--open', isOpen);
+    drawer.classList.toggle('is-open', isOpen);
+    drawer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    backdrop.classList.toggle('is-visible', isOpen);
+    backdrop.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    burger.setAttribute('aria-label', isOpen ? d.closeMenu : d.openMenu);
+    burger.classList.toggle('is-open', isOpen);
+    if (drawerCloseBtn) drawerCloseBtn.setAttribute('aria-label', d.closeMenu);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
     const moreBtn = document.querySelector('[data-mobile-nav="menu"]');
-    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'true');
-    const firstFocusable = drawer.querySelector('a, button');
+    if (moreBtn) moreBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  function openDrawer() {
+    setDrawerState(true);
+    const firstFocusable = drawer.querySelector(drawerFocusableSelector);
     if (firstFocusable) firstFocusable.focus();
   }
 
   function closeDrawer() {
-    const d = NAV_DATA[_currentLang] || NAV_DATA.en;
-    navEl.classList.remove('nav--open');
-    drawer.classList.remove('is-open');
-    drawer.setAttribute('aria-hidden', 'true');
-    backdrop.classList.remove('is-visible');
-    backdrop.setAttribute('aria-hidden', 'true');
-    burger.setAttribute('aria-expanded', 'false');
-    burger.setAttribute('aria-label', d.openMenu);
-    burger.classList.remove('is-open');
-    const moreBtn = document.querySelector('[data-mobile-nav="menu"]');
-    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
-    // Defer overflow reset so the slide-out CSS transition finishes first
-    setTimeout(() => {
-      document.body.style.overflow = '';
-    }, 260);
+    setDrawerState(false);
   }
 
   // ── Dropdown helpers ────────────────────────────────────────────────────────
@@ -791,6 +795,13 @@ export function injectNav(lang = 'en', depth = 0) {
     burger.focus();
   });
 
+  if (drawerCloseBtn) {
+    drawerCloseBtn.addEventListener('click', () => {
+      closeDrawer();
+      burger.focus();
+    });
+  }
+
   // ── Close drawer on any drawer link click ──────────────────────────────────
   drawer.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => closeDrawer());
@@ -817,9 +828,7 @@ export function injectNav(lang = 'en', depth = 0) {
   // ── Focus trap inside the open drawer ──────────────────────────────────────
   drawer.addEventListener('keydown', (e) => {
     if (e.key !== 'Tab' || !navEl.classList.contains('nav--open')) return;
-    const focusables = drawer.querySelectorAll(
-      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
+    const focusables = drawer.querySelectorAll(drawerFocusableSelector);
     if (!focusables.length) return;
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
@@ -829,6 +838,16 @@ export function injectNav(lang = 'en', depth = 0) {
     } else if (!e.shiftKey && document.activeElement === last) {
       e.preventDefault();
       first.focus();
+    }
+  });
+
+  // ── Prevent stuck mobile drawer state when resizing to desktop ─────────────
+  window.addEventListener('resize', () => {
+    const isMobileDrawerVisible = mobileDrawerMedia
+      ? mobileDrawerMedia.matches
+      : window.innerWidth <= 640;
+    if (!isMobileDrawerVisible && navEl.classList.contains('nav--open')) {
+      closeDrawer();
     }
   });
 
@@ -1127,6 +1146,12 @@ export function updateNavLang(lang) {
   // Drawer aria-label
   const drawer = document.getElementById('nav-drawer');
   if (drawer) drawer.setAttribute('aria-label', data.mainNav);
+  const drawerCloseBtn = document.getElementById('nav-drawer-close');
+  if (drawerCloseBtn) {
+    drawerCloseBtn.setAttribute('aria-label', data.closeMenu);
+    const drawerCloseText = drawerCloseBtn.querySelector('span:not([aria-hidden="true"])');
+    if (drawerCloseText) drawerCloseText.textContent = data.closeMenu;
+  }
 
   // Desktop CTA label
   const ctaEl = document.getElementById('nav-cta-tracker');

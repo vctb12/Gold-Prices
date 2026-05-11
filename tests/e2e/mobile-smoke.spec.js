@@ -52,19 +52,78 @@ test.describe('Mobile smoke', () => {
     await expectNoHorizontalOverflow(page, '/countries/uae/gold-price/');
   });
 
-  test('mobile drawer is reachable and ARIA state updates', async ({ page }) => {
+  test('mobile drawer toggles with hamburger and closes on Escape without stuck scroll lock', async ({
+    page,
+  }) => {
     await page.goto('/');
     const burger = page.locator('#nav-hamburger');
+    const drawer = page.locator('#nav-drawer');
     await expect(burger).toBeVisible();
     await expect(burger).toHaveAttribute('aria-expanded', 'false');
 
+    // Open
     await burger.click();
     await expect(burger).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.locator('#nav-drawer')).toHaveAttribute('aria-hidden', 'false');
+    await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('#nav-backdrop')).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('.site-nav')).toHaveClass(/nav--open/);
+    await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe('hidden');
+
+    // Close via hamburger toggle
+    await burger.click();
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('#nav-backdrop')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('.site-nav')).not.toHaveClass(/nav--open/);
+    await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe('');
+
+    // Re-open then close via Escape
+    await burger.click();
+    await expect(drawer).toHaveAttribute('aria-hidden', 'false');
 
     await page.keyboard.press('Escape');
     await expect(burger).toHaveAttribute('aria-expanded', 'false');
-    await expect(page.locator('#nav-drawer')).toHaveAttribute('aria-hidden', 'true');
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+    await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe('');
+  });
+
+  test('mobile drawer closes with close button and when resizing past the mobile drawer breakpoint', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const burger = page.locator('#nav-hamburger');
+    const drawer = page.locator('#nav-drawer');
+
+    await burger.click();
+    await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('#nav-drawer-close')).toBeVisible();
+    await page.locator('#nav-drawer-close').click();
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe('');
+
+    await burger.click();
+    await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+    await page.setViewportSize({ width: 700, height: 844 });
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe('');
+  });
+
+  test('mobile drawer closes on backdrop tap', async ({ page }) => {
+    await page.setViewportSize({ width: 600, height: 844 });
+    await page.goto('/');
+    const burger = page.locator('#nav-hamburger');
+    const drawer = page.locator('#nav-drawer');
+
+    await burger.click();
+    await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('#nav-backdrop')).toHaveAttribute('aria-hidden', 'false');
+
+    await page.locator('#nav-backdrop').click({ position: { x: 10, y: 10 } });
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(async () => page.evaluate(() => document.body.style.overflow)).toBe('');
   });
 
   test('forced RTL layout stays stable on calculator', async ({ page }) => {
