@@ -87,7 +87,7 @@ def _run_result_path():
 
 def _atomic_write_text(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp = path.with_name(path.name + ".tmp")
     try:
         tmp.write_text(text, encoding="utf-8")
         tmp.replace(path)
@@ -163,6 +163,8 @@ def _restore_text_file(path, snapshot):
             text = snapshot.get("text")
             if text is not None:
                 _atomic_write_text(path, text)
+            else:
+                print(f"⚠️  Skipping restore for {path}: snapshot text was unavailable.")
         elif path.exists():
             path.unlink()
     except Exception as exc:  # pragma: no cover — best-effort
