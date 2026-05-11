@@ -3448,6 +3448,24 @@ td.tracker-chg-down {
   letter-spacing: 0;
 }
 
+[dir='rtl'] .comparison-card__header {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .comparison-card__row {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .tracker-result-item {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] td.tracker-chg-up,
+[dir='rtl'] td.tracker-chg-down {
+  direction: ltr; /* keep ▲/▼ symbol left of number */
+  unicode-bidi: isolate;
+}
+
 /* ══════════════════════════════════════════════════════════════
    PHASE 3 MOBILE POLISH — range pills, sticky-strip safe-area
    ══════════════════════════════════════════════════════════════ */

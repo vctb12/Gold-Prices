@@ -316,7 +316,7 @@ export function renderHero() {
     if (dayOpenSpot && dayOpenSpot > 0) {
       const pct = ((spot - dayOpenSpot) / dayOpenSpot) * 100;
       const sign = pct >= 0 ? '▲' : '▼';
-      spotSubText = `${tx('heroStatSpotSub', { source: freshness.sourceLabel })} · ${sign} ${Math.abs(pct).toFixed(2)}% today`;
+      spotSubText = `${tx('heroStatSpotSub', { source: freshness.sourceLabel })} ${tx('heroStatDayChange', { sign, pct: Math.abs(pct).toFixed(2) })}`;
     }
 
     const stats = [
