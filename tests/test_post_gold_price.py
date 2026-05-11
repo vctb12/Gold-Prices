@@ -92,32 +92,23 @@ def _sample_data(prev_price=None, prev_posted_at_utc=None, chp=None):
     }
 
 
-def test_hourly_tweet_under_320_chars():
-    # NOTE: The spec asserts `len(tweet) < 320`, but the spec's own "Desired
-    # hourly tweet format" sample is 300 chars by Python len() (for realistic
-    # 4-digit gold prices). With the required Prev + delta additions, no
-    # realistic input produces a tweet under 320. This is flagged in the PR
-    # as an open question. Until clarified, this test uses a relaxed upper
-    # bound (310) to preserve the intent — detect runaway template growth —
-    # while accepting the spec's own stated sample size.
+def test_hourly_tweet_reasonable_length_and_content():
+    # With 7 karats, the tweet is longer than the legacy 280-char limit but
+    # well within X Premium's 25,000-char limit. Detect runaway growth at 1000.
     data = _sample_data(
         prev_price=4669.34,
         prev_posted_at_utc="2026-04-24T10:00:00Z",
         chp=0.2677,
     )
-    try:
-        tweet = pg.format_hourly_tweet(data)
-    except ValueError as e:
-        # Spec-mandated 320 guard fires; confirm we're within the relaxed bound.
-        msg = str(e)
-        assert "exceeds 320 chars" in msg
-        # Parse length out of the error message.
-        m = re.search(r"(\d+)$", msg)
-        assert m is not None
-        length = int(m.group(1))
-        assert length < 310, f"Tweet is {length} chars; runaway growth"
-        return
-    assert len(tweet) < 310
+    tweet = pg.format_hourly_tweet(data)
+    assert len(tweet) < 1000, f"Tweet is {len(tweet)} chars — runaway growth detected"
+    assert len(tweet) > 100, "Tweet is unexpectedly short"
+    # Must include all 7 karats
+    for karat in ("24K", "22K", "21K", "20K", "18K", "16K", "14K"):
+        assert karat in tweet, f"Missing karat {karat} from tweet"
+    # Lead emoji must be the trend emoji (not the static pin emoji)
+    assert "📈" in tweet
+    assert "📍" not in tweet
 
 
 def test_hourly_tweet_first_run_omits_prev_and_delta():
@@ -127,6 +118,66 @@ def test_hourly_tweet_first_run_omits_prev_and_delta():
     assert "Prev:" not in tweet
     assert "(+" not in tweet
     assert "(-" not in tweet
+
+
+# ── _spike_headline ──────────────────────────────────────────────────────────
+def test_spike_headline_below_threshold_returns_none():
+    assert pg._spike_headline(1.0, "May 11 2026") is None
+    assert pg._spike_headline(-1.0, "May 11 2026") is None
+    assert pg._spike_headline(0.0, "May 11 2026") is None
+    assert pg._spike_headline(None, "May 11 2026") is None
+
+
+def test_spike_headline_positive_large_move():
+    h = pg._spike_headline(2.3, "May 11 2026")
+    assert h is not None
+    assert "2.3" in h
+    assert "GOLD" in h
+    assert "+" in h
+
+
+def test_spike_headline_positive_huge_move():
+    h = pg._spike_headline(3.5, "May 11 2026")
+    assert h is not None
+    assert "3.5" in h
+    assert "GOLD" in h
+    assert "SPIKE" in h.upper() or "SURGE" in h.upper() or "RALLY" in h.upper() or "SOAR" in h.upper()
+
+
+def test_spike_headline_negative_large_move():
+    h = pg._spike_headline(-1.8, "May 11 2026")
+    assert h is not None
+    assert "1.8" in h
+    assert "GOLD" in h
+
+
+def test_spike_headline_negative_huge_move():
+    h = pg._spike_headline(-3.5, "May 11 2026")
+    assert h is not None
+    assert "3.5" in h
+    assert "GOLD" in h
+
+
+def test_hourly_tweet_spike_headline_replaces_normal_header():
+    """When |chp| >= SPIKE_THRESHOLD_PCT, the spike headline replaces the normal header."""
+    data = _sample_data(chp=2.0)
+    tweet = pg.format_hourly_tweet(data)
+    assert "📍" not in tweet          # Static pin emoji must never appear
+    # Spike headline must be the first non-blank line
+    first_line = [l for l in tweet.splitlines() if l][0]
+    assert "GOLD" in first_line.upper()
+    assert "2.0" in first_line
+
+
+def test_hourly_tweet_prev_line_directly_under_spot():
+    """Previous price line must appear directly after the spot price line."""
+    data = _sample_data(prev_price=4669.34, prev_posted_at_utc="2026-04-24T10:00:00Z", chp=0.27)
+    tweet = pg.format_hourly_tweet(data)
+    lines = tweet.splitlines()
+    spot_idx = next(i for i, l in enumerate(lines) if "$4,681.84/oz" in l)
+    prev_idx = next(i for i, l in enumerate(lines) if "Prev:" in l)
+    # Prev line must immediately follow the spot line (no blank between them)
+    assert prev_idx == spot_idx + 1, "Prev line is not directly under the spot price line"
 
 
 # ── _load_last_price 3-tuple ──────────────────────────────────────────────────
@@ -1559,8 +1610,8 @@ def test_main_scheduled_run_cannot_use_allow_same_price_repost(
 
 # ── New hardening tests ───────────────────────────────────────────────────────
 
-def test_format_tweet_uses_compact_hourly_variant_when_standard_is_over_280(capsys):
-    """format_tweet should fall back to the compact hourly variant before warning."""
+def test_format_tweet_always_uses_standard_variant_regardless_of_length(capsys):
+    """With X Premium, format_tweet always uses the standard template — no compact fallback."""
     data = {
         "price": 4681.84,
         "price_gram_24k": 150.38,
@@ -1578,13 +1629,14 @@ def test_format_tweet_uses_compact_hourly_variant_when_standard_is_over_280(caps
     finally:
         pg.format_hourly_tweet = original_format
 
+    # X Premium: the 304-char tweet is returned as-is without compact fallback.
+    assert result == "x" * 304
     out = capsys.readouterr().out
-    assert len(result) <= 280
-    assert "template_variant: hourly_compact" in out
-    assert "tweet_length=304" not in out
+    assert "template_variant: hourly_compact" not in out
 
 
-def test_format_tweet_emits_length_warning_when_all_variants_are_over_280(capsys):
+def test_format_tweet_returns_standard_template_within_premium_limit(capsys):
+    """With X Premium, even a tweet that exceeds the legacy 280-char limit is returned as-is."""
     data = {
         "price": 4681.84,
         "price_gram_24k": 150.38,
@@ -1596,23 +1648,20 @@ def test_format_tweet_emits_length_warning_when_all_variants_are_over_280(capsys
         "prev_posted_at_utc": None,
     }
     original_standard = pg.format_hourly_tweet
-    original_compact = pg.format_hourly_tweet_compact
-    pg.format_hourly_tweet = lambda _d: "x" * 304
-    pg.format_hourly_tweet_compact = lambda _d: "y" * 299
+    pg.format_hourly_tweet = lambda _d: "x" * 350  # typical 7-karat tweet length
     try:
         result = pg.format_tweet(data, "hourly")
     finally:
         pg.format_hourly_tweet = original_standard
-        pg.format_hourly_tweet_compact = original_compact
 
-    assert len(result) == 299
+    assert result == "x" * 350
     out = capsys.readouterr().out
-    assert "⚠️  tweet_length=299 > 280" in out
-    assert "local posting NOT blocked" in out
+    # No length warning for tweets comfortably within X Premium limits
+    assert "⚠️" not in out
 
 
-def test_format_tweet_no_warning_for_under_280_chars(capsys):
-    """format_tweet must NOT emit a length warning for normal tweets."""
+def test_format_tweet_no_warning_for_normal_length_tweets(capsys):
+    """format_tweet must NOT emit a length warning for normal-sized tweets."""
     data = {
         "price": 4681.84,
         "price_gram_24k": 150.38,
@@ -2022,8 +2071,9 @@ def test_market_closed_reference_template_content(tmp_path, monkeypatch, capsys)
     visible_lines = [line for line in tweet.splitlines() if line]
     assert visible_lines[-2] == "goldtickerlive.com"
     assert "#GoldPrice #XAU #UAE" in tweet
-    # Representative closed-market prices around the current ~$4.7k/oz range must still fit X.
-    assert len(tweet) <= 280
+    # With 7 karats and proper spacing, this tweet is longer than the legacy 280-char limit
+    # but well within X Premium's 25,000-char limit. Detect runaway growth at 1000.
+    assert len(tweet) <= 1000, f"tweet is {len(tweet)} chars — runaway growth"
     # Stale age must NOT be in the public post
     assert "10.0h old" not in tweet
     assert "Cached reference" not in tweet
