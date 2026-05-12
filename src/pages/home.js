@@ -138,8 +138,14 @@ function applyRegionTabA11yLabels() {
     global: tx('gccTabGlobalAria'),
   };
   document.querySelectorAll('.gcc-region-tab').forEach((tab) => {
-    const label = tabLabelMap[tab.dataset.region];
-    if (label) tab.setAttribute('aria-label', label);
+    const region = tab.dataset.region;
+    const label = tabLabelMap[region];
+    if (label) {
+      tab.setAttribute('aria-label', label);
+      return;
+    }
+    tab.setAttribute('aria-label', tx('gccTabListAria'));
+    console.warn('[home] Unrecognized region tab value for ARIA label:', region);
   });
 }
 

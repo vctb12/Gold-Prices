@@ -31,6 +31,10 @@ const STATE = {
 
 const SHOPS_LAST_REVIEWED_ISO = '2026-04-05';
 
+function sanitizeSearchQueryForMessage(value = '') {
+  return String(value).replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 120);
+}
+
 // Load shortlist from localStorage on module init
 (function loadShortlist() {
   try {
@@ -1219,7 +1223,7 @@ function render() {
     document.getElementById('shops-grid').replaceChildren();
     const emptyTextEl = document.getElementById('shops-empty-text');
     if (emptyTextEl) {
-      const query = STATE.search.trim();
+      const query = sanitizeSearchQueryForMessage(STATE.search);
       emptyTextEl.textContent = query ? t('emptyTextQuery')(query) : t('emptyText');
     }
     empty.hidden = false;
