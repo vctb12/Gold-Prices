@@ -815,6 +815,7 @@ function initLazyBelowFoldFeatures() {
         obs.unobserve(entry.target);
       });
     },
+    // Preload a little before elements reach viewport so interactions stay instant on mobile.
     { rootMargin: '220px 0px' }
   );
 
