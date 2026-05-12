@@ -79,6 +79,8 @@ const TXT = {
     verifiedFilterLabel: 'verified details only',
     emptyTitle: 'No listings match your filters',
     emptyText: 'Try clearing one filter or searching with a broader term.',
+    emptyTextQuery: (query) =>
+      `No listings match “${query}”. Try clearing one filter or searching with a broader term.`,
     emptySubmitCta: 'Suggest a shop for review',
     clearFilters: 'Clear filters',
     clearAllFilters: 'Clear all filters',
@@ -191,6 +193,8 @@ const TXT = {
     verifiedFilterLabel: 'تفاصيل موثقة فقط',
     emptyTitle: 'لا توجد إدراجات مطابقة',
     emptyText: 'جرّب إلغاء أحد الفلاتر أو استخدام كلمات أوسع في البحث.',
+    emptyTextQuery: (query) =>
+      `لا توجد إدراجات مطابقة لـ “${query}”. جرّب إلغاء أحد الفلاتر أو توسيع البحث.`,
     emptySubmitCta: 'اقترح محلاً للمراجعة',
     clearFilters: 'مسح الفلاتر',
     clearAllFilters: 'مسح كل الفلاتر',
@@ -1213,6 +1217,11 @@ function render() {
 
   if (!shops.length) {
     document.getElementById('shops-grid').replaceChildren();
+    const emptyTextEl = document.getElementById('shops-empty-text');
+    if (emptyTextEl) {
+      const query = STATE.search.trim();
+      emptyTextEl.textContent = query ? t('emptyTextQuery')(query) : t('emptyText');
+    }
     empty.hidden = false;
     return;
   }

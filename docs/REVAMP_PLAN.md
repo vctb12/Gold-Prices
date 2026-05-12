@@ -25,6 +25,23 @@ removing all legacy `--color-surface` / `--color-border-subtle` / `--color-text`
 `--color-text-muted` fallback overrides across home.css, shops.css, calculator.css, stub.css,
 order.css, global.css).
 
+### 2026-05-12 scoped execution slice (core public pages)
+
+Scope for this cycle is intentionally constrained to top-level public website surfaces first (home,
+tracker, calculator, shops, shared shell), with no admin expansion, no country/city bulk rewrites,
+and no long-term roadmap/platform items.
+
+- [x] Reconcile open tasks from this master plan + active proposal files into one core-first slice.
+- [x] Homepage accessibility + clarity sub-slice: region-tab ARIA labels and below-fold lazy-init
+      for heavy enhancements.
+- [x] Tracker copy/localization sub-slice: remove remaining hardcoded English planner/empty strings
+      and wire them to EN/AR translations.
+- [x] Shops empty-state sub-slice: query-aware no-result messaging in both languages.
+- [x] Calculator copy-button sub-slice: bilingual copied-state aria-label feedback on delegated copy
+      buttons.
+- [ ] Shared-shell follow-up items (if still needed after verification): nav/footer parity pass.
+- [ ] Final cycle verification and checklist sync.
+
 ### 2026-04-27 full-site UX/admin/content revamp intake
 
 This workstream tracks the user-requested broad upgrade to make Gold Ticker Live feel substantially

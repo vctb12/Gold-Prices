@@ -1044,10 +1044,12 @@ function initCopyBtn() {
       ?.writeText(text)
       .then(() => {
         const orig = b.textContent;
-        b.textContent = '✓ Copied';
+        b.textContent = `✓ ${t('copied_result')}`;
+        b.setAttribute('aria-label', t('copied_result'));
         track(EVENTS.COPY_CLICK, { surface: 'calculator', value_type: 'result' });
         setTimeout(() => {
           b.textContent = orig;
+          b.setAttribute('aria-label', t('copy_result'));
         }, 2000);
       })
       .catch(() => {});
