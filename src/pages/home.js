@@ -144,7 +144,7 @@ function applyRegionTabA11yLabels() {
       tab.setAttribute('aria-label', label);
       return;
     }
-    tab.setAttribute('aria-label', tx('gccTabListAria'));
+    tab.setAttribute('aria-label', tx('gccTabFallbackAria'));
     console.warn('[home] Unrecognized region tab value for ARIA label:', region);
   });
 }
@@ -791,6 +791,9 @@ async function fetchLiveData() {
 }
 
 function initLazyBelowFoldFeatures() {
+  // 220px prefetch margin was chosen to load content before it enters view on
+  // common mobile scroll velocity without aggressively preloading deep sections.
+  const BELOW_FOLD_PREFETCH_MARGIN_PX = 220;
   let countrySearchInitialized = false;
   let bottomAdLoaded = false;
 
@@ -821,8 +824,7 @@ function initLazyBelowFoldFeatures() {
         obs.unobserve(entry.target);
       });
     },
-    // Preload a little before elements reach viewport so interactions stay instant on mobile.
-    { rootMargin: '220px 0px' }
+    { rootMargin: `${BELOW_FOLD_PREFETCH_MARGIN_PX}px 0px` }
   );
 
   const countriesSection = document.getElementById('countries-quick');

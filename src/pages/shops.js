@@ -32,7 +32,11 @@ const STATE = {
 const SHOPS_LAST_REVIEWED_ISO = '2026-04-05';
 
 function sanitizeSearchQueryForMessage(value = '') {
-  return String(value).replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 120);
+  return String(value)
+    .replace(/[&<>"']/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
 }
 
 // Load shortlist from localStorage on module init

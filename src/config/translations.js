@@ -553,6 +553,7 @@ export const TRANSLATIONS = {
     'home.gccTabGccAria': 'Show GCC reference prices',
     'home.gccTabMenaAria': 'Show MENA reference prices',
     'home.gccTabGlobalAria': 'Show global reference prices',
+    'home.gccTabFallbackAria': 'Show reference prices for selected region',
     'home.toolPrimaryBadge': 'Core tool',
     'home.nextStepTitle': 'What should I check next?',
     'home.nextStepSub':
@@ -1210,6 +1211,7 @@ export const TRANSLATIONS = {
     'home.gccTabGccAria': 'عرض الأسعار المرجعية لدول الخليج',
     'home.gccTabMenaAria': 'عرض الأسعار المرجعية لمنطقة الشرق الأوسط وشمال أفريقيا',
     'home.gccTabGlobalAria': 'عرض الأسعار المرجعية العالمية',
+    'home.gccTabFallbackAria': 'عرض الأسعار المرجعية للمنطقة المحددة',
     'home.toolPrimaryBadge': 'أداة رئيسية',
     'home.nextStepTitle': 'ماذا أتحقق بعد ذلك؟',
     'home.nextStepSub':
