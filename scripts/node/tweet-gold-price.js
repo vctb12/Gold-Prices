@@ -158,6 +158,7 @@ async function buildOAuthHeader(
   options = {}
 ) {
   const nonce = options.nonce || crypto.randomBytes(16).toString('hex');
+  // Optional timestamp/clock injection is only for deterministic tests.
   const timestamp = String(
     options.timestamp ||
       Math.floor((typeof options.clock === 'function' ? options.clock() : Date.now()) / 1000)
@@ -220,6 +221,7 @@ async function createOAuth1RequestSignature({
   const hmacKey = await crypto.webcrypto.subtle.importKey(
     'raw',
     Buffer.from(oauthMacKey, 'utf8'),
+    // OAuth 1.0a request MAC key: non-extractable and sign-only.
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']

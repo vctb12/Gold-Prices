@@ -72,6 +72,8 @@ export function clear(node) {
   while (node.firstChild) node.removeChild(node.firstChild);
 }
 
+// Symbol branding travels with the DOM node itself and avoids external mutable
+// registries; this keeps trust metadata local to the value being appended.
 const SAFE_DOM_NODE_BRAND = Symbol('safeDomTrustedNode');
 const ALLOWED_NODE_TYPES = new Set([1, 3, 11]); // Element, Text, DocumentFragment
 const BLOCKED_ATTR_NAMES = new Set(['srcdoc']);
@@ -98,6 +100,8 @@ function isNodeLike(value) {
 function isTrustedNode(node, ownerDocument) {
   if (!isNodeLike(node)) return false;
   if (!ALLOWED_NODE_TYPES.has(node.nodeType)) return false;
+  // Cross-document nodes can come from unknown contexts (iframes/parsers); keep
+  // trust boundary local to this document to avoid implicit HTML reinterpretation.
   if (ownerDocument && node.ownerDocument && node.ownerDocument !== ownerDocument) return false;
   if (node.nodeType === 3) return true; // Text nodes are safe by construction.
   return node[SAFE_DOM_NODE_BRAND] === true;
