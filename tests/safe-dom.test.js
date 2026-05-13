@@ -267,14 +267,17 @@ test('el() keeps URL attribute sanitization attribute-aware', async () => {
   const mock = installMockDocument();
   try {
     const { el } = await load();
-    const node = el('img', {
+    const imageNode = el('img', {
       src: 'mailto:hello@example.com',
       poster: 'tel:+971 50 123 4567',
+    });
+    assert.equal(imageNode.attrs.src, undefined);
+    assert.equal(imageNode.attrs.poster, undefined);
+
+    const linkNode = el('a', {
       href: 'mailto:hello@example.com',
     });
-    assert.equal(node.attrs.src, undefined);
-    assert.equal(node.attrs.poster, undefined);
-    assert.equal(node.attrs.href, 'mailto:hello@example.com');
+    assert.equal(linkNode.attrs.href, 'mailto:hello@example.com');
   } finally {
     mock.restore();
   }

@@ -42,7 +42,7 @@ export function escape(value) {
  *  to server-side path resolution. */
 export function safeHref(url, attrName = 'href') {
   if (!url || typeof url !== 'string') return '';
-  const normalizedAttr = String(attrName || 'href').toLowerCase();
+  const normalizedAttr = String(attrName).toLowerCase();
   const isLinkAttr = normalizedAttr === 'href' || normalizedAttr === 'xlink:href';
   const trimmed = url.trim();
   // Explicitly reject javascript:, data:, vbscript:, file:, etc. — allowlist only.
