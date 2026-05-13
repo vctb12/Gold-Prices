@@ -1520,6 +1520,16 @@ surfaces (`tracker.html`, `index.html`, `admin/`). Phases ship as single-concern
 - [ ] **Phase 12** — Alerts mode (local-only, explicit "Browser-only reminder" disclaimer).
 - [ ] **Phase 13** — Planner + Exports + Method (CSV/JSON/brief polish; Method links into
       `methodology.html`).
+- [x] **Phase 13a** — Historical chart intelligence + export credibility layer (_Round 14_):
+      `getBaselineRange()` in `historical-data.js` (dynamic coverage labels); `freshnessState` field
+      on all normalized records (`historical` for baseline, `cached` for daily); enhanced
+      `exportJSON` with `freshnessState`, `dataResolution`, `selectedRange/Karat/Currency/Unit`,
+      `baselineCoverage`, `limitations`; `exportChartCSV` + `exportHistoricalCSV` with Freshness
+      state column and richer disclaimer headers; archive source note (`#tp-archive-source-note`)
+      bilingual (EN/AR) with methodology link and `aria-live`; improved archive empty state with
+      baseline coverage context; chart tooltip shows granularity label (`monthly avg` for baseline
+      entries); `renderBrief` passes dynamic `{lastMonth}` to bilingual brief copy; 19 new tests (7
+      tracker-dom + 12 historical-data model), total test count 477.
 - [ ] **Phase 14** — `styles/pages/tracker-pro.css` split into per-mode files + dead-rule prune.
 
 ### Track 3 — Homepage

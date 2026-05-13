@@ -6,6 +6,7 @@ import '../lib/reveal.js';
 import { createInitialState, persistState } from '../tracker/state.js';
 import { el as safeEl } from '../lib/safe-dom.js';
 import { track, EVENTS } from '../lib/analytics.js';
+import { getBaselineRange } from '../lib/historical-data.js';
 // Lazy-load heavy UI modules (ui-shell, events, wire, adSlot) inside init()
 let mountShell;
 let fetchWire, renderWireModule;
@@ -568,15 +569,20 @@ async function exportJsonData() {
       });
     });
   }
+  const hasLiveFailure = state.hasLiveFailure;
+  const baselineRange = getBaselineRange();
   const exportState = {
     goldPriceUsdPerOz: spot || null,
     freshness: {
       goldUpdatedAt: state.live?.updatedAt || new Date().toISOString(),
       fxUpdatedAt: state.fxMeta?.lastUpdateUtc || new Date().toISOString(),
-      hasLiveFailure: state.hasLiveFailure,
+      hasLiveFailure,
     },
     rates: state.rates,
     lang: state.lang,
+    selectedCurrency: state.selectedCurrency,
+    selectedKarat: state.selectedKarat,
+    selectedUnit: state.selectedUnit,
     compareCountries: getSelectedComparisonCountries().map((country) => ({
       code: country.code,
       currency: country.currency,
@@ -586,6 +592,11 @@ async function exportJsonData() {
     compareKarats: getSelectedComparisonKarats(),
     historyMonth: state.historyMonth || null,
     range: state.range,
+    baselineCoverage: {
+      first: baselineRange.first,
+      last: baselineRange.last,
+      monthCount: baselineRange.count,
+    },
   };
   try {
     const expMod = await import('../lib/export.js');

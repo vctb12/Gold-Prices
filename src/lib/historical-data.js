@@ -42,11 +42,13 @@ import MONTHLY_BASELINE from '../data/historical-baseline.json' with { type: 'js
  * @returns {HistoryRecord}
  */
 function baselineToRecord(entry) {
+  const isEstimated = Boolean(entry.estimated);
   return {
     date: entry.date, // 'YYYY-MM'
     price: entry.price, // USD/troy oz
     granularity: 'monthly',
-    source: entry.estimated ? 'estimated' : 'LBMA-baseline',
+    source: isEstimated ? 'estimated' : 'LBMA-baseline',
+    freshnessState: 'historical',
     derived: false,
   };
 }
@@ -62,8 +64,25 @@ function cachedToRecord(entry) {
     price: entry.price, // USD/troy oz
     granularity: 'daily',
     source: 'local-snapshot',
+    freshnessState: 'cached',
     derived: false,
     timestamp: entry.timestamp,
+  };
+}
+
+/**
+ * Returns the first and last dates covered by the embedded baseline.
+ * Useful for showing coverage labels in the UI without hardcoding dates.
+ *
+ * @returns {{ first: string, last: string, count: number }}
+ */
+export function getBaselineRange() {
+  if (!MONTHLY_BASELINE.length) return { first: '', last: '', count: 0 };
+  const sorted = [...MONTHLY_BASELINE].sort((a, b) => a.date.localeCompare(b.date));
+  return {
+    first: sorted[0].date,
+    last: sorted[sorted.length - 1].date,
+    count: sorted.length,
   };
 }
 

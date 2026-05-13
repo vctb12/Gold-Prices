@@ -100,29 +100,43 @@ export function exportCSV(countries, karatCode, prices, lang = 'en') {
 
 /**
  * Export a full structured JSON snapshot (spot price, FX rates, all karat×country
- * prices, disclaimer) and trigger a browser download.
+ * prices, freshness metadata, disclaimer) and trigger a browser download.
  *
  * @param {object} STATE  The shared page-level state object.
  * @param {Record<string, Record<string, { gram: number, oz: number }|null>>} prices
  */
 export function exportJSON(STATE, prices) {
+  const hasLiveFailure = Boolean(STATE.freshness?.hasLiveFailure);
+  const freshnessState = hasLiveFailure
+    ? 'cached'
+    : STATE.goldPriceUsdPerOz
+      ? 'live'
+      : 'unavailable';
   const payload = {
     exportedAt: new Date().toISOString(),
     goldPriceUsdPerOz: STATE.goldPriceUsdPerOz,
-    goldUpdatedAt: STATE.freshness.goldUpdatedAt,
-    fxUpdatedAt: STATE.freshness.fxUpdatedAt,
-    dataSource: 'goldpricez.com / open.er-api.com',
+    goldUpdatedAt: STATE.freshness?.goldUpdatedAt,
+    fxUpdatedAt: STATE.freshness?.fxUpdatedAt,
+    freshnessState,
+    dataSource: 'gold-api.com / open.er-api.com',
+    dataResolution: 'live snapshot — spot-linked reference estimate',
+    selectedRange: STATE.range || null,
+    selectedCurrency: STATE.selectedCurrency || null,
+    selectedKarat: STATE.selectedKarat || null,
+    selectedUnit: STATE.selectedUnit || null,
     aedPeg: CONSTANTS.AED_PEG,
     aedPegNote: 'Fixed UAE Central Bank rate since 1997',
     troyOzGrams: CONSTANTS.TROY_OZ_GRAMS,
     prices,
     rates: STATE.rates,
     disclaimer:
-      'Reference / spot-linked estimates only. Retail prices may differ because of making charges, VAT, and dealer premiums.',
+      'Reference / spot-linked estimates only. Retail prices may differ because of making charges, VAT, and dealer premiums. AED uses the fixed central-bank peg 3.6725.',
+    limitations:
+      'Historical ranges beyond 90 days use monthly LBMA baseline data and are not intraday prices. Short ranges use cached browser snapshots.',
   };
   downloadFile(
     JSON.stringify(payload, null, 2),
-    `goldtickerlive-current-snapshot-${dateStamp()}.json`,
+    `goldtickerlive-snapshot-${dateStamp()}.json`,
     'application/json'
   );
 }
@@ -214,13 +228,30 @@ export function exportHistoricalCSV(records, karatCode = '24') {
   const AED = CONSTANTS.AED_PEG;
   const purity = parseInt(karatCode, 10) / 24;
 
+  // Identify the actual date range covered by these records
+  const dates = records.map((r) => String(r.date)).sort();
+  const firstDate = dates[0] ?? '—';
+  const lastDate = dates[dates.length - 1] ?? '—';
+  const hasBaseline = records.some((r) => r.source === 'LBMA-baseline');
+  const hasDaily = records.some((r) => r.granularity === 'daily');
+  const dataResolution =
+    hasBaseline && hasDaily
+      ? 'mixed: monthly LBMA baseline + daily cached snapshots'
+      : hasBaseline
+        ? 'monthly LBMA baseline only'
+        : 'daily cached snapshots only';
+
   const lines = [
     `# Gold Ticker Live — Historical Gold Prices (${karatCode}K)`,
     `# Exported: ${new Date().toISOString()}`,
-    '# Monthly averages: LBMA PM fix (2019–present, public domain records)',
-    '# Daily entries: locally cached snapshots (recent 90 days)',
+    `# Coverage: ${firstDate} → ${lastDate} (${records.length} records)`,
+    `# Data resolution: ${dataResolution}`,
+    '# Monthly baseline: LBMA PM fix averages (public domain records)',
+    '# Daily entries: locally cached browser snapshots (up to 90 days)',
     `# AED peg: ${AED} fixed (UAE Central Bank since 1997)`,
-    '# Note: Bullion-equivalent estimates. Not financial advice.',
+    '# Freshness: baseline=historical · daily=cached · see Source column',
+    '# Disclaimer: Bullion-equivalent spot-linked estimates only. Not retail/shop pricing.',
+    '# Note: Actual retail prices include making charges, VAT, and dealer premiums.',
     '',
     csvRow([
       'Date',
@@ -229,6 +260,7 @@ export function exportHistoricalCSV(records, karatCode = '24') {
       `${karatCode}K USD/gram`,
       `${karatCode}K AED/gram`,
       'Source',
+      'Freshness state',
     ]),
   ];
 
@@ -243,6 +275,7 @@ export function exportHistoricalCSV(records, karatCode = '24') {
         usdGram.toFixed(3),
         aedGram.toFixed(3),
         r.source,
+        r.freshnessState || (r.granularity === 'monthly' ? 'historical' : 'cached'),
       ])
     );
   }
@@ -269,16 +302,20 @@ export function exportChartCSV(rows, range, karatCode = '24') {
   const hasMonthly = rows.some(
     (row) => row.granularity === 'monthly' || String(row.date).length === 7
   );
+  const hasLive = rows.some((row) => row.source === 'live' || row.granularity === 'live');
   const resolution = hasMonthly
-    ? 'mixed daily/monthly reference history'
-    : 'daily snapshot history';
+    ? 'mixed: monthly LBMA baseline + recent snapshots'
+    : 'daily cached snapshots';
+  const freshnessState = hasLive ? 'live+cached' : hasMonthly ? 'historical+cached' : 'cached';
   const lines = [
-    `# Gold Ticker Live — Visible Historical Range (${karatCode}K, ${range || 'ALL'})`,
+    `# Gold Ticker Live — Visible Chart Range (${karatCode}K, ${range || 'ALL'})`,
     `# Exported: ${new Date().toISOString()}`,
     `# Range filter: ${range || 'ALL'} · ${startDate} → ${endDate} · points: ${rows.length}`,
-    `# AED peg: ${AED} fixed (UAE Central Bank)`,
     `# Data resolution: ${resolution}`,
-    '# Note: Reference / spot-linked estimates only. This is not retail or shop pricing.',
+    `# Freshness state: ${freshnessState}`,
+    `# AED peg: ${AED} fixed (UAE Central Bank)`,
+    '# Disclaimer: Reference / spot-linked estimates only. Not retail or shop pricing.',
+    '# Note: Actual retail prices include making charges, VAT, and dealer premiums.',
     '',
     csvRow([
       'Date',
@@ -286,6 +323,7 @@ export function exportChartCSV(rows, range, karatCode = '24') {
       `${karatCode}K USD/gram`,
       `${karatCode}K AED/gram`,
       'Source',
+      'Freshness state',
     ]),
   ];
 
@@ -301,6 +339,12 @@ export function exportChartCSV(rows, range, karatCode = '24') {
     const dateStr = r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date);
     const usdGram = (spot * purity) / TROY;
     const aedGram = usdGram * AED;
+    const rowFreshnessState =
+      r.source === 'live' || r.granularity === 'live'
+        ? 'live'
+        : r.granularity === 'monthly'
+          ? 'historical'
+          : 'cached';
     lines.push(
       csvRow([
         dateStr,
@@ -308,6 +352,7 @@ export function exportChartCSV(rows, range, karatCode = '24') {
         usdGram.toFixed(3),
         aedGram.toFixed(3),
         r.source || 'baseline',
+        rowFreshnessState,
       ])
     );
   }
