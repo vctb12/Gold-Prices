@@ -20,10 +20,17 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
   schedule:
     - cron: '25 18 * * 2'
+  workflow_dispatch:
 
 # Workflow-level least-privilege default. Individual jobs elevate only what they need.
 permissions:
@@ -31,8 +38,8 @@ permissions:
 
 # Prevent pile-ups when multiple pushes hit main in quick succession.
 concurrency:
-  group: codeql-${{ github.ref }}
-  cancel-in-progress: true
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   analyze:

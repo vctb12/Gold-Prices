@@ -29,23 +29,33 @@ export function escape(value) {
     .replace(/'/g, '&#39;');
 }
 
-/** Return the URL only if it is safe to use as an `<a href>` value in a
- *  browser context. Allows http(s), root-relative, relative (`./` / `../`),
- *  and fragment-only URLs. Explicitly rejects `javascript:`, `data:`,
- *  `vbscript:`, `file:`, and any other non-allowlisted scheme.
+/** Return the URL only if it is safe for the given attribute in browser
+ *  context. For link navigation attrs (`href`, `xlink:href`), allows
+ *  http(s), `mailto:`, `tel:`, root-relative, relative (`./` / `../`), and
+ *  fragment-only URLs. For resource attrs (`src`, `poster`) and form actions
+ *  (`action`, `formaction`), allows only http(s) and relative URLs.
+ *  Explicitly rejects `javascript:`, `data:`, `vbscript:`, `file:`, and any
+ *  other non-allowlisted scheme.
  *
  *  ⚠️ This is for *navigation URLs in the browser only*. It is NOT a
  *  filesystem-path sanitizer — do not pass its output to `fs.*` calls or
  *  to server-side path resolution. */
-export function safeHref(url) {
+export function safeHref(url, attrName = 'href') {
   if (!url || typeof url !== 'string') return '';
+  const normalizedAttr = String(attrName).toLowerCase();
+  const isLinkAttr = normalizedAttr === 'href' || normalizedAttr === 'xlink:href';
   const trimmed = url.trim();
   // Explicitly reject javascript:, data:, vbscript:, file:, etc. — allowlist only.
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  // Also allow protocol-relative and root-relative internal links.
+  if (isLinkAttr && /^mailto:/i.test(trimmed)) return trimmed;
+  if (isLinkAttr && /^tel:/i.test(trimmed)) {
+    const sanitizedPhone = safeTel(trimmed.slice(4));
+    return sanitizedPhone ? `tel:${sanitizedPhone}` : '';
+  }
+  // Allow root-relative and relative URLs for both navigation and resources.
   if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('../'))
     return trimmed;
-  if (trimmed.startsWith('#')) return trimmed;
+  if (isLinkAttr && trimmed.startsWith('#')) return trimmed;
   return '';
 }
 
@@ -67,6 +77,68 @@ export function clear(node) {
   while (node.firstChild) node.removeChild(node.firstChild);
 }
 
+// Symbol branding travels with the DOM node itself and avoids external mutable
+// registries; this keeps trust metadata local to the value being appended.
+const SAFE_DOM_NODE_BRAND = Symbol('safeDomTrustedNode');
+const ALLOWED_NODE_TYPES = new Set([1, 3, 11]); // Element, Text, DocumentFragment
+const BLOCKED_ATTR_NAMES = new Set(['srcdoc']);
+const URL_ATTR_NAMES = new Set(['href', 'src', 'action', 'formaction', 'poster', 'xlink:href']);
+
+function markTrustedNode(node) {
+  if (!node || typeof node !== 'object') return node;
+  try {
+    Object.defineProperty(node, SAFE_DOM_NODE_BRAND, {
+      value: true,
+      enumerable: false,
+      configurable: true,
+    });
+  } catch {
+    // Non-extensible DOM node; safe to continue without branding.
+  }
+  return node;
+}
+
+function isNodeLike(value) {
+  return Boolean(value && typeof value === 'object' && typeof value.nodeType === 'number');
+}
+
+function isTrustedNode(node, ownerDocument) {
+  if (!isNodeLike(node)) return false;
+  if (!ALLOWED_NODE_TYPES.has(node.nodeType)) return false;
+  // Cross-document nodes can come from unknown contexts (iframes/parsers); keep
+  // trust boundary local to this document to avoid implicit HTML reinterpretation.
+  if (ownerDocument && node.ownerDocument && node.ownerDocument !== ownerDocument) return false;
+  if (node.nodeType === 3) return true; // Text nodes are safe by construction.
+  return node[SAFE_DOM_NODE_BRAND] === true;
+}
+
+function appendText(parent, value) {
+  if (!parent) return;
+  parent.append(String(value ?? ''));
+}
+
+function appendTrustedNode(parent, node) {
+  if (!parent) return;
+  if (isTrustedNode(node, parent?.ownerDocument)) {
+    parent.append(node);
+    return;
+  }
+  appendText(parent, node?.textContent ?? '');
+}
+
+function appendSafeChildren(parent, children) {
+  if (children === null || children === undefined || children === false) return;
+  if (Array.isArray(children)) {
+    for (const child of children) appendSafeChildren(parent, child);
+    return;
+  }
+  if (isNodeLike(children)) {
+    appendTrustedNode(parent, children);
+    return;
+  }
+  appendText(parent, children);
+}
+
 /**
  * Create an element with attributes and children.
  *
@@ -77,10 +149,12 @@ export function clear(node) {
  * become text nodes (never parsed as HTML).
  */
 export function el(tag, attrs, children) {
-  const node = document.createElement(tag);
+  const node = markTrustedNode(document.createElement(tag));
   if (attrs) {
     for (const [key, value] of Object.entries(attrs)) {
       if (value === null || value === undefined || value === false) continue;
+      const keyLower = key.toLowerCase();
+      if (BLOCKED_ATTR_NAMES.has(keyLower)) continue;
       if (key === 'class') node.className = String(value);
       else if (key === 'dataset' && typeof value === 'object') {
         for (const [dk, dv] of Object.entries(value)) node.dataset[dk] = String(dv);
@@ -90,8 +164,13 @@ export function el(tag, attrs, children) {
           if (sk.startsWith('--')) node.style.setProperty(sk, String(sv));
           else node.style[sk] = String(sv);
         }
-      } else if (key.startsWith('on') && typeof value === 'function') {
-        node.addEventListener(key.slice(2).toLowerCase(), value);
+      } else if (keyLower.startsWith('on')) {
+        if (typeof value === 'function') {
+          node.addEventListener(keyLower.slice(2), value);
+        }
+      } else if (URL_ATTR_NAMES.has(keyLower)) {
+        const safeValue = safeHref(String(value), keyLower);
+        if (safeValue) node.setAttribute(key, safeValue);
       } else if (value === true) {
         node.setAttribute(key, '');
       } else {
@@ -99,19 +178,7 @@ export function el(tag, attrs, children) {
       }
     }
   }
-  if (children) {
-    const arr = Array.isArray(children) ? children : [children];
-    for (const child of arr) {
-      if (child === null || child === undefined || child === false) continue;
-      // `appendChild(Node)` is a structural DOM operation, not an HTML sink.
-      // Strings fall through to `createTextNode`, which treats the content
-      // as literal text. Neither branch reinterprets the argument as HTML,
-      // so any `js/xss-through-dom` alert on this line is a false positive.
-      // lgtm[js/xss-through-dom]
-      if (child instanceof Node) node.appendChild(child);
-      else node.appendChild(document.createTextNode(String(child)));
-    }
-  }
+  appendSafeChildren(node, children);
   return node;
 }
 

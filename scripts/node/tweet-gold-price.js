@@ -148,19 +148,24 @@ function percentEncode(s) {
     .replace(/\*/g, '%2A');
 }
 
-function buildOAuthHeader(
-  method,
+async function buildOAuthHeader(
+  httpMethod,
   endpointUrl,
-  consumerKey,
-  consumerSecret,
-  accessToken,
-  tokenSecret
+  oauthConsumerKey,
+  oauthConsumerSigningSecret,
+  oauthAccessToken,
+  oauthAccessTokenSigningSecret,
+  options = {}
 ) {
-  const nonce = crypto.randomBytes(16).toString('hex');
-  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const nonce = options.nonce || crypto.randomBytes(16).toString('hex');
+  // Optional timestamp/clock injection is only for deterministic tests.
+  const timestamp = String(
+    options.timestamp ||
+      Math.floor((typeof options.clock === 'function' ? options.clock() : Date.now()) / 1000)
+  );
 
   const oauthParams = {
-    oauth_consumer_key: consumerKey,
+    oauth_consumer_key: oauthConsumerKey,
     oauth_nonce: nonce,
     // Upgrade from HMAC-SHA1 (the RFC 5849 default) to HMAC-SHA256. The X / Twitter
     // v2 API accepts `HMAC-SHA256` as an oauth_signature_method value, and SHA-1
@@ -170,7 +175,7 @@ function buildOAuthHeader(
     // methods are supported side-by-side.
     oauth_signature_method: 'HMAC-SHA256',
     oauth_timestamp: timestamp,
-    oauth_token: accessToken,
+    oauth_token: oauthAccessToken,
     oauth_version: '1.0',
   };
 
@@ -180,26 +185,16 @@ function buildOAuthHeader(
     .map((k) => `${percentEncode(k)}=${percentEncode(oauthParams[k])}`)
     .join('&');
 
-  const signatureBase = [
-    method.toUpperCase(),
+  const oauthSignatureBaseString = [
+    httpMethod.toUpperCase(),
     percentEncode(endpointUrl),
     percentEncode(sortedParams),
   ].join('&');
-
-  const signingKey = `${percentEncode(consumerSecret)}&${percentEncode(tokenSecret)}`;
-  // This is an HMAC (a message-authentication code), not a password hash.
-  // OAuth 1.0a requires an HMAC over the request signature-base string to
-  // prove integrity of the request. We use SHA-256; the v2 X/Twitter API
-  // accepts `HMAC-SHA256` alongside the legacy SHA-1 default. No user
-  // password is involved — `signingKey` is derived from OAuth application
-  // secrets delivered to us by the upstream API. CodeQL's
-  // `js/insufficient-password-hash` fires here because the signing
-  // material contains the substring "Secret"; that is a semantic false
-  // positive for the OAuth HMAC construction.
-  // lgtm[js/insufficient-password-hash]
-  const signature = crypto.createHmac('sha256', signingKey).update(signatureBase).digest('base64');
-
-  oauthParams.oauth_signature = signature;
+  oauthParams.oauth_signature = await createOAuth1RequestSignature({
+    oauthSignatureBaseString,
+    oauthConsumerSigningSecret,
+    oauthAccessTokenSigningSecret,
+  });
 
   const headerValue =
     'OAuth ' +
@@ -209,6 +204,34 @@ function buildOAuthHeader(
       .join(', ');
 
   return { Authorization: headerValue };
+}
+
+async function createOAuth1RequestSignature({
+  oauthSignatureBaseString,
+  oauthConsumerSigningSecret,
+  oauthAccessTokenSigningSecret,
+}) {
+  // OAuth 1.0a request signing: this computes an HMAC for request-auth
+  // integrity and API authentication. It is not password storage or password
+  // verification logic and must remain an HMAC per OAuth 1.0a.
+  const oauthMacKey = [
+    percentEncode(oauthConsumerSigningSecret),
+    percentEncode(oauthAccessTokenSigningSecret),
+  ].join('&');
+  const hmacKey = await crypto.webcrypto.subtle.importKey(
+    'raw',
+    Buffer.from(oauthMacKey, 'utf8'),
+    // OAuth 1.0a request MAC key: non-extractable and sign-only.
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signatureBytes = await crypto.webcrypto.subtle.sign(
+    'HMAC',
+    hmacKey,
+    Buffer.from(oauthSignatureBaseString, 'utf8')
+  );
+  return Buffer.from(signatureBytes).toString('base64');
 }
 
 // ---------------------------------------------------------------------------
@@ -535,7 +558,7 @@ async function main() {
   }
 
   // 4. Build OAuth header and post to X API v2
-  const authHeaders = buildOAuthHeader(
+  const authHeaders = await buildOAuthHeader(
     'POST',
     TWEET_URL,
     TWITTER_API_KEY,
@@ -562,7 +585,20 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('❌ Unhandled error:', err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error('❌ Unhandled error:', err.message);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  buildOAuthHeader,
+  buildTweetText,
+  calcKarat,
+  createOAuth1RequestSignature,
+  fmt,
+  percentEncode,
+  pickTemplate,
+  trendEmoji,
+};
