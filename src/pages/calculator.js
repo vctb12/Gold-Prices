@@ -1000,6 +1000,22 @@ async function fetchLiveData() {
 function initCopyBtn() {
   const btn = document.getElementById('calc-copy-btn');
   if (!btn) return;
+  function copyTextFallback(text) {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return true;
+    } catch (e) {
+      console.warn('Copy fallback failed:', e);
+      return false;
+    }
+  }
   btn.addEventListener('click', () => {
     const resultEl = document.getElementById('val-result-value');
     if (!resultEl) return;
@@ -1017,19 +1033,7 @@ function initCopyBtn() {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(done).catch(done);
     } else {
-      try {
-        const t = document.createElement('textarea');
-        t.value = text;
-        t.style.position = 'fixed';
-        t.style.opacity = '0';
-        document.body.appendChild(t);
-        t.select();
-        document.execCommand('copy');
-        document.body.removeChild(t);
-        done();
-      } catch (e) {
-        console.warn('Copy fallback failed:', e);
-      }
+      if (copyTextFallback(text)) done();
     }
   });
 
@@ -1040,19 +1044,26 @@ function initCopyBtn() {
     const targetEl = document.getElementById(b.dataset.target);
     const text = targetEl?.textContent?.trim();
     if (!text || text === '—') return;
-    navigator.clipboard
-      ?.writeText(text)
-      .then(() => {
-        const orig = b.textContent;
-        b.textContent = `✓ ${t('copied_result')}`;
-        b.setAttribute('aria-label', t('copied_result'));
-        track(EVENTS.COPY_CLICK, { surface: 'calculator', value_type: 'result' });
-        setTimeout(() => {
-          b.textContent = orig;
-          b.setAttribute('aria-label', t('copy_result'));
-        }, 2000);
-      })
-      .catch(() => {});
+    const done = () => {
+      const orig = b.textContent;
+      b.textContent = `✓ ${t('copied_result')}`;
+      b.setAttribute('aria-label', t('copied_result'));
+      track(EVENTS.COPY_CLICK, { surface: 'calculator', value_type: 'result' });
+      setTimeout(() => {
+        b.textContent = orig;
+        b.setAttribute('aria-label', t('copy_result'));
+      }, 2000);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(done)
+        .catch(() => {
+          if (copyTextFallback(text)) done();
+        });
+      return;
+    }
+    if (copyTextFallback(text)) done();
   });
 }
 
