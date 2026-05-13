@@ -18,8 +18,8 @@ function parseOAuthHeader(authorizationValue) {
   );
 }
 
-test('buildOAuthHeader() includes oauth_signature and remains deterministic with fixed nonce/timestamp', () => {
-  const authA = buildOAuthHeader(
+test('buildOAuthHeader() includes oauth_signature and remains deterministic with fixed nonce/timestamp', async () => {
+  const authA = await buildOAuthHeader(
     'POST',
     'https://api.twitter.com/2/tweets',
     'consumer-key',
@@ -28,7 +28,7 @@ test('buildOAuthHeader() includes oauth_signature and remains deterministic with
     'token-signing-secret',
     { nonce: 'fixednonce123', timestamp: '1710000000' }
   );
-  const authB = buildOAuthHeader(
+  const authB = await buildOAuthHeader(
     'POST',
     'https://api.twitter.com/2/tweets',
     'consumer-key',
@@ -48,15 +48,15 @@ test('buildOAuthHeader() includes oauth_signature and remains deterministic with
   assert.ok(authA.Authorization.includes('oauth_signature='));
 });
 
-test('createOAuth1RequestSignature() changes when method/url/params input changes', () => {
+test('createOAuth1RequestSignature() changes when method/url/params input changes', async () => {
   const baseA = 'POST&https%3A%2F%2Fapi.twitter.com%2F2%2Ftweets&a%3D1%26b%3D2';
   const baseB = 'GET&https%3A%2F%2Fapi.twitter.com%2F2%2Ftweets&a%3D1%26b%3D2';
-  const signatureA = createOAuth1RequestSignature({
+  const signatureA = await createOAuth1RequestSignature({
     oauthSignatureBaseString: baseA,
     oauthConsumerSigningSecret: 'consumer-secret',
     oauthAccessTokenSigningSecret: 'token-secret',
   });
-  const signatureB = createOAuth1RequestSignature({
+  const signatureB = await createOAuth1RequestSignature({
     oauthSignatureBaseString: baseB,
     oauthConsumerSigningSecret: 'consumer-secret',
     oauthAccessTokenSigningSecret: 'token-secret',
@@ -65,10 +65,10 @@ test('createOAuth1RequestSignature() changes when method/url/params input change
   assert.notEqual(signatureA, signatureB);
 });
 
-test('buildOAuthHeader() never embeds raw signing secrets', () => {
+test('buildOAuthHeader() never embeds raw signing secrets', async () => {
   const consumerSecret = 'my-very-secret-app-key';
   const tokenSecret = 'my-very-secret-user-key';
-  const auth = buildOAuthHeader(
+  const auth = await buildOAuthHeader(
     'POST',
     'https://api.twitter.com/2/tweets',
     'consumer-key',

@@ -139,6 +139,13 @@ function installMockDocument() {
           this.children.push(child);
           return child;
         },
+        append(value) {
+          if (value && typeof value === 'object' && typeof value.nodeType === 'number') {
+            this.children.push(value);
+            return;
+          }
+          this.children.push(doc.createTextNode(value));
+        },
         setAttribute(name, value) {
           this.attrs[name] = String(value);
         },

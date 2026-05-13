@@ -104,13 +104,14 @@ function isTrustedNode(node, ownerDocument) {
 }
 
 function appendText(parent, value) {
-  const doc = parent?.ownerDocument || document;
-  parent.appendChild(doc.createTextNode(String(value ?? '')));
+  if (!parent) return;
+  parent.append(String(value ?? ''));
 }
 
 function appendTrustedNode(parent, node) {
+  if (!parent) return;
   if (isTrustedNode(node, parent?.ownerDocument)) {
-    parent.appendChild(node);
+    parent.append(node);
     return;
   }
   appendText(parent, node?.textContent ?? '');

@@ -148,7 +148,7 @@ function percentEncode(s) {
     .replace(/\*/g, '%2A');
 }
 
-function buildOAuthHeader(
+async function buildOAuthHeader(
   httpMethod,
   endpointUrl,
   oauthConsumerKey,
@@ -189,7 +189,7 @@ function buildOAuthHeader(
     percentEncode(endpointUrl),
     percentEncode(sortedParams),
   ].join('&');
-  oauthParams.oauth_signature = createOAuth1RequestSignature({
+  oauthParams.oauth_signature = await createOAuth1RequestSignature({
     oauthSignatureBaseString,
     oauthConsumerSigningSecret,
     oauthAccessTokenSigningSecret,
@@ -205,7 +205,7 @@ function buildOAuthHeader(
   return { Authorization: headerValue };
 }
 
-function createOAuth1RequestSignature({
+async function createOAuth1RequestSignature({
   oauthSignatureBaseString,
   oauthConsumerSigningSecret,
   oauthAccessTokenSigningSecret,
@@ -217,7 +217,19 @@ function createOAuth1RequestSignature({
     percentEncode(oauthConsumerSigningSecret),
     percentEncode(oauthAccessTokenSigningSecret),
   ].join('&');
-  return crypto.createHmac('sha256', oauthMacKey).update(oauthSignatureBaseString).digest('base64');
+  const hmacKey = await crypto.webcrypto.subtle.importKey(
+    'raw',
+    Buffer.from(oauthMacKey, 'utf8'),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signatureBytes = await crypto.webcrypto.subtle.sign(
+    'HMAC',
+    hmacKey,
+    Buffer.from(oauthSignatureBaseString, 'utf8')
+  );
+  return Buffer.from(signatureBytes).toString('base64');
 }
 
 // ---------------------------------------------------------------------------
@@ -544,7 +556,7 @@ async function main() {
   }
 
   // 4. Build OAuth header and post to X API v2
-  const authHeaders = buildOAuthHeader(
+  const authHeaders = await buildOAuthHeader(
     'POST',
     TWEET_URL,
     TWITTER_API_KEY,
