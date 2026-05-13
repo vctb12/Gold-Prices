@@ -13,6 +13,6 @@
 #   1. Update the workflow file(s) that need it (no ad-hoc `pip install` lines).
 #   2. Update docs/environment-variables.md if the package needs a new secret.
 
-requests==2.32.3
+requests==2.33.0
 tweepy==4.14.0
 supabase==2.9.1
