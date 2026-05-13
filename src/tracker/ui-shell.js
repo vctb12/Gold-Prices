@@ -10,7 +10,7 @@ import {
   VALID_MODES,
   VALID_PANELS,
 } from './state.js';
-import { TRACKER_PANELS, getShortcutMap } from './modes.js';
+import { TRACKER_PANELS, getShortcutMap, getTrackerTab } from './modes.js';
 
 let _openPanel = null;
 
@@ -50,7 +50,7 @@ export function mountShell(state, els, onModeChange, onLangChange) {
       workspaceToggle.textContent = advanced ? 'Use basic workspace' : 'Open advanced workspace';
       workspaceToggle.setAttribute('aria-pressed', advanced ? 'true' : 'false');
     }
-    if (!advanced && state.mode !== 'live') {
+    if (!advanced && getTrackerTab(state.mode)?.workspace === 'advanced') {
       setMode('live');
     }
     if (!advanced && _openPanel) {
@@ -72,7 +72,7 @@ export function mountShell(state, els, onModeChange, onLangChange) {
   }
 
   function setMode(mode) {
-    if (mode !== 'live') ensureAdvancedWorkspace();
+    if (getTrackerTab(mode)?.workspace === 'advanced') ensureAdvancedWorkspace();
     state.mode = mode;
     tabs.forEach((tab) => {
       const active = tab.dataset.mode === mode;

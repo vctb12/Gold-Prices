@@ -655,8 +655,8 @@
               <div class="tracker-mini-strip" id="tp-mini-strip"></div>
             </div>
 
-            <div class="tracker-chart-wrap" aria-label="Gold price chart" role="group">
-              <svg id="tp-chart" viewBox="0 0 1200 430"></svg>
+            <div class="tracker-chart-wrap" aria-label="Gold price chart" role="group" aria-describedby="tp-chart-source-note">
+              <svg id="tp-chart" viewBox="0 0 1200 430" aria-hidden="true"></svg>
               <div
                 class="tracker-tooltip"
                 id="tp-tooltip"
@@ -664,7 +664,8 @@
                 aria-live="polite"
               ></div>
               <div class="tracker-chart-empty" id="tp-chart-empty" hidden>
-                <p>Waiting for live and history data…</p>
+                <p>Waiting for price data — select a time range above or refresh to load history.</p>
+                <p class="source-note">Short ranges use live and cached snapshots. Longer ranges use the monthly baseline anchored to XAU/USD.</p>
               </div>
             </div>
             <p class="tracker-chart-caption" id="tp-history-caption" role="status" aria-live="polite">
@@ -732,12 +733,13 @@
 
             <div class="tracker-ladder-table-wrap" aria-label="Karat ladder">
               <table class="tracker-table">
+                <caption class="sr-only">Karat ladder — spot-linked reference price per selected unit for the selected market</caption>
                 <thead>
                   <tr>
-                    <th>Karat</th>
-                    <th>Purity</th>
-                    <th>Selected price</th>
-                    <th>vs 24K</th>
+                    <th scope="col">Karat</th>
+                    <th scope="col">Purity</th>
+                    <th scope="col">Selected price</th>
+                    <th scope="col">vs 24K</th>
                   </tr>
                 </thead>
                 <tbody id="tp-karat-table" aria-live="polite" aria-atomic="false"></tbody>
@@ -770,7 +772,7 @@
 
       <!-- ── MODE: COMPARE ──────────────────────────────────── -->
       <section
-        class="tracker-shell tracker-compare-shell tracker-mode-panel tracker-advanced-only"
+        class="tracker-shell tracker-compare-shell tracker-mode-panel"
         id="mode-compare"
         role="tabpanel"
         aria-labelledby="tab-compare"
@@ -782,8 +784,9 @@
             <div>
               <h2>Markets compare board</h2>
               <p>
-                Live-ranking board for GCC, Arab, and reference markets with favorites, filters, and
-                deep links to country pages.
+                Spot-linked reference prices across GCC, Arab, and international markets.
+                All prices are bullion estimates — not retail or jewelry quotes.
+                <a href="methodology.html#spot-vs-retail" class="tracker-inline-link">Why shop prices differ →</a>
               </p>
             </div>
             <div class="tracker-head-actions">
@@ -898,7 +901,7 @@
 
       <!-- ── OVERLAY: ALERTS & PRESETS ─────────────────────── -->
       <div
-        class="tp-overlay tracker-advanced-only"
+        class="tp-overlay"
         id="tp-overlay-alerts"
         role="dialog"
         aria-modal="true"
@@ -921,9 +924,8 @@
           <div class="tp-overlay-body">
             <div class="tp-drawer-inner">
             <p class="tp-overlay-intro">
-              Browser-based price alerts and view presets — stored locally in your browser only. No
-              SMS, email, or server-side notifications. The live chart and prices remain visible
-              behind this panel.
+              Browser-based price alerts — stored locally in your browser only. Alerts fire only
+              while this tab is open. No SMS, email, or server-side notifications.
             </p>
             <div
               id="tp-alert-live-region"
@@ -934,32 +936,37 @@
             ></div>
 
             <article class="tracker-subpanel">
-              <div class="tracker-subpanel-head"><h3>New alert</h3></div>
+              <div class="tracker-subpanel-head"><h3>Create alert</h3></div>
               <div class="tracker-form-grid">
                 <label class="tracker-field">
-                  <span>Scope</span>
-                  <select id="tp-alert-scope">
-                    <option value="selected">Selected view</option>
-                    <option value="spot">Spot XAU/USD</option>
-                    <option value="uae24">UAE 24K / g</option>
+                  <span id="tp-alert-scope-label">Watch price</span>
+                  <select id="tp-alert-scope" aria-labelledby="tp-alert-scope-label">
+                    <option value="selected">Selected view (current karat + currency)</option>
+                    <option value="spot">Spot XAU/USD per ounce</option>
+                    <option value="uae24">UAE 24K per gram (AED)</option>
                   </select>
                 </label>
                 <label class="tracker-field">
-                  <span>Condition</span>
-                  <select id="tp-alert-direction">
-                    <option value="above">Above</option>
-                    <option value="below">Below</option>
+                  <span id="tp-alert-direction-label">Trigger when price is</span>
+                  <select id="tp-alert-direction" aria-labelledby="tp-alert-direction-label">
+                    <option value="above">Above target</option>
+                    <option value="below">Below target</option>
                   </select>
                 </label>
                 <label class="tracker-field">
-                  <span>Target price</span>
+                  <span id="tp-alert-target-label">Target price</span>
                   <input
                     type="number"
                     id="tp-alert-target"
+                    aria-labelledby="tp-alert-target-label"
+                    aria-describedby="tp-alert-target-hint"
                     min="0"
                     step="0.01"
-                    placeholder="Enter price target"
+                    placeholder="Enter target price"
                   />
+                  <span class="tracker-help-text" id="tp-alert-target-hint">
+                    Use spot-linked reference prices as a guide. Retail prices may differ.
+                  </span>
                 </label>
               </div>
               <div class="tracker-inline-actions">
@@ -977,7 +984,7 @@
               <div class="tracker-subpanel-head"><h3>Saved alerts</h3></div>
               <p class="tracker-help-text tracker-browser-only-note" id="tp-alert-browser-note">
                 <strong>Browser-only:</strong> Alerts fire only while this tab is open.
-                Closing or refreshing the tab stops all alerts. No SMS or email delivery.
+                Closing or refreshing the tab stops all alerts. No server-side delivery.
               </p>
               <div class="tracker-stack-list" id="tp-alert-list" aria-live="polite"></div>
             </article>
@@ -1016,7 +1023,7 @@
 
       <!-- ── OVERLAY: PLANNER ───────────────────────────────── -->
       <div
-        class="tp-overlay tracker-advanced-only"
+        class="tp-overlay"
         id="tp-overlay-planner"
         role="dialog"
         aria-modal="true"
@@ -1039,26 +1046,26 @@
           <div class="tp-overlay-body">
             <div class="tp-drawer-inner">
             <p class="tp-overlay-intro">
-              Turn live prices into decisions. The chart and prices remain visible behind this
-              panel.
+              Turn reference prices into decisions. All calculations use spot-linked estimates —
+              not retail or jewelry quotes.
             </p>
             <p class="tracker-help-text">
-              ⚠ All calculations use <strong>spot-linked reference prices</strong> — not retail
-              or jewelry quotes. Actual purchase prices include making charges, dealer premiums,
-              and applicable taxes.
+              ⚠ Actual purchase prices include making charges, dealer premiums, and applicable taxes.
+              Add these in the fields below or use the full calculator for a more detailed estimate.
               <a href="methodology.html" class="tracker-inline-link">Methodology →</a>
             </p>
 
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Budget planner</h3></div>
+              <p class="tracker-subpanel-intro">How many grams can I buy with my budget?</p>
               <div class="tracker-form-grid">
                 <label class="tracker-field">
-                  <span>Budget amount</span>
-                  <input type="number" id="tp-budget-amount" min="0" step="0.01" value="10000" />
+                  <span id="tp-budget-amount-label">Budget amount (in selected currency)</span>
+                  <input type="number" id="tp-budget-amount" aria-labelledby="tp-budget-amount-label" min="0" step="0.01" value="10000" />
                 </label>
                 <label class="tracker-field">
-                  <span>Extra fee %</span>
-                  <input type="number" id="tp-budget-fee" min="0" step="0.01" value="0" />
+                  <span id="tp-budget-fee-label">Extra fee / premium %</span>
+                  <input type="number" id="tp-budget-fee" aria-labelledby="tp-budget-fee-label" min="0" step="0.01" value="0" />
                 </label>
               </div>
               <div class="tracker-result-list" id="tp-budget-results"></div>
@@ -1066,14 +1073,15 @@
 
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Position tracker</h3></div>
+              <p class="tracker-subpanel-intro">What is my unrealised gain or loss at the current reference price?</p>
               <div class="tracker-form-grid">
                 <label class="tracker-field">
-                  <span>Entry price</span>
-                  <input type="number" id="tp-position-entry" min="0" step="0.01" value="0" />
+                  <span id="tp-position-entry-label">Entry price (per gram, selected currency)</span>
+                  <input type="number" id="tp-position-entry" aria-labelledby="tp-position-entry-label" min="0" step="0.01" value="0" />
                 </label>
                 <label class="tracker-field">
-                  <span>Quantity (g)</span>
-                  <input type="number" id="tp-position-qty" min="0" step="0.0001" value="0" />
+                  <span id="tp-position-qty-label">Quantity (grams)</span>
+                  <input type="number" id="tp-position-qty" aria-labelledby="tp-position-qty-label" min="0" step="0.0001" value="0" />
                 </label>
               </div>
               <div class="tracker-result-list" id="tp-position-results"></div>
@@ -1081,28 +1089,29 @@
 
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Jewelry ticket estimate</h3></div>
+              <p class="tracker-subpanel-intro">Estimate the reference value of a jewelry piece — add making charges, premiums, and VAT to get closer to a retail estimate.</p>
               <div class="tracker-form-grid">
                 <label class="tracker-field">
-                  <span>Weight (g)</span>
-                  <input type="number" id="tp-jewelry-weight" min="0" step="0.01" value="20" />
+                  <span id="tp-jewelry-weight-label">Weight (grams)</span>
+                  <input type="number" id="tp-jewelry-weight" aria-labelledby="tp-jewelry-weight-label" min="0" step="0.01" value="20" />
                 </label>
                 <label class="tracker-field">
-                  <span>Karat</span>
-                  <select id="tp-jewelry-karat"></select>
+                  <span id="tp-jewelry-karat-label">Karat</span>
+                  <select id="tp-jewelry-karat" aria-labelledby="tp-jewelry-karat-label"></select>
                 </label>
                 <label class="tracker-field">
-                  <span>Making charge / g</span>
-                  <input type="number" id="tp-jewelry-making" min="0" step="0.01" value="0" />
+                  <span id="tp-jewelry-making-label">Making charge per gram</span>
+                  <input type="number" id="tp-jewelry-making" aria-labelledby="tp-jewelry-making-label" min="0" step="0.01" value="0" />
                 </label>
                 <label class="tracker-field">
-                  <span>Premium %</span>
-                  <input type="number" id="tp-jewelry-premium" min="0" step="0.01" value="0" />
+                  <span id="tp-jewelry-premium-label">Dealer premium %</span>
+                  <input type="number" id="tp-jewelry-premium" aria-labelledby="tp-jewelry-premium-label" min="0" step="0.01" value="0" />
                 </label>
               </div>
               <div class="tracker-inline-actions">
                 <label class="tracker-checkbox">
                   <input type="checkbox" id="tp-jewelry-vat" checked />
-                  <span>Include 5% VAT</span>
+                  <span>Include 5% UAE VAT</span>
                 </label>
               </div>
               <div class="tracker-result-list" id="tp-jewelry-results"></div>
@@ -1110,22 +1119,25 @@
 
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Accumulation planner</h3></div>
+              <p class="tracker-subpanel-intro">How long will it take to reach my target weight at the current reference price?</p>
               <div class="tracker-form-grid">
                 <label class="tracker-field">
-                  <span>Monthly contribution</span>
+                  <span id="tp-accum-monthly-label">Monthly contribution (selected currency)</span>
                   <input
                     type="number"
                     id="tp-accum-monthly"
+                    aria-labelledby="tp-accum-monthly-label"
                     min="0"
                     step="0.01"
                     value="2000"
                   />
                 </label>
                 <label class="tracker-field">
-                  <span>Target quantity (g)</span>
+                  <span id="tp-accum-target-label">Target quantity (grams)</span>
                   <input
                     type="number"
                     id="tp-accum-target"
+                    aria-labelledby="tp-accum-target-label"
                     min="0"
                     step="0.0001"
                     value="100"
@@ -1136,7 +1148,7 @@
             </article>
 
             <div class="tracker-panel-footer-link">
-              <a href="calculator.html" class="tracker-link">Open full calculator →</a>
+              <a href="calculator.html" class="tracker-link">Open full calculator for more options →</a>
             </div>
             </div><!-- /.tp-drawer-inner -->
           </div>
@@ -1204,13 +1216,14 @@
               </p>
               <div class="tracker-table-scroll">
                 <table class="tracker-table">
+                  <caption class="sr-only">Gold price archive — historical XAU/USD spot and selected market reference prices with data source labels</caption>
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Spot USD/oz</th>
-                      <th>Selected view</th>
-                      <th>UAE 24K/g</th>
-                      <th>Source</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Spot USD/oz</th>
+                      <th scope="col">Selected view</th>
+                      <th scope="col">UAE 24K/g</th>
+                      <th scope="col">Source</th>
                     </tr>
                   </thead>
                   <tbody id="tp-archive-body"></tbody>
@@ -1273,8 +1286,9 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Visible chart CSV</h3></div>
               <p>
-                Exports the visible historical range with start/end dates, source, and data-resolution
-                notes.
+                Exports the visible historical range with start/end dates, source labels, and
+                data-resolution notes. Includes a freshness header row so recipients know whether
+                points are live, cached, or baseline-derived.
               </p>
               <button class="btn btn-outline" id="tp-export-chart-2" type="button">
                 Export visible chart CSV
@@ -1284,8 +1298,9 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Comparison CSV</h3></div>
               <p>
-                Download the current country + karat comparison cards in the same mobile-first order
-                shown in the compare workspace.
+                Downloads the current country + karat comparison cards in the same order shown in
+                the Compare workspace. Includes currency, karat, unit, and reference-price columns.
+                All values are spot-linked estimates — not retail quotes.
               </p>
               <button class="btn btn-outline" id="tp-export-compare-2" type="button">
                 Download comparison CSV
@@ -1295,8 +1310,9 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Archive CSVs</h3></div>
               <p>
-                Download cached daily archive and full baseline+cache history for longer-term
-                analysis.
+                Download the cached daily archive (visible range) or the full baseline + cache
+                history for longer-term reference. Archive data may include estimated or baseline
+                points — the Source column identifies each.
               </p>
               <div class="tracker-inline-actions">
                 <button class="btn btn-outline" id="tp-export-archive-2" type="button">
@@ -1311,8 +1327,9 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Snapshot JSON</h3></div>
               <p>
-                Structured JSON payload with live snapshot, freshness labels, selected comparison
-                setup, and export timestamp.
+                Structured JSON with the live snapshot, freshness label, FX rate, selected karat,
+                comparison setup, and export timestamp. Suitable for integrating into scripts or
+                spreadsheets.
               </p>
               <button class="btn btn-outline" id="tp-download-json-2" type="button">
                 Download snapshot JSON
@@ -1322,13 +1339,19 @@
             <article class="tracker-subpanel">
               <div class="tracker-subpanel-head"><h3>Market brief text</h3></div>
               <p>
-                Export the current market brief as plain text, suitable for email or note-taking.
+                Plain-text summary of current gold conditions for the selected view — suitable for
+                email or note-taking. Includes freshness label and reference-price disclaimer.
               </p>
               <button class="btn btn-outline" id="tp-download-brief" type="button">
                 Download brief
               </button>
             </article>
           </div>
+          <p class="source-note tracker-export-disclaimer">
+            All exports contain reference prices only — spot-linked estimates before making charges, premiums, and tax.
+            The Source column in every file identifies whether each data point is live, cached, or baseline-derived.
+            <a href="methodology.html" class="tracker-inline-link">Methodology →</a>
+          </p>
         </section>
       </section>
 

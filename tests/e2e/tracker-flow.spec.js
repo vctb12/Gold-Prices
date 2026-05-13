@@ -115,4 +115,61 @@ test.describe('Tracker page — live mode & navigation', () => {
     await expect(page.locator('#tp-comparison-cards .comparison-card').first()).toBeVisible();
     await expect(page.locator('#tp-export-compare')).toBeEnabled({ timeout: 10000 });
   });
+
+  test('compare tab is visible and clickable without needing advanced workspace', async ({
+    page,
+  }) => {
+    await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
+    // Compare is workspace:basic — its tab button must be visible in default state
+    const compareTab = page.locator('#tab-compare');
+    await expect(compareTab).toBeVisible({ timeout: 5000 });
+
+    // Clicking it should switch to compare mode without requiring workspace toggle
+    await compareTab.click();
+    await expect(page.locator('#mode-compare')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('alerts and planner overlays open without requiring advanced workspace', async ({
+    page,
+  }) => {
+    await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
+
+    // Alerts tab button must be visible in basic mode
+    const alertsTab = page.locator('#tab-alerts');
+    await expect(alertsTab).toBeVisible({ timeout: 5000 });
+    await alertsTab.click();
+    // Alerts overlay should open
+    await expect(page.locator('#tp-overlay-alerts')).toBeVisible({ timeout: 5000 });
+
+    // Close it
+    await page.locator('#tp-overlay-alerts .tp-overlay-close').click();
+    await expect(page.locator('#tp-overlay-alerts')).toBeHidden({ timeout: 3000 });
+
+    // Planner tab button must be visible in basic mode
+    const plannerTab = page.locator('#tab-planner');
+    await expect(plannerTab).toBeVisible({ timeout: 5000 });
+    await plannerTab.click();
+    await expect(page.locator('#tp-overlay-planner')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('tracker at 360px shows Compare tab and has no horizontal overflow', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await page.goto('/tracker.html');
+    await waitForTrackerReady(page);
+
+    // Compare tab visible on 360px
+    await expect(page.locator('#tab-compare')).toBeVisible({ timeout: 5000 });
+
+    // No horizontal overflow
+    const metrics = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      viewportWidth: window.innerWidth,
+    }));
+    expect(
+      metrics.scrollWidth <= metrics.viewportWidth + 1,
+      `tracker at 360px overflows: ${metrics.scrollWidth}px > ${metrics.viewportWidth}px`
+    ).toBeTruthy();
+  });
 });

@@ -3488,3 +3488,129 @@ td.tracker-chg-down {
     }
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   FOCUS-VISIBLE — keyboard navigation accessibility
+   ══════════════════════════════════════════════════════════════ */
+
+/* All interactive tracker elements get a visible gold focus ring */
+.tracker-mode-tab:focus-visible,
+.tracker-region-pill:focus-visible,
+.tracker-pill:focus-visible,
+.tracker-overlay-btn:focus-visible,
+.tracker-market-fav:focus-visible,
+.tracker-watch-card:focus-visible {
+  outline: 2px solid var(--tp-gold);
+  outline-offset: 2px;
+}
+
+/* Hero select / button focus on dark background */
+.tracker-hero-field select:focus-visible {
+  outline: 2px solid var(--tp-gold);
+  outline-offset: 2px;
+  border-color: var(--tp-gold);
+  box-shadow: 0 0 0 3px rgb(196 154 68 / 22%);
+}
+
+.tracker-hero-wrap .btn:focus-visible {
+  outline: 2px solid var(--tp-gold);
+  outline-offset: 2px;
+}
+
+/* Overlay form inputs */
+.tracker-field input:focus-visible,
+.tracker-field select:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 1px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EXPORT DISCLAIMER — bottom of exports panel
+   ══════════════════════════════════════════════════════════════ */
+
+.tracker-export-disclaimer {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-accent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMPARE PANEL — visible in basic workspace (workspace: basic)
+   Ensure it has no leftover display-blocking from advanced state
+   ══════════════════════════════════════════════════════════════ */
+
+/* Compare panel has its own .tracker-shell margin, consistent with live mode */
+.tracker-compare-shell {
+  margin-top: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SUBPANEL INTRO — short helper text below subpanel headings
+   ══════════════════════════════════════════════════════════════ */
+
+.tracker-subpanel-intro {
+  font-size: var(--text-sm);
+  color: var(--tp-text-muted);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHART EMPTY STATE — fuller card style
+   ══════════════════════════════════════════════════════════════ */
+
+.tracker-chart-empty {
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+}
+
+.tracker-chart-empty .source-note {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--tp-text-faint);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ALERT FORM — target-hint help text
+   ══════════════════════════════════════════════════════════════ */
+
+.tracker-field .tracker-help-text {
+  font-size: var(--text-xs);
+  color: var(--tp-text-faint);
+  line-height: 1.45;
+  margin-top: var(--space-1);
+  display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE: compare panel card grid — prevent overflow at 360px
+   ══════════════════════════════════════════════════════════════ */
+
+@media (width <= 420px) {
+  .comparison-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-builder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-karat-row {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TABLE CAPTIONS — visually hidden but accessible
+   ══════════════════════════════════════════════════════════════ */
+
+.tracker-table caption.sr-only {
+  /* sr-only is defined in global.css; this rule ensures it applies inside tables */
+  caption-side: top;
+}
