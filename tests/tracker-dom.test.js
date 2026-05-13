@@ -190,6 +190,9 @@ test('tracker-dom: archive table headers have scope attributes', () => {
 
 // ── Chart workspace ───────────────────────────────────────────────────────────
 
+/** Minimum character length that indicates meaningful empty-state content (not just "…"). */
+const MIN_EMPTY_STATE_LENGTH = 50;
+
 test('tracker-dom: chart SVG exists', () => {
   assert.ok(/id="tp-chart"/.test(HTML), '#tp-chart SVG must exist');
 });
@@ -198,7 +201,7 @@ test('tracker-dom: chart empty state exists and is not trivially empty', () => {
   const emptyStateMatch = HTML.match(/id="tp-chart-empty"[\s\S]*?<\/div>/);
   assert.ok(emptyStateMatch, '#tp-chart-empty must exist');
   assert.ok(
-    emptyStateMatch[0].length > 50,
+    emptyStateMatch[0].length > MIN_EMPTY_STATE_LENGTH,
     'chart empty state should have descriptive content (not just "…")'
   );
 });
