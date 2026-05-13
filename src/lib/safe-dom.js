@@ -29,28 +29,33 @@ export function escape(value) {
     .replace(/'/g, '&#39;');
 }
 
-/** Return the URL only if it is safe to use as an `<a href>` value in a
- *  browser context. Allows http(s), `mailto:`, `tel:`, root-relative,
- *  relative (`./` / `../`), and fragment-only URLs. Explicitly rejects `javascript:`, `data:`,
- *  `vbscript:`, `file:`, and any other non-allowlisted scheme.
+/** Return the URL only if it is safe for the given attribute in browser
+ *  context. For link navigation attrs (`href`, `xlink:href`), allows
+ *  http(s), `mailto:`, `tel:`, root-relative, relative (`./` / `../`), and
+ *  fragment-only URLs. For resource attrs (`src`, `poster`) and form actions
+ *  (`action`, `formaction`), allows only http(s) and relative URLs.
+ *  Explicitly rejects `javascript:`, `data:`, `vbscript:`, `file:`, and any
+ *  other non-allowlisted scheme.
  *
  *  ⚠️ This is for *navigation URLs in the browser only*. It is NOT a
  *  filesystem-path sanitizer — do not pass its output to `fs.*` calls or
  *  to server-side path resolution. */
-export function safeHref(url) {
+export function safeHref(url, attrName = 'href') {
   if (!url || typeof url !== 'string') return '';
+  const normalizedAttr = String(attrName || 'href').toLowerCase();
+  const isLinkAttr = normalizedAttr === 'href' || normalizedAttr === 'xlink:href';
   const trimmed = url.trim();
   // Explicitly reject javascript:, data:, vbscript:, file:, etc. — allowlist only.
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  if (/^mailto:/i.test(trimmed)) return trimmed;
-  if (/^tel:/i.test(trimmed)) {
+  if (isLinkAttr && /^mailto:/i.test(trimmed)) return trimmed;
+  if (isLinkAttr && /^tel:/i.test(trimmed)) {
     const sanitizedPhone = safeTel(trimmed.slice(4));
     return sanitizedPhone ? `tel:${sanitizedPhone}` : '';
   }
-  // Also allow protocol-relative and root-relative internal links.
+  // Allow root-relative and relative URLs for both navigation and resources.
   if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('../'))
     return trimmed;
-  if (trimmed.startsWith('#')) return trimmed;
+  if (isLinkAttr && trimmed.startsWith('#')) return trimmed;
   return '';
 }
 
@@ -164,7 +169,7 @@ export function el(tag, attrs, children) {
           node.addEventListener(keyLower.slice(2), value);
         }
       } else if (URL_ATTR_NAMES.has(keyLower)) {
-        const safeValue = safeHref(String(value));
+        const safeValue = safeHref(String(value), keyLower);
         if (safeValue) node.setAttribute(key, safeValue);
       } else if (value === true) {
         node.setAttribute(key, '');

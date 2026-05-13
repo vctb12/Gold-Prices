@@ -59,6 +59,16 @@ test('safeHref() allows http/https/relative/fragment', async () => {
   assert.equal(safeHref('#section'), '#section');
 });
 
+test('safeHref() applies attribute-specific scheme rules', async () => {
+  const { safeHref } = await load();
+  assert.equal(safeHref('mailto:hello@example.com', 'href'), 'mailto:hello@example.com');
+  assert.equal(safeHref('tel:+971 50 123 4567', 'href'), 'tel:+971501234567');
+  assert.equal(safeHref('#section', 'href'), '#section');
+  assert.equal(safeHref('mailto:hello@example.com', 'src'), '');
+  assert.equal(safeHref('tel:+971 50 123 4567', 'src'), '');
+  assert.equal(safeHref('#section', 'src'), '');
+});
+
 test('safeHref() returns empty string for null/undefined/non-string', async () => {
   const { safeHref } = await load();
   assert.equal(safeHref(null), '');
@@ -248,6 +258,23 @@ test('el() blocks dangerous attributes but allows event listeners', async () => 
     assert.equal(node.className, 'x');
     assert.equal(mock.listeners.length, 1);
     assert.equal(mock.listeners[0][0], 'click');
+  } finally {
+    mock.restore();
+  }
+});
+
+test('el() keeps URL attribute sanitization attribute-aware', async () => {
+  const mock = installMockDocument();
+  try {
+    const { el } = await load();
+    const node = el('img', {
+      src: 'mailto:hello@example.com',
+      poster: 'tel:+971 50 123 4567',
+      href: 'mailto:hello@example.com',
+    });
+    assert.equal(node.attrs.src, undefined);
+    assert.equal(node.attrs.poster, undefined);
+    assert.equal(node.attrs.href, 'mailto:hello@example.com');
   } finally {
     mock.restore();
   }

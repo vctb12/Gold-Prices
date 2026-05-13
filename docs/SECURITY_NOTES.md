@@ -2,7 +2,7 @@
 
 ## Safe DOM helpers (`src/lib/safe-dom.js`)
 
-- Dynamic text is always appended as text nodes (`createTextNode`) and is never parsed as HTML.
+- Dynamic text is always appended as literal text and is never parsed as HTML.
 - `el()` only appends trusted nodes created by the safe-dom helper itself (plus text nodes).
   Untrusted external nodes are downgraded to plain text via `textContent`.
 - Dangerous attribute paths are blocked (`on*` string handlers, `srcdoc`), and URL-like attributes
