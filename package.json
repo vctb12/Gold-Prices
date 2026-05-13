@@ -49,16 +49,16 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.2",
+    "@playwright/test": "^1.60.0",
     "eslint": "^10.3.0",
     "husky": "^9.1.7",
     "linkinator": "^7.6.1",
-    "lint-staged": "^17.0.2",
+    "lint-staged": "^17.0.4",
     "prettier": "^3.8.3",
     "stylelint": "^17.11.0",
     "stylelint-config-standard": "^40.0.0",
-    "terser": "^5.46.2",
-    "vite": "^8.0.10"
+    "terser": "^5.47.1",
+    "vite": "^8.0.12"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
