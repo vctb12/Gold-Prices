@@ -258,9 +258,8 @@ function detectPageType(filePath, _content) {
   const relativePath = path.relative(ROOT, filePath);
 
   if (relativePath === 'index.html') return 'homepage';
-  if (relativePath.includes('/countries/') && !relativePath.includes('/gold-price'))
-    return 'country';
-  if (relativePath.includes('/gold-price')) return 'price';
+  if (relativePath.includes('/gold-price') || relativePath.includes('/gold-rate')) return 'price';
+  if (relativePath.includes('/countries/')) return 'country';
   if (relativePath.includes('/guides/') || relativePath.includes('/content/')) return 'article';
   if (relativePath.includes('/calculator') || relativePath.includes('/tools')) return 'tool';
 
@@ -316,8 +315,15 @@ function generateSchemasForPage(filePath, content) {
     const countryMatch = relativePath.match(/countries\/([^\/]+)/);
     const karatMatch = relativePath.match(/(\d+k)/i);
 
-    // Extract currency code from page title (e.g. "— SAR reference rates")
-    const currencyMatch = pageTitle.match(/—\s*([A-Z]{3})\s+reference rates/);
+    // Extract currency code from page title.
+    // Handles multiple formats:
+    //   "— SAR reference rates" (country gold-price pages)
+    //   "— AED per Gram" (city gold-price and karat pages)
+    //   "in AED |" (some city-level pages)
+    const currencyMatch =
+      pageTitle.match(/—\s*([A-Z]{3})\s+reference rates/) ||
+      pageTitle.match(/—\s*([A-Z]{3})\s+per Gram/i) ||
+      pageTitle.match(/\bin\s+([A-Z]{3})\s*[|,]/);
     const currency = currencyMatch ? currencyMatch[1] : 'AED';
 
     schemas.push(
@@ -348,12 +354,13 @@ function generateSchemasForPage(filePath, content) {
 
     // Dataset schema for the price data
     const pageUrl = canonicalUrl || `${SITE_URL}${urlPath}`;
+    const karatLabel = karatMatch ? karatMatch[1].toUpperCase() : '24K';
     schemas.push(
       getDatasetSchema({
         name: pageTitle,
         description: pageDescription,
         url: pageUrl,
-        variableMeasured: 'Gold price per gram',
+        variableMeasured: `${karatLabel} gold price per gram in ${currency}`,
       })
     );
   }
