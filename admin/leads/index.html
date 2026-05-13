@@ -176,8 +176,17 @@
         try { return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } catch { return iso; }
       }
 
+      function esc(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       function statusBadge(s) {
-        return `<span class="status-badge status-${s}">${s}</span>`;
+        return `<span class="status-badge status-${esc(s)}">${esc(s)}</span>`;
       }
 
       async function apiCall(method, path, body) {
@@ -222,17 +231,17 @@
           }
 
           tbody.innerHTML = allLeads.map((l) => `
-            <tr data-id="${l.id}">
-              <td><span class="status-badge" style="background:rgba(245,158,11,0.1);color:#f59e0b">${l.type}</span></td>
-              <td>${l.email || l.name || '<em style="color:var(--text-muted)">anonymous</em>'}</td>
-              <td><div class="lead-message">${l.message || '—'}</div></td>
-              <td>${l.source || '—'}</td>
-              <td>${l.locale || 'en'}</td>
+            <tr data-id="${esc(l.id)}">
+              <td><span class="status-badge" style="background:rgba(245,158,11,0.1);color:#f59e0b">${esc(l.type)}</span></td>
+              <td>${l.email ? esc(l.email) : l.name ? esc(l.name) : '<em style="color:var(--text-muted)">anonymous</em>'}</td>
+              <td><div class="lead-message">${l.message ? esc(l.message) : '—'}</div></td>
+              <td>${esc(l.source || '—')}</td>
+              <td>${esc(l.locale || 'en')}</td>
               <td>${statusBadge(l.status)}</td>
               <td>${fmtDate(l.created_at)}</td>
               <td>
                 <div class="row-actions-menu">
-                  <button class="btn btn-ghost btn-sm" data-action="view" data-id="${l.id}" type="button" aria-label="View lead">View</button>
+                  <button class="btn btn-ghost btn-sm" data-action="view" data-id="${esc(l.id)}" type="button" aria-label="View lead">View</button>
                 </div>
               </td>
             </tr>
@@ -254,7 +263,7 @@
             });
           });
         } catch (e) {
-          tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Error: ${e.message}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Error: ${esc(e.message)}</td></tr>`;
           paginationBar.hidden = true;
         }
       }
@@ -264,32 +273,32 @@
         document.getElementById('detail-title').textContent = `${lead.type} lead`;
         const body = document.getElementById('detail-body');
         body.innerHTML = [
-          ['ID', lead.id],
-          ['Email', lead.email || '—'],
-          ['Name', lead.name || '—'],
-          ['Phone', lead.phone || '—'],
-          ['Status', lead.status],
-          ['Source', lead.source || '—'],
-          ['Page', lead.page_path || '—'],
-          ['Locale', lead.locale || 'en'],
-          ['Entity', lead.entity_type ? `${lead.entity_type} / ${lead.entity_id || '?'}` : '—'],
-          ['Message', lead.message || '—'],
-          ['Admin notes', lead.notes || '—'],
-          ['Created', lead.created_at ? new Date(lead.created_at).toLocaleString() : '—'],
-          ['Reviewed by', lead.reviewed_by || '—'],
+          ['ID', esc(lead.id)],
+          ['Email', esc(lead.email || '—')],
+          ['Name', esc(lead.name || '—')],
+          ['Phone', esc(lead.phone || '—')],
+          ['Status', esc(lead.status)],
+          ['Source', esc(lead.source || '—')],
+          ['Page', esc(lead.page_path || '—')],
+          ['Locale', esc(lead.locale || 'en')],
+          ['Entity', lead.entity_type ? esc(`${lead.entity_type} / ${lead.entity_id || '?'}`) : '—'],
+          ['Message', esc(lead.message || '—')],
+          ['Admin notes', esc(lead.notes || '—')],
+          ['Created', lead.created_at ? esc(new Date(lead.created_at).toLocaleString()) : '—'],
+          ['Reviewed by', esc(lead.reviewed_by || '—')],
         ].map(([label, val]) => `
           <div class="lead-detail-field">
-            <label>${label}</label>
+            <label>${esc(label)}</label>
             <span>${val}</span>
           </div>
         `).join('');
 
-        // Status action buttons
+        // Status action buttons (all values are from our own allowlist — safe)
         const actionsEl = document.getElementById('status-actions');
         const statuses = ['new', 'contacted', 'converted', 'closed', 'spam'];
         actionsEl.innerHTML = statuses
           .filter((s) => s !== lead.status)
-          .map((s) => `<button class="btn btn-ghost btn-sm" data-set-status="${s}" data-lead-id="${lead.id}" type="button">Mark ${s}</button>`)
+          .map((s) => `<button class="btn btn-ghost btn-sm" data-set-status="${esc(s)}" data-lead-id="${esc(lead.id)}" type="button">Mark ${esc(s)}</button>`)
           .join('');
 
         actionsEl.querySelectorAll('[data-set-status]').forEach((btn) => {

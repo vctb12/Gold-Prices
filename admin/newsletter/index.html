@@ -151,8 +151,17 @@
         } catch { return iso; }
       }
 
+      function esc(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       function statusBadge(s) {
-        return `<span class="status-badge status-${s}">${s}</span>`;
+        return `<span class="status-badge status-${esc(s)}">${esc(s)}</span>`;
       }
 
       async function apiGet(path) {
@@ -194,11 +203,11 @@
 
           tbody.innerHTML = data.data.map((s) => `
             <tr>
-              <td>${s.email}</td>
+              <td>${esc(s.email)}</td>
               <td>${statusBadge(s.status)}</td>
-              <td>${s.locale || 'en'}</td>
-              <td>${s.source || '—'}</td>
-              <td>${s.preferences?.frequency || 'weekly'}</td>
+              <td>${esc(s.locale || 'en')}</td>
+              <td>${esc(s.source || '—')}</td>
+              <td>${esc(s.preferences?.frequency || 'weekly')}</td>
               <td>${fmtDate(s.confirmed_at)}</td>
               <td>${fmtDate(s.created_at)}</td>
             </tr>
