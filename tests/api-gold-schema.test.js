@@ -122,3 +122,30 @@ test('fetchGold falls back to static JSON when backend endpoint fails', async ()
     global.fetch = originalFetch;
   }
 });
+
+test('fetchGold accepts numeric strings from backend payload', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: true,
+    async json() {
+      return {
+        ok: true,
+        data: {
+          provider: 'price_snapshots',
+          xauUsdPerOz: '4733.42',
+          timestampUtc: '2026-05-07T10:42:00Z',
+        },
+      };
+    },
+  });
+
+  try {
+    const api = await loadApiModule();
+    const result = await api.fetchGold();
+    assert.equal(result.price, 4733.42);
+    assert.equal(result.updatedAt, '2026-05-07T10:42:00Z');
+    assert.equal(result.source, 'price_snapshots');
+  } finally {
+    global.fetch = originalFetch;
+  }
+});

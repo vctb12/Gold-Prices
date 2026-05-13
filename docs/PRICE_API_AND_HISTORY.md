@@ -11,7 +11,7 @@ This document explains how Gold Ticker Live now serves price data in two modes:
 - `GET /api/v1/prices/history?range=1d|7d|30d|1y`
 - `GET /api/v1/prices/snapshots?limit=120&provider=<name>`
 - `GET /api/v1/providers/status`
-- `GET /api/v1/providers/runs?limit=100&provider=<name>`
+- `GET /api/v1/providers/runs?limit=100&provider=<name>` (**admin auth required**)
 
 ## Data source behavior
 
@@ -28,7 +28,7 @@ This document explains how Gold Ticker Live now serves price data in two modes:
 ### Provider telemetry
 
 - `/api/v1/providers/status` uses `provider_health` when available.
-- `/api/v1/providers/runs` uses `provider_runs` when available.
+- `/api/v1/providers/runs` uses `provider_runs` when available and requires admin authentication.
 - Both routes return safe fallback payloads when DB data is unavailable.
 
 ## Snapshot ingestion

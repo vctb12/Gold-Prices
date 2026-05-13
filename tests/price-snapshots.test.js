@@ -25,34 +25,27 @@ function samplePayload() {
 }
 
 function createSupabaseMock({ duplicate = false } = {}) {
-  const state = { inserts: [], eqCalls: [], limitCalls: [] };
+  const state = { inserts: [] };
   return {
     state,
     from(table) {
       if (table !== 'price_snapshots') throw new Error(`Unexpected table: ${table}`);
       return {
-        select() {
-          const chain = {
-            eq(field, value) {
-              state.eqCalls.push([field, value]);
-              return chain;
-            },
-            limit(value) {
-              state.limitCalls.push(value);
-              return Promise.resolve({
-                data: duplicate ? [{ id: 'existing-id' }] : [],
-                error: null,
-              });
-            },
-          };
-          return chain;
-        },
         insert(rows) {
           state.inserts.push(...rows);
           return {
             select() {
               return {
                 single() {
+                  if (duplicate) {
+                    return Promise.resolve({
+                      data: null,
+                      error: {
+                        code: '23505',
+                        message: 'duplicate key value violates unique constraint',
+                      },
+                    });
+                  }
                   return Promise.resolve({ data: { id: 'new-id' }, error: null });
                 },
               };
@@ -91,13 +84,7 @@ test('insertSnapshotIfNew prevents duplicate inserts for same key', async () => 
   const result = await insertSnapshotIfNew(mock, row);
   assert.equal(result.inserted, false);
   assert.equal(result.duplicate, true);
-  assert.equal(mock.state.inserts.length, 0);
-  assert.deepEqual(mock.state.eqCalls, [
-    ['timestamp_utc', row.timestamp_utc],
-    ['source_provider', row.source_provider],
-    ['raw_payload_hash', row.raw_payload_hash],
-  ]);
-  assert.deepEqual(mock.state.limitCalls, [1]);
+  assert.equal(mock.state.inserts.length, 1);
 });
 
 test('insertSnapshotIfNew inserts when duplicate does not exist', async () => {

@@ -87,14 +87,15 @@ async function run() {
   try {
     const row = buildPriceSnapshotRow(validated.normalized, { providerChain });
     const snapshotResult = await insertSnapshotIfNew(supabase, row);
-    if (!snapshotResult.duplicate) {
-      await insertProviderRun(supabase, validated.normalized, { circuitState });
-      await upsertProviderHealth(
-        supabase,
-        validated.normalized.sourceProvider,
-        circuitState || (validated.normalized.isFallback ? 'fallback' : 'closed')
-      );
-    }
+    // Record provider telemetry for every fetch run, even when the snapshot is
+    // a duplicate. This keeps provider health/latency metrics current across
+    // retries and repeated polls that intentionally do not create new snapshots.
+    await insertProviderRun(supabase, validated.normalized, { circuitState });
+    await upsertProviderHealth(
+      supabase,
+      validated.normalized.sourceProvider,
+      circuitState || (validated.normalized.isFallback ? 'fallback' : 'closed')
+    );
 
     appendGithubOutput('snapshot_synced', snapshotResult.inserted ? 'true' : 'false');
     appendGithubOutput('snapshot_duplicate', snapshotResult.duplicate ? 'true' : 'false');
@@ -104,7 +105,7 @@ async function run() {
     );
 
     const summaryLine = snapshotResult.duplicate
-      ? '- Snapshot sync: duplicate snapshot detected; insert skipped.'
+      ? '- Snapshot sync: duplicate snapshot skipped; provider run + health were still updated.'
       : '- Snapshot sync: inserted into price_snapshots and updated provider health.';
     writeSummary([summaryLine]);
     return 0;

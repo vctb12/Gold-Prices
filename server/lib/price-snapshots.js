@@ -128,15 +128,18 @@ async function hasDuplicateSnapshot(supabase, row) {
 }
 
 async function insertSnapshotIfNew(supabase, row) {
-  const duplicate = await hasDuplicateSnapshot(supabase, row);
-  if (duplicate) return { inserted: false, duplicate: true };
-
   const { data, error } = await supabase
     .from('price_snapshots')
     .insert([row])
     .select('id')
     .single();
-  if (error) throw new Error(`snapshot insert failed: ${error.message}`);
+  if (error) {
+    const isDuplicate =
+      error.code === '23505' ||
+      /\bduplicate\s+key\b|\bunique\s+constraint\b/i.test(String(error.message || ''));
+    if (isDuplicate) return { inserted: false, duplicate: true };
+    throw new Error(`snapshot insert failed: ${error.message}`);
+  }
   return { inserted: true, duplicate: false, id: data?.id || null };
 }
 

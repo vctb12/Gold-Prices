@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const { atomicWriteJSON } = require('../lib/fs-atomic');
 const { getRuntimeEnvSnapshot, validateServerEnv } = require('../lib/env-validation');
 const { successResponse, errorResponse } = require('../lib/api-response');
+const { authMiddleware } = require('../lib/auth');
 const { getSupabaseClient } = require('../lib/supabase-client');
 const {
   normalizeHistoryRange,
@@ -119,6 +120,33 @@ function sanitizeString(value, maxLength, fallback = null) {
   return cleaned || fallback;
 }
 
+function coerceToNumber(value, { positive = false, integer = false } = {}) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  if (positive && parsed <= 0) return null;
+  if (integer) return Math.round(parsed);
+  return parsed;
+}
+
+function toBooleanOrNull(value) {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return null;
+}
+
+function toHistoryTimestampUtc(dateValue) {
+  if (typeof dateValue !== 'string') return null;
+  const isoCandidate =
+    dateValue.length === ISO_YEAR_MONTH_STRING_LENGTH
+      ? `${dateValue}-01T00:00:00.000Z`
+      : dateValue.length === 10
+        ? `${dateValue}T00:00:00.000Z`
+        : dateValue;
+  const date = new Date(isoCandidate);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+}
+
 async function querySupabase(table, queryBuilder) {
   const sb = getSupabaseClient(false);
   if (!sb) return null;
@@ -137,39 +165,43 @@ async function querySupabase(table, queryBuilder) {
 }
 
 function mapPricePayloadToApiData(pricePayload) {
+  const freshnessSeconds = coerceToNumber(pricePayload?.freshness_seconds, { integer: true });
   return {
-    xauUsdPerOz: pricePayload?.xau_usd_per_oz ?? pricePayload?.gold?.ounce_usd ?? null,
-    usdPerGram24k: pricePayload?.usd_per_gram_24k ?? null,
-    aedPerGram24k: pricePayload?.aed_per_gram_24k ?? pricePayload?.gold?.gram_aed ?? null,
+    xauUsdPerOz: coerceToNumber(pricePayload?.xau_usd_per_oz ?? pricePayload?.gold?.ounce_usd, {
+      positive: true,
+    }),
+    usdPerGram24k: coerceToNumber(pricePayload?.usd_per_gram_24k, { positive: true }),
+    aedPerGram24k: coerceToNumber(pricePayload?.aed_per_gram_24k ?? pricePayload?.gold?.gram_aed, {
+      positive: true,
+    }),
     karatsAedPerGram: pricePayload?.karats_aed_per_gram || null,
     timestampUtc: pricePayload?.timestamp_utc || null,
     fetchedAtUtc: pricePayload?.fetched_at_utc || null,
     provider: pricePayload?.provider || pricePayload?.source || null,
     providerChain: pricePayload?.provider_chain || null,
-    freshnessSeconds:
-      typeof pricePayload?.freshness_seconds === 'number' ? pricePayload.freshness_seconds : null,
-    isFresh: typeof pricePayload?.is_fresh === 'boolean' ? pricePayload?.is_fresh : null,
-    isFallback: typeof pricePayload?.is_fallback === 'boolean' ? pricePayload?.is_fallback : null,
-    isMarketOpen:
-      typeof pricePayload?.is_market_open === 'boolean' ? pricePayload?.is_market_open : null,
+    freshnessSeconds: freshnessSeconds !== null && freshnessSeconds >= 0 ? freshnessSeconds : null,
+    isFresh: toBooleanOrNull(pricePayload?.is_fresh),
+    isFallback: toBooleanOrNull(pricePayload?.is_fallback),
+    isMarketOpen: toBooleanOrNull(pricePayload?.is_market_open),
     sourceMode: 'file',
   };
 }
 
 function mapSnapshotRowToLatestApiData(row) {
+  const freshnessSeconds = coerceToNumber(row?.freshness_seconds, { integer: true });
   return {
-    xauUsdPerOz: row?.xau_usd_per_oz ?? null,
+    xauUsdPerOz: coerceToNumber(row?.xau_usd_per_oz, { positive: true }),
     usdPerGram24k: null,
-    aedPerGram24k: row?.xau_aed_per_gram ?? null,
+    aedPerGram24k: coerceToNumber(row?.xau_aed_per_gram, { positive: true }),
     karatsAedPerGram: null,
     timestampUtc: row?.timestamp_utc || null,
     fetchedAtUtc: row?.fetched_at_utc || null,
     provider: row?.source_provider || null,
     providerChain: row?.provider_chain || null,
-    freshnessSeconds: typeof row?.freshness_seconds === 'number' ? row.freshness_seconds : null,
-    isFresh: typeof row?.is_fresh === 'boolean' ? row.is_fresh : null,
-    isFallback: typeof row?.is_fallback === 'boolean' ? row.is_fallback : null,
-    isMarketOpen: typeof row?.is_market_open === 'boolean' ? row.is_market_open : null,
+    freshnessSeconds: freshnessSeconds !== null && freshnessSeconds >= 0 ? freshnessSeconds : null,
+    isFresh: toBooleanOrNull(row?.is_fresh),
+    isFallback: toBooleanOrNull(row?.is_fallback),
+    isMarketOpen: toBooleanOrNull(row?.is_market_open),
     sourceMode: 'supabase',
   };
 }
@@ -295,12 +327,12 @@ router.get('/prices/history', async (req, res) => {
           points: supabaseRows.map((row) => ({
             timestampUtc: row.timestamp_utc,
             fetchedAtUtc: row.fetched_at_utc,
-            xauUsdPerOz: row.xau_usd_per_oz,
-            xauAedPerGram: row.xau_aed_per_gram,
+            xauUsdPerOz: coerceToNumber(row.xau_usd_per_oz, { positive: true }),
+            xauAedPerGram: coerceToNumber(row.xau_aed_per_gram, { positive: true }),
             provider: row.source_provider,
-            freshnessSeconds: row.freshness_seconds,
-            isFresh: row.is_fresh,
-            isFallback: row.is_fallback,
+            freshnessSeconds: coerceToNumber(row.freshness_seconds, { integer: true }),
+            isFresh: toBooleanOrNull(row.is_fresh),
+            isFallback: toBooleanOrNull(row.is_fallback),
           })),
           sourceMode: 'supabase',
         },
@@ -320,7 +352,14 @@ router.get('/prices/history', async (req, res) => {
       .json(errorResponse('PRICE_HISTORY_UNAVAILABLE', 'Historical price dataset is unavailable.'));
   }
   const limit = parseLimit(req.query.limit, 120, 5000);
-  const points = history.slice(-limit);
+  const rangeStartTime = new Date(getHistoryWindowStart(range)).getTime();
+  const points = history
+    .filter((point) => {
+      const ts = toHistoryTimestampUtc(point?.date);
+      if (!ts) return false;
+      return new Date(ts).getTime() >= rangeStartTime;
+    })
+    .slice(-limit);
   return res.json(
     successResponse(
       {
@@ -328,13 +367,12 @@ router.get('/prices/history', async (req, res) => {
         total: history.length,
         returned: points.length,
         points: points.map((point) => ({
-          timestampUtc:
-            typeof point.date === 'string' && point.date.length === ISO_YEAR_MONTH_STRING_LENGTH
-              ? `${point.date}-01T00:00:00.000Z`
-              : point.date,
-          xauUsdPerOz: point.price,
+          timestampUtc: toHistoryTimestampUtc(point.date),
+          xauUsdPerOz: coerceToNumber(point.price, { positive: true }),
           provider: point.source || 'historical-baseline',
-          granularity: point.granularity || (String(point.date).length === 7 ? 'monthly' : 'daily'),
+          granularity:
+            point.granularity ||
+            (String(point.date).length === ISO_YEAR_MONTH_STRING_LENGTH ? 'monthly' : 'daily'),
         })),
         sourceMode: 'file',
       },
@@ -368,7 +406,14 @@ router.get('/prices/snapshots', async (req, res) => {
         {
           total: supabaseRows.length,
           returned: supabaseRows.length,
-          snapshots: supabaseRows,
+          snapshots: supabaseRows.map((row) => ({
+            ...row,
+            xau_usd_per_oz: coerceToNumber(row.xau_usd_per_oz, { positive: true }),
+            xau_aed_per_gram: coerceToNumber(row.xau_aed_per_gram, { positive: true }),
+            freshness_seconds: coerceToNumber(row.freshness_seconds, { integer: true }),
+            is_fresh: toBooleanOrNull(row.is_fresh),
+            is_fallback: toBooleanOrNull(row.is_fallback),
+          })),
           sourceMode: 'supabase',
         },
         {
@@ -468,7 +513,7 @@ router.get('/providers/status', async (_req, res) => {
   );
 });
 
-router.get('/providers/runs', async (req, res) => {
+router.get('/providers/runs', authMiddleware('admin'), async (req, res) => {
   const limit = parseLimit(req.query.limit, DEFAULT_LIMIT_PROVIDER_RUNS, 1000);
   const provider = sanitizeString(req.query.provider, 120, null);
 

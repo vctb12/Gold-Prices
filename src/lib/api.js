@@ -110,12 +110,12 @@ function normalizeGoldResponse(data) {
   if (!data || typeof data !== 'object') return null;
 
   const payload = unwrapApiEnvelope(data);
-  const normalizedPrice = payload?.xauUsdPerOz ?? payload?.xau_usd_per_oz;
-  const legacyPrice = payload?.gold?.ounce_usd;
+  const normalizedPrice = Number(payload?.xauUsdPerOz ?? payload?.xau_usd_per_oz);
+  const legacyPrice = Number(payload?.gold?.ounce_usd);
   const price =
-    typeof normalizedPrice === 'number' && normalizedPrice > 0
+    Number.isFinite(normalizedPrice) && normalizedPrice > 0
       ? normalizedPrice
-      : typeof legacyPrice === 'number' && legacyPrice > 0
+      : Number.isFinite(legacyPrice) && legacyPrice > 0
         ? legacyPrice
         : null;
 
