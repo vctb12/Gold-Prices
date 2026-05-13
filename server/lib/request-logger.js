@@ -1,6 +1,7 @@
 'use strict';
 
 const morgan = require('morgan');
+const MAX_USER_AGENT_LENGTH = 200;
 
 function createRequestLogger() {
   return morgan((tokens, req, res) => {
@@ -16,7 +17,7 @@ function createRequestLogger() {
       responseTimeMs,
       contentLength: Number(tokens.res(req, res, 'content-length') || 0) || null,
       ip: req.ip || req.socket?.remoteAddress || null,
-      userAgent: (tokens.req(req, res, 'user-agent') || '').slice(0, 200),
+      userAgent: (tokens.req(req, res, 'user-agent') || '').slice(0, MAX_USER_AGENT_LENGTH),
     });
   });
 }

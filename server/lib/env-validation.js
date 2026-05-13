@@ -1,5 +1,8 @@
 'use strict';
 
+const MIN_ADMIN_PIN_DIGITS = 6;
+const ADMIN_PIN_REGEX = new RegExp(`^\\d{${MIN_ADMIN_PIN_DIGITS},}$`);
+
 function hasValue(v) {
   return typeof v === 'string' ? v.trim().length > 0 : Boolean(v);
 }
@@ -56,8 +59,8 @@ function validateServerEnv(env = process.env, logger = console) {
     );
   }
 
-  if (snapshot.adminPinConfigured && !/^\d{6,}$/.test(String(env.ADMIN_ACCESS_PIN || ''))) {
-    pushWarning('ADMIN_ACCESS_PIN should be 6+ digits when configured.');
+  if (snapshot.adminPinConfigured && !ADMIN_PIN_REGEX.test(String(env.ADMIN_ACCESS_PIN || ''))) {
+    pushWarning(`ADMIN_ACCESS_PIN should be ${MIN_ADMIN_PIN_DIGITS}+ digits when configured.`);
   }
 
   for (const warning of warnings) {

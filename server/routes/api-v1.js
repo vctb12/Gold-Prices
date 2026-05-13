@@ -17,6 +17,16 @@ const PROVIDER_STATE_FILE = path.join(ROOT, 'data', 'provider_state.json');
 const PRICE_HISTORY_FILE = path.join(ROOT, 'src', 'data', 'historical-baseline.json');
 const EVENTS_FILE = path.join(ROOT, 'data', 'analytics-events.json');
 const LEADS_FILE = path.join(ROOT, 'data', 'leads.json');
+const MAX_EVENT_NAME_LENGTH = 80;
+const MAX_EVENT_PAGE_LENGTH = 200;
+const MAX_LEAD_NAME_LENGTH = 120;
+const MAX_LEAD_MESSAGE_LENGTH = 1200;
+const MAX_LEAD_SOURCE_LENGTH = 120;
+const MAX_STORED_EVENTS = 5000;
+const MAX_STORED_LEADS = 5000;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const EVENTS_RATE_LIMIT_WINDOW_MINUTES = 15;
+const LEADS_RATE_LIMIT_WINDOW_MINUTES = 15;
 
 const PACKAGE_VERSION = (() => {
   try {
@@ -95,8 +105,14 @@ function parseLimit(input, fallback = 120, max = 1000) {
   return Math.min(n, max);
 }
 
+function sanitizeString(value, maxLength, fallback = null) {
+  if (typeof value !== 'string') return fallback;
+  const cleaned = value.trim().slice(0, maxLength);
+  return cleaned || fallback;
+}
+
 const eventsRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: EVENTS_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
@@ -107,7 +123,7 @@ const eventsRateLimiter = rateLimit({
 });
 
 const leadsRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: LEADS_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
@@ -164,14 +180,14 @@ router.get('/prices/latest', (_req, res) => {
 
   const data = {
     xauUsdPerOz: pricePayload.xau_usd_per_oz ?? pricePayload?.gold?.ounce_usd ?? null,
-    usdPerGram24k: pricePayload.usd_per_gram_24k ?? null,
-    aedPerGram24k: pricePayload.aed_per_gram_24k ?? pricePayload?.gold?.gram_aed ?? null,
-    karatsAedPerGram: pricePayload.karats_aed_per_gram || null,
-    timestampUtc: pricePayload.timestamp_utc || null,
-    fetchedAtUtc: pricePayload.fetched_at_utc || null,
-    provider: pricePayload.provider || pricePayload.source || null,
-    isFresh: typeof pricePayload.is_fresh === 'boolean' ? pricePayload.is_fresh : null,
-    isFallback: typeof pricePayload.is_fallback === 'boolean' ? pricePayload.is_fallback : null,
+    usdPerGram24k: pricePayload?.usd_per_gram_24k ?? null,
+    aedPerGram24k: pricePayload?.aed_per_gram_24k ?? pricePayload?.gold?.gram_aed ?? null,
+    karatsAedPerGram: pricePayload?.karats_aed_per_gram || null,
+    timestampUtc: pricePayload?.timestamp_utc || null,
+    fetchedAtUtc: pricePayload?.fetched_at_utc || null,
+    provider: pricePayload?.provider || pricePayload?.source || null,
+    isFresh: typeof pricePayload?.is_fresh === 'boolean' ? pricePayload?.is_fresh : null,
+    isFallback: typeof pricePayload?.is_fallback === 'boolean' ? pricePayload?.is_fallback : null,
   };
 
   return res.json(
@@ -226,7 +242,7 @@ router.get('/providers/status', (_req, res) => {
 });
 
 router.post('/events', eventsRateLimiter, (req, res) => {
-  const eventName = typeof req.body?.event === 'string' ? req.body.event.trim().slice(0, 80) : '';
+  const eventName = sanitizeString(req.body?.event, MAX_EVENT_NAME_LENGTH, '');
   if (!eventName) {
     return res.status(400).json(errorResponse('VALIDATION_ERROR', 'event is required.'));
   }
@@ -234,7 +250,7 @@ router.post('/events', eventsRateLimiter, (req, res) => {
   const entry = {
     id: `evt_${crypto.randomBytes(8).toString('hex')}`,
     event: eventName,
-    page: typeof req.body?.page === 'string' ? req.body.page.trim().slice(0, 200) : null,
+    page: sanitizeString(req.body?.page, MAX_EVENT_PAGE_LENGTH),
     ts: typeof req.body?.ts === 'number' ? req.body.ts : Date.now(),
     properties:
       req.body?.properties && typeof req.body.properties === 'object' ? req.body.properties : {},
@@ -243,7 +259,7 @@ router.post('/events', eventsRateLimiter, (req, res) => {
 
   const events = readJsonArray(EVENTS_FILE);
   events.push(entry);
-  writeJsonArray(EVENTS_FILE, events.slice(-5000));
+  writeJsonArray(EVENTS_FILE, events.slice(-MAX_STORED_EVENTS));
 
   return res
     .status(202)
@@ -256,24 +272,23 @@ router.post('/events', eventsRateLimiter, (req, res) => {
 });
 
 router.post('/leads', leadsRateLimiter, (req, res) => {
-  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  if (!EMAIL_RE.test(email)) {
+  const email = sanitizeString(req.body?.email, 320, '')?.toLowerCase() || '';
+  if (!EMAIL_REGEX.test(email)) {
     return res.status(400).json(errorResponse('VALIDATION_ERROR', 'A valid email is required.'));
   }
 
   const lead = {
     id: `lead_${crypto.randomBytes(8).toString('hex')}`,
     email,
-    name: typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 120) : null,
-    message: typeof req.body?.message === 'string' ? req.body.message.trim().slice(0, 1200) : null,
-    source: typeof req.body?.source === 'string' ? req.body.source.trim().slice(0, 120) : 'public',
+    name: sanitizeString(req.body?.name, MAX_LEAD_NAME_LENGTH),
+    message: sanitizeString(req.body?.message, MAX_LEAD_MESSAGE_LENGTH),
+    source: sanitizeString(req.body?.source, MAX_LEAD_SOURCE_LENGTH, 'public'),
     createdAt: new Date().toISOString(),
   };
 
   const leads = readJsonArray(LEADS_FILE);
   leads.push(lead);
-  writeJsonArray(LEADS_FILE, leads.slice(-5000));
+  writeJsonArray(LEADS_FILE, leads.slice(-MAX_STORED_LEADS));
 
   return res.status(201).json(
     successResponse(
