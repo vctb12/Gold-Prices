@@ -6,12 +6,14 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;
 const rateLimit = require('express-rate-limit');
 const { errorHandler } = require('./server/lib/errors');
+const { createRequestLogger } = require('./server/lib/request-logger');
+const { validateServerEnv } = require('./server/lib/env-validation');
+const { successResponse } = require('./server/lib/api-response');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +30,10 @@ const adminRoutes = require('./server/routes/admin');
 const stripeRoutes = require('./server/routes/stripe');
 const newsletterRoutes = require('./server/routes/newsletter');
 const submissionsRoutes = require('./server/routes/submissions');
+const apiV1Routes = require('./server/routes/api-v1');
+
+// Validate environment feature wiring at startup without crashing optional integrations.
+validateServerEnv(process.env, console);
 
 // ---------------------------------------------------------------------------
 // Security headers (Helmet)
@@ -149,11 +155,15 @@ app.use(
   )
 );
 
-app.use(morgan(IS_PROD ? 'combined' : 'dev'));
+// Structured request logs for production observability.
+app.use(createRequestLogger());
 
 // Stripe webhooks require the raw request body for signature verification.
 // This must be registered before the global JSON body parser.
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+app.use(
+  ['/api/stripe/webhook', '/api/v1/stripe/webhook'],
+  express.raw({ type: 'application/json' })
+);
 
 // Body parsing with size limits.
 // urlencoded is intentionally tighter than json — no current route consumes
@@ -264,13 +274,28 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api', submissionsRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/stripe', stripeRoutes);
+app.use('/api/v1/newsletter', newsletterRoutes);
+app.use('/api/v1', submissionsRoutes);
+app.use('/api/v1', apiV1Routes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
+app.get('/api/health', (_req, res) => {
+  const payload = {
     status: 'ok',
     timestamp: new Date().toISOString(),
+  };
+  // Preserve legacy shape while exposing the new API envelope fields.
+  res.json({
+    ...payload,
+    ...successResponse(payload, { source: 'legacy-health', freshness: 'live' }),
   });
+});
+
+// Legacy status endpoint mirrors v1 readiness snapshot entry point.
+app.get('/api/status', (_req, res) => {
+  res.redirect(307, '/api/v1/status');
 });
 
 // Redirect /admin to the Supabase-integrated admin panel
