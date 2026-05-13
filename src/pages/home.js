@@ -129,6 +129,26 @@ function setTextById(id, text) {
   if (target) target.textContent = text;
 }
 
+function applyRegionTabA11yLabels() {
+  const tablist = document.querySelector('.gcc-region-tabs');
+  if (tablist) tablist.setAttribute('aria-label', tx('gccTabListAria'));
+  const tabLabelMap = {
+    gcc: tx('gccTabGccAria'),
+    mena: tx('gccTabMenaAria'),
+    global: tx('gccTabGlobalAria'),
+  };
+  document.querySelectorAll('.gcc-region-tab').forEach((tab) => {
+    const region = tab.dataset.region;
+    const label = tabLabelMap[region];
+    if (label) {
+      tab.setAttribute('aria-label', label);
+      return;
+    }
+    tab.setAttribute('aria-label', tx('gccTabFallbackAria'));
+    console.warn('[home] Unrecognized region tab value for ARIA label:', region);
+  });
+}
+
 function formatCountrySearchEmpty(query = '') {
   const trimmed = query.trim();
   if (!trimmed) return tx('countrySearchEmpty');
@@ -715,6 +735,7 @@ function applyLangToPage() {
   // Karat strip unit toggle group — update aria-label bilingually
   const unitGroupEl = document.getElementById('kstrip-unit-group');
   if (unitGroupEl) unitGroupEl.setAttribute('aria-label', tx('unitToggleLabel'));
+  applyRegionTabA11yLabels();
 
   renderHeroCard();
   renderGCCGrid();
@@ -767,6 +788,51 @@ async function fetchLiveData() {
     });
     renderGCCGrid();
   }
+}
+
+function initLazyBelowFoldFeatures() {
+  // 220px prefetch margin was chosen to load content before it enters view on
+  // common mobile scroll velocity without aggressively preloading deep sections.
+  const BELOW_FOLD_PREFETCH_MARGIN_PX = 220;
+  let countrySearchInitialized = false;
+  let bottomAdLoaded = false;
+
+  const runCountrySearchInit = () => {
+    if (countrySearchInitialized) return;
+    countrySearchInitialized = true;
+    initCountrySearch();
+  };
+  const runBottomAdLoad = () => {
+    if (bottomAdLoaded) return;
+    bottomAdLoaded = true;
+    renderAdSlot('ad-bottom', 'rectangle');
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    runCountrySearchInit();
+    runBottomAdLoad();
+    return;
+  }
+
+  const sectionObserver = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const targetId = entry.target.id;
+        if (targetId === 'countries-quick') runCountrySearchInit();
+        if (targetId === 'ad-bottom') runBottomAdLoad();
+        obs.unobserve(entry.target);
+      });
+    },
+    { rootMargin: `${BELOW_FOLD_PREFETCH_MARGIN_PX}px 0px` }
+  );
+
+  const countriesSection = document.getElementById('countries-quick');
+  const bottomAd = document.getElementById('ad-bottom');
+  if (countriesSection) sectionObserver.observe(countriesSection);
+  else runCountrySearchInit();
+  if (bottomAd) sectionObserver.observe(bottomAd);
+  else runBottomAdLoad();
 }
 
 // ── Country quick-picker search ────────────────────────────────────────────
@@ -878,7 +944,7 @@ async function init() {
 
   // Render ad slots
   renderAdSlot('ad-top', 'leaderboard');
-  renderAdSlot('ad-bottom', 'rectangle');
+  initLazyBelowFoldFeatures();
 
   // Bind region tab filters
   document.querySelectorAll('.gcc-region-tab').forEach((tab) => {
@@ -963,9 +1029,6 @@ async function init() {
       }
     });
   });
-
-  // Country quick-picker inline search
-  initCountrySearch();
 
   // Load cache first for instant render
   const cacheState = {

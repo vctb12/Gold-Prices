@@ -29,8 +29,10 @@ one bucket. Reviewer can read top-to-bottom.
 ### Bucket 4 — feat: home + hero polish
 
 - [x] Fix broken X/Twitter social link (space in URL → URL-encoded / corrected).
-- [ ] Improve region-tab aria labels (descriptive `aria-label` on tablist + each tab).
-- [ ] Karat-strip copy buttons: ensure `aria-label` values are complete and bilingual.
+- [x] Improve region-tab aria labels (descriptive `aria-label` on tablist + each tab). _(2026-05-12
+      core slice: localized tablist + per-tab aria labels wired in `home.js` / `translations.js`.)_
+- [x] Karat-strip copy buttons: ensure `aria-label` values are complete and bilingual. _(2026-05-12
+      validation: `home.karatCopyAriaLabel` applied on each update cycle.)_
 - [ ] Hero lead copy: tighten wording and trust language.
 - [ ] Add `aria-live="polite"` guard where missing (karat strip footer update span).
 
@@ -38,20 +40,25 @@ one bucket. Reviewer can read top-to-bottom.
 
 - [ ] Tracker hero: verify all freshness badge states (live/cached/stale/unavailable) have correct
       accessible text.
-- [ ] Improve empty/loading state copy for first-time users.
+- [x] Improve empty/loading state copy for first-time users. _(2026-05-12 core slice: tracker
+      planner and karat-table empty/loading strings moved to EN/AR translation keys.)_
 - [ ] Ensure "last updated" label is always visible on mobile (not hidden by overflow).
 
 ### Bucket 6 — feat: calculator + tools UX
 
-- [ ] Add `inputmode="decimal"` to all weight/value numeric inputs for mobile keyboard.
-- [ ] Add `autocomplete="off"` to calculator weight/price inputs (prevent browser autofill).
+- [x] Add `inputmode="decimal"` to all weight/value numeric inputs for mobile keyboard. _(verified
+      in `calculator.html` top-level calculators.)_
+- [x] Add `autocomplete="off"` to calculator weight/price inputs (prevent browser autofill).
+      _(verified in `calculator.html`.)_
 - [ ] Ensure copy button has an accessible label update after copy ("Copied!").
 - [ ] Verify scrap-gold payout-rate input has `min`, `max`, `step`, and `aria-label`.
 
 ### Bucket 7 — feat: shops directory polish
 
-- [ ] Shops search input: add `aria-label` and `autocomplete="off"`.
-- [ ] Empty-state message: improve copy when no shops match filters.
+- [x] Shops search input: add `aria-label` and `autocomplete="off"`. _(already present and
+      verified.)_
+- [x] Empty-state message: improve copy when no shops match filters. _(2026-05-12 core slice:
+      query-aware empty message in `shops.js`.)_
 - [ ] Add `lang="ar"` on Arabic text blocks if rendered from JS.
 
 ### Bucket 8 — chore: SEO metadata + JSON-LD

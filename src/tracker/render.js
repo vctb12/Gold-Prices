@@ -696,17 +696,17 @@ export function renderChart() {
     if (stats.ytdChange != null)
       cards.push(
         buildStatCard(
-          'YTD change',
+          tx('historical.summary.ytdLabel'),
           `${stats.ytdChange >= 0 ? '+' : ''}${stats.ytdChange.toFixed(1)}%`,
-          'vs Jan 1'
+          tx('historical.summary.ytdHint')
         )
       );
     if (stats.yoyChange != null)
       cards.push(
         buildStatCard(
-          '1Y change',
+          tx('historical.summary.yoyLabel'),
           `${stats.yoyChange >= 0 ? '+' : ''}${stats.yoyChange.toFixed(1)}%`,
-          'year over year'
+          tx('historical.summary.yoyHint')
         )
       );
     clear(_el.chartStats);
@@ -746,7 +746,7 @@ export function renderKaratTable() {
   const spot = _currentSpot();
   if (!spot) {
     clear(_el.karatTable);
-    _el.karatTable.append(el('tr', null, [el('td', { colspan: '4' }, 'Waiting for live data…')]));
+    _el.karatTable.append(el('tr', null, [el('td', { colspan: '4' }, tx('karatTableWaiting'))]));
     return;
   }
   const price24 = _priceFor({
@@ -1440,15 +1440,18 @@ export function renderPlanners() {
         ? (() => {
             const f = document.createDocumentFragment();
             f.append(
-              _resultItem('Net budget', `${net.toFixed(2)} ${escape(_state.selectedCurrency)}`),
               _resultItem(
-                'Gold you can buy',
+                tx('planner.netBudget'),
+                `${net.toFixed(2)} ${escape(_state.selectedCurrency)}`
+              ),
+              _resultItem(
+                tx('planner.goldCanBuy'),
                 `${(net / p).toFixed(3)} g (${escape(_state.selectedKarat)}K)`
               )
             );
             return f;
           })()
-        : _emptyMsg('Enter a budget above.')
+        : _emptyMsg(tx('planner.emptyBudget'))
     );
   }
 
@@ -1470,20 +1473,23 @@ export function renderPlanners() {
       const gainPrefix = gainLoss >= 0 ? '+' : '';
       const frag = document.createDocumentFragment();
       frag.append(
-        _resultItem('Entry value', `${entryValue.toFixed(2)} ${escape(_state.selectedCurrency)}`),
         _resultItem(
-          'Current value',
+          tx('planner.entryValue'),
+          `${entryValue.toFixed(2)} ${escape(_state.selectedCurrency)}`
+        ),
+        _resultItem(
+          tx('planner.currentValue'),
           `${currentValue.toFixed(2)} ${escape(_state.selectedCurrency)}`
         ),
         _resultItem(
-          'Gain / loss',
+          tx('planner.gainLoss'),
           `${gainPrefix}${gainLoss.toFixed(2)} ${escape(_state.selectedCurrency)} (${gainLoss >= 0 ? '+' : ''}${gainLossPercent.toFixed(1)}%)`,
           { color: gainColor }
         )
       );
       _el.positionResults.replaceChildren(frag);
     } else {
-      _el.positionResults.replaceChildren(_emptyMsg('Enter entry price and quantity above.'));
+      _el.positionResults.replaceChildren(_emptyMsg(tx('planner.emptyPosition')));
     }
   }
 
@@ -1510,18 +1516,21 @@ export function renderPlanners() {
       const cur = escape(_state.selectedCurrency);
       const frag = document.createDocumentFragment();
       frag.append(
-        _resultItem('Gold value', `${goldValue.toFixed(2)} ${cur}`),
-        _resultItem('Making charge', `${makingTotal.toFixed(2)} ${cur}`)
+        _resultItem(tx('planner.goldValue'), `${goldValue.toFixed(2)} ${cur}`),
+        _resultItem(tx('planner.makingCharge'), `${makingTotal.toFixed(2)} ${cur}`)
       );
-      if (premium) frag.append(_resultItem('Premium', `${premiumTotal.toFixed(2)} ${cur}`));
-      frag.append(_resultItem('Subtotal', `${subtotal.toFixed(2)} ${cur}`));
-      if (vat) frag.append(_resultItem('VAT (5%)', `${vatAmount.toFixed(2)} ${cur}`));
+      if (premium)
+        frag.append(_resultItem(tx('planner.premium'), `${premiumTotal.toFixed(2)} ${cur}`));
+      frag.append(_resultItem(tx('planner.subtotal'), `${subtotal.toFixed(2)} ${cur}`));
+      if (vat) frag.append(_resultItem(tx('planner.vat'), `${vatAmount.toFixed(2)} ${cur}`));
       frag.append(
-        _resultItem('Total', `${total.toFixed(2)} ${cur}`, { color: 'var(--tp-accent)' })
+        _resultItem(tx('planner.total'), `${total.toFixed(2)} ${cur}`, {
+          color: 'var(--tp-accent)',
+        })
       );
       _el.jewelryResults.replaceChildren(frag);
     } else {
-      _el.jewelryResults.replaceChildren(_emptyMsg('Enter weight and select karat above.'));
+      _el.jewelryResults.replaceChildren(_emptyMsg(tx('planner.emptyJewelry')));
     }
   }
 
@@ -1540,15 +1549,13 @@ export function renderPlanners() {
       const years = months / 12;
       const frag = document.createDocumentFragment();
       frag.append(
-        _resultItem('Grams / month', `${gramsPerMonth.toFixed(3)} g`),
-        _resultItem('Months to target', `${months.toFixed(1)}`),
-        _resultItem('Years to target', `${years.toFixed(2)}`)
+        _resultItem(tx('planner.gramsPerMonth'), `${gramsPerMonth.toFixed(3)} g`),
+        _resultItem(tx('planner.monthsToTarget'), `${months.toFixed(1)}`),
+        _resultItem(tx('planner.yearsToTarget'), `${years.toFixed(2)}`)
       );
       _el.accumResults.replaceChildren(frag);
     } else {
-      _el.accumResults.replaceChildren(
-        _emptyMsg('Enter monthly contribution and target quantity above.')
-      );
+      _el.accumResults.replaceChildren(_emptyMsg(tx('planner.emptyAccumulation')));
     }
   }
 }

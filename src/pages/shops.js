@@ -31,6 +31,14 @@ const STATE = {
 
 const SHOPS_LAST_REVIEWED_ISO = '2026-04-05';
 
+function sanitizeSearchQueryForMessage(value = '') {
+  return String(value)
+    .replace(/[&<>"']/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+}
+
 // Load shortlist from localStorage on module init
 (function loadShortlist() {
   try {
@@ -79,6 +87,8 @@ const TXT = {
     verifiedFilterLabel: 'verified details only',
     emptyTitle: 'No listings match your filters',
     emptyText: 'Try clearing one filter or searching with a broader term.',
+    emptyTextQuery: (query) =>
+      `No listings match “${query}”. Try clearing one filter or searching with a broader term.`,
     emptySubmitCta: 'Suggest a shop for review',
     clearFilters: 'Clear filters',
     clearAllFilters: 'Clear all filters',
@@ -191,6 +201,8 @@ const TXT = {
     verifiedFilterLabel: 'تفاصيل موثقة فقط',
     emptyTitle: 'لا توجد إدراجات مطابقة',
     emptyText: 'جرّب إلغاء أحد الفلاتر أو استخدام كلمات أوسع في البحث.',
+    emptyTextQuery: (query) =>
+      `لا توجد إدراجات مطابقة لـ “${query}”. جرّب إلغاء أحد الفلاتر أو توسيع البحث.`,
     emptySubmitCta: 'اقترح محلاً للمراجعة',
     clearFilters: 'مسح الفلاتر',
     clearAllFilters: 'مسح كل الفلاتر',
@@ -1213,6 +1225,11 @@ function render() {
 
   if (!shops.length) {
     document.getElementById('shops-grid').replaceChildren();
+    const emptyTextEl = document.getElementById('shops-empty-text');
+    if (emptyTextEl) {
+      const query = sanitizeSearchQueryForMessage(STATE.search);
+      emptyTextEl.textContent = query ? t('emptyTextQuery')(query) : t('emptyText');
+    }
     empty.hidden = false;
     return;
   }
