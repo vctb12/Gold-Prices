@@ -434,7 +434,9 @@ async function createServerAlert({ condition, target }) {
 
 async function syncAlertToAccount({ condition, target }) {
   if (!isAccountAuthenticated()) return;
-  const itemKey = `${condition}:${target}:${state.selectedCurrency}:${state.selectedKarat}`;
+  const currency = state.selectedCurrency || 'USD';
+  const karat = state.selectedKarat || '24';
+  const itemKey = `${condition}:${target}:${currency}:${karat}`;
   await createWatchlistItem({
     item_type: 'alert',
     item_key: itemKey.slice(0, 120),
@@ -446,8 +448,8 @@ async function syncAlertToAccount({ condition, target }) {
       source: 'tracker',
       condition,
       target,
-      currency: state.selectedCurrency,
-      karat: state.selectedKarat,
+      currency,
+      karat,
     },
   });
 }

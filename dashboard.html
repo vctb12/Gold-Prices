@@ -8,7 +8,25 @@
       name="description"
       content="Manage your saved calculations, watchlist items, and shops from your Gold Ticker Live account."
     />
-    <link rel="canonical" href="https://goldtickerlive.com/dashboard.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_AE" />
+    <meta property="og:title" content="User Dashboard — Gold Ticker Live" />
+    <meta
+      property="og:description"
+      content="Manage your saved calculations, watchlist items, and shops from your Gold Ticker Live account."
+    />
+    <meta property="og:url" content="https://goldtickerlive.com/dashboard.html" />
+    <meta property="og:image" content="https://goldtickerlive.com/assets/og-image.png" />
+    <meta property="og:image:alt" content="Gold Ticker Live user dashboard" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="User Dashboard — Gold Ticker Live" />
+    <meta
+      name="twitter:description"
+      content="Manage your saved calculations, watchlist items, and shops from your Gold Ticker Live account."
+    />
+    <meta name="twitter:image" content="https://goldtickerlive.com/assets/og-image.png" />
+        <link rel="canonical" href="https://goldtickerlive.com/dashboard.html" />
     <link rel="alternate" hreflang="x-default" href="https://goldtickerlive.com/dashboard.html" />
     <link rel="alternate" hreflang="en" href="https://goldtickerlive.com/dashboard.html" />
     <link rel="alternate" hreflang="ar" href="https://goldtickerlive.com/dashboard.html?lang=ar" />
@@ -18,6 +36,26 @@
     <link rel="stylesheet" href="./styles/pages/account.css" />
     <link rel="stylesheet" href="./styles/pages/dashboard.css" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://goldtickerlive.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Dashboard",
+      "item": "https://goldtickerlive.com/dashboard.html"
+    }
+  ]
+}
+  </script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -59,7 +97,11 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+    </script>
     <script type="module" src="./src/pages/dashboard.js"></script>
   </body>
 </html>
-

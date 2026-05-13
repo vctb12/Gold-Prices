@@ -133,6 +133,7 @@ const TXT = {
     shortlistClear: 'Clear all',
     shortlistReview: 'Review saved',
     shareShop: 'Share',
+    linkCopied: 'Link copied to clipboard',
     directions: 'Directions',
     callShop: 'Call',
     closeDetails: 'Close details',
@@ -250,6 +251,7 @@ const TXT = {
     shortlistClear: 'مسح الكل',
     shortlistReview: 'مراجعة المحفوظ',
     shareShop: 'مشاركة',
+    linkCopied: 'تم نسخ الرابط',
     directions: 'الاتجاهات',
     callShop: 'اتصال',
     closeDetails: 'إغلاق التفاصيل',
@@ -413,18 +415,29 @@ function shareShop(shop) {
     navigator.clipboard
       ?.writeText(url)
       .then(() => {
-        alert(STATE.lang === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+        announceShopStatus(t('linkCopied'));
       })
       .catch(() => {});
   }
 }
 
+function announceShopStatus(message) {
+  let status = document.getElementById('shops-live-status');
+  if (!status) {
+    status = document.createElement('p');
+    status.id = 'shops-live-status';
+    status.className = 'shops-results-disclaimer';
+    status.setAttribute('aria-live', 'polite');
+    const head = document.querySelector('.shops-results-head-left');
+    head?.appendChild(status);
+  }
+  status.textContent = message;
+}
+
 async function saveShopToAccount(shop) {
   if (!shop?.id) return;
   if (!isAccountAuthenticated()) {
-    if (window.confirm(t('saveToAccountAuthPrompt'))) {
-      redirectToAccount();
-    }
+    redirectToAccount();
     return;
   }
   await createSavedShop({
@@ -432,10 +445,10 @@ async function saveShopToAccount(shop) {
     shop_name: shop.name,
     city: shop.city,
     country_code: shop.countryCode,
-    source_url: `${location.origin}${location.pathname}?shop=${shop.id}`,
+    source_url: `${location.origin}${location.pathname}?shop=${encodeURIComponent(shop.id)}`,
     notes: shop.notes || null,
   });
-  alert(t('savedToAccount'));
+  announceShopStatus(t('savedToAccount'));
 }
 
 function openModal(shop) {

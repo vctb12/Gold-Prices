@@ -16,7 +16,7 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function newId() {
+function generateId() {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   return crypto.randomBytes(16).toString('hex');
 }
@@ -192,7 +192,7 @@ function createDataLayer(storePath) {
 
     async touchSession(user, req) {
       const row = {
-        id: newId(),
+        id: generateId(),
         user_id: user.id,
         ip_hash: crypto
           .createHash('sha256')
@@ -287,7 +287,7 @@ function createDataLayer(storePath) {
 
     async addSavedCalculation(userId, payload) {
       const row = {
-        id: newId(),
+        id: generateId(),
         user_id: userId,
         tool: payload.tool,
         label: payload.label,
@@ -372,7 +372,7 @@ function createDataLayer(storePath) {
 
     async addWatchlistItem(userId, payload) {
       const row = {
-        id: newId(),
+        id: generateId(),
         user_id: userId,
         item_type: payload.item_type,
         item_key: payload.item_key,
@@ -457,7 +457,7 @@ function createDataLayer(storePath) {
 
     async addSavedShop(userId, payload) {
       const row = {
-        id: newId(),
+        id: generateId(),
         user_id: userId,
         shop_id: payload.shop_id,
         shop_name: payload.shop_name,

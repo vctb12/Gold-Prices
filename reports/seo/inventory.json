@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "generatedAtDate": "2026-05-13",
   "summary": {
-    "totalHtmlFiles": 653,
-    "withCanonical": 651,
+    "totalHtmlFiles": 655,
+    "withCanonical": 653,
     "withoutCanonical": 2,
-    "withOgImage": 497,
+    "withOgImage": 499,
     "withoutOgImage": 156,
-    "withJsonLd": 641,
+    "withJsonLd": 643,
     "withoutJsonLd": 12,
-    "hreflangEnArPairs": 641,
+    "hreflangEnArPairs": 643,
     "noindexCount": 156
   },
   "records": [
@@ -32,6 +32,42 @@
       "hreflang": [],
       "jsonLdTypes": [],
       "hasStructuredData": false,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "account.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Account Sign In — Gold Ticker Live",
+      "metaDescription": "Sign in to save watchlists, calculator outputs, and favorite shops across devices.",
+      "canonical": "https://goldtickerlive.com/account.html",
+      "robots": null,
+      "ogTitle": "Account Sign In — Gold Ticker Live",
+      "ogDescription": "Sign in to save watchlists, calculator outputs, and favorite shops across devices.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/account.html",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/account.html?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/account.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/account.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -23714,6 +23750,42 @@
         {
           "lang": "x-default",
           "href": "https://goldtickerlive.com/countries/yemen/taiz/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "dashboard.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "User Dashboard — Gold Ticker Live",
+      "metaDescription": "Manage your saved calculations, watchlist items, and shops from your Gold Ticker Live account.",
+      "canonical": "https://goldtickerlive.com/dashboard.html",
+      "robots": null,
+      "ogTitle": "User Dashboard — Gold Ticker Live",
+      "ogDescription": "Manage your saved calculations, watchlist items, and shops from your Gold Ticker Live account.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/dashboard.html",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/dashboard.html?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/dashboard.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/dashboard.html"
         }
       ],
       "jsonLdTypes": [

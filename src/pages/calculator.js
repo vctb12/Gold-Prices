@@ -1139,7 +1139,7 @@ function initCopyBtn() {
 
     if (!isAccountAuthenticated()) {
       fallback();
-      if (window.confirm(t('save_requires_auth'))) redirectToAccount();
+      redirectToAccount();
       return;
     }
 

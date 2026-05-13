@@ -1,7 +1,7 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase.js';
 
 const API_BASE = '/api/v1';
-const SUPABASE_AUTH_TOKEN_KEY_RX = /^sb-[a-z0-9]+-auth-token$/i;
+const SUPABASE_AUTH_TOKEN_KEY_REGEX = /^sb-[a-z0-9]+-auth-token$/i;
 
 function readJson(value) {
   try {
@@ -15,7 +15,7 @@ function readSessionFromStorage() {
   if (typeof localStorage === 'undefined') return null;
   const keys = Object.keys(localStorage);
   for (const key of keys) {
-    if (!SUPABASE_AUTH_TOKEN_KEY_RX.test(key)) continue;
+    if (!SUPABASE_AUTH_TOKEN_KEY_REGEX.test(key)) continue;
     const parsed = readJson(localStorage.getItem(key));
     if (!parsed) continue;
     if (parsed.access_token) return parsed;
@@ -34,6 +34,8 @@ export function isAuthenticated() {
 }
 
 export function redirectToAccount(nextUrl = null) {
+  // `next` is validated on the account page before redirecting back, so
+  // cross-origin values are rejected there.
   const next = encodeURIComponent(nextUrl || window.location.href);
   window.location.href = `/account.html?next=${next}`;
 }
