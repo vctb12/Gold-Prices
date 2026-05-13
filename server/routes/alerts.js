@@ -1002,7 +1002,7 @@ router.post('/jobs/check-alerts', async (req, res) => {
     }
 
     triggered += 1;
-    const subscription = await findSubscriptionForRule(rule);
+    const _subscription = await findSubscriptionForRule(rule);
 
     if (dryRun) {
       await writeAlertEvent({
