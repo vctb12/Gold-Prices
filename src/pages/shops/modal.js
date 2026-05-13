@@ -4,7 +4,15 @@
  */
 
 import { escape as esc, safeHref as safeUrl, safeTel } from '../../lib/safe-dom.js';
-import { countryByCode, countryName, regionName, isMarketArea, calculateConfidenceBadge, detailsAvailabilityLabel, listingTypeLabel } from './helpers.js';
+import {
+  countryByCode,
+  countryName,
+  regionName,
+  isMarketArea,
+  calculateConfidenceBadge,
+  detailsAvailabilityLabel,
+  listingTypeLabel,
+} from './helpers.js';
 
 export function openModal(shop, STATE, SHOPS, t, isInShortlist, toggleShortlist, shareShop) {
   const modal = document.getElementById('shops-modal');

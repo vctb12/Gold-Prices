@@ -34,7 +34,17 @@ export function buildSourceBadge(freshness) {
   );
 }
 
-export function buildMarketCard(country, cur, price, freshness, isFav, state, tx, formatUnitLabel, onFavClick) {
+export function buildMarketCard(
+  country,
+  cur,
+  price,
+  freshness,
+  isFav,
+  state,
+  tx,
+  formatUnitLabel,
+  onFavClick
+) {
   const name = state.lang === 'ar' ? country.nameAr || country.nameEn : country.nameEn;
 
   const button = el(
@@ -97,7 +107,16 @@ export function buildMarketCard(country, cur, price, freshness, isFav, state, tx
   return card;
 }
 
-export function buildWatchCard(country, cur, price, freshness, isCurrent, state, tx, formatUnitLabel) {
+export function buildWatchCard(
+  country,
+  cur,
+  price,
+  freshness,
+  isCurrent,
+  state,
+  tx,
+  formatUnitLabel
+) {
   const name = state.lang === 'ar' ? country?.nameAr || country?.nameEn : country?.nameEn;
 
   const card = el('div', { class: `tracker-watch-card${isCurrent ? ' is-highlight' : ''}` }, [

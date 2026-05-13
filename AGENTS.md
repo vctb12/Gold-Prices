@@ -45,7 +45,7 @@ removing one should tighten the baseline in the same PR.
 | `countries/`           | Pre-generated country / city / karat / market pages.                                                                                            |
 | `content/`             | Guides, FAQ, order-gold, submit-shop, search, social, news, premium-watch, compare-countries, todays-best-rates, tools.                         |
 | `admin/`               | Admin panel (Supabase GitHub OAuth).                                                                                                            |
-| `server/`, `server.js` | Node/Express admin backend (JWT + bcrypt + Helmet + rate limiting + JSON file persistence).                                                                     |
+| `server/`, `server.js` | Node/Express admin backend (JWT + bcrypt + Helmet + rate limiting + JSON file persistence).                                                     |
 | `scripts/node/`        | Build, validation, audit, and enrichment scripts.                                                                                               |
 | `scripts/python/`      | Automation: gold poster, spike detector, Supabase client, newsletter builder.                                                                   |
 | `.github/workflows/`   | CI, deploy, codeql, semgrep, lighthouse, perf-check, hourly `post_gold.yml`, newsletters, uptime / health / spike alerts, `sync-db-to-git.yml`. |

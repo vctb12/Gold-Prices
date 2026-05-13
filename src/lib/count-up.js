@@ -79,10 +79,7 @@ export function countUp(el, target, options = {}) {
   const existing = activeAnimations.get(el);
   if (existing) cancelAnimationFrame(existing.rafId);
 
-  const duration = Math.max(
-    minDurationMs,
-    Math.min(maxDurationMs, Math.abs(diff) / unitsPerMs)
-  );
+  const duration = Math.max(minDurationMs, Math.min(maxDurationMs, Math.abs(diff) / unitsPerMs));
   const t0 = performance.now();
 
   function tick(now) {

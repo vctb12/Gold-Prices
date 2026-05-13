@@ -22,7 +22,7 @@ export function shareShop(shop) {
   const text = `${shop.name} — ${shop.market}, ${shop.city}`;
 
   if (navigator.share) {
-    navigator.share({ title: shop.name, text, url}).catch(() => {});
+    navigator.share({ title: shop.name, text, url }).catch(() => {});
   } else {
     navigator.clipboard
       ?.writeText(url)

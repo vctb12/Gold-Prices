@@ -8,6 +8,8 @@
  * - BreadcrumbList (all pages)
  * - WebSite with SearchAction (homepage)
  * - Product/Offer for price pages
+ * - FAQPage for country gold-price pages
+ * - Dataset for country gold-price pages
  * - Article for content pages
  *
  * Usage:
@@ -25,6 +27,47 @@ const ROOT = path.resolve(__dirname, '../..');
 const SITE_URL = 'https://goldtickerlive.com';
 const SITE_NAME = 'Gold Ticker Live';
 const SITE_DESCRIPTION = 'Live gold prices for GCC, Arab world and global markets';
+
+// ── Country / Currency Metadata ─────────────────────────────────────────────
+// Maps country slug → { name, nameAr, currency, region }
+const COUNTRY_META = {
+  uae: {
+    name: 'United Arab Emirates',
+    nameAr: 'الإمارات العربية المتحدة',
+    currency: 'AED',
+    region: 'GCC',
+  },
+  'saudi-arabia': {
+    name: 'Saudi Arabia',
+    nameAr: 'المملكة العربية السعودية',
+    currency: 'SAR',
+    region: 'GCC',
+  },
+  kuwait: { name: 'Kuwait', nameAr: 'الكويت', currency: 'KWD', region: 'GCC' },
+  qatar: { name: 'Qatar', nameAr: 'قطر', currency: 'QAR', region: 'GCC' },
+  bahrain: { name: 'Bahrain', nameAr: 'البحرين', currency: 'BHD', region: 'GCC' },
+  oman: { name: 'Oman', nameAr: 'عُمان', currency: 'OMR', region: 'GCC' },
+  egypt: { name: 'Egypt', nameAr: 'مصر', currency: 'EGP', region: 'Arab World' },
+  jordan: { name: 'Jordan', nameAr: 'الأردن', currency: 'JOD', region: 'Levant' },
+  lebanon: { name: 'Lebanon', nameAr: 'لبنان', currency: 'LBP', region: 'Levant' },
+  iraq: { name: 'Iraq', nameAr: 'العراق', currency: 'IQD', region: 'Arab World' },
+  morocco: { name: 'Morocco', nameAr: 'المغرب', currency: 'MAD', region: 'North Africa' },
+  algeria: { name: 'Algeria', nameAr: 'الجزائر', currency: 'DZD', region: 'North Africa' },
+  tunisia: { name: 'Tunisia', nameAr: 'تونس', currency: 'TND', region: 'North Africa' },
+  libya: { name: 'Libya', nameAr: 'ليبيا', currency: 'LYD', region: 'North Africa' },
+  sudan: { name: 'Sudan', nameAr: 'السودان', currency: 'SDG', region: 'North Africa' },
+  yemen: { name: 'Yemen', nameAr: 'اليمن', currency: 'YER', region: 'Arab World' },
+  syria: { name: 'Syria', nameAr: 'سوريا', currency: 'SYP', region: 'Levant' },
+  palestine: {
+    name: 'Palestine',
+    nameAr: 'فلسطين',
+    currency: 'ILS',
+    region: 'Levant',
+  },
+  turkey: { name: 'Turkey', nameAr: 'تركيا', currency: 'TRY', region: 'Middle East' },
+  india: { name: 'India', nameAr: 'الهند', currency: 'INR', region: 'South Asia' },
+  pakistan: { name: 'Pakistan', nameAr: 'باكستان', currency: 'PKR', region: 'South Asia' },
+};
 
 // ── Schema Templates ────────────────────────────────────────────────────────
 
@@ -154,6 +197,93 @@ function getArticleSchema(options) {
   };
 }
 
+/**
+ * FAQPage schema for country gold-price pages.
+ * Generates country-specific FAQ questions and answers.
+ * @param {Object} options
+ * @param {string} options.countryName - Full country name
+ * @param {string} options.currency - ISO currency code
+ * @param {string} options.pageUrl - Full canonical URL
+ */
+function getFAQPageSchema({ countryName, currency, pageUrl }) {
+  const questions = [
+    {
+      q: `What is the gold price today in ${countryName}?`,
+      a: `Gold Ticker Live shows today's spot-linked reference gold price in ${countryName} in ${currency} per gram for 24K, 22K, 21K, 18K, and 14K. These are reference estimates derived from the live XAU/USD spot price converted using current exchange rates. Retail and jewellery shop prices may differ due to making charges, dealer premiums, VAT, and local market spread.`,
+    },
+    {
+      q: `Are these the actual gold shop prices in ${countryName}?`,
+      a: `No. Gold Ticker Live shows spot-linked reference prices — bullion-equivalent estimates based on the international XAU/USD spot price. Actual shop prices in ${countryName} typically include making charges, dealer premiums, and applicable taxes, so they will be higher than the reference price shown here. Always confirm the final price with your local gold shop or jeweller.`,
+    },
+    {
+      q: `What karats are shown for gold prices in ${countryName}?`,
+      a: `Gold Ticker Live shows reference prices for 24K (pure gold), 22K (91.7% purity), 21K (87.5% purity), 18K (75% purity), and 14K (58.3% purity) gold in ${countryName}. Each price is calculated by multiplying the 24K spot reference by the karat's purity ratio.`,
+    },
+    {
+      q: `How often are gold prices updated for ${countryName}?`,
+      a: 'The XAU/USD spot price used to calculate reference rates is refreshed approximately every 90 seconds during active market hours. When live data is unavailable, the most recently cached price is displayed with a clear freshness label showing the data age. Weekends and holidays may show the last available closing price.',
+    },
+    {
+      q: `What currency are gold prices shown in for ${countryName}?`,
+      a: `Gold prices for ${countryName} are shown in ${currency} per gram by default. The conversion from USD is done using live exchange rates, except where a fixed peg applies (such as the AED/USD peg of 3.6725 for the UAE).`,
+    },
+  ];
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    url: pageUrl,
+    mainEntity: questions.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: a,
+      },
+    })),
+  };
+}
+
+/**
+ * Dataset schema for country gold-price pages.
+ * Describes the structured price data available on the page.
+ * @param {Object} options
+ * @param {string} options.countryName
+ * @param {string} options.currency
+ * @param {string} options.pageUrl
+ * @param {string} options.description
+ */
+function getDatasetSchema({ countryName, currency, pageUrl, description }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: `Gold price reference data for ${countryName} — ${currency} per gram`,
+    description:
+      description ||
+      `Spot-linked reference gold prices for ${countryName} in ${currency} per gram. Covers 24K, 22K, 21K, 18K, and 14K karats. Derived from live XAU/USD spot rate and current ${currency}/USD exchange rate. Updated approximately every 90 seconds during active market hours.`,
+    url: pageUrl,
+    creator: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    license: `${SITE_URL}/terms.html`,
+    isAccessibleForFree: true,
+    variableMeasured: [
+      { '@type': 'PropertyValue', name: '24K gold price per gram', unitCode: currency },
+      { '@type': 'PropertyValue', name: '22K gold price per gram', unitCode: currency },
+      { '@type': 'PropertyValue', name: '21K gold price per gram', unitCode: currency },
+      { '@type': 'PropertyValue', name: '18K gold price per gram', unitCode: currency },
+      { '@type': 'PropertyValue', name: '14K gold price per gram', unitCode: currency },
+    ],
+    temporalCoverage: new Date().toISOString().split('T')[0],
+    spatialCoverage: {
+      '@type': 'Place',
+      name: countryName,
+    },
+  };
+}
+
 // ── URL to Breadcrumb Parser ────────────────────────────────────────────────
 
 /**
@@ -267,20 +397,53 @@ function generateSchemasForPage(filePath, content) {
     }
   }
 
-  // Price pages get Product schema
+  // Price pages get Product + FAQPage + Dataset schemas
   if (pageType === 'price') {
-    // Extract country/karat from path
-    const countryMatch = relativePath.match(/countries\/([^\/]+)/);
+    // Extract country slug from path
+    const countryMatch = relativePath.match(/countries\/([^/]+)/);
+    const countrySlug = countryMatch ? countryMatch[1] : 'uae';
     const karatMatch = relativePath.match(/(\d+k)/i);
+
+    // Resolve country metadata from our lookup table
+    const countryInfo = COUNTRY_META[countrySlug] || {
+      name: countrySlug
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' '),
+      currency: 'USD',
+      region: 'Global',
+    };
+    const pageCanonical = canonicalUrl || `${SITE_URL}${urlPath}`;
 
     schemas.push(
       getProductSchema({
         name: pageTitle,
         description: pageDescription,
-        country: countryMatch ? countryMatch[1].toUpperCase() : 'UAE',
+        country: countryInfo.name,
         karat: karatMatch ? karatMatch[1].toUpperCase() : '24K',
+        currency: countryInfo.currency,
       })
     );
+
+    // Country-level gold-price pages get FAQPage + Dataset schemas
+    // (only the /gold-price/ index, not per-karat sub-pages)
+    if (!karatMatch) {
+      schemas.push(
+        getFAQPageSchema({
+          countryName: countryInfo.name,
+          currency: countryInfo.currency,
+          pageUrl: pageCanonical,
+        })
+      );
+      schemas.push(
+        getDatasetSchema({
+          countryName: countryInfo.name,
+          currency: countryInfo.currency,
+          pageUrl: pageCanonical,
+          description: pageDescription,
+        })
+      );
+    }
   }
 
   // Article pages get Article schema
@@ -484,4 +647,6 @@ module.exports = {
   generateSchemasForPage,
   injectSchemas,
   processFile,
+  getFAQPageSchema,
+  getDatasetSchema,
 };

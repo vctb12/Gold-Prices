@@ -94,7 +94,7 @@ rules.push({
 });
 
 const files = execSync(
-  'find . -name "*.html" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./playwright-report/*" -not -path "./test-results/*"',
+  'find . -name "*.html" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./playwright-report/*" -not -path "./test-results/*"'
 )
   .toString()
   .trim()

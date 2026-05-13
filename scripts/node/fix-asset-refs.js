@@ -21,7 +21,7 @@ const TARGETS = [
 ];
 
 const files = execSync(
-  'find . -name "*.html" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./playwright-report/*" -not -path "./test-results/*"',
+  'find . -name "*.html" -not -path "./node_modules/*" -not -path "./dist/*" -not -path "./playwright-report/*" -not -path "./test-results/*"'
 )
   .toString()
   .trim()
@@ -38,7 +38,7 @@ for (const f of files) {
     // Match ../ (1-6 times) + file, within href="" or src="" attributes.
     const re = new RegExp(
       `((?:href|src)=")(?:\\.\\./){1,6}${file.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}"`,
-      'g',
+      'g'
     );
     s = s.replace(re, `$1${replacement}"`);
   }

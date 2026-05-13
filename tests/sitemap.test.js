@@ -60,14 +60,14 @@ test('every <loc> uses canonical origin (no www, no http://)', () => {
   const xml = ensureSitemap();
   const all = locs(xml);
   const bad = all.filter(
-    (u) => u.startsWith('http://') || /^https:\/\/www\.goldtickerlive\.com/.test(u),
+    (u) => u.startsWith('http://') || /^https:\/\/www\.goldtickerlive\.com/.test(u)
   );
   assert.deepEqual(bad, [], 'Found non-canonical <loc>s: ' + bad.slice(0, 5).join(', '));
   const offOrigin = all.filter((u) => !u.startsWith(CANONICAL_ORIGIN + '/'));
   assert.deepEqual(
     offOrigin,
     [],
-    'Every <loc> must start with canonical origin; offenders: ' + offOrigin.slice(0, 5).join(', '),
+    'Every <loc> must start with canonical origin; offenders: ' + offOrigin.slice(0, 5).join(', ')
   );
 });
 
@@ -87,13 +87,11 @@ test('core static pages are in the sitemap', () => {
   for (const p of core) {
     const expected = CANONICAL_ORIGIN + p;
     const filePath =
-      p === '/'
-        ? path.join(REPO_ROOT, 'index.html')
-        : path.join(REPO_ROOT, p.replace(/^\//, ''));
+      p === '/' ? path.join(REPO_ROOT, 'index.html') : path.join(REPO_ROOT, p.replace(/^\//, ''));
     if (!fs.existsSync(filePath)) continue;
     assert.ok(
       all.has(expected),
-      `Expected sitemap to include ${expected} (file exists at ${filePath})`,
+      `Expected sitemap to include ${expected} (file exists at ${filePath})`
     );
   }
 });
@@ -135,7 +133,7 @@ test('every existing country page is present in the sitemap', () => {
     const goldPrice = `${CANONICAL_ORIGIN}/countries/${c.slug}/gold-price/`;
     assert.ok(
       all.has(slash) || all.has(html) || all.has(goldPrice),
-      `Expected sitemap to include a loc for country "${c.slug}"`,
+      `Expected sitemap to include a loc for country "${c.slug}"`
     );
   }
   assert.ok(checked > 0, 'Expected to verify at least one country page');

@@ -142,11 +142,11 @@ All inputs default to their safe values. Scheduled cron runs see `dry_run=false`
 
 ## State Files
 
-| File                         | Written by                | Contents                                                                                    |
-| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
-| `data/gold_price.json`       | `fetch_gold_price.py`     | Canonical price payload, provider, timestamps, karat prices                                 |
+| File                         | Written by                                  | Contents                                                                                    |
+| ---------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `data/gold_price.json`       | `fetch_gold_price.py`                       | Canonical price payload, provider, timestamps, karat prices                                 |
 | `data/last_gold_price.json`  | `fetch_gold_price.py`, `post_gold_price.py` | Legacy compatibility record of the last posted price + timestamp + content hash             |
-| `data/last_tweet_state.json` | `tweet_guard.py` / poster | Authoritative guard state: last price, provider ts, tweet hash, cooldown, Shortcut metadata |
+| `data/last_tweet_state.json` | `tweet_guard.py` / poster                   | Authoritative guard state: last price, provider ts, tweet hash, cooldown, Shortcut metadata |
 
 `data/last_gold_price.json` has a dual-writer history: the fetcher can write a normalized payload,
 while the poster writes the legacy compatibility shape. `data/last_tweet_state.json` remains the

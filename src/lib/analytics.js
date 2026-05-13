@@ -70,9 +70,13 @@ function _getSessionId() {
         id = crypto.randomUUID();
       } else {
         // Fallback: timestamp + random hex — analytics use only, not security.
-        id = Date.now().toString(36) + (crypto?.getRandomValues
-          ? Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, '0')).join('')
-          : Math.floor(Math.random() * 0xffffffff).toString(16));
+        id =
+          Date.now().toString(36) +
+          (crypto?.getRandomValues
+            ? Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) =>
+                b.toString(16).padStart(2, '0')
+              ).join('')
+            : Math.floor(Math.random() * 0xffffffff).toString(16));
       }
       sessionStorage.setItem('gp_session_id', id);
     }

@@ -14,9 +14,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 
 async function loadAnalytics() {
-  const url = new URL(
-    'file://' + path.resolve(__dirname, '..', 'src', 'lib', 'analytics.js')
-  );
+  const url = new URL('file://' + path.resolve(__dirname, '..', 'src', 'lib', 'analytics.js'));
   return import(url.href);
 }
 

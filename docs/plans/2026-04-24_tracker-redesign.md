@@ -3,7 +3,8 @@
 **Created:** 2026-04-24  
 **Source reports:** [`reports/tracker-ux-audit.md`](../../reports/tracker-ux-audit.md) (Phase 1
 deliverable), [`reports/token-audit.md`](../../reports/token-audit.md) (Phase 2 deliverable),
-[`reports/tracker-primitive-map.md`](../../reports/tracker-primitive-map.md) (Phase 3 deliverable).  
+[`reports/tracker-primitive-map.md`](../../reports/tracker-primitive-map.md) (Phase 3
+deliverable).  
 **Master plan section:** `docs/REVAMP_PLAN.md` §22b.  
 **Status:** ⬜ Pending — Phase 1–3 audit reports complete; implementation Phases 4–20 awaiting slot
 into `REVAMP_PLAN.md`.
@@ -16,12 +17,12 @@ The tracker.html page has become overly complex and scattered through multiple i
 different agents and developers. The current implementation has:
 
 1. **241 tracker-specific CSS classes** — indicating significant fragmentation.
-2. **Overly dense hero section** with too many competing elements: 4 status badges, title + subtitle,
-   description, hero stats grid, 4 selector dropdowns, 4 action buttons, 4 hint chips, keyboard
-   shortcuts hint, live-desk sidebar, explore-links sidebar.
+2. **Overly dense hero section** with too many competing elements: 4 status badges, title +
+   subtitle, description, hero stats grid, 4 selector dropdowns, 4 action buttons, 4 hint chips,
+   keyboard shortcuts hint, live-desk sidebar, explore-links sidebar.
 3. **Scattered information architecture**: trust banner separate from hero, welcome strip
-   conditionally shown, hero split between main and aside, mode tabs immediately after hero, multiple
-   overlapping toolbars.
+   conditionally shown, hero split between main and aside, mode tabs immediately after hero,
+   multiple overlapping toolbars.
 4. **27 `innerHTML` / `outerHTML` / `insertAdjacentHTML` sinks** across 4 tracker files — the
    largest DOM-safety surface in the repo.
 
@@ -29,26 +30,26 @@ different agents and developers. The current implementation has:
 
 ## Surface footprint (from `reports/tracker-ux-audit.md` §1)
 
-| File                           | LOC   | Notes                                                                               |
-| ------------------------------ | ----- | ----------------------------------------------------------------------------------- |
+| File                           | LOC   | Notes                                                                                   |
+| ------------------------------ | ----- | --------------------------------------------------------------------------------------- |
 | `tracker.html`                 | 1,312 | 7 modes (live · compare · archive · alerts · planner · exports · method) + hero + trust |
-| `src/pages/tracker-pro.js`     | 716   | Orchestrator; lazy-loads render / events / wire / ad-slot                           |
-| `src/tracker/render.js`        | 1,031 | Biggest `innerHTML` concentration (18 sinks)                                        |
-| `src/tracker/state.js`         | 270   | URL-hash contract frozen in `docs/tracker-state.md`                                 |
-| `src/tracker/ui-shell.js`      | 220   | Tab + overlay wiring (target of Phase 7 extraction)                                 |
-| `src/tracker/events.js`        | 308   | Trust / welcome-strip / keyboard                                                    |
-| `src/tracker/wire.js`          | 98    | Live headlines belt                                                                  |
-| `styles/pages/tracker-pro.css` | 2,577 | Target of Phase 17 split                                                            |
+| `src/pages/tracker-pro.js`     | 716   | Orchestrator; lazy-loads render / events / wire / ad-slot                               |
+| `src/tracker/render.js`        | 1,031 | Biggest `innerHTML` concentration (18 sinks)                                            |
+| `src/tracker/state.js`         | 270   | URL-hash contract frozen in `docs/tracker-state.md`                                     |
+| `src/tracker/ui-shell.js`      | 220   | Tab + overlay wiring (target of Phase 7 extraction)                                     |
+| `src/tracker/events.js`        | 308   | Trust / welcome-strip / keyboard                                                        |
+| `src/tracker/wire.js`          | 98    | Live headlines belt                                                                     |
+| `styles/pages/tracker-pro.css` | 2,577 | Target of Phase 17 split                                                                |
 
 ### DOM-safety baseline (must not increase; reductions require tightening the per-file baseline)
 
 | File                       | Current sinks |
 | -------------------------- | :-----------: |
-| `src/tracker/render.js`    | 18            |
-| `src/tracker/events.js`    | 2             |
-| `src/tracker/wire.js`      | 3             |
-| `src/pages/tracker-pro.js` | 4             |
-| **Total tracker surface**  | **27**        |
+| `src/tracker/render.js`    |      18       |
+| `src/tracker/events.js`    |       2       |
+| `src/tracker/wire.js`      |       3       |
+| `src/pages/tracker-pro.js` |       4       |
+| **Total tracker surface**  |    **27**     |
 
 ---
 
@@ -66,8 +67,10 @@ different agents and developers. The current implementation has:
   **not** promote. Rename to `--admin-*` prefix in Phases 23–28.
 
 **Phase 2 follow-up rows:**
+
 - Phase 14 (CSS split): keep the `--tp-*` alias `:root` block in the shared file.
-- Phases 15–22 (homepage rebuild): wire count-up and sparkline colors via `--color-up*` / `--color-down*`.
+- Phases 15–22 (homepage rebuild): wire count-up and sparkline colors via `--color-up*` /
+  `--color-down*`.
 - Phases 23–28 (admin revamp): rename admin tokens to `--admin-*` prefix.
 
 ---
@@ -76,34 +79,34 @@ different agents and developers. The current implementation has:
 
 Primitives in play:
 
-| Primitive | Surface role |
-| --- | --- |
-| `src/lib/live-status.js` (`getLiveFreshness`, `getMarketStatus`, `formatRelativeAge`) | Canonical freshness / market-open / relative-age strings |
-| `src/lib/freshness-pulse.js` (`pulseFreshness`) | 600 ms attribute toggle, 90 s throttle, reduced-motion safe |
-| `src/lib/reveal.js` (`observeReveal`, auto-init) | Fade-in-up for `[data-reveal]` via one shared `IntersectionObserver` |
-| `src/lib/count-up.js` (`countUp`) | rAF easeOutQuad numeric counter, auto directional `data-flash=up/down` |
-| `src/lib/safe-dom.js` (`el`, `clear`, `escape`, `safeHref`, `safeTel`) | DOM-safe builders — the only home for `innerHTML` |
+| Primitive                                                                             | Surface role                                                           |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `src/lib/live-status.js` (`getLiveFreshness`, `getMarketStatus`, `formatRelativeAge`) | Canonical freshness / market-open / relative-age strings               |
+| `src/lib/freshness-pulse.js` (`pulseFreshness`)                                       | 600 ms attribute toggle, 90 s throttle, reduced-motion safe            |
+| `src/lib/reveal.js` (`observeReveal`, auto-init)                                      | Fade-in-up for `[data-reveal]` via one shared `IntersectionObserver`   |
+| `src/lib/count-up.js` (`countUp`)                                                     | rAF easeOutQuad numeric counter, auto directional `data-flash=up/down` |
+| `src/lib/safe-dom.js` (`el`, `clear`, `escape`, `safeHref`, `safeTel`)                | DOM-safe builders — the only home for `innerHTML`                      |
 
 Adoption status per site:
 
-| Site | Target primitive | Status | Phase |
-| --- | --- | --- | --- |
-| `render.js` — hero badges | `getLiveFreshness` + `getMarketStatus` | ✅ Adopted | — |
-| `tracker-pro.js` — reveal import | `observeReveal` auto-init | ✅ Adopted | — |
-| Mode-tab registry | `src/tracker/modes.js` | ✅ Shipped | 7 |
-| Sections below the fold | `[data-reveal]` HTML attribute | ✅ Shipped | 7 |
-| `render.js` — `#tp-xauusd-value` | `countUp` | ⚠️ Not adopted | 17 |
-| `render.js` — karat strip cells | `countUp` + `pulseFreshness` | ⚠️ Not adopted | 17 |
-| `render.js` — `#tp-chart-stats` | `countUp` | ⚠️ Not adopted | 9 / 17 |
-| Tracker "just-refreshed" cells (hero + karat strip + compare) | `pulseFreshness(el, {})` | ⚠️ Not adopted | 9 / 18 |
-| `wire.js` — live-wire items | `safe-dom.el()` + `formatRelativeAge` | ⚠️ 3 sinks pending | 9 |
-| `render.js` — archive table | `safe-dom.el()` + `clear()` | ❌ Ad-hoc `innerHTML` | 11 |
-| `render.js` — compare results table | `safe-dom.el()` | ❌ Ad-hoc `innerHTML` | 10 |
-| `events.js` — welcome-strip | `observeReveal` (`[data-reveal]` opt-in) | ⚠️ No tag yet | 6 |
+| Site                                                          | Target primitive                         | Status                | Phase  |
+| ------------------------------------------------------------- | ---------------------------------------- | --------------------- | ------ |
+| `render.js` — hero badges                                     | `getLiveFreshness` + `getMarketStatus`   | ✅ Adopted            | —      |
+| `tracker-pro.js` — reveal import                              | `observeReveal` auto-init                | ✅ Adopted            | —      |
+| Mode-tab registry                                             | `src/tracker/modes.js`                   | ✅ Shipped            | 7      |
+| Sections below the fold                                       | `[data-reveal]` HTML attribute           | ✅ Shipped            | 7      |
+| `render.js` — `#tp-xauusd-value`                              | `countUp`                                | ⚠️ Not adopted        | 17     |
+| `render.js` — karat strip cells                               | `countUp` + `pulseFreshness`             | ⚠️ Not adopted        | 17     |
+| `render.js` — `#tp-chart-stats`                               | `countUp`                                | ⚠️ Not adopted        | 9 / 17 |
+| Tracker "just-refreshed" cells (hero + karat strip + compare) | `pulseFreshness(el, {})`                 | ⚠️ Not adopted        | 9 / 18 |
+| `wire.js` — live-wire items                                   | `safe-dom.el()` + `formatRelativeAge`    | ⚠️ 3 sinks pending    | 9      |
+| `render.js` — archive table                                   | `safe-dom.el()` + `clear()`              | ❌ Ad-hoc `innerHTML` | 11     |
+| `render.js` — compare results table                           | `safe-dom.el()`                          | ❌ Ad-hoc `innerHTML` | 10     |
+| `events.js` — welcome-strip                                   | `observeReveal` (`[data-reveal]` opt-in) | ⚠️ No tag yet         | 6      |
 
-**Invariant:** Any future change on the tracker surface must check this map before introducing a local
-helper. If the primitive does not cover the new case, add a row and extend the primitive — do not
-fork a sibling in `src/tracker/`.
+**Invariant:** Any future change on the tracker surface must check this map before introducing a
+local helper. If the primitive does not cover the new case, add a row and extend the primitive — do
+not fork a sibling in `src/tracker/`.
 
 ---
 
@@ -179,7 +182,8 @@ Each defect is mapped to the phase that owns it. Severity: 🟥 critical, 🟧 s
 ## A11y / performance baselines to beat
 
 - **Pa11y (mobile):** owed — Phase 20 defines the "clean" bar.
-- **Lighthouse (mobile):** previous LCP ≈ 2.8 s on 4G emulation — Phase 19 + Phase 5 must not regress.
+- **Lighthouse (mobile):** previous LCP ≈ 2.8 s on 4G emulation — Phase 19 + Phase 5 must not
+  regress.
 - **DOM-safety baseline:** tightened on Phase 11 (archive) and Phase 5 (hero).
 
 ---
@@ -189,28 +193,28 @@ Each defect is mapped to the phase that owns it. Severity: 🟥 critical, 🟧 s
 All 20 phases are defined by `REVAMP_PLAN.md` §22b. The table below maps each phase to the defects
 it resolves and the primitives it must adopt. Phases 1–3 are already shipped (audit deliverables).
 
-| Phase | Title | Defects resolved | Primitive targets | Status |
-| --- | --- | --- | --- | --- |
-| 1 | Surface audit | — | — | ✅ Done — `reports/tracker-ux-audit.md` |
-| 2 | Token audit | — | — | ✅ Done — `reports/token-audit.md` |
-| 3 | Primitive adoption map | — | — | ✅ Done — `reports/tracker-primitive-map.md` |
-| 4 | Audit tooling gate | — | `check-unsafe-dom.js` baseline | ⬜ Pending |
-| 5 | Hero + trust redesign | Hero 🟧×2, 🟨×2 | `el()` skeleton, badge layout | ⬜ Pending |
-| 6 | Welcome strip FOUC + progressive chips | Welcome 🟧, 🟨 | `[data-reveal]` opt-in | ⬜ Pending |
-| 7 | Mode-tab registry extraction | Tabs 🟧, 🟨 | `modes.js` registry | ✅ Shipped |
-| 8 | Keyboard + hash wiring cleanup | Tabs wiring | `ui-shell.js` refactor | ⬜ Pending |
-| 9 | Live mode: skeleton + touch + pulse | Live 🟧×2, 🟨 | `countUp`, `pulseFreshness`, 3 `wire.js` sinks | ⬜ Pending |
-| 10 | Compare mode: safe-dom table + retail framing | Compare 🟧, 🟨 | `safe-dom.el()` | ⬜ Pending |
-| 11 | Archive mode: pagination + sort hash + sink reduction | Archive 🟥×2, 🟧 | `safe-dom.el()` + `clear()` | ⬜ Pending |
-| 12 | Alerts mode: browser-only disclaimer + aria-live | Alerts 🟧, 🟨 | `aria-live` region | ⬜ Pending |
-| 13 | Planner mode: retail disclaimer + hash round-trip | Planner 🟧, 🟨 | §0.2 snippet reuse | ⬜ Pending |
-| 14 | Exports mode: CSV filename + copy-brief generator | Exports 🟧, 🟨 | — | ⬜ Pending |
-| 15 | Method mode: deep-links to methodology.html | Method 🟨 | — | ⬜ Pending |
-| 16 | Hero stats: count-up animation | Hero polish | `countUp` on hero stats | ⬜ Pending |
-| 17 | Karat strip + XAU/USD: count-up + pulse | — | `countUp`, `pulseFreshness` on strip | ⬜ Pending |
-| 18 | Pulse all "just-refreshed" cells | — | `pulseFreshness` sitewide on tracker | ⬜ Pending |
-| 19 | Performance: lazy-mount below-fold modes | — | — | ⬜ Pending |
-| 20 | Pa11y audit + final Lighthouse baseline | — | — | ⬜ Pending |
+| Phase | Title                                                 | Defects resolved | Primitive targets                              | Status                                       |
+| ----- | ----------------------------------------------------- | ---------------- | ---------------------------------------------- | -------------------------------------------- |
+| 1     | Surface audit                                         | —                | —                                              | ✅ Done — `reports/tracker-ux-audit.md`      |
+| 2     | Token audit                                           | —                | —                                              | ✅ Done — `reports/token-audit.md`           |
+| 3     | Primitive adoption map                                | —                | —                                              | ✅ Done — `reports/tracker-primitive-map.md` |
+| 4     | Audit tooling gate                                    | —                | `check-unsafe-dom.js` baseline                 | ⬜ Pending                                   |
+| 5     | Hero + trust redesign                                 | Hero 🟧×2, 🟨×2  | `el()` skeleton, badge layout                  | ⬜ Pending                                   |
+| 6     | Welcome strip FOUC + progressive chips                | Welcome 🟧, 🟨   | `[data-reveal]` opt-in                         | ⬜ Pending                                   |
+| 7     | Mode-tab registry extraction                          | Tabs 🟧, 🟨      | `modes.js` registry                            | ✅ Shipped                                   |
+| 8     | Keyboard + hash wiring cleanup                        | Tabs wiring      | `ui-shell.js` refactor                         | ⬜ Pending                                   |
+| 9     | Live mode: skeleton + touch + pulse                   | Live 🟧×2, 🟨    | `countUp`, `pulseFreshness`, 3 `wire.js` sinks | ⬜ Pending                                   |
+| 10    | Compare mode: safe-dom table + retail framing         | Compare 🟧, 🟨   | `safe-dom.el()`                                | ⬜ Pending                                   |
+| 11    | Archive mode: pagination + sort hash + sink reduction | Archive 🟥×2, 🟧 | `safe-dom.el()` + `clear()`                    | ⬜ Pending                                   |
+| 12    | Alerts mode: browser-only disclaimer + aria-live      | Alerts 🟧, 🟨    | `aria-live` region                             | ⬜ Pending                                   |
+| 13    | Planner mode: retail disclaimer + hash round-trip     | Planner 🟧, 🟨   | §0.2 snippet reuse                             | ⬜ Pending                                   |
+| 14    | Exports mode: CSV filename + copy-brief generator     | Exports 🟧, 🟨   | —                                              | ⬜ Pending                                   |
+| 15    | Method mode: deep-links to methodology.html           | Method 🟨        | —                                              | ⬜ Pending                                   |
+| 16    | Hero stats: count-up animation                        | Hero polish      | `countUp` on hero stats                        | ⬜ Pending                                   |
+| 17    | Karat strip + XAU/USD: count-up + pulse               | —                | `countUp`, `pulseFreshness` on strip           | ⬜ Pending                                   |
+| 18    | Pulse all "just-refreshed" cells                      | —                | `pulseFreshness` sitewide on tracker           | ⬜ Pending                                   |
+| 19    | Performance: lazy-mount below-fold modes              | —                | —                                              | ⬜ Pending                                   |
+| 20    | Pa11y audit + final Lighthouse baseline               | —                | —                                              | ⬜ Pending                                   |
 
 ---
 
@@ -250,7 +254,8 @@ From `reports/tracker-ux-audit.md` §4:
 - `npm test`, `npm run lint`, `npm run validate`, `npm run build` all green.
 - Before/after screenshots at 360 px + 1440 px for every phase that touches visible surfaces.
 - RTL spot-check (Arabic + `dir=rtl`) for Phases 5, 6, 9, 10, 11.
-- All §6 product-trust guardrails intact (freshness labels, spot-vs-retail framing, disclaimer copy).
+- All §6 product-trust guardrails intact (freshness labels, spot-vs-retail framing, disclaimer
+  copy).
 
 ---
 
@@ -265,10 +270,10 @@ verification.
 
 ## Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| Breaking URL hash state | `state.js` is untouched; test with `tests/tracker-hash.test.js` after every phase |
-| Raising DOM-safety sink count | Run `npm run validate` after every phase; revert if count increases |
-| LCP regression on mobile | Run Lighthouse before Phase 19 and after Phase 20 |
-| Bilingual regression (RTL) | Test Arabic mode at every phase that touches `tracker.html` |
-| Archive pagination edge cases | Gate Phase 11 behind a feature flag; load-test with 365-day range |
+| Risk                          | Mitigation                                                                        |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| Breaking URL hash state       | `state.js` is untouched; test with `tests/tracker-hash.test.js` after every phase |
+| Raising DOM-safety sink count | Run `npm run validate` after every phase; revert if count increases               |
+| LCP regression on mobile      | Run Lighthouse before Phase 19 and after Phase 20                                 |
+| Bilingual regression (RTL)    | Test Arabic mode at every phase that touches `tracker.html`                       |
+| Archive pagination edge cases | Gate Phase 11 behind a feature flag; load-test with 365-day range                 |
