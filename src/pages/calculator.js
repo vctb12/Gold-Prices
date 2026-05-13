@@ -1054,16 +1054,14 @@ function initCopyBtn() {
         b.setAttribute('aria-label', t('copy_result'));
       }, 2000);
     };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard
-        .writeText(text)
-        .then(done)
-        .catch(() => {
-          if (copyTextFallback(text)) done();
-        });
-      return;
+    const tryFallbackCopy = () => {
+      if (copyTextFallback(text)) done();
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(done).catch(tryFallbackCopy);
+    } else {
+      tryFallbackCopy();
     }
-    if (copyTextFallback(text)) done();
   });
 }
 
