@@ -134,6 +134,8 @@ async function insertSnapshotIfNew(supabase, row) {
     .select('id')
     .single();
   if (error) {
+    // Postgres duplicate key violations use SQLSTATE 23505. Some client stacks
+    // may omit `code`, so we keep a narrow message fallback for compatibility.
     const isDuplicate =
       error.code === '23505' ||
       /\bduplicate\s+key\b|\bunique\s+constraint\b/i.test(String(error.message || ''));

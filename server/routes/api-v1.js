@@ -124,7 +124,7 @@ function coerceToNumber(value, { positive = false, integer = false } = {}) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return null;
   if (positive && parsed <= 0) return null;
-  if (integer) return Math.round(parsed);
+  if (integer) return Math.trunc(parsed);
   return parsed;
 }
 
