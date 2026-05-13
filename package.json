@@ -37,6 +37,7 @@
     "audit-pages": "node scripts/node/audit-pages.js",
     "generate-sitemap": "node scripts/node/generate-sitemap.js",
     "inject-schema": "node scripts/node/inject-schema.js",
+    "sync:snapshot": "node scripts/node/sync-price-snapshot.js",
     "enrich-placeholders": "node scripts/node/enrich-placeholder-pages.js",
     "preflight": "npm run audit-pages && npm run check-links",
     "validate": "node scripts/node/validate-build.js && node scripts/node/check-unsafe-dom.js && node scripts/node/check-seo-meta.js && node scripts/node/check-sw-coverage.js && node scripts/node/enrich-placeholder-pages.js --check && node scripts/node/externalize-analytics.js --check && node scripts/node/inventory-seo.js --check && node scripts/node/inject-schema.js --check",

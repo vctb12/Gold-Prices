@@ -45,6 +45,7 @@ jobs:
         run: pip install -r scripts/python/requirements.txt
 
       - name: Fetch gold price
+        id: fetch_gold
         env:
           GOLD_API_COM_ENABLED: 'true'
           GOLD_PROVIDER_ORDER: gold_api_com,twelvedata_xauusd,fmp_gcusd
@@ -55,6 +56,30 @@ jobs:
           FMP_SYMBOL: ${{ secrets.FMP_SYMBOL }}
           GOLDPRICEZ_API_KEY: ${{ secrets.GOLDPRICEZ_API_KEY }}
         run: python scripts/python/fetch_gold_price.py
+
+      - name: Sync latest snapshot to Supabase (optional)
+        id: snapshot_sync
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SNAPSHOT_SYNC_STRICT: ${{ vars.SNAPSHOT_SYNC_STRICT || 'false' }}
+          PRICE_PROVIDER_CHAIN: ${{ steps.fetch_gold.outputs.reason }}
+          PRICE_CIRCUIT_STATE: ${{ steps.fetch_gold.outputs.fresh == 'true' ? 'closed' : 'fallback' }}
+        run: node scripts/node/sync-price-snapshot.js
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Gold Price Fetch Summary"
+            echo ""
+            echo "- Fresh quote: \`${{ steps.fetch_gold.outputs.fresh || 'unknown' }}\`"
+            echo "- Selected provider: \`${{ steps.fetch_gold.outputs.provider || 'n/a' }}\`"
+            echo "- Provider decision chain: \`${{ steps.fetch_gold.outputs.reason || 'n/a' }}\`"
+            echo "- Snapshot synced: \`${{ steps.snapshot_sync.outputs.snapshot_synced || 'false' }}\`"
+            echo "- Snapshot sync reason: \`${{ steps.snapshot_sync.outputs.snapshot_sync_reason || 'not_available' }}\`"
+            echo "- Snapshot duplicate: \`${{ steps.snapshot_sync.outputs.snapshot_duplicate || 'false' }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit data/gold_price.json if changed
         uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7
