@@ -116,6 +116,42 @@
       .tools-row a:hover {
         background: rgba(212, 160, 23, 0.18);
       }
+
+      .countries-page-hero {
+        padding-top: 2rem;
+      }
+
+      .countries-section-copy {
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 640px) {
+        .countries-page-hero {
+          padding-top: 1.25rem;
+        }
+
+        .country-tiles {
+          grid-template-columns: 1fr;
+        }
+
+        .city-tiles,
+        .tools-row {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+
+        .city-tile,
+        .country-tile,
+        .tools-row a {
+          min-height: 44px;
+        }
+      }
+
+      [dir='rtl'] .city-tile,
+      [dir='rtl'] .tools-row a {
+        flex-direction: row-reverse;
+      }
     </style>
   <script type="application/ld+json">
 {
@@ -142,11 +178,7 @@
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
     <main id="main-content">
-      <section
-        class="home-section"
-        aria-labelledby="countries-index-title"
-        style="padding-top: 2rem"
-      >
+      <section class="home-section countries-page-hero" aria-labelledby="countries-index-title">
         <div class="home-section-inner">
           <div class="section-intro">
             <div>
@@ -196,7 +228,7 @@
 
           <div class="cities-section">
             <h2>Major Cities</h2>
-            <p style="margin-bottom: 0.75rem; font-size: 0.95rem">
+            <p class="countries-section-copy">
               City-level gold price pages with local buying guides and market information.
             </p>
             <div class="city-tiles">
@@ -210,7 +242,7 @@
 
           <div class="cities-section">
             <h2>Famous Gold Markets</h2>
-            <p style="margin-bottom: 0.75rem; font-size: 0.95rem">
+            <p class="countries-section-copy">
               Detailed guides to the most well-known gold souks and bazaars.
             </p>
             <div class="city-tiles">

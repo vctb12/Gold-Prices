@@ -1527,12 +1527,13 @@
    ══════════════════════════════════════════════════════════════ */
 @media (width <= 640px) {
   .hero {
-    padding: 2.5rem 1.1rem 2rem;
+    padding: 2.35rem 1rem 1.8rem;
   }
 
   .hero-ctas {
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.7rem;
+    margin-top: 1.65rem;
   }
 
   .hero-ctas .btn {
@@ -1548,8 +1549,9 @@
   .hero-ctas-secondary {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.45rem 0.6rem;
+    gap: 0.5rem 0.6rem;
     width: 100%;
+    margin-top: 0.75rem;
   }
 
   .hero-secondary-link {
@@ -1558,6 +1560,7 @@
     border-radius: var(--radius-pill);
     background: rgb(255 255 255 / 4%);
     min-height: 44px;
+    padding-inline: 0.6rem;
   }
 
   .hero-secondary-sep {
@@ -2255,7 +2258,7 @@
   }
 
   .hero-ctas {
-    margin-top: 1.5rem;
+    margin-top: 1.35rem;
     gap: 0.5rem;
   }
 
@@ -2277,6 +2280,29 @@
 
   .hlc-item-label {
     font-size: 0.62rem;
+  }
+
+  .hlc-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .hlc-tracker-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@media (width <= 390px) {
+  .hero-ctas-secondary {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-secondary-link {
+    justify-content: flex-start;
   }
 }
 

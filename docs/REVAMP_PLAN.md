@@ -39,6 +39,17 @@ order.css, global.css).
 - [x] Country FAQ headings improved: "Country page FAQ" → "Gold price questions & answers".
 - [x] Homepage how-it-works section: Added spot-vs-retail link for better internal discovery.
 
+### 2026-05-13 mobile visual system app-experience pass
+
+- [x] Mobile app shell polish: bottom-nav priorities updated to Tracker / Calculator / Countries /
+      Shops + Menu; safe-area spacing and touch rhythm tightened.
+- [x] Mobile visual hierarchy pass on homepage/tracker/calculator/shops/methodology/learn/insights/
+      invest/country surfaces (spacing, sticky bars, card rhythm, compact readability tweaks).
+- [x] Countries index mobile cleanup: replaced ad-hoc inline style attributes with responsive
+      classes and mobile 44px touch-target behavior.
+- [x] Mobile E2E contract updated: `tests/e2e/mobile-smoke.spec.js` now asserts mobile bottom-nav
+      priority items and tracker active state.
+
 ### 2026-05-12 scoped execution slice (core public pages)
 
 Scope for this cycle is intentionally constrained to top-level public website surfaces first (home,

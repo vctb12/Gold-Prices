@@ -98,6 +98,24 @@
   margin-inline-start: auto;
 }
 
+@media (width <= 768px) {
+  .insights-price-bar {
+    position: sticky;
+    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
+    z-index: 30;
+    padding: 0.55rem 1rem;
+  }
+
+  .insights-price-bar-inner {
+    gap: 0.45rem;
+  }
+
+  .price-bar-freshness {
+    margin-inline-start: 0;
+    width: 100%;
+  }
+}
+
 .price-bar-freshness.price-bar-stale {
   color: var(--color-stale);
 }

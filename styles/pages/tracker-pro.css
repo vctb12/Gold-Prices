@@ -3228,6 +3228,7 @@ td.tracker-chg-down {
     padding-inline: var(--page-gutter);
     border-bottom: 1px solid var(--tp-hero-border);
     box-shadow: 0 4px 14px rgb(0 0 0 / 45%);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   }
 
   .tracker-control-grid {
@@ -3258,7 +3259,7 @@ td.tracker-chg-down {
   }
 
   .tracker-table {
-    min-width: 520px;
+    min-width: 480px;
   }
 
   .tracker-toast-stack {
@@ -3327,7 +3328,7 @@ td.tracker-chg-down {
   }
 
   .tracker-chart-wrap {
-    min-height: 240px;
+    min-height: 230px;
   }
 
   .tracker-mini-strip {
@@ -3338,6 +3339,10 @@ td.tracker-chg-down {
   .tracker-mini-item {
     width: 100%;
     min-width: unset;
+  }
+
+  .tracker-hero-controls {
+    padding-block: var(--space-2);
   }
 }
 

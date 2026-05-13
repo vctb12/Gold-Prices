@@ -178,8 +178,9 @@
   --content-max-width: 1280px;
   --page-gutter: 1.25rem;
   --nav-height: 64px;
-  --mobile-bottom-nav-height: 64px;
-  --mobile-bottom-nav-body-offset: 68px;
+  --mobile-bottom-nav-height: 68px;
+  --mobile-bottom-nav-body-offset: 84px;
+  --mobile-bottom-nav-max-width: 640px;
 
   /* Focus ring */
   --focus-ring-color: var(--color-gold);
@@ -612,7 +613,10 @@
 
   .mobile-result-dock {
     position: sticky;
-    bottom: max(var(--space-3), env(safe-area-inset-bottom, 0px));
+    bottom: max(
+      var(--space-3),
+      calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px))
+    );
     z-index: 35;
   }
 }
@@ -5737,7 +5741,9 @@ body > * {
   z-index: 250;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
-  box-shadow: 0 -2px 12px rgb(0 0 0 / 8%);
+  box-shadow: 0 -4px 20px rgb(0 0 0 / 10%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   padding: 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -5746,9 +5752,12 @@ body > * {
   display: flex;
   align-items: stretch;
   justify-content: space-around;
-  max-width: 500px;
+  max-width: var(--mobile-bottom-nav-max-width);
   margin: 0 auto;
   min-height: var(--mobile-bottom-nav-height);
+  padding-inline: max(var(--space-2), env(safe-area-inset-left, 0px))
+    max(var(--space-2), env(safe-area-inset-right, 0px));
+  gap: 2px;
 }
 
 .mobile-bottom-nav-item {
@@ -5757,11 +5766,11 @@ body > * {
   align-items: center;
   justify-content: center;
   flex: 1;
-  gap: 2px;
-  padding: 6px 4px 4px;
+  gap: 3px;
+  padding: 8px 5px 6px;
   text-decoration: none;
   color: var(--color-text-faint);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-wide);
   transition: color 0.15s ease;
@@ -5787,12 +5796,12 @@ body > * {
 }
 
 .mobile-bottom-nav-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   line-height: var(--leading-none);
 }
 
@@ -5815,7 +5824,9 @@ body > * {
 
   /* Add bottom padding to body so content isn't hidden behind the nav */
   body {
-    padding-bottom: calc(var(--mobile-bottom-nav-body-offset) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(
+      var(--mobile-bottom-nav-body-offset) + var(--space-2) + env(safe-area-inset-bottom, 0px)
+    );
   }
 }
 

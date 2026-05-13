@@ -32,7 +32,7 @@
   border-bottom: 1px solid var(--color-border);
   padding: var(--space-3) var(--space-5);
   position: sticky;
-  top: var(--nav-height, 56px);
+  top: calc(var(--nav-height, 56px) + var(--spot-bar-height, 0px));
   z-index: 90;
 }
 
@@ -70,6 +70,9 @@
 }
 
 .learn-toc-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: 0.82rem;
   font-weight: var(--weight-semibold);
   color: var(--color-text-muted);
@@ -288,6 +291,10 @@
 
   .learn-karat-table-wrap {
     font-size: 0.82rem;
+  }
+
+  .learn-toc {
+    padding: var(--space-2) var(--space-3);
   }
 }
 

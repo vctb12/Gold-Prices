@@ -48,7 +48,7 @@ body.invest-page {
 
 .invest-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(340px, 0.7fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
   gap: 1.4rem;
   align-items: stretch;
 }
@@ -964,6 +964,10 @@ body.invest-page {
   .invest-actions .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .invest-jumpbar a {
+    padding: 0.62rem 0.9rem;
   }
 }
 

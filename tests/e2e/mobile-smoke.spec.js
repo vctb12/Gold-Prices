@@ -20,6 +20,12 @@ test.describe('Mobile smoke', () => {
     await page.goto('/');
     await expect(page.locator('main')).toBeVisible();
     await expect(page.locator('#home-command-card')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="tracker"]')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="calculator"]')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="countries"]')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="shops"]')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="home"]')).toHaveCount(0);
     await expectNoHorizontalOverflow(page, '/');
 
     await page.goto('/tracker.html');
@@ -27,6 +33,9 @@ test.describe('Mobile smoke', () => {
     await expect(page.locator('.tracker-modes')).toBeVisible();
     await expect(page.locator('.tracker-mobile-workspace')).toBeVisible();
     await expect(page.locator('#tp-chart-stats')).toBeVisible();
+    await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="tracker"]')).toHaveClass(
+      /is-active/
+    );
     await expectNoHorizontalOverflow(page, '/tracker.html');
 
     await page.goto('/calculator.html');
