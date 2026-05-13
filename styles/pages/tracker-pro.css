@@ -3580,10 +3580,10 @@ td.tracker-chg-down {
    ══════════════════════════════════════════════════════════════ */
 
 .tracker-field .tracker-help-text {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--tp-text-faint);
   line-height: 1.45;
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
   display: block;
 }
 

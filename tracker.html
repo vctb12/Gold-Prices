@@ -664,7 +664,7 @@
                 aria-live="polite"
               ></div>
               <div class="tracker-chart-empty" id="tp-chart-empty" hidden>
-                <p>Waiting for price data — select a time range above or refresh to load history.</p>
+                <p>Waiting for price data &mdash; select a time range above or refresh to load history.</p>
                 <p class="source-note">Short ranges use live and cached snapshots. Longer ranges use the monthly baseline anchored to XAU/USD.</p>
               </div>
             </div>
@@ -903,6 +903,9 @@
       <div
         class="tp-overlay"
         id="tp-overlay-alerts"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tp-overlay-alerts-title"
         aria-hidden="true"
         hidden
       >
