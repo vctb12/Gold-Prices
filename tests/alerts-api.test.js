@@ -146,6 +146,18 @@ test('alerts create + verify + dry-run check + cooldown skip', async () => {
   assert.equal(run2.body?.data?.triggered, 0);
   assert.equal(run2.body?.data?.sent, 0);
   assert.equal(run2.body?.data?.skipped >= 1, true);
+
+  const store = JSON.parse(fs.readFileSync(alertsDataFile, 'utf8'));
+  assert.equal(Array.isArray(store.alert_rules), true);
+  assert.equal(store.alert_rules.length >= 1, true);
+  store.alert_rules[0].last_triggered_at = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  fs.writeFileSync(alertsDataFile, JSON.stringify(store, null, 2));
+
+  const run3 = await request('POST', '/api/v1/jobs/check-alerts', { dryRun: true });
+  assert.equal(run3.status, 200);
+  assert.equal(run3.body?.ok, true);
+  assert.equal(run3.body?.data?.triggered, 1);
+  assert.equal(run3.body?.data?.sent, 1);
 });
 
 test('alerts check skips stale/fallback snapshots', async () => {

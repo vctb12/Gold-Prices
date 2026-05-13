@@ -698,37 +698,6 @@ async function loadActiveRules() {
   );
 }
 
-async function findSubscriptionForRule(rule) {
-  const sb = getSupabase();
-  if (sb) {
-    try {
-      const { data, error } = await sb
-        .from('notification_subscriptions')
-        .select('*')
-        .eq('destination', rule.email)
-        .eq('channel', rule.channel)
-        .is('unsubscribed_at', null)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      if (!error && Array.isArray(data) && data[0]) return data[0];
-    } catch (error) {
-      console.warn(
-        `[alerts] Supabase subscription lookup failed, using file fallback: ${error.message}`
-      );
-    }
-  }
-
-  const store = readStore();
-  return (
-    store.notification_subscriptions
-      .filter(
-        (sub) =>
-          sub.destination === rule.email && sub.channel === rule.channel && !sub.unsubscribed_at
-      )
-      .sort((a, b) => Date.parse(b.created_at || 0) - Date.parse(a.created_at || 0))[0] || null
-  );
-}
-
 function updateSubscriptionByDestination(destination, patch) {
   const sb = getSupabase();
   if (sb) {
@@ -1002,8 +971,6 @@ router.post('/jobs/check-alerts', async (req, res) => {
     }
 
     triggered += 1;
-    const _subscription = await findSubscriptionForRule(rule);
-
     if (dryRun) {
       await writeAlertEvent({
         alert_rule_id: rule.id,
@@ -1093,5 +1060,10 @@ router.post('/jobs/check-alerts', async (req, res) => {
     )
   );
 });
+
+router.__private = {
+  computeRulePrice,
+  shouldTrigger,
+};
 
 module.exports = router;

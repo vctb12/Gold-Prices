@@ -222,13 +222,13 @@ export function bindCoreEvents() {
   _el.saveAlert?.addEventListener('click', async () => {
     const delivery = _el.alertDelivery?.value || 'local';
     const scope = _el.alertScope?.value || 'selected';
-    const direction = _el.alertDirection?.value || 'above';
+    const condition = _el.alertDirection?.value || 'above';
     const target = parseFloat(_el.alertTarget?.value);
     if (!Number.isFinite(target)) return;
 
     if (delivery === 'server') {
       try {
-        const result = await _cb.createServerAlert({ scope, direction, target });
+        const result = await _cb.createServerAlert({ scope, condition, target });
         const sentMode = result?.verifyDelivery === 'dry_run' ? 'dry-run' : 'email';
         const manageNote = result?.managementUrl
           ? ` ${_cb.tx('alerts.serverManage')}: ${result.managementUrl}`
@@ -246,15 +246,15 @@ export function bindCoreEvents() {
       return;
     }
 
-    _state.alerts = [...(_state.alerts || []), { scope, direction, target }];
+    _state.alerts = [...(_state.alerts || []), { scope, direction: condition, target }];
     persistState(_state);
     _cb.renderAlerts();
-    _cb.showToast(`Alert ${direction} $${target} saved`);
+    _cb.showToast(`Alert ${condition} $${target} saved`);
     if (_el.alertTarget) _el.alertTarget.value = '';
     track(EVENTS.ALERT_SET, {
       karat: _state.selectedKarat,
       threshold: target,
-      direction,
+      direction: condition,
       currency: _state.selectedCurrency,
     });
   });

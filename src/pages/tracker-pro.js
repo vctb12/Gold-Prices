@@ -389,7 +389,7 @@ async function probeServerAlertsAvailability() {
   }
 }
 
-async function createServerAlert({ direction, target }) {
+async function createServerAlert({ condition, target }) {
   const email = el.alertEmail?.value?.trim()?.toLowerCase();
   if (!email) {
     throw new Error(trackerTx('alerts.serverEmailRequired'));
@@ -403,7 +403,7 @@ async function createServerAlert({ direction, target }) {
       channel: 'email',
       symbol: 'XAUUSD',
       currency: state.selectedCurrency === 'AED' ? 'AED' : 'USD',
-      condition: direction,
+      condition,
       threshold_value: target,
       karat: state.selectedCurrency === 'AED' ? state.selectedKarat : null,
       country_code: state.selectedCurrency === 'AED' ? 'AE' : null,
