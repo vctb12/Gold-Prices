@@ -1879,7 +1879,6 @@ td.tracker-chg-down {
   display: flex;
   gap: 0.45rem;
   flex-wrap: wrap;
-  -webkit-overflow-scrolling: touch;
 }
 
 .tracker-region-pill {
@@ -3105,7 +3104,6 @@ td.tracker-chg-down {
     flex-wrap: nowrap;
     gap: 0.5rem;
     padding-bottom: 0.3rem;
-    -webkit-overflow-scrolling: touch;
     touch-action: pan-x;
     scroll-snap-type: x proximity;
   }
@@ -3136,7 +3134,6 @@ td.tracker-chg-down {
     justify-content: flex-start;
     padding-bottom: 0.3rem;
     flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
     touch-action: pan-x;
     scroll-snap-type: x proximity;
   }

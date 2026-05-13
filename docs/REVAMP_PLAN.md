@@ -758,6 +758,9 @@ Applied on top of primitives from Track A. Rules:
   - Home: `WebSite` + `SearchAction` + `BreadcrumbList` + `Organization`. ✅ (was already present)
   - Tracker: `WebApplication`. ✅ Added `tracker.html` (`2fe030d` 2026-04-27)
   - Calculator: `WebApplication`. ✅ Added `calculator.html` (`2fe030d` 2026-04-27)
+  - Country gold-price pages: `BreadcrumbList` + `Product` (correct local `priceCurrency`) +
+    `FAQPage` + `Dataset`. ✅ (`inject-schema.js` extended; all 20 country pages re-injected,
+    2026-05-13)
   - No `Product` schema on non-product pages.
 - [ ] Internal linking: home ↔ tracker, calculator, shops, top country pages. Tracker ↔ calculator,
       methodology, country pages, shops.
@@ -780,7 +783,7 @@ Applied on top of primitives from Track A. Rules:
 Before marking the PR ready for review:
 
 - [ ] `npm test` — all suites pass (requires `JWT_SECRET`, `ADMIN_PASSWORD`, `ADMIN_ACCESS_PIN`).
-      Latest: **376 / 376 pass** (Round 9).
+      Latest: **410 / 410 pass** (2026-05-13, `revamp/mobile-ui-cx-hotfix-pass` branch).
 - [ ] `npm run validate` — HTML + imports + DOM-sink check green; baseline tightened where sinks
       were removed. Latest: **0 errors**.
 - [ ] `npm run quality` — ESLint + Prettier + Stylelint green.
