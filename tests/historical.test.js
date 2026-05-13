@@ -85,3 +85,131 @@ describe('historical-data (inline helpers)', () => {
     assert.ok('allTimeHigh' in s && 'latest' in s);
   });
 });
+
+describe('historical-data: baseline range and record metadata', () => {
+  // NOTE: src/lib/historical-data.js uses ES module `import` syntax and cannot be directly
+  // require()'d by this CJS test suite. The functions below are inline reimplementations that
+  // mirror the production code exactly. Any change to the production implementations must be
+  // reflected here. This is consistent with the existing pattern in this file (see toChartData,
+  // filterByRange, computeYoYChange, getHistoryStats above).
+  test('baseline is sorted chronologically', () => {
+    for (let i = 1; i < baseline.length; i++) {
+      assert.ok(
+        baseline[i].date >= baseline[i - 1].date,
+        `baseline entry ${i} must not predate entry ${i - 1}`
+      );
+    }
+  });
+
+  test('baseline first entry is in 2019', () => {
+    const sorted = [...baseline].sort((a, b) => a.date.localeCompare(b.date));
+    assert.ok(
+      sorted[0].date.startsWith('2019'),
+      `Baseline first entry should start in 2019, got: ${sorted[0].date}`
+    );
+  });
+
+  test('baseline last entry date is a valid YYYY-MM string', () => {
+    const sorted = [...baseline].sort((a, b) => a.date.localeCompare(b.date));
+    const last = sorted[sorted.length - 1];
+    assert.ok(
+      /^\d{4}-\d{2}$/.test(last.date),
+      `Baseline last entry date must be YYYY-MM, got: ${last.date}`
+    );
+  });
+
+  test('all baseline prices are positive numbers', () => {
+    for (const entry of baseline) {
+      assert.ok(
+        typeof entry.price === 'number' && entry.price > 0,
+        `Entry ${entry.date} must have a positive price, got: ${entry.price}`
+      );
+    }
+  });
+
+  test('baseline has at least 60 monthly records (5 years of history)', () => {
+    assert.ok(
+      baseline.length >= 60,
+      `Baseline should have at least 60 records, got: ${baseline.length}`
+    );
+  });
+
+  // Inline getBaselineRange mirroring the real implementation
+  function getBaselineRangeInline() {
+    if (!baseline.length) return { first: '', last: '', count: 0 };
+    const sorted = [...baseline].sort((a, b) => a.date.localeCompare(b.date));
+    return {
+      first: sorted[0].date,
+      last: sorted[sorted.length - 1].date,
+      count: sorted.length,
+    };
+  }
+
+  test('getBaselineRange returns correct first, last, count', () => {
+    const range = getBaselineRangeInline();
+    assert.ok(range.first.length > 0, 'first must be non-empty');
+    assert.ok(range.last.length > 0, 'last must be non-empty');
+    assert.ok(range.count > 0, 'count must be positive');
+    assert.equal(range.count, baseline.length, 'count must match baseline.length');
+    assert.ok(range.first <= range.last, 'first must be <= last');
+  });
+
+  test('getBaselineRange last is after 2024', () => {
+    const range = getBaselineRangeInline();
+    assert.ok(
+      range.last >= '2024-01',
+      `Baseline should extend to at least 2024, last is: ${range.last}`
+    );
+  });
+
+  // Inline baselineToRecord mirroring new freshnessState field
+  function baselineToRecord(entry) {
+    const isEstimated = Boolean(entry.estimated);
+    return {
+      date: entry.date,
+      price: entry.price,
+      granularity: 'monthly',
+      source: isEstimated ? 'estimated' : 'LBMA-baseline',
+      freshnessState: 'historical',
+      derived: false,
+    };
+  }
+
+  test('baselineToRecord sets freshnessState to "historical"', () => {
+    const record = baselineToRecord(baseline[0]);
+    assert.equal(record.freshnessState, 'historical');
+  });
+
+  test('baselineToRecord sets source to LBMA-baseline for non-estimated entries', () => {
+    const entry = { date: '2023-01', price: 1900 };
+    const record = baselineToRecord(entry);
+    assert.equal(record.source, 'LBMA-baseline');
+    assert.equal(record.granularity, 'monthly');
+  });
+
+  test('baselineToRecord uses "estimated" source for estimated entries', () => {
+    const entry = { date: '2025-06', price: 3200, estimated: true };
+    const record = baselineToRecord(entry);
+    assert.equal(record.source, 'estimated');
+  });
+
+  // Inline cachedToRecord mirroring new freshnessState field
+  function cachedToRecord(entry) {
+    return {
+      date: entry.date,
+      price: entry.price,
+      granularity: 'daily',
+      source: 'local-snapshot',
+      freshnessState: 'cached',
+      derived: false,
+      timestamp: entry.timestamp,
+    };
+  }
+
+  test('cachedToRecord sets freshnessState to "cached"', () => {
+    const record = cachedToRecord({ date: '2025-01-15', price: 2900, timestamp: Date.now() });
+    assert.equal(record.freshnessState, 'cached');
+    assert.equal(record.granularity, 'daily');
+    assert.equal(record.source, 'local-snapshot');
+  });
+});

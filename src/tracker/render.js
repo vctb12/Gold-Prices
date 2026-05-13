@@ -7,6 +7,7 @@ import {
   describeHistoryResolution,
   filterByMonth,
   filterByRange,
+  getBaselineRange,
 } from '../lib/historical-data.js';
 import { clear, el, setText, escape } from '../lib/safe-dom.js';
 import { getLiveFreshness, getMarketStatus } from '../lib/live-status.js';
@@ -53,6 +54,19 @@ function tx(key, params = {}) {
     (text, [token, value]) => text.replaceAll(`{${token}}`, String(value)),
     template
   );
+}
+
+/**
+ * Format a concise source/resolution context string for a history record.
+ * Used by the chart tooltip and can be reused in archive rows or export previews.
+ *
+ * @param {{ source?: string, granularity?: string }} row
+ * @returns {string}
+ */
+function formatHistoricalContext(row) {
+  const sourceLabel = row.source || '';
+  const granLabel = row.granularity === 'monthly' ? 'monthly avg' : row.granularity || '';
+  return [sourceLabel, granLabel].filter(Boolean).join(' · ');
 }
 
 function formatUsd(value, decimals = 2) {
@@ -643,7 +657,8 @@ export function renderChart() {
       const strong = document.createElement('strong');
       strong.textContent = `$${row.spot.toFixed(2)}`;
       const div = document.createElement('div');
-      div.textContent = `${row.date.toLocaleDateString()} · ${row.source}`;
+      // Show date, source, and granularity so users can tell live/cached/historical apart
+      div.textContent = `${row.date.toLocaleDateString()} · ${formatHistoricalContext(row)}`;
       tooltip.replaceChildren(strong, div);
       tooltip.style.left = x + 'px';
       tooltip.style.top = '0px';
@@ -1567,6 +1582,22 @@ export function renderArchive(resetPage = false) {
   if (!_el.archiveBody) return;
   if (resetPage) _archivePage = 0;
 
+  // Update the archive source note dynamically with the actual baseline range
+  const archiveSourceNote = document.getElementById('tp-archive-source-note');
+  if (archiveSourceNote) {
+    const { last: lastMonth, first: firstMonth } = getBaselineRange();
+    const noteText = tx('archive.sourceNote', {
+      lastMonth: lastMonth || '—',
+      firstMonth: firstMonth || '2019',
+    });
+    const link = el(
+      'a',
+      { href: 'methodology.html', class: 'tracker-inline-link' },
+      tx('archive.sourceNoteLink')
+    );
+    archiveSourceNote.replaceChildren(noteText, ' ', link);
+  }
+
   let rows = _state.history.slice().reverse();
 
   const range = _el.archiveRange?.value || 'ALL';
@@ -1597,9 +1628,9 @@ export function renderArchive(resetPage = false) {
   clear(_el.archiveBody);
 
   if (!pageRows.length) {
-    _el.archiveBody.append(
-      el('tr', null, [el('td', { colspan: '5' }, 'No records match filters.')])
-    );
+    const { last: lastMonth } = getBaselineRange();
+    const noDataMsg = tx('archive.noDataDetailed', { lastMonth: lastMonth || '—' });
+    _el.archiveBody.append(el('tr', null, [el('td', { colspan: '5' }, noDataMsg)]));
     if (_el.archiveMeta) _el.archiveMeta.textContent = '';
     _renderArchivePagination(0, 1, 0);
     return;
@@ -1635,12 +1666,13 @@ export function renderArchive(resetPage = false) {
   _el.archiveBody.append(fragment);
 
   if (_el.archiveMeta) {
+    const { first: firstMonth, last: lastMonth } = getBaselineRange();
     const sourceInfo = _state.history.some(
       (r) => r.source === 'live' || r.source === 'session-cache'
     )
       ? 'session + baseline'
       : 'baseline';
-    _el.archiveMeta.textContent = `${pageStart + 1}–${pageStart + pageRows.length} of ${totalFiltered} records · ${sourceInfo} · 2019–present`;
+    _el.archiveMeta.textContent = `${pageStart + 1}–${pageStart + pageRows.length} of ${totalFiltered} records · ${sourceInfo} · ${firstMonth || '2019'}–${lastMonth || 'present'}`;
   }
 
   _renderArchivePagination(_archivePage, totalPages, totalFiltered);
@@ -1798,6 +1830,7 @@ export function renderBrief() {
     return;
   }
   const aed24 = _priceFor({ currency: 'AED', karat: '24', unit: 'gram', spot });
+  const { last: lastMonth } = getBaselineRange();
   _el.briefHeadline.textContent = tx('briefHeadline', {
     spot: spot.toFixed(2),
     source: freshness.sourceLabel,
@@ -1807,6 +1840,7 @@ export function renderBrief() {
     karat: _state.selectedKarat,
     currency: _state.selectedCurrency,
     unit: formatUnitLabel(_state.selectedUnit),
+    lastMonth: lastMonth || '—',
   });
 }
 

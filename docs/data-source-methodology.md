@@ -149,3 +149,71 @@ flip production:
 
 See [`gold-price-provider-migration.md`](./gold-price-provider-migration.md) for the migration steps
 and rollback plan.
+
+---
+
+## 8. Historical data layers and limitations
+
+Gold Ticker Live uses three data layers for historical price display, archive browsing, and exports.
+Understanding their resolution and limitations is important for honest display.
+
+### Layer 1 — Monthly LBMA baseline (embedded)
+
+- **Source:** LBMA PM fix monthly average data (public domain records)
+- **Resolution:** One data point per calendar month (YYYY-MM)
+- **Coverage:** 2019-01 onwards; baseline file: `src/data/historical-baseline.json`
+- **Freshness state:** `historical`
+- **Limitations:**
+  - Embedded in the codebase; requires a code update to add new months
+  - Monthly averages are not intraday prices; they smooth within-month volatility
+  - Any `estimated: true` entries are approximate and labelled accordingly in the UI
+
+### Layer 2 — Daily cached browser snapshots
+
+- **Source:** Locally cached browser snapshots (localStorage) captured while the tracker is open
+- **Resolution:** One data point per calendar day (YYYY-MM-DD)
+- **Coverage:** Up to 90 days back from the current session
+- **Freshness state:** `cached`
+- **Limitations:**
+  - Coverage depends on how often the user visits; gaps appear for days the tracker was not open
+  - Data is browser-local — different devices have independent caches
+
+### Layer 3 — Live session ticks
+
+- **Source:** Real-time GoldPriceZ / gold-api.com spot snapshot (refreshed every 90 s)
+- **Resolution:** ~90-second ticks
+- **Coverage:** Current session duration only
+- **Freshness state:** `live` or `cached` depending on whether the fetch succeeded
+
+### Merged view
+
+`getUnifiedHistory()` in `src/lib/historical-data.js` merges all three layers:
+
+1. Start with the full monthly baseline
+2. Overlay daily cached snapshots (daily points are added; monthly baseline entries for that month
+   are marked `superseded`)
+3. The chart and archive render the merged, de-duplicated result
+
+For long date ranges (1Y, 3Y, 5Y, ALL) where daily snapshots don't reach, the view falls back
+entirely to the monthly baseline. Resolution is clearly labelled via `describeHistoryResolution()`.
+
+### Export metadata
+
+Every CSV and JSON export includes:
+
+- `dataResolution` — describes the resolution mix (monthly / daily / mixed)
+- `freshnessState` — describes the freshness of each row (`historical`, `cached`, `live`)
+- `disclaimer` — explicit statement that values are spot-linked reference estimates, not retail
+  prices
+- `aedPeg` — confirms the fixed 3.6725 rate
+- `limitations` — describes the baseline coverage gap and session-cache dependency
+
+### Baseline coverage note
+
+The monthly baseline was last updated to cover through **2025-08**. Any periods after that date use
+live or cached session snapshots for short ranges, and show no data for long ranges that extend into
+uncovered months. The UI notes the actual baseline range dynamically via `getBaselineRange()`.
+
+To extend the baseline, add new entries to `src/data/historical-baseline.json` following the
+existing `{ "date": "YYYY-MM", "price": <XAU/USD monthly average> }` format. Use verified LBMA data
+only; mark estimated entries with `"estimated": true`.

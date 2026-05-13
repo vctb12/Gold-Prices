@@ -246,13 +246,20 @@ export const TRANSLATIONS = {
     'tracker.waitingLive': 'Waiting for live data…',
     'tracker.liveSpotNote': 'Live spot: {spot} / troy oz',
     'tracker.dataSourceNote': '{source} · updated {age}',
-    'tracker.historyNote': 'History: LBMA baseline 2019–Aug 2025 + {count} session snapshots',
+    'tracker.historyNote': 'History: LBMA baseline 2019–{lastMonth} + {count} session snapshots',
+    'tracker.archive.sourceNote':
+      'Archive data combines a monthly LBMA baseline (2019–{lastMonth}) with your cached browser snapshots (up to 90 days). The Source column labels each row: LBMA-baseline = historical monthly average · local-snapshot = cached browser point. Reference estimates only — not retail prices.',
+    'tracker.archive.sourceNoteLink': 'Methodology →',
+    'tracker.archive.noDataDetailed':
+      'No records match the selected range or search query. The monthly baseline covers 2019–{lastMonth}. For more recent data, try a shorter range (30D or 90D) — those draw on your live session snapshots.',
+    'tracker.archive.partialDataWarning':
+      'Showing {count} record(s). Longer ranges use monthly LBMA averages which are less granular than recent snapshots.',
     'tracker.briefWaitingHeadline': 'Waiting for live data',
     'tracker.briefWaitingBody':
       'Gold price data is loading. If this persists, the API may be temporarily unavailable — last cached price will be shown when available.',
     'tracker.briefHeadline': 'Gold at {spot} / troy oz — {source}',
     'tracker.briefBody':
-      'UAE 24K: AED {aed24}/g. Selected view: {karat}K in {currency} per {unit}. FX source: open.er-api.com (AED uses fixed peg 3.6725). History: LBMA monthly baseline 2019–Aug 2025 + session snapshots.',
+      'UAE 24K: AED {aed24}/g. Selected view: {karat}K in {currency} per {unit}. FX source: open.er-api.com (AED uses fixed peg 3.6725). History: LBMA monthly baseline 2019–{lastMonth} + session snapshots.',
     'tracker.pagination.prev': '← Prev',
     'tracker.pagination.next': 'Next →',
     'tracker.pagination.prevLabel': 'Previous page',
@@ -907,13 +914,20 @@ export const TRANSLATIONS = {
     'tracker.waitingLive': 'بانتظار البيانات المباشرة…',
     'tracker.liveSpotNote': 'السعر الفوري المباشر: {spot} لكل أوقية تروي',
     'tracker.dataSourceNote': '{source} · تم التحديث {age}',
-    'tracker.historyNote': 'السجل: متوسطات LBMA من 2019 حتى أغسطس 2025 + {count} لقطات جلسة',
+    'tracker.historyNote': 'السجل: متوسطات LBMA من 2019 حتى {lastMonth} + {count} لقطات جلسة',
+    'tracker.archive.sourceNote':
+      'يجمع الأرشيف بين مرجع LBMA الشهري (2019–{lastMonth}) ولقطاتك المخزنة في المتصفح (حتى 90 يومًا). يوضح عمود المصدر نوع كل سجل: LBMA-baseline = متوسط شهري تاريخي · local-snapshot = نقطة مخزنة. أسعار مرجعية فقط — ليست أسعار محلات.',
+    'tracker.archive.sourceNoteLink': 'المنهجية ←',
+    'tracker.archive.noDataDetailed':
+      'لا توجد سجلات تطابق النطاق أو البحث المحدد. يغطي المرجع الشهري الفترة من 2019 حتى {lastMonth}. جرّب نطاقًا أقصر (30 يومًا أو 90 يومًا) للحصول على بيانات الجلسة الحديثة.',
+    'tracker.archive.partialDataWarning':
+      'يعرض {count} سجلًا. تستخدم النطاقات الطويلة متوسطات LBMA الشهرية وهي أقل تفصيلًا من اللقطات الحديثة.',
     'tracker.briefWaitingHeadline': 'بانتظار البيانات المباشرة',
     'tracker.briefWaitingBody':
       'يتم تحميل بيانات الذهب الآن. إذا استمر ذلك فقد تكون الواجهة غير متاحة مؤقتاً — سيتم عرض آخر قيمة مخزنة عند توفرها.',
     'tracker.briefHeadline': 'الذهب عند {spot} لكل أوقية تروي — {source}',
     'tracker.briefBody':
-      'عيار 24 في الإمارات: {aed24} درهم/غ. العرض المحدد: {karat} قيراط بعملة {currency} لكل {unit}. مصدر الصرف: open.er-api.com (مع ربط الدرهم الثابت 3.6725). السجل: متوسطات LBMA الشهرية من 2019 حتى أغسطس 2025 مع لقطات الجلسة.',
+      'عيار 24 في الإمارات: {aed24} درهم/غ. العرض المحدد: {karat} قيراط بعملة {currency} لكل {unit}. مصدر الصرف: open.er-api.com (مع ربط الدرهم الثابت 3.6725). السجل: متوسطات LBMA الشهرية من 2019 حتى {lastMonth} مع لقطات الجلسة.',
     'tracker.pagination.prev': 'السابق ←',
     'tracker.pagination.next': '→ التالي',
     'tracker.pagination.prevLabel': 'الصفحة السابقة',
