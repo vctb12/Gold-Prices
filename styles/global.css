@@ -1838,6 +1838,35 @@ body.has-spot-bar .site-nav {
   font-weight: var(--weight-semibold);
 }
 
+.footer-newsletter-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.footer-newsletter-msg {
+  font-size: 0.78rem;
+  margin-top: var(--space-2);
+  width: 100%;
+}
+
+.footer-newsletter-msg--error {
+  color: #f87171;
+}
+
+.footer-newsletter-msg--info {
+  color: #93c5fd;
+}
+
+.footer-newsletter-msg--success {
+  color: #86efac;
+}
+
+.footer-newsletter-success {
+  color: #86efac;
+  font-size: 0.85rem;
+  padding: var(--space-2) 0;
+}
+
 @media (max-width: 640px) {
   .footer-newsletter-inner {
     flex-direction: column;

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="../../assets/analytics.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Newsletter — GoldAdmin</title>
+    <link rel="stylesheet" href="../../styles/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+      .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .status-active { background: rgba(34,197,94,0.15); color: #22c55e; }
+      .status-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+      .status-unsubscribed { background: rgba(100,116,139,0.15); color: #94a3b8; }
+      .status-bounced { background: rgba(239,68,68,0.15); color: #f87171; }
+      .stat-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .stat-pill {
+        background: var(--surface-2, rgba(255,255,255,0.04));
+        border: 1px solid var(--border, rgba(255,255,255,0.08));
+        border-radius: var(--radius-sm, 8px);
+        padding: 10px 16px;
+        min-width: 120px;
+      }
+      .stat-pill-label { color: var(--text-muted, #64748b); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .stat-pill-value { color: var(--text, #f1f5f9); font-size: 1.4rem; font-weight: 700; margin-top: 2px; }
+      .export-bar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        try {
+          if (window.location.hash && window.location.hash.includes('access_token')) return;
+          var k = Object.keys(localStorage);
+          var hasToken = k.some(function (x) {
+            return x.startsWith('sb-') && x.endsWith('-auth-token');
+          });
+          if (!hasToken) window.location.replace('../login/');
+        } catch (e) {}
+      })();
+    </script>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="admin-layout">
+      <aside class="sidebar" id="sidebar" aria-label="Admin navigation"></aside>
+      <div class="main-area">
+        <header class="page-header">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" type="button">☰</button>
+          <h1 class="page-title">Newsletter Subscribers</h1>
+          <div class="header-actions">
+            <div class="ticker-badge ticker-loading" id="ticker-badge" aria-live="polite">
+              <span class="ticker-dot ticker-dot--yellow" id="ticker-dot"></span>
+              <span id="ticker-text">XAU: loading…</span>
+            </div>
+          </div>
+        </header>
+
+        <main class="content-area">
+          <!-- Stat summary -->
+          <div class="stat-row" id="stats-row">
+            <div class="stat-pill"><div class="stat-pill-label">Total</div><div class="stat-pill-value" id="stat-total">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">Active</div><div class="stat-pill-value" id="stat-active">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">Pending</div><div class="stat-pill-value" id="stat-pending">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">Unsubscribed</div><div class="stat-pill-value" id="stat-unsub">—</div></div>
+          </div>
+
+          <!-- Filters + export -->
+          <div class="export-bar">
+            <select id="filter-status" class="form-select" style="max-width:140px">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="unsubscribed">Unsubscribed</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" id="btn-refresh" type="button">↺ Refresh</button>
+            <button class="btn btn-ghost btn-sm" id="btn-export-csv" type="button">⬇ Export CSV</button>
+          </div>
+
+          <!-- Table -->
+          <div class="table-wrap">
+            <table class="data-table" id="subscribers-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Locale</th>
+                  <th>Source</th>
+                  <th>Frequency</th>
+                  <th>Confirmed</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="subscribers-tbody">
+                <tr><td colspan="7" class="table-empty">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-bar" id="pagination-bar" hidden>
+            <button class="btn btn-ghost btn-sm" id="btn-prev" type="button">← Prev</button>
+            <span id="pagination-info" style="color:var(--text-muted,#64748b);font-size:0.8rem"></span>
+            <button class="btn btn-ghost btn-sm" id="btn-next" type="button">Next →</button>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initAdminShell } from '../shared/admin-shell.js';
+      import { requireAuth, logout, getSession } from '../auth.js';
+      import { getAuthToken } from '../shared/admin-data.js';
+
+      await requireAuth();
+      await initAdminShell({ logout, getSession });
+
+      // ── State ────────────────────────────────────────────────────────────
+      let currentPage = 1;
+      let totalPages = 1;
+      let currentStatus = '';
+
+      const tbody = document.getElementById('subscribers-tbody');
+      const paginationBar = document.getElementById('pagination-bar');
+      const paginationInfo = document.getElementById('pagination-info');
+
+      // ── Helpers ──────────────────────────────────────────────────────────
+      function fmtDate(iso) {
+        if (!iso) return '—';
+        try {
+          return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        } catch { return iso; }
+      }
+
+      function statusBadge(s) {
+        return `<span class="status-badge status-${s}">${s}</span>`;
+      }
+
+      async function apiGet(path) {
+        const token = getAuthToken();
+        const res = await fetch(path, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }
+
+      // ── Load subscribers ─────────────────────────────────────────────────
+      async function loadStats() {
+        try {
+          const data = await apiGet('/api/v1/newsletter/stats');
+          if (data.counts) {
+            document.getElementById('stat-total').textContent = data.counts.total ?? '—';
+            document.getElementById('stat-active').textContent = data.counts.active ?? '—';
+            document.getElementById('stat-pending').textContent = data.counts.pending ?? '—';
+            document.getElementById('stat-unsub').textContent = data.counts.unsubscribed ?? '—';
+          }
+        } catch (e) {
+          console.warn('Could not load stats', e.message);
+        }
+      }
+
+      async function loadSubscribers(page = 1, status = '') {
+        tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Loading…</td></tr>';
+        try {
+          const params = new URLSearchParams({ page, per_page: 50 });
+          if (status) params.set('status', status);
+          const data = await apiGet(`/api/v1/newsletter/subscribers?${params}`);
+
+          if (!data.data || data.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No subscribers found.</td></tr>';
+            paginationBar.hidden = true;
+            return;
+          }
+
+          tbody.innerHTML = data.data.map((s) => `
+            <tr>
+              <td>${s.email}</td>
+              <td>${statusBadge(s.status)}</td>
+              <td>${s.locale || 'en'}</td>
+              <td>${s.source || '—'}</td>
+              <td>${s.preferences?.frequency || 'weekly'}</td>
+              <td>${fmtDate(s.confirmed_at)}</td>
+              <td>${fmtDate(s.created_at)}</td>
+            </tr>
+          `).join('');
+
+          // Pagination
+          const p = data.pagination;
+          if (p && p.pages > 1) {
+            totalPages = p.pages;
+            currentPage = p.page;
+            paginationInfo.textContent = `Page ${p.page} of ${p.pages} · ${p.total} total`;
+            paginationBar.hidden = false;
+            document.getElementById('btn-prev').disabled = p.page <= 1;
+            document.getElementById('btn-next').disabled = p.page >= p.pages;
+          } else {
+            paginationBar.hidden = true;
+          }
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Error loading subscribers: ${e.message}</td></tr>`;
+          paginationBar.hidden = true;
+        }
+      }
+
+      // ── Export CSV ───────────────────────────────────────────────────────
+      document.getElementById('btn-export-csv').addEventListener('click', async () => {
+        try {
+          const data = await apiGet('/api/v1/newsletter/subscribers?per_page=100&page=1');
+          const rows = [['Email', 'Status', 'Locale', 'Source', 'Frequency', 'Confirmed', 'Joined']];
+          (data.data || []).forEach((s) => {
+            rows.push([
+              s.email,
+              s.status,
+              s.locale || 'en',
+              s.source || '',
+              s.preferences?.frequency || 'weekly',
+              s.confirmed_at || '',
+              s.created_at || '',
+            ]);
+          });
+          const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = Object.assign(document.createElement('a'), { href: url, download: `newsletter-subscribers-${new Date().toISOString().slice(0,10)}.csv` });
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          alert('Export failed: ' + e.message);
+        }
+      });
+
+      // ── Event listeners ──────────────────────────────────────────────────
+      document.getElementById('filter-status').addEventListener('change', (e) => {
+        currentStatus = e.target.value;
+        currentPage = 1;
+        loadSubscribers(currentPage, currentStatus);
+      });
+
+      document.getElementById('btn-refresh').addEventListener('click', () => {
+        loadSubscribers(currentPage, currentStatus);
+        loadStats();
+      });
+
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        if (currentPage > 1) loadSubscribers(--currentPage, currentStatus);
+      });
+
+      document.getElementById('btn-next').addEventListener('click', () => {
+        if (currentPage < totalPages) loadSubscribers(++currentPage, currentStatus);
+      });
+
+      // ── Init ─────────────────────────────────────────────────────────────
+      loadStats();
+      loadSubscribers(1, '');
+    </script>
+  </body>
+</html>

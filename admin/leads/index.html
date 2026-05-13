@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="../../assets/analytics.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Leads — GoldAdmin</title>
+    <link rel="stylesheet" href="../../styles/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+      .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .status-new { background: rgba(59,130,246,0.15); color: #60a5fa; }
+      .status-contacted { background: rgba(234,179,8,0.15); color: #eab308; }
+      .status-converted { background: rgba(34,197,94,0.15); color: #22c55e; }
+      .status-closed { background: rgba(100,116,139,0.15); color: #94a3b8; }
+      .status-spam { background: rgba(239,68,68,0.15); color: #f87171; }
+      .stat-row { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+      .stat-pill { background:var(--surface-2,rgba(255,255,255,0.04)); border:1px solid var(--border,rgba(255,255,255,0.08)); border-radius:var(--radius-sm,8px); padding:10px 16px; min-width:100px; }
+      .stat-pill-label { color:var(--text-muted,#64748b); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; }
+      .stat-pill-value { color:var(--text,#f1f5f9); font-size:1.4rem; font-weight:700; margin-top:2px; }
+      .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+      .lead-message { max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-muted); font-size:0.78rem; }
+      .row-actions-menu { display:flex; gap:6px; }
+
+      /* Detail overlay */
+      .lead-detail-overlay {
+        position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000;
+        display:flex; align-items:center; justify-content:center; padding:16px;
+      }
+      .lead-detail-panel {
+        background:var(--surface, #1e293b);
+        border:1px solid var(--border, rgba(255,255,255,0.08));
+        border-radius:var(--radius,12px);
+        padding:24px;
+        max-width:560px; width:100%;
+        max-height:80vh; overflow-y:auto;
+      }
+      .lead-detail-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+      .lead-detail-title { font-size:1rem; font-weight:600; color:var(--text,#f1f5f9); }
+      .lead-detail-field { margin-bottom:10px; }
+      .lead-detail-field label { display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted,#64748b); margin-bottom:2px; }
+      .lead-detail-field span { color:var(--text,#f1f5f9); font-size:0.875rem; word-break:break-word; }
+      .status-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        try {
+          if (window.location.hash && window.location.hash.includes('access_token')) return;
+          var k = Object.keys(localStorage);
+          var hasToken = k.some(function (x) { return x.startsWith('sb-') && x.endsWith('-auth-token'); });
+          if (!hasToken) window.location.replace('../login/');
+        } catch (e) {}
+      })();
+    </script>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="admin-layout">
+      <aside class="sidebar" id="sidebar" aria-label="Admin navigation"></aside>
+      <div class="main-area">
+        <header class="page-header">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" type="button">☰</button>
+          <h1 class="page-title">Leads</h1>
+          <div class="header-actions">
+            <div class="ticker-badge ticker-loading" id="ticker-badge" aria-live="polite">
+              <span class="ticker-dot ticker-dot--yellow" id="ticker-dot"></span>
+              <span id="ticker-text">XAU: loading…</span>
+            </div>
+          </div>
+        </header>
+
+        <main class="content-area">
+          <!-- Stat summary -->
+          <div class="stat-row">
+            <div class="stat-pill"><div class="stat-pill-label">Total</div><div class="stat-pill-value" id="stat-total">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">New</div><div class="stat-pill-value" id="stat-new">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">Contacted</div><div class="stat-pill-value" id="stat-contacted">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">Converted</div><div class="stat-pill-value" id="stat-converted">—</div></div>
+            <div class="stat-pill"><div class="stat-pill-label">Closed</div><div class="stat-pill-value" id="stat-closed">—</div></div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-bar">
+            <select id="filter-status" class="form-select" style="max-width:140px">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="converted">Converted</option>
+              <option value="closed">Closed</option>
+              <option value="spam">Spam</option>
+            </select>
+            <select id="filter-type" class="form-select" style="max-width:160px">
+              <option value="">All types</option>
+              <option value="shop_interest">Shop interest</option>
+              <option value="pricing_inquiry">Pricing inquiry</option>
+              <option value="contact">Contact</option>
+              <option value="event_track">Event</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" id="btn-refresh" type="button">↺ Refresh</button>
+          </div>
+
+          <!-- Table -->
+          <div class="table-wrap">
+            <table class="data-table" id="leads-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Email / Name</th>
+                  <th>Message</th>
+                  <th>Source</th>
+                  <th>Locale</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-tbody">
+                <tr><td colspan="8" class="table-empty">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-bar" id="pagination-bar" hidden>
+            <button class="btn btn-ghost btn-sm" id="btn-prev" type="button">← Prev</button>
+            <span id="pagination-info" style="color:var(--text-muted,#64748b);font-size:0.8rem"></span>
+            <button class="btn btn-ghost btn-sm" id="btn-next" type="button">Next →</button>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Lead detail overlay -->
+    <div id="lead-detail-overlay" class="lead-detail-overlay" hidden>
+      <div class="lead-detail-panel" role="dialog" aria-label="Lead detail">
+        <div class="lead-detail-header">
+          <div class="lead-detail-title" id="detail-title">Lead</div>
+          <button class="btn btn-ghost btn-sm" id="detail-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <div id="detail-body"></div>
+        <div class="status-actions" id="status-actions"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initAdminShell } from '../shared/admin-shell.js';
+      import { requireAuth, logout, getSession } from '../auth.js';
+      import { getAuthToken } from '../shared/admin-data.js';
+
+      await requireAuth();
+      await initAdminShell({ logout, getSession });
+
+      // ── State ────────────────────────────────────────────────────────────
+      let currentPage = 1;
+      let totalPages = 1;
+      let currentStatus = '';
+      let currentType = '';
+      let allLeads = [];
+
+      const tbody = document.getElementById('leads-tbody');
+      const paginationBar = document.getElementById('pagination-bar');
+
+      // ── Helpers ──────────────────────────────────────────────────────────
+      function fmtDate(iso) {
+        if (!iso) return '—';
+        try { return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } catch { return iso; }
+      }
+
+      function statusBadge(s) {
+        return `<span class="status-badge status-${s}">${s}</span>`;
+      }
+
+      async function apiCall(method, path, body) {
+        const token = getAuthToken();
+        const opts = {
+          method,
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        };
+        const res = await fetch(path, opts);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }
+
+      // ── Load counts ──────────────────────────────────────────────────────
+      async function loadCounts() {
+        try {
+          const data = await apiCall('GET', '/api/v1/admin/leads?per_page=1&page=1');
+          const c = data.counts || {};
+          document.getElementById('stat-total').textContent = c.total ?? '—';
+          document.getElementById('stat-new').textContent = c.new ?? '—';
+          document.getElementById('stat-contacted').textContent = c.contacted ?? '—';
+          document.getElementById('stat-converted').textContent = c.converted ?? '—';
+          document.getElementById('stat-closed').textContent = c.closed ?? '—';
+        } catch (e) { console.warn('counts', e.message); }
+      }
+
+      // ── Load leads ───────────────────────────────────────────────────────
+      async function loadLeads(page = 1, status = '', type = '') {
+        tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Loading…</td></tr>';
+        try {
+          const params = new URLSearchParams({ page, per_page: 50 });
+          if (status) params.set('status', status);
+          if (type) params.set('type', type);
+          const data = await apiCall('GET', `/api/v1/admin/leads?${params}`);
+          allLeads = data.data || [];
+
+          if (!allLeads.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="table-empty">No leads found.</td></tr>';
+            paginationBar.hidden = true;
+            return;
+          }
+
+          tbody.innerHTML = allLeads.map((l) => `
+            <tr data-id="${l.id}">
+              <td><span class="status-badge" style="background:rgba(245,158,11,0.1);color:#f59e0b">${l.type}</span></td>
+              <td>${l.email || l.name || '<em style="color:var(--text-muted)">anonymous</em>'}</td>
+              <td><div class="lead-message">${l.message || '—'}</div></td>
+              <td>${l.source || '—'}</td>
+              <td>${l.locale || 'en'}</td>
+              <td>${statusBadge(l.status)}</td>
+              <td>${fmtDate(l.created_at)}</td>
+              <td>
+                <div class="row-actions-menu">
+                  <button class="btn btn-ghost btn-sm" data-action="view" data-id="${l.id}" type="button" aria-label="View lead">View</button>
+                </div>
+              </td>
+            </tr>
+          `).join('');
+
+          // Pagination (basic — the getLeads call doesn't track total pages with offsets)
+          paginationBar.hidden = allLeads.length < 50;
+          if (!paginationBar.hidden) {
+            document.getElementById('btn-prev').disabled = page <= 1;
+            document.getElementById('btn-next').disabled = allLeads.length < 50;
+            document.getElementById('pagination-info').textContent = `Page ${page}`;
+          }
+
+          // View buttons
+          tbody.querySelectorAll('[data-action="view"]').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              const lead = allLeads.find((l) => l.id === e.currentTarget.dataset.id);
+              if (lead) showDetail(lead);
+            });
+          });
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Error: ${e.message}</td></tr>`;
+          paginationBar.hidden = true;
+        }
+      }
+
+      // ── Detail overlay ───────────────────────────────────────────────────
+      function showDetail(lead) {
+        document.getElementById('detail-title').textContent = `${lead.type} lead`;
+        const body = document.getElementById('detail-body');
+        body.innerHTML = [
+          ['ID', lead.id],
+          ['Email', lead.email || '—'],
+          ['Name', lead.name || '—'],
+          ['Phone', lead.phone || '—'],
+          ['Status', lead.status],
+          ['Source', lead.source || '—'],
+          ['Page', lead.page_path || '—'],
+          ['Locale', lead.locale || 'en'],
+          ['Entity', lead.entity_type ? `${lead.entity_type} / ${lead.entity_id || '?'}` : '—'],
+          ['Message', lead.message || '—'],
+          ['Admin notes', lead.notes || '—'],
+          ['Created', lead.created_at ? new Date(lead.created_at).toLocaleString() : '—'],
+          ['Reviewed by', lead.reviewed_by || '—'],
+        ].map(([label, val]) => `
+          <div class="lead-detail-field">
+            <label>${label}</label>
+            <span>${val}</span>
+          </div>
+        `).join('');
+
+        // Status action buttons
+        const actionsEl = document.getElementById('status-actions');
+        const statuses = ['new', 'contacted', 'converted', 'closed', 'spam'];
+        actionsEl.innerHTML = statuses
+          .filter((s) => s !== lead.status)
+          .map((s) => `<button class="btn btn-ghost btn-sm" data-set-status="${s}" data-lead-id="${lead.id}" type="button">Mark ${s}</button>`)
+          .join('');
+
+        actionsEl.querySelectorAll('[data-set-status]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            try {
+              btn.disabled = true;
+              await apiCall('PATCH', `/api/v1/admin/leads/${btn.dataset.leadId}`, { status: btn.dataset.setStatus });
+              hideDetail();
+              loadLeads(currentPage, currentStatus, currentType);
+              loadCounts();
+            } catch (e) {
+              alert('Failed to update: ' + e.message);
+              btn.disabled = false;
+            }
+          });
+        });
+
+        document.getElementById('lead-detail-overlay').hidden = false;
+      }
+
+      function hideDetail() {
+        document.getElementById('lead-detail-overlay').hidden = true;
+      }
+
+      document.getElementById('detail-close').addEventListener('click', hideDetail);
+      document.getElementById('lead-detail-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) hideDetail();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hideDetail();
+      });
+
+      // ── Event listeners ──────────────────────────────────────────────────
+      document.getElementById('filter-status').addEventListener('change', (e) => {
+        currentStatus = e.target.value; currentPage = 1;
+        loadLeads(currentPage, currentStatus, currentType);
+      });
+      document.getElementById('filter-type').addEventListener('change', (e) => {
+        currentType = e.target.value; currentPage = 1;
+        loadLeads(currentPage, currentStatus, currentType);
+      });
+      document.getElementById('btn-refresh').addEventListener('click', () => {
+        loadLeads(currentPage, currentStatus, currentType);
+        loadCounts();
+      });
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        if (currentPage > 1) loadLeads(--currentPage, currentStatus, currentType);
+      });
+      document.getElementById('btn-next').addEventListener('click', () => {
+        loadLeads(++currentPage, currentStatus, currentType);
+      });
+
+      // ── Init ─────────────────────────────────────────────────────────────
+      loadCounts();
+      loadLeads(1, '', '');
+    </script>
+  </body>
+</html>

@@ -30,6 +30,7 @@ const adminRoutes = require('./server/routes/admin');
 const stripeRoutes = require('./server/routes/stripe');
 const newsletterRoutes = require('./server/routes/newsletter');
 const submissionsRoutes = require('./server/routes/submissions');
+const leadsRoutes = require('./server/routes/leads');
 const apiV1Routes = require('./server/routes/api-v1');
 const alertsRoutes = require('./server/routes/alerts');
 
@@ -279,6 +280,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/stripe', stripeRoutes);
 app.use('/api/v1/newsletter', newsletterRoutes);
 app.use('/api/v1', submissionsRoutes);
+app.use('/api/v1', leadsRoutes);
 app.use('/api/v1', apiV1Routes);
 app.use('/api/v1', alertsRoutes);
 

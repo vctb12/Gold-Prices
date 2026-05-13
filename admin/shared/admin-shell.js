@@ -48,6 +48,13 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Growth',
+    items: [
+      { iconKey: 'content', label: 'Newsletter', slug: 'newsletter' },
+      { iconKey: 'social', label: 'Leads', slug: 'leads' },
+    ],
+  },
+  {
     label: 'Content',
     items: [
       { iconKey: 'content', label: 'Content', slug: 'content' },

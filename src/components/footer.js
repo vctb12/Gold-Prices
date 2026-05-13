@@ -1,4 +1,4 @@
-import { FORMSPREE_ENDPOINT } from '../config/index.js';
+import { NEWSLETTER_API_ENDPOINT, FORMSPREE_ENDPOINT } from '../config/index.js';
 import { NAV_DATA } from './nav-data.js';
 import { escapeHtml, resolveHref } from './nav/helpers.js';
 import { track, EVENTS } from '../lib/analytics.js';
@@ -72,19 +72,31 @@ export function injectFooter(lang = 'en', depth = 0) {
   </div>
 
   ${
-    FORMSPREE_ENDPOINT
+    // Show newsletter form: use internal API endpoint, or fall back to Formspree if configured.
+    // Always show the form (endpoint is always available via internal API).
+    true
       ? `
   <div class="footer-newsletter">
     <div class="footer-inner">
       <div class="footer-newsletter-inner">
         <div class="footer-newsletter-text">
-          <strong>${isAr ? '📬 النشرة الإخبارية' : '📬 Gold Price Alerts'}</strong>
-          <span>${isAr ? 'احصل على تحديثات أسعار الذهب الأسبوعية' : 'Get weekly gold price updates delivered to your inbox'}</span>
+          <strong>${isAr ? '📬 النشرة الإخبارية' : '📬 Gold Price Updates'}</strong>
+          <span>${isAr ? 'احصل على تحديثات أسعار الذهب الأسبوعية في صندوق بريدك' : 'Get weekly gold price updates delivered to your inbox'}</span>
         </div>
-        <form class="footer-newsletter-form" action="${FORMSPREE_ENDPOINT}" method="POST" aria-label="${isAr ? 'اشتراك النشرة' : 'Newsletter signup'}">
-          <input type="email" name="email" placeholder="${isAr ? 'بريدك الإلكتروني' : 'Your email address'}" required aria-label="${isAr ? 'البريد الإلكتروني' : 'Email address'}" autocomplete="email" />
-          <button type="submit" class="btn btn-primary">${isAr ? 'اشتراك' : 'Subscribe'}</button>
+        <form class="footer-newsletter-form" id="footer-newsletter-form" novalidate aria-label="${isAr ? 'اشتراك النشرة الإخبارية' : 'Newsletter signup'}" data-endpoint="${NEWSLETTER_API_ENDPOINT}" data-formspree="${FORMSPREE_ENDPOINT}">
+          <input type="email" name="email" id="footer-newsletter-email"
+            placeholder="${isAr ? 'بريدك الإلكتروني' : 'Your email address'}"
+            required
+            aria-label="${isAr ? 'البريد الإلكتروني' : 'Email address'}"
+            autocomplete="email"
+            inputmode="email"
+            aria-describedby="footer-newsletter-msg"
+          />
+          <!-- Honeypot field — hidden from humans, bots fill it in -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" />
+          <button type="submit" class="btn btn-primary" id="footer-newsletter-btn">${isAr ? 'اشتراك' : 'Subscribe'}</button>
         </form>
+        <p class="footer-newsletter-msg" id="footer-newsletter-msg" role="status" aria-live="polite" aria-atomic="true" hidden></p>
       </div>
     </div>
   </div>
@@ -139,11 +151,12 @@ export function injectFooter(lang = 'en', depth = 0) {
     }
   } catch (_) {}
 
-  // Newsletter form: fire newsletter_subscribe event on submit (before POST)
-  const newsletterForm = footerEl.querySelector('.footer-newsletter-form');
+  // Newsletter form: async submission with full state management
+  const newsletterForm = footerEl.querySelector('#footer-newsletter-form');
   if (newsletterForm) {
-    newsletterForm.addEventListener('submit', () => {
+    newsletterForm.addEventListener('submit', (e) => {
       track(EVENTS.NEWSLETTER_SUBSCRIBE, { source: 'footer', cadence: 'weekly' });
+      _handleNewsletterSubmit(e, newsletterForm, isAr);
     });
   }
 
@@ -168,6 +181,127 @@ export function injectFooter(lang = 'en', depth = 0) {
   // Method 4: Keyboard shortcut Ctrl+Shift+A
   // Method 5: Konami code ↑↑↓↓←→←→BA
   _initAdminAccessMethods(depth);
+}
+
+/**
+ * Handle async newsletter form submission with full state management.
+ * States: loading → success | duplicate | invalid | error
+ * @param {Event} e
+ * @param {HTMLFormElement} form
+ * @param {boolean} isAr
+ */
+async function _handleNewsletterSubmit(e, form, isAr) {
+  e.preventDefault();
+
+  const emailInput = form.querySelector('#footer-newsletter-email');
+  const btn = form.querySelector('#footer-newsletter-btn');
+  const msg =
+    form.querySelector('#footer-newsletter-msg') ||
+    document.getElementById('footer-newsletter-msg');
+
+  const email = emailInput ? emailInput.value.trim() : '';
+
+  // Basic client-side validation
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    _showNewsletterMsg(
+      msg,
+      isAr ? '⚠ يرجى إدخال بريد إلكتروني صحيح.' : '⚠ Please enter a valid email address.',
+      'error'
+    );
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  // Loading state
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = isAr ? 'جارٍ الاشتراك…' : 'Subscribing…';
+  }
+  _showNewsletterMsg(msg, '', null);
+
+  const endpoint = form.dataset.endpoint || '/api/v1/newsletter/subscribe';
+  const formspree = form.dataset.formspree || '';
+
+  try {
+    let ok = false;
+    let responseData = {};
+
+    if (formspree) {
+      // Formspree legacy path
+      const res = await fetch(formspree, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      ok = res.ok;
+    } else {
+      const locale = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+      const pagePath = window.location.pathname;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'footer', locale, page_path: pagePath }),
+      });
+      try {
+        responseData = await res.json();
+      } catch (_) {}
+      ok = res.ok || res.status === 200 || res.status === 201;
+    }
+
+    if (ok) {
+      // Hide the form, show success using textContent (not innerHTML)
+      const formRow = form.parentElement;
+      if (formRow) {
+        const successMsg = document.createElement('p');
+        successMsg.className = 'footer-newsletter-success';
+        successMsg.setAttribute('role', 'status');
+        successMsg.textContent = isAr
+          ? '✅ تحقق من صندوق الوارد لتأكيد اشتراكك.'
+          : '✅ Check your inbox to confirm your subscription.';
+        formRow.replaceChildren(successMsg);
+      }
+    } else {
+      // Determine error type from response
+      const serverMsg = responseData.message || '';
+      if (serverMsg.toLowerCase().includes('already')) {
+        _showNewsletterMsg(
+          msg,
+          isAr ? 'ℹ هذا البريد مشترك بالفعل.' : 'ℹ This email is already subscribed.',
+          'info'
+        );
+      } else {
+        _showNewsletterMsg(
+          msg,
+          isAr ? '⚠ حدث خطأ. يرجى المحاولة مجدداً.' : '⚠ Something went wrong. Please try again.',
+          'error'
+        );
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = isAr ? 'اشتراك' : 'Subscribe';
+      }
+    }
+  } catch (_err) {
+    _showNewsletterMsg(
+      msg,
+      isAr
+        ? '⚠ تعذر الاتصال. يرجى المحاولة لاحقاً.'
+        : '⚠ Could not connect. Please try again later.',
+      'error'
+    );
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = isAr ? 'اشتراك' : 'Subscribe';
+    }
+  }
+}
+
+function _showNewsletterMsg(el, text, type) {
+  if (!el) return;
+  el.textContent = text;
+  el.removeAttribute('hidden');
+  el.className = `footer-newsletter-msg footer-newsletter-msg--${type || 'info'}`;
+  if (!text) el.setAttribute('hidden', '');
 }
 
 /**

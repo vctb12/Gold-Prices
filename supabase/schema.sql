@@ -905,3 +905,269 @@ create policy "Admin delete api call logs"
     on public.api_call_logs for delete
     to authenticated
     using (true);
+
+-- ============================================================
+-- NEWSLETTER SUBSCRIBERS (phase 4 newsletter + lead capture)
+-- ============================================================
+create table if not exists public.newsletter_subscribers (
+    id                      uuid primary key default uuid_generate_v4(),
+    email                   text not null unique,
+    status                  text not null default 'pending'
+                            check (status in ('pending', 'active', 'unsubscribed', 'bounced')),
+    locale                  text not null default 'en' check (locale in ('en', 'ar')),
+    source                  text not null default 'footer',
+    page_path               text,
+    preferences             jsonb not null default '{}'::jsonb,
+    consent_given           boolean not null default true,
+    consent_at              timestamptz,
+    confirmed_at            timestamptz,
+    unsubscribed_at         timestamptz,
+    resubscribed_at         timestamptz,
+    created_at              timestamptz not null default now(),
+    updated_at              timestamptz not null default now()
+);
+
+alter table public.newsletter_subscribers enable row level security;
+
+create index if not exists idx_newsletter_subscribers_status
+    on public.newsletter_subscribers(status, created_at desc);
+create index if not exists idx_newsletter_subscribers_email
+    on public.newsletter_subscribers(email);
+
+-- Anyone may subscribe; no one may read the list without auth.
+create policy "Public insert newsletter subscribers"
+    on public.newsletter_subscribers for insert
+    with check (
+        status = 'pending'
+        and char_length(email) between 5 and 320
+    );
+
+create policy "Admin read newsletter subscribers"
+    on public.newsletter_subscribers for select
+    to authenticated
+    using (true);
+
+create policy "Admin update newsletter subscribers"
+    on public.newsletter_subscribers for update
+    to authenticated
+    using (true);
+
+create policy "Admin delete newsletter subscribers"
+    on public.newsletter_subscribers for delete
+    to authenticated
+    using (true);
+
+create trigger newsletter_subscribers_set_updated_at
+    before update on public.newsletter_subscribers
+    for each row execute procedure public.set_updated_at();
+
+-- ============================================================
+-- LEAD SUBMISSIONS (phase 4)
+-- ============================================================
+create table if not exists public.lead_submissions (
+    id              uuid primary key default uuid_generate_v4(),
+    type            text not null default 'contact'
+                    check (type in ('shop_interest', 'pricing_inquiry', 'contact', 'event_track')),
+    status          text not null default 'new'
+                    check (status in ('new', 'contacted', 'converted', 'closed', 'spam')),
+    email           text,
+    name            text,
+    phone           text,
+    message         text,
+    source          text not null default 'website',
+    page_path       text,
+    locale          text not null default 'en' check (locale in ('en', 'ar')),
+    entity_type     text,           -- 'shop' | 'country' | etc.
+    entity_id       text,
+    metadata        jsonb default '{}'::jsonb,
+    reviewed_at     timestamptz,
+    reviewed_by     text,
+    notes           text,
+    created_at      timestamptz not null default now(),
+    updated_at      timestamptz not null default now()
+);
+
+alter table public.lead_submissions enable row level security;
+
+create index if not exists idx_lead_submissions_status
+    on public.lead_submissions(status, created_at desc);
+create index if not exists idx_lead_submissions_type
+    on public.lead_submissions(type, created_at desc);
+
+-- Public can submit; cannot read.
+create policy "Public insert lead submissions"
+    on public.lead_submissions for insert
+    with check (true);
+
+create policy "Admin read lead submissions"
+    on public.lead_submissions for select
+    to authenticated
+    using (true);
+
+create policy "Admin update lead submissions"
+    on public.lead_submissions for update
+    to authenticated
+    using (true);
+
+create policy "Admin delete lead submissions"
+    on public.lead_submissions for delete
+    to authenticated
+    using (true);
+
+create trigger lead_submissions_set_updated_at
+    before update on public.lead_submissions
+    for each row execute procedure public.set_updated_at();
+
+-- ============================================================
+-- LEAD EVENTS (phase 4)
+-- ============================================================
+create table if not exists public.lead_events (
+    id              uuid primary key default uuid_generate_v4(),
+    lead_id         uuid references public.lead_submissions(id) on delete set null,
+    type            text not null,          -- 'submit', 'click', 'call', 'website', 'map', 'status_*'
+    entity_type     text,
+    entity_id       text,
+    page_path       text,
+    locale          text default 'en',
+    metadata        jsonb,
+    created_at      timestamptz not null default now()
+);
+
+alter table public.lead_events enable row level security;
+
+create index if not exists idx_lead_events_lead_id
+    on public.lead_events(lead_id, created_at desc);
+create index if not exists idx_lead_events_type
+    on public.lead_events(type, created_at desc);
+
+create policy "Admin read lead events"
+    on public.lead_events for select
+    to authenticated
+    using (true);
+
+create policy "Admin insert lead events"
+    on public.lead_events for insert
+    to authenticated
+    with check (true);
+
+-- ============================================================
+-- EMAIL CAMPAIGNS (phase 4)
+-- ============================================================
+create table if not exists public.email_campaigns (
+    id              uuid primary key default uuid_generate_v4(),
+    type            text not null default 'weekly'
+                    check (type in ('daily', 'weekly', 'transactional', 'custom')),
+    subject         text not null,
+    content_html    text,
+    content_text    text,
+    status          text not null default 'draft'
+                    check (status in ('draft', 'scheduled', 'sending', 'sent', 'cancelled')),
+    scheduled_at    timestamptz,
+    sent_at         timestamptz,
+    total_recipients int not null default 0,
+    created_by      text,
+    metadata        jsonb default '{}'::jsonb,
+    created_at      timestamptz not null default now(),
+    updated_at      timestamptz not null default now()
+);
+
+alter table public.email_campaigns enable row level security;
+
+create index if not exists idx_email_campaigns_status
+    on public.email_campaigns(status, sent_at desc);
+
+create policy "Admin read email campaigns"
+    on public.email_campaigns for select
+    to authenticated
+    using (true);
+
+create policy "Admin insert email campaigns"
+    on public.email_campaigns for insert
+    to authenticated
+    with check (true);
+
+create policy "Admin update email campaigns"
+    on public.email_campaigns for update
+    to authenticated
+    using (true);
+
+create trigger email_campaigns_set_updated_at
+    before update on public.email_campaigns
+    for each row execute procedure public.set_updated_at();
+
+-- ============================================================
+-- EMAIL DELIVERIES (phase 4)
+-- ============================================================
+create table if not exists public.email_deliveries (
+    id              uuid primary key default uuid_generate_v4(),
+    campaign_id     uuid references public.email_campaigns(id) on delete set null,
+    subscriber_id   uuid references public.newsletter_subscribers(id) on delete set null,
+    email           text not null,
+    status          text not null default 'queued'
+                    check (status in ('queued', 'sent', 'delivered', 'bounced', 'complained', 'failed')),
+    provider_id     text,           -- Resend email ID
+    error_message   text,
+    sent_at         timestamptz,
+    opened_at       timestamptz,
+    clicked_at      timestamptz,
+    created_at      timestamptz not null default now()
+);
+
+alter table public.email_deliveries enable row level security;
+
+create index if not exists idx_email_deliveries_campaign
+    on public.email_deliveries(campaign_id, created_at desc);
+create index if not exists idx_email_deliveries_subscriber
+    on public.email_deliveries(subscriber_id, created_at desc);
+create index if not exists idx_email_deliveries_status
+    on public.email_deliveries(status, created_at desc);
+
+create policy "Admin read email deliveries"
+    on public.email_deliveries for select
+    to authenticated
+    using (true);
+
+create policy "Admin insert email deliveries"
+    on public.email_deliveries for insert
+    to authenticated
+    with check (true);
+
+create policy "Admin update email deliveries"
+    on public.email_deliveries for update
+    to authenticated
+    using (true);
+
+-- ============================================================
+-- CONSENT LOGS (phase 4 — legal/compliance)
+-- ============================================================
+create table if not exists public.consent_logs (
+    id              uuid primary key default uuid_generate_v4(),
+    entity_type     text not null,   -- 'newsletter_subscriber' | 'lead_submission' | 'alert_rule'
+    entity_id       uuid not null,
+    email           text,
+    action          text not null    -- 'consent_given' | 'consent_withdrawn' | 'subscribed' | 'unsubscribed' | 'confirmed'
+                    check (action in ('consent_given', 'consent_withdrawn', 'subscribed', 'unsubscribed', 'confirmed', 'resubscribed')),
+    source          text,
+    page_path       text,
+    locale          text default 'en',
+    ip_hash         text,           -- hashed for privacy
+    user_agent_hash text,           -- hashed for privacy
+    created_at      timestamptz not null default now()
+);
+
+alter table public.consent_logs enable row level security;
+
+create index if not exists idx_consent_logs_entity
+    on public.consent_logs(entity_type, entity_id, created_at desc);
+create index if not exists idx_consent_logs_action
+    on public.consent_logs(action, created_at desc);
+
+create policy "Admin read consent logs"
+    on public.consent_logs for select
+    to authenticated
+    using (true);
+
+create policy "Admin insert consent logs"
+    on public.consent_logs for insert
+    to authenticated
+    with check (true);

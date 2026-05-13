@@ -54,6 +54,8 @@ const BASELINE = {
   'admin/analytics/index.html': 3,
   'admin/content/index.html': 4,
   'admin/index.html': 6,
+  'admin/leads/index.html': 6, // Phase 4: table row building + detail modal (admin-authed, server-supplied data)
+  'admin/newsletter/index.html': 4, // Phase 4: table row building (admin-authed, server-supplied data)
   'admin/orders/index.html': 3,
   'admin/pricing/index.html': 8,
   'admin/shared/admin-shell.js': 5,

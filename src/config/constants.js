@@ -40,6 +40,8 @@ export const AD_CONFIG = {
   },
 };
 
-// ── Newsletter / Formspree ──────────────────────────────────────────────────
-// Fill in after Formspree signup. Leave empty to hide newsletter form.
-export const FORMSPREE_ENDPOINT = ''; // e.g. 'https://formspree.io/f/xyzabc'
+// ── Newsletter ──────────────────────────────────────────────────────────────
+// Newsletter subscription endpoint. Uses the internal API by default.
+// Set FORMSPREE_ENDPOINT to use Formspree as a fallback (legacy).
+export const NEWSLETTER_API_ENDPOINT = '/api/v1/newsletter/subscribe';
+export const FORMSPREE_ENDPOINT = ''; // legacy — leave empty to use NEWSLETTER_API_ENDPOINT
