@@ -639,7 +639,9 @@
     position: sticky;
     top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
     z-index: 15;
-    background: var(--surface-primary);
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .calc-tab {
@@ -1005,6 +1007,11 @@
   /* Slightly larger result value so it reads well at small widths */
   .calc-result-value {
     font-size: clamp(1.6rem, 7.5vw, 2.2rem);
+  }
+
+  .calc-nav-tabs {
+    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px) - 1px);
+    padding-inline: 0.2rem;
   }
 }
 

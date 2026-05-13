@@ -930,13 +930,48 @@ function _injectMobileBottomNav(lang, _depth) {
   if (document.querySelector('.mobile-bottom-nav')) return;
 
   const isAr = lang === 'ar';
+  const data = NAV_DATA[lang] || NAV_DATA.en;
+  const navItems = [
+    ...(Array.isArray(data.primaryLinks) ? data.primaryLinks : []),
+    ...(Array.isArray(data.groups)
+      ? data.groups.flatMap((group) =>
+          Array.isArray(group.sections)
+            ? group.sections.flatMap((section) => section.items || [])
+            : Array.isArray(group.items)
+              ? group.items
+              : []
+        )
+      : []),
+  ];
+  const findLabel = (href, fallback) =>
+    navItems.find((item) => item && item.href === href)?.label || fallback;
 
   // Bottom nav uses root-safe absolute hrefs (matches phx/06 AR-nav pattern).
   const items = [
-    { href: '/', icon: '🏠', label: isAr ? 'الرئيسية' : 'Home', key: 'home' },
-    { href: '/tracker.html', icon: '📈', label: isAr ? 'تتبع' : 'Tracker', key: 'tracker' },
-    { href: '/calculator.html', icon: '🧮', label: isAr ? 'حاسبة' : 'Calc', key: 'calculator' },
-    { href: '/shops.html', icon: '🏪', label: isAr ? 'المحلات' : 'Shops', key: 'shops' },
+    {
+      href: '/tracker.html',
+      icon: '📈',
+      label: findLabel('/tracker.html', isAr ? 'تتبع' : 'Tracker'),
+      key: 'tracker',
+    },
+    {
+      href: '/calculator.html',
+      icon: '🧮',
+      label: findLabel('/calculator.html', isAr ? 'الحاسبة' : 'Calculator'),
+      key: 'calculator',
+    },
+    {
+      href: '/countries/index.html',
+      icon: '🌍',
+      label: findLabel('/countries/index.html', isAr ? 'الدول' : 'Countries'),
+      key: 'countries',
+    },
+    {
+      href: '/shops.html',
+      icon: '🏪',
+      label: findLabel('/shops.html', isAr ? 'المحلات' : 'Shops'),
+      key: 'shops',
+    },
     { action: 'menu', icon: '☰', label: isAr ? 'القائمة' : 'More', key: 'menu' },
   ];
 

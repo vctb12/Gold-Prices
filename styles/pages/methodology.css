@@ -49,7 +49,7 @@
   background: var(--color-surface, #1a1814);
   border-bottom: 1px solid var(--color-border, #2e2b24);
   position: sticky;
-  top: var(--nav-height, 56px);
+  top: calc(var(--nav-height, 56px) + var(--spot-bar-height, 0px));
   z-index: 100;
   overflow-x: auto;
 }
@@ -85,9 +85,9 @@
 .method-toc-list li a {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.65rem;
+  padding: 0.4rem 0.7rem;
   border-radius: var(--radius-sm, 6px);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--color-text-muted, #888);
   text-decoration: none;
   transition:
@@ -504,6 +504,11 @@ code.method-formula {
   .method-section {
     padding: 2rem 1rem 1.5rem;
   }
+
+  .method-toc-inner {
+    padding: 0.5rem var(--space-3);
+    gap: var(--space-3);
+  }
 }
 
 @media (width <= 480px) {
@@ -515,5 +520,13 @@ code.method-formula {
   .method-tier-desc {
     text-align: start;
     max-width: 100%;
+  }
+
+  .method-hero {
+    padding: var(--space-6) var(--space-4) var(--space-5);
+  }
+
+  .method-body {
+    padding: var(--space-5) var(--space-4) var(--space-7);
   }
 }
