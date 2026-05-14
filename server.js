@@ -28,6 +28,8 @@ if (IS_PROD) app.set('trust proxy', 1);
 // Import routes
 const adminRoutes = require('./server/routes/admin');
 const stripeRoutes = require('./server/routes/stripe');
+const billingRoutes = require('./server/routes/billing');
+const { meRouter: billingMeRouter } = billingRoutes;
 const newsletterRoutes = require('./server/routes/newsletter');
 const submissionsRoutes = require('./server/routes/submissions');
 const leadsRoutes = require('./server/routes/leads');
@@ -63,6 +65,7 @@ app.use(
               'https://www.clarity.ms',
               'https://pagead2.googlesyndication.com',
               'https://www.google-analytics.com',
+              'https://js.stripe.com',
             ],
             styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
             fontSrc: ["'self'", 'https://fonts.gstatic.com'],
@@ -74,8 +77,14 @@ app.use(
               'https://*.supabase.co',
               'https://www.clarity.ms',
               'https://nominatim.openstreetmap.org',
+              'https://api.stripe.com',
             ],
-            frameSrc: ["'self'", 'https://pagead2.googlesyndication.com'],
+            frameSrc: [
+              "'self'",
+              'https://pagead2.googlesyndication.com',
+              'https://js.stripe.com',
+              'https://hooks.stripe.com',
+            ],
             frameAncestors: ["'none'"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"],
@@ -164,7 +173,7 @@ app.use(createRequestLogger());
 // Stripe webhooks require the raw request body for signature verification.
 // This must be registered before the global JSON body parser.
 app.use(
-  ['/api/stripe/webhook', '/api/v1/stripe/webhook'],
+  ['/api/stripe/webhook', '/api/v1/stripe/webhook', '/api/v1/billing/webhook'],
   express.raw({ type: 'application/json' })
 );
 
@@ -275,6 +284,8 @@ if (!IS_PROD) {
 // API routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/v1/billing', billingRoutes);
+app.use('/api/v1/me', billingMeRouter);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api', submissionsRoutes);
 app.use('/api/v1/admin', adminRoutes);

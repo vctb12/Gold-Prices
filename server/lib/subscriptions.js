@@ -2,13 +2,17 @@
  * server/lib/subscriptions.js
  *
  * Subscription management logic for premium tiers.
- * Handles subscription creation, updates, cancellations, and tier checking.
+ * Delegates persistence to billing-repository.js; callers that only need
+ * tier/feature data should prefer entitlements.js.
  *
  * Tiers:
- * - free: AdSense ads, basic features, 100 API calls/day (future)
- * - pro: Ad-free, advanced alerts, priority support, unlimited exports ($4.99/month)
- * - api: Pro features + API access (500 calls/day), webhook support ($19.99/month)
+ * - free: AdSense ads, basic features, 3 alerts
+ * - pro: Ad-free, advanced alerts, push/email, priority support ($4.99/month)
+ * - api: Pro features + API access (500 calls/day), webhooks ($19.99/month)
  */
+
+const billingRepo = require('./billing-repository');
+const { resolveUserEntitlements, getEntitlementsForTier } = require('./entitlements');
 
 const SUBSCRIPTION_TIERS = {
   FREE: 'free',
@@ -20,49 +24,19 @@ const TIER_FEATURES = {
   free: {
     name: 'Free',
     price: 0,
-    features: {
-      adsEnabled: true,
-      maxAlerts: 3,
-      exportFormats: ['csv'],
-      apiCallsPerDay: 100,
-      prioritySupport: false,
-      advancedAlerts: false,
-      portfolioLimit: 1,
-    },
+    features: getEntitlementsForTier('free'),
   },
   pro: {
     name: 'Pro',
     priceMonthly: 4.99,
     priceAnnual: 49.99,
-    features: {
-      adsEnabled: false,
-      maxAlerts: 50,
-      exportFormats: ['csv', 'json', 'excel'],
-      apiCallsPerDay: 100,
-      prioritySupport: true,
-      advancedAlerts: true,
-      portfolioLimit: 10,
-      pushNotifications: true,
-      emailDigest: true,
-    },
+    features: getEntitlementsForTier('pro'),
   },
   api: {
     name: 'API',
     priceMonthly: 19.99,
     priceAnnual: 199.99,
-    features: {
-      adsEnabled: false,
-      maxAlerts: 100,
-      exportFormats: ['csv', 'json', 'excel'],
-      apiCallsPerDay: 500,
-      prioritySupport: true,
-      advancedAlerts: true,
-      portfolioLimit: 50,
-      pushNotifications: true,
-      emailDigest: true,
-      apiAccess: true,
-      webhookSupport: true,
-    },
+    features: getEntitlementsForTier('api'),
   },
 };
 
@@ -81,20 +55,19 @@ async function getUserSubscription(userId) {
     };
   }
 
-  // TODO: Query Supabase subscriptions table
-  // For now, return free tier
+  const { tier, subscription } = await resolveUserEntitlements(userId);
   return {
-    tier: SUBSCRIPTION_TIERS.FREE,
-    features: TIER_FEATURES.free.features,
-    status: 'active',
-    expiresAt: null,
+    tier,
+    features: getEntitlementsForTier(tier),
+    status: subscription?.status || 'active',
+    expiresAt: subscription?.currentPeriodEnd || null,
   };
 }
 
 /**
  * Check if user has access to a specific feature
  * @param {string} userId - User ID
- * @param {string} feature - Feature name (e.g., 'advancedAlerts', 'apiAccess')
+ * @param {string} feature - Feature name (e.g., 'webPush', 'apiAccess')
  * @returns {Promise<boolean>}
  */
 async function hasFeatureAccess(userId, feature) {
@@ -105,7 +78,7 @@ async function hasFeatureAccess(userId, feature) {
 /**
  * Get feature limit for a user
  * @param {string} userId - User ID
- * @param {string} feature - Feature name (e.g., 'maxAlerts', 'apiCallsPerDay')
+ * @param {string} feature - Feature name (e.g., 'alertLimit', 'apiCallsPerDay')
  * @returns {Promise<number>}
  */
 async function getFeatureLimit(userId, feature) {
@@ -124,9 +97,10 @@ async function checkUsageLimit(userId, action) {
 
   // Map actions to feature limits
   const limitMap = {
-    create_alert: 'maxAlerts',
+    create_alert: 'alertLimit',
     create_portfolio: 'portfolioLimit',
     api_call: 'apiCallsPerDay',
+    save_calculation: 'savedCalcLimit',
   };
 
   const limitKey = limitMap[action];
@@ -134,7 +108,7 @@ async function checkUsageLimit(userId, action) {
     return { allowed: true, limit: Infinity, current: 0 };
   }
 
-  const limit = subscription.features[limitKey];
+  const limit = subscription.features[limitKey] || 0;
 
   // TODO: Query actual usage from database
   const currentUsage = 0;
@@ -152,26 +126,7 @@ async function checkUsageLimit(userId, action) {
  * @returns {Promise<object>}
  */
 async function createSubscription(params) {
-  const {
-    userId,
-    tier,
-    stripeCustomerId,
-    stripeSubscriptionId,
-    status = 'active',
-    currentPeriodEnd,
-  } = params;
-
-  // TODO: Insert into Supabase subscriptions table
-  return {
-    id: 'temp-id',
-    userId,
-    tier,
-    stripeCustomerId,
-    stripeSubscriptionId,
-    status,
-    currentPeriodEnd,
-    createdAt: new Date(),
-  };
+  return billingRepo.createSubscription(params);
 }
 
 /**
@@ -181,12 +136,7 @@ async function createSubscription(params) {
  * @returns {Promise<object>}
  */
 async function updateSubscription(stripeSubscriptionId, updates) {
-  // TODO: Update Supabase subscriptions table
-  return {
-    stripeSubscriptionId,
-    ...updates,
-    updatedAt: new Date(),
-  };
+  return billingRepo.updateSubscription(stripeSubscriptionId, updates);
 }
 
 /**
@@ -195,13 +145,13 @@ async function updateSubscription(stripeSubscriptionId, updates) {
  * @returns {Promise<object>}
  */
 async function cancelSubscription(userId) {
-  // TODO: Update subscription status to 'canceled' in Supabase
-  // Keep access until current period ends
-  return {
-    userId,
+  const sub = await billingRepo.getActiveSubscription(userId);
+  if (!sub) return { userId, status: 'not_found' };
+  await billingRepo.updateSubscription(sub.stripeSubscriptionId, {
     status: 'canceled',
     canceledAt: new Date(),
-  };
+  });
+  return { userId, status: 'canceled', canceledAt: new Date() };
 }
 
 module.exports = {

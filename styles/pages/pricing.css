@@ -373,3 +373,53 @@
     padding: 0.75rem 0.5rem;
   }
 }
+
+/* ── Billing notices ───────────────────────────────────────────────────── */
+.billing-notice {
+  margin: var(--space-4) auto;
+  max-width: 56rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  border-inline-start: 4px solid transparent;
+}
+
+.billing-notice--warn {
+  background: color-mix(in srgb, var(--color-gold) 12%, transparent);
+  border-color: var(--color-gold);
+  color: var(--color-text);
+}
+
+.billing-notice--error {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  border-color: #ef4444;
+  color: var(--color-text);
+}
+
+/* Spinner for loading CTA state */
+@keyframes pricing-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+[aria-busy='true']::before {
+  content: '';
+  display: inline-block;
+  width: 0.875em;
+  height: 0.875em;
+  border: 2px solid currentcolor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: pricing-spin 0.6s linear infinite;
+  margin-inline-end: 0.4em;
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [aria-busy='true']::before {
+    animation: none;
+    content: '…';
+    border: none;
+  }
+}

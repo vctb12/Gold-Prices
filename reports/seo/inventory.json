@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-13",
+  "generatedAtDate": "2026-05-14",
   "summary": {
-    "totalHtmlFiles": 655,
-    "withCanonical": 653,
+    "totalHtmlFiles": 656,
+    "withCanonical": 654,
     "withoutCanonical": 2,
     "withOgImage": 499,
-    "withoutOgImage": 156,
+    "withoutOgImage": 157,
     "withJsonLd": 643,
-    "withoutJsonLd": 12,
+    "withoutJsonLd": 13,
     "hreflangEnArPairs": 643,
-    "noindexCount": 156
+    "noindexCount": 157
   },
   "records": [
     {
@@ -1004,6 +1004,27 @@
         "BreadcrumbList"
       ],
       "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/subscription/success.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Subscription Active — Gold Ticker Live",
+      "metaDescription": "Your subscription is active. Welcome to Gold Ticker Live Pro.",
+      "canonical": "https://goldtickerlive.com/content/subscription/success.html",
+      "robots": "noindex, nofollow",
+      "ogTitle": null,
+      "ogDescription": null,
+      "ogImage": null,
+      "ogUrl": null,
+      "ogType": null,
+      "twitterCard": null,
+      "twitterImage": null,
+      "hreflang": [],
+      "jsonLdTypes": [],
+      "hasStructuredData": false,
       "jsonLdParseFailures": null
     },
     {

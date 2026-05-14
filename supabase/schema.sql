@@ -1384,3 +1384,289 @@ create policy "Admin insert consent logs"
     on public.consent_logs for insert
     to authenticated
     with check (true);
+
+-- ============================================================
+-- BILLING (phase 6 — Stripe subscriptions & entitlements)
+-- ============================================================
+
+-- ── plans ─────────────────────────────────────────────────────────────────
+-- Product catalogue. Rows are inserted once and referenced by subscriptions.
+create table if not exists public.plans (
+    id              uuid primary key default uuid_generate_v4(),
+    name            text not null unique,            -- 'free' | 'pro' | 'api'
+    display_name    text not null,
+    price_monthly   numeric(10,2) not null default 0,
+    price_yearly    numeric(10,2) not null default 0,
+    stripe_price_monthly text,                       -- Stripe price ID
+    stripe_price_yearly  text,
+    features        jsonb not null default '{}',
+    active          boolean not null default true,
+    created_at      timestamptz not null default now(),
+    updated_at      timestamptz not null default now()
+);
+
+alter table public.plans enable row level security;
+
+create policy "Public read plans"
+    on public.plans for select
+    using (active = true);
+
+create policy "Admin manage plans"
+    on public.plans for all
+    to service_role
+    using (true)
+    with check (true);
+
+create trigger plans_set_updated_at
+    before update on public.plans
+    for each row execute procedure public.set_updated_at();
+
+-- Seed the three tiers
+insert into public.plans (name, display_name, price_monthly, price_yearly, features) values
+    ('free', 'Free',  0,     0,      '{"alertLimit":3,"historyDays":30,"savedCalcLimit":5,"apiAccess":false,"apiCallsPerDay":0,"exportFormats":["csv"],"webPush":false,"emailAlerts":false,"adsEnabled":true,"portfolioLimit":1,"webhookSupport":false,"prioritySupport":false}'),
+    ('pro',  'Pro',   4.99,  49.99,  '{"alertLimit":50,"historyDays":365,"savedCalcLimit":100,"apiAccess":false,"apiCallsPerDay":0,"exportFormats":["csv","json","excel"],"webPush":true,"emailAlerts":true,"adsEnabled":false,"portfolioLimit":10,"webhookSupport":false,"prioritySupport":true}'),
+    ('api',  'API',   19.99, 199.99, '{"alertLimit":100,"historyDays":0,"savedCalcLimit":500,"apiAccess":true,"apiCallsPerDay":500,"exportFormats":["csv","json","excel"],"webPush":true,"emailAlerts":true,"adsEnabled":false,"portfolioLimit":50,"webhookSupport":true,"prioritySupport":true}')
+on conflict (name) do nothing;
+
+-- ── stripe_customers ──────────────────────────────────────────────────────
+create table if not exists public.stripe_customers (
+    id                  uuid primary key default uuid_generate_v4(),
+    user_id             text not null unique,         -- Supabase auth user ID
+    stripe_customer_id  text not null unique,
+    email               text,
+    created_at          timestamptz not null default now(),
+    updated_at          timestamptz not null default now()
+);
+
+alter table public.stripe_customers enable row level security;
+
+create index if not exists idx_stripe_customers_user_id
+    on public.stripe_customers(user_id);
+create index if not exists idx_stripe_customers_stripe_id
+    on public.stripe_customers(stripe_customer_id);
+
+-- Only the owning user and admins may read; service-role writes via backend
+create policy "User read own stripe customer"
+    on public.stripe_customers for select
+    to authenticated
+    using (user_id = auth.uid()::text);
+
+create policy "Admin manage stripe customers"
+    on public.stripe_customers for all
+    to service_role
+    using (true)
+    with check (true);
+
+create trigger stripe_customers_set_updated_at
+    before update on public.stripe_customers
+    for each row execute procedure public.set_updated_at();
+
+-- ── subscriptions ─────────────────────────────────────────────────────────
+create table if not exists public.subscriptions (
+    id                      uuid primary key default uuid_generate_v4(),
+    user_id                 text not null,
+    tier                    text not null default 'free'
+                            check (tier in ('free', 'pro', 'api')),
+    stripe_customer_id      text,
+    stripe_subscription_id  text unique,
+    status                  text not null default 'active'
+                            check (status in ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'unpaid')),
+    current_period_end      timestamptz,
+    cancel_at_period_end    boolean not null default false,
+    canceled_at             timestamptz,
+    interval                text not null default 'month'
+                            check (interval in ('month', 'year')),
+    created_at              timestamptz not null default now(),
+    updated_at              timestamptz not null default now()
+);
+
+alter table public.subscriptions enable row level security;
+
+create index if not exists idx_subscriptions_user_id
+    on public.subscriptions(user_id, status, created_at desc);
+create index if not exists idx_subscriptions_stripe_sub_id
+    on public.subscriptions(stripe_subscription_id);
+create index if not exists idx_subscriptions_customer_id
+    on public.subscriptions(stripe_customer_id);
+
+create policy "User read own subscriptions"
+    on public.subscriptions for select
+    to authenticated
+    using (user_id = auth.uid()::text);
+
+create policy "Admin manage subscriptions"
+    on public.subscriptions for all
+    to service_role
+    using (true)
+    with check (true);
+
+create trigger subscriptions_set_updated_at
+    before update on public.subscriptions
+    for each row execute procedure public.set_updated_at();
+
+-- ── entitlements ──────────────────────────────────────────────────────────
+-- Manual grants / overrides. The backend derives entitlements from
+-- subscriptions.tier by default; rows here take precedence.
+create table if not exists public.entitlements (
+    id          uuid primary key default uuid_generate_v4(),
+    user_id     text not null,
+    feature     text not null,
+    value       jsonb not null,              -- true | false | number | string[]
+    granted_by  text,
+    expires_at  timestamptz,
+    created_at  timestamptz not null default now(),
+    updated_at  timestamptz not null default now(),
+    unique (user_id, feature)
+);
+
+alter table public.entitlements enable row level security;
+
+create index if not exists idx_entitlements_user_id
+    on public.entitlements(user_id, feature);
+
+create policy "User read own entitlements"
+    on public.entitlements for select
+    to authenticated
+    using (user_id = auth.uid()::text);
+
+create policy "Admin manage entitlements"
+    on public.entitlements for all
+    to service_role
+    using (true)
+    with check (true);
+
+create trigger entitlements_set_updated_at
+    before update on public.entitlements
+    for each row execute procedure public.set_updated_at();
+
+-- ── stripe_events ─────────────────────────────────────────────────────────
+-- Idempotent event log. One row per Stripe event ID.
+create table if not exists public.stripe_events (
+    id              uuid primary key default uuid_generate_v4(),
+    stripe_event_id text not null unique,
+    type            text not null,
+    livemode        boolean not null default false,
+    handled_at      timestamptz not null default now(),
+    created_at      timestamptz not null default now()
+);
+
+alter table public.stripe_events enable row level security;
+
+create index if not exists idx_stripe_events_event_id
+    on public.stripe_events(stripe_event_id);
+create index if not exists idx_stripe_events_type
+    on public.stripe_events(type, handled_at desc);
+
+create policy "Admin read stripe events"
+    on public.stripe_events for select
+    to service_role
+    using (true);
+
+create policy "Admin insert stripe events"
+    on public.stripe_events for insert
+    to service_role
+    with check (true);
+
+-- ── api_keys ──────────────────────────────────────────────────────────────
+create table if not exists public.api_keys (
+    id          uuid primary key default uuid_generate_v4(),
+    user_id     text not null,
+    key_hash    text not null unique,        -- SHA-256 of the raw key
+    key_prefix  text not null,              -- first 12 chars — safe to display
+    label       text not null default 'default',
+    revoked     boolean not null default false,
+    created_at  timestamptz not null default now(),
+    updated_at  timestamptz not null default now()
+);
+
+alter table public.api_keys enable row level security;
+
+create index if not exists idx_api_keys_user_id
+    on public.api_keys(user_id, revoked, created_at desc);
+create index if not exists idx_api_keys_hash
+    on public.api_keys(key_hash) where (revoked = false);
+
+create policy "User read own api keys"
+    on public.api_keys for select
+    to authenticated
+    using (user_id = auth.uid()::text);
+
+create policy "Admin manage api keys"
+    on public.api_keys for all
+    to service_role
+    using (true)
+    with check (true);
+
+create trigger api_keys_set_updated_at
+    before update on public.api_keys
+    for each row execute procedure public.set_updated_at();
+
+-- ── api_usage ─────────────────────────────────────────────────────────────
+-- One row per (api_key_id, date) window — incremented atomically.
+create table if not exists public.api_usage (
+    id          uuid primary key default uuid_generate_v4(),
+    api_key_id  uuid not null references public.api_keys(id) on delete cascade,
+    date        date not null,
+    call_count  int not null default 0,
+    created_at  timestamptz not null default now(),
+    updated_at  timestamptz not null default now(),
+    unique (api_key_id, date)
+);
+
+alter table public.api_usage enable row level security;
+
+create index if not exists idx_api_usage_key_date
+    on public.api_usage(api_key_id, date desc);
+
+create policy "Admin manage api usage"
+    on public.api_usage for all
+    to service_role
+    using (true)
+    with check (true);
+
+create trigger api_usage_set_updated_at
+    before update on public.api_usage
+    for each row execute procedure public.set_updated_at();
+
+-- Atomic increment helper (avoids a read-modify-write race)
+create or replace function public.increment_api_usage(p_key_id uuid, p_date date)
+returns int language plpgsql security definer as $$
+declare
+    v_count int;
+begin
+    insert into public.api_usage (api_key_id, date, call_count)
+    values (p_key_id, p_date, 1)
+    on conflict (api_key_id, date)
+    do update set call_count = api_usage.call_count + 1,
+                  updated_at = now()
+    returning call_count into v_count;
+    return v_count;
+end;
+$$;
+
+-- ── billing_audit_logs ────────────────────────────────────────────────────
+create table if not exists public.billing_audit_logs (
+    id          uuid primary key default uuid_generate_v4(),
+    user_id     text,
+    action      text not null,
+    tier        text,
+    metadata    jsonb,
+    created_at  timestamptz not null default now()
+);
+
+alter table public.billing_audit_logs enable row level security;
+
+create index if not exists idx_billing_audit_logs_user_id
+    on public.billing_audit_logs(user_id, created_at desc);
+create index if not exists idx_billing_audit_logs_action
+    on public.billing_audit_logs(action, created_at desc);
+
+create policy "Admin read billing audit logs"
+    on public.billing_audit_logs for select
+    to service_role
+    using (true);
+
+create policy "Admin insert billing audit logs"
+    on public.billing_audit_logs for insert
+    to service_role
+    with check (true);

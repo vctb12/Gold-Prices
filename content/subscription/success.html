@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="/assets/analytics.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Your subscription is active. Welcome to Gold Ticker Live Pro." />
+    <title>Subscription Active — Gold Ticker Live</title>
+    <link rel="canonical" href="https://goldtickerlive.com/content/subscription/success.html" />
+    <meta name="theme-color" content="#d4a017" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles/global.css" />
+    <style>
+      .success-page {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: var(--space-8) var(--space-4);
+      }
+      .success-icon {
+        font-size: 4rem;
+        margin-block-end: var(--space-4);
+        line-height: 1;
+      }
+      .success-heading {
+        font-size: var(--text-3xl);
+        font-weight: 700;
+        color: var(--color-gold);
+        margin-block-end: var(--space-3);
+      }
+      .success-subtext {
+        font-size: var(--text-lg);
+        color: var(--color-text-secondary);
+        max-width: 36rem;
+        margin-block-end: var(--space-8);
+      }
+      .success-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        justify-content: center;
+      }
+      .success-actions a {
+        display: inline-block;
+        padding: var(--space-3) var(--space-6);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .btn-primary {
+        background: var(--color-gold);
+        color: #000;
+      }
+      .btn-secondary {
+        background: var(--surface-2);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+      }
+      .success-loading { color: var(--color-text-secondary); }
+      .success-details {
+        margin-block-start: var(--space-8);
+        padding: var(--space-4);
+        background: var(--surface-2);
+        border-radius: var(--radius-lg);
+        max-width: 28rem;
+        width: 100%;
+        text-align: start;
+      }
+      .success-details h2 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        margin-block-end: var(--space-2);
+      }
+      .success-details p {
+        font-size: var(--text-sm);
+        color: var(--color-text-secondary);
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div id="nav-container"></div>
+
+    <main id="main-content" class="success-page">
+      <div id="success-content" aria-live="polite">
+        <p class="success-loading">Confirming your subscription…</p>
+      </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script type="module">
+      import { injectNav } from '/src/components/nav.js';
+      import { injectFooter } from '/src/components/footer.js';
+
+      injectNav('en');
+      injectFooter('en');
+
+      // getToken must be declared before the await call below that uses it
+      async function getToken() {
+        try {
+          if (window.supabase) {
+            const { data } = await window.supabase.auth.getSession();
+            return data?.session?.access_token || null;
+          }
+        } catch {
+          // fall through
+        }
+        return null;
+      }
+
+      // Read session_id from query string — used only for display, not for trust
+      const params = new URLSearchParams(window.location.search);
+      // sessionId available for future use (e.g. analytics)
+      params.get('session_id');
+
+      // Attempt to fetch billing status to confirm tier (purely for UX messaging)
+      let tierLabel = null; // null until confirmed via server
+      try {
+        const token = await getToken();
+        // Only send Authorization when we actually have a token to avoid
+        // noisy 401 entries from unauthenticated back-button visitors
+        const fetchOptions = token
+          ? { headers: { Authorization: `Bearer ${token}` } }
+          : {};
+        const res = await fetch('/api/v1/billing/status', fetchOptions);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.subscription?.tier === 'api') tierLabel = 'API';
+          else if (data.subscription?.tier === 'pro') tierLabel = 'Pro';
+        }
+      } catch {
+        // Display generic success if status check fails
+      }
+
+      // Render success state — only claim a specific tier when confirmed
+      const container = document.getElementById('success-content');
+      const tierHeading = tierLabel
+        ? `You're subscribed to ${tierLabel}!`
+        : 'Your subscription is active!';
+      const tierBody = tierLabel
+        ? `Your ${tierLabel} features are now active.`
+        : 'Your new features are now active.';
+      container.innerHTML = `
+        <div class="success-icon" aria-hidden="true">✅</div>
+        <h1 class="success-heading">${tierHeading}</h1>
+        <p class="success-subtext">
+          Your free trial has started. No charge until the trial ends.
+          You can manage or cancel your subscription at any time from your account.
+        </p>
+        <div class="success-actions">
+          <a href="/tracker.html" class="btn-primary">Open Gold Tracker</a>
+          <a href="/account.html" class="btn-secondary">Manage Subscription</a>
+        </div>
+        <div class="success-details">
+          <h2>What's next?</h2>
+          <p>${tierBody} Check your email for a receipt from Stripe. Questions? <a href="/content/faq/index.html">Visit our FAQ</a>.</p>
+        </div>
+      `;
+    </script>
+  </body>
+</html>

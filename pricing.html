@@ -61,6 +61,14 @@
     <div id="nav-container"></div>
 
     <main id="main-content" class="pricing-page">
+      <!-- Billing unavailable notice (shown when Stripe is not configured) -->
+      <div id="billing-unavailable-notice" class="billing-notice billing-notice--warn" hidden role="status">
+        <strong>Payments coming soon.</strong> Paid plans are not yet active — the tracker, calculator, and all free features remain fully available.
+      </div>
+
+      <!-- Checkout error message -->
+      <div id="checkout-error-message" class="billing-notice billing-notice--error" hidden role="alert" tabindex="-1"></div>
+
       <section class="pricing-hero">
         <div class="pricing-hero-content">
           <h1>Choose Your Plan</h1>
@@ -291,44 +299,156 @@
       injectNav('en');
       injectFooter('en');
 
-      // Billing toggle logic
+      // -----------------------------------------------------------------------
+      // Billing configuration check
+      // -----------------------------------------------------------------------
+      let billingConfigured = false;
+      let stripePublishableKey = null;
+      let billingCheckFailed = false; // true when the config fetch itself errored
+
+      async function checkBillingConfig() {
+        try {
+          const res = await fetch('/api/v1/billing/config');
+          if (res.ok) {
+            const data = await res.json();
+            billingConfigured = Boolean(data.configured);
+            stripePublishableKey = data.publishableKey || null;
+          }
+        } catch {
+          billingConfigured = false;
+          billingCheckFailed = true;
+        }
+
+        if (!billingConfigured) {
+          const notice = document.getElementById('billing-unavailable-notice');
+          if (notice) {
+            notice.hidden = false;
+            // Distinguish a transient network error from deliberately unconfigured
+            if (billingCheckFailed) {
+              notice.textContent =
+                'Payments are temporarily unavailable. Please refresh the page or try again shortly.';
+            }
+          }
+          document.querySelectorAll('[data-tier]').forEach((btn) => {
+            btn.disabled = true;
+            btn.title = billingCheckFailed
+              ? 'Payments temporarily unavailable — please try again shortly.'
+              : 'Payments not available yet — check back soon.';
+          });
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // Billing toggle (monthly / annual)
+      // -----------------------------------------------------------------------
       const billingToggle = document.getElementById('billing-annual');
       const monthlyPrices = document.querySelectorAll('.monthly-price');
       const annualPrices = document.querySelectorAll('.annual-price');
-      const annualNotes = document.querySelectorAll('.annual-price');
 
-      billingToggle.addEventListener('change', (e) => {
-        const isAnnual = e.target.checked;
-        monthlyPrices.forEach(el => el.style.display = isAnnual ? 'none' : 'inline');
-        annualPrices.forEach(el => el.style.display = isAnnual ? 'inline' : 'none');
-      });
+      function applyBillingToggle(isAnnual) {
+        monthlyPrices.forEach((el) => { el.style.display = isAnnual ? 'none' : 'inline'; });
+        annualPrices.forEach((el) => { el.style.display = isAnnual ? 'inline' : 'none'; });
+      }
 
-      // Handle subscription buttons
-      const ctaButtons = document.querySelectorAll('[data-tier]');
-      ctaButtons.forEach(button => {
+      billingToggle.addEventListener('change', (e) => applyBillingToggle(e.target.checked));
+      applyBillingToggle(false);
+
+      // -----------------------------------------------------------------------
+      // Checkout flow
+      // -----------------------------------------------------------------------
+      function setButtonState(btn, state, originalText) {
+        if (state === 'loading') {
+          btn.disabled = true;
+          btn.textContent = 'Starting…';
+          btn.setAttribute('aria-busy', 'true');
+        } else if (state === 'error') {
+          btn.disabled = false;
+          btn.textContent = originalText;
+          btn.removeAttribute('aria-busy');
+        } else {
+          btn.disabled = false;
+          btn.textContent = originalText;
+          btn.removeAttribute('aria-busy');
+        }
+      }
+
+      function showCheckoutError(message) {
+        const el = document.getElementById('checkout-error-message');
+        if (el) {
+          el.textContent = message;
+          el.hidden = false;
+          el.focus();
+        }
+      }
+
+      function hideCheckoutError() {
+        const el = document.getElementById('checkout-error-message');
+        if (el) { el.hidden = true; el.textContent = ''; }
+      }
+
+      async function startCheckout(tier, interval) {
+        // Get session token from Supabase (if logged in)
+        let authToken = null;
+        try {
+          // Attempt to get Supabase session from localStorage
+          const sbUrl = document.head.querySelector('meta[name="supabase-url"]')?.content;
+          const sbKey = document.head.querySelector('meta[name="supabase-anon-key"]')?.content;
+          if (sbUrl && sbKey && window.supabase) {
+            const { data } = await window.supabase.auth.getSession();
+            authToken = data?.session?.access_token || null;
+          }
+        } catch {
+          // supabase client may not be loaded on this page
+        }
+
+        if (!authToken) {
+          // Redirect to account page for sign-in, then come back
+          const returnUrl = encodeURIComponent(window.location.href);
+          window.location.href = `/account.html?redirect=${returnUrl}&reason=checkout`;
+          return;
+        }
+
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` };
+        const response = await fetch('/api/v1/billing/create-checkout-session', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ tier, interval }),
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          if (response.status === 503 && body.code === 'BILLING_NOT_CONFIGURED') {
+            throw new Error('Payments are not available yet. Please check back soon.');
+          }
+          throw new Error(body.error || `Server error (${response.status})`);
+        }
+
+        const { url } = await response.json();
+        if (!url) throw new Error('Invalid checkout response from server.');
+        window.location.href = url;
+      }
+
+      // -----------------------------------------------------------------------
+      // Init — await billing config before wiring click handlers to avoid the
+      // race where billingConfigured is still false when a CTA is clicked.
+      // -----------------------------------------------------------------------
+      await checkBillingConfig();
+
+      document.querySelectorAll('[data-tier]').forEach((button) => {
+        const originalText = button.textContent.trim();
         button.addEventListener('click', async () => {
+          if (!billingConfigured) return;
           const tier = button.dataset.tier;
           const interval = billingToggle.checked ? 'year' : 'month';
-
-          // TODO: Check if user is authenticated
-          // For now, redirect to signup or show auth modal
-          alert(`Subscribe to ${tier} tier (${interval}ly)\n\nStripe integration pending.`);
-
-          // Future implementation:
-          /*
+          hideCheckoutError();
+          setButtonState(button, 'loading', originalText);
           try {
-            const response = await fetch('/api/stripe/create-checkout', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ tier, interval, userId: 'current-user-id' }),
-            });
-            const { url } = await response.json();
-            window.location.href = url; // Redirect to Stripe Checkout
-          } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Failed to start checkout. Please try again.');
+            await startCheckout(tier, interval);
+          } catch (err) {
+            console.error('[pricing] Checkout error:', err.message);
+            showCheckoutError(err.message || 'Failed to start checkout. Please try again.');
+            setButtonState(button, 'error', originalText);
           }
-          */
         });
       });
     </script>
