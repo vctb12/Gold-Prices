@@ -59,7 +59,7 @@ function readStore() {
 
 function writeStore(store) {
   const dir = path.dirname(BILLING_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   atomicWriteJSON(BILLING_FILE, store, { mode: 0o600 });
 }
 

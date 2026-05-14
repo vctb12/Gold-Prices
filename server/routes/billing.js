@@ -275,7 +275,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     console.error('[billing/webhook] Signature verification failed:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    // Return plain text — never interpolate error message into HTML
+    return res.status(400).type('text/plain').send('Webhook signature verification failed');
   }
 
   // Idempotency guard — ignore already-processed events
