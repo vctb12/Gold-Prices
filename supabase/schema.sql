@@ -2077,3 +2077,68 @@ create policy "Admin insert tweet failures"
     on public.tweet_failures for insert
     to service_role
     with check (true);
+
+-- ---------------------------------------------------------------------------
+-- Phase 11: AI Content Drafts
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.ai_drafts (
+    id                  text primary key,
+    type                text not null,
+    status              text not null default 'draft',
+    language_pair       text not null default 'en+ar',
+    title_en            text not null default '',
+    title_ar            text not null default '',
+    body_en             text not null default '',
+    body_ar             text not null default '',
+    data_snapshot       jsonb,
+    data_timestamp_utc  timestamptz,
+    is_spot_estimate    boolean not null default true,
+    anomaly_flag        boolean not null default false,
+    anomaly_detail      text,
+    generated_at_utc    timestamptz not null default now(),
+    reviewed_by         text,
+    reviewed_at_utc     timestamptz,
+    review_action       text,
+    review_note         text,
+    published_at_utc    timestamptz,
+    export_channel      text,
+    audit_trail         jsonb not null default '[]'::jsonb,
+    constraint ai_drafts_type_check check (
+        type in (
+            'daily_summary', 'weekly_summary', 'uae_gcc_summary',
+            'provider_report', 'seo_brief', 'x_post', 'newsletter_block'
+        )
+    ),
+    constraint ai_drafts_status_check check (
+        status in ('draft', 'approved', 'rejected', 'published')
+    )
+);
+
+create index if not exists idx_ai_drafts_status
+    on public.ai_drafts(status, generated_at_utc desc);
+create index if not exists idx_ai_drafts_type
+    on public.ai_drafts(type, generated_at_utc desc);
+create index if not exists idx_ai_drafts_generated_at
+    on public.ai_drafts(generated_at_utc desc);
+
+alter table public.ai_drafts enable row level security;
+
+drop policy if exists "Admin read ai drafts" on public.ai_drafts;
+create policy "Admin read ai drafts"
+    on public.ai_drafts for select
+    to service_role
+    using (true);
+
+drop policy if exists "Admin insert ai drafts" on public.ai_drafts;
+create policy "Admin insert ai drafts"
+    on public.ai_drafts for insert
+    to service_role
+    with check (true);
+
+drop policy if exists "Admin update ai drafts" on public.ai_drafts;
+create policy "Admin update ai drafts"
+    on public.ai_drafts for update
+    to service_role
+    using (true)
+    with check (true);
