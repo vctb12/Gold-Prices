@@ -304,6 +304,7 @@
       // -----------------------------------------------------------------------
       let billingConfigured = false;
       let stripePublishableKey = null;
+      let billingCheckFailed = false; // true when the config fetch itself errored
 
       async function checkBillingConfig() {
         try {
@@ -315,14 +316,24 @@
           }
         } catch {
           billingConfigured = false;
+          billingCheckFailed = true;
         }
 
         if (!billingConfigured) {
           const notice = document.getElementById('billing-unavailable-notice');
-          if (notice) notice.hidden = false;
+          if (notice) {
+            notice.hidden = false;
+            // Distinguish a transient network error from deliberately unconfigured
+            if (billingCheckFailed) {
+              notice.textContent =
+                'Payments are temporarily unavailable. Please refresh the page or try again shortly.';
+            }
+          }
           document.querySelectorAll('[data-tier]').forEach((btn) => {
             btn.disabled = true;
-            btn.title = 'Payments not available yet — check back soon.';
+            btn.title = billingCheckFailed
+              ? 'Payments temporarily unavailable — please try again shortly.'
+              : 'Payments not available yet — check back soon.';
           });
         }
       }
@@ -417,6 +428,12 @@
         window.location.href = url;
       }
 
+      // -----------------------------------------------------------------------
+      // Init — await billing config before wiring click handlers to avoid the
+      // race where billingConfigured is still false when a CTA is clicked.
+      // -----------------------------------------------------------------------
+      await checkBillingConfig();
+
       document.querySelectorAll('[data-tier]').forEach((button) => {
         const originalText = button.textContent.trim();
         button.addEventListener('click', async () => {
@@ -434,11 +451,6 @@
           }
         });
       });
-
-      // -----------------------------------------------------------------------
-      // Init
-      // -----------------------------------------------------------------------
-      checkBillingConfig();
     </script>
   </body>
 </html>

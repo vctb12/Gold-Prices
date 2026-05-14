@@ -83,6 +83,17 @@ function getPriceId(tier, interval) {
   return map[tier]?.[interval] || null;
 }
 
+/**
+ * Return the trial period in days from STRIPE_TRIAL_DAYS env var.
+ * Returns 0 when set to '0' (disables trial). Defaults to 7.
+ */
+function _getTrialDays() {
+  const raw = process.env.STRIPE_TRIAL_DAYS;
+  if (raw === undefined || raw === null || raw === '') return 7;
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 7;
+}
+
 // ---------------------------------------------------------------------------
 // User resolution helper (mirrors public-accounts pattern)
 // ---------------------------------------------------------------------------
@@ -191,7 +202,7 @@ router.post('/create-checkout-session', requireBillingUser, async (req, res) => 
       success_url: buildUrl('/content/subscription/success.html?session_id={CHECKOUT_SESSION_ID}'),
       cancel_url: buildUrl('/pricing.html'),
       subscription_data: {
-        trial_period_days: 7,
+        trial_period_days: _getTrialDays() || undefined,
         metadata: { userId, tier },
       },
       allow_promotion_codes: true,
@@ -291,17 +302,19 @@ router.post('/webhook', async (req, res) => {
     await _handleWebhookEvent(event);
   } catch (err) {
     console.error('[billing/webhook] Handler error for', event.type, ':', err.message);
-    // Return 200 to prevent Stripe retrying a handler bug
-    await billingRepo.recordEvent({
-      stripeEventId: event.id,
-      type: event.type,
-      livemode: event.livemode,
-      handledAt: new Date().toISOString(),
-    });
-    return res.json({ received: true, error: 'Handler error — logged' });
+    // Log the failure for operational visibility but do NOT mark the event
+    // as processed — Stripe will retry with backoff so transient errors
+    // (DB unavailable, Supabase rate-limit, network blip) self-heal.
+    await appendAuditLog({
+      userId: null,
+      action: 'webhook_handler_error',
+      tier: null,
+      metadata: { eventId: event.id, type: event.type, error: err.message },
+    }).catch(() => {}); // swallow — audit log failure must not mask the retry signal
+    return res.status(500).json({ error: 'Handler error — will retry' });
   }
 
-  // Mark event as processed
+  // Mark event as processed only after successful handling
   await billingRepo.recordEvent({
     stripeEventId: event.id,
     type: event.type,

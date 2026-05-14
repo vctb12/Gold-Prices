@@ -105,16 +105,34 @@
       injectNav('en');
       injectFooter('en');
 
+      // getToken must be declared before the await call below that uses it
+      async function getToken() {
+        try {
+          if (window.supabase) {
+            const { data } = await window.supabase.auth.getSession();
+            return data?.session?.access_token || null;
+          }
+        } catch {
+          // fall through
+        }
+        return null;
+      }
+
       // Read session_id from query string — used only for display, not for trust
       const params = new URLSearchParams(window.location.search);
-      const sessionId = params.get('session_id');
+      // sessionId available for future use (e.g. analytics)
+      params.get('session_id');
 
-      // Attempt to fetch entitlements to confirm tier (purely for UX messaging)
-      let tierLabel = 'Pro';
+      // Attempt to fetch billing status to confirm tier (purely for UX messaging)
+      let tierLabel = null; // null until confirmed via server
       try {
-        const res = await fetch('/api/v1/billing/status', {
-          headers: { Authorization: `Bearer ${await getToken()}` },
-        });
+        const token = await getToken();
+        // Only send Authorization when we actually have a token to avoid
+        // noisy 401 entries from unauthenticated back-button visitors
+        const fetchOptions = token
+          ? { headers: { Authorization: `Bearer ${token}` } }
+          : {};
+        const res = await fetch('/api/v1/billing/status', fetchOptions);
         if (res.ok) {
           const data = await res.json();
           if (data.subscription?.tier === 'api') tierLabel = 'API';
@@ -124,25 +142,19 @@
         // Display generic success if status check fails
       }
 
-      async function getToken() {
-        try {
-          if (window.supabase) {
-            const { data } = await window.supabase.auth.getSession();
-            return data?.session?.access_token || '';
-          }
-        } catch {
-          return '';
-        }
-        return '';
-      }
-
-      // Render success state
+      // Render success state — only claim a specific tier when confirmed
       const container = document.getElementById('success-content');
+      const tierHeading = tierLabel
+        ? `You're subscribed to ${tierLabel}!`
+        : 'Your subscription is active!';
+      const tierBody = tierLabel
+        ? `Your ${tierLabel} features are now active.`
+        : 'Your new features are now active.';
       container.innerHTML = `
         <div class="success-icon" aria-hidden="true">✅</div>
-        <h1 class="success-heading">You're subscribed to ${tierLabel}!</h1>
+        <h1 class="success-heading">${tierHeading}</h1>
         <p class="success-subtext">
-          Your 7-day free trial has started. No charge until the trial ends.
+          Your free trial has started. No charge until the trial ends.
           You can manage or cancel your subscription at any time from your account.
         </p>
         <div class="success-actions">
@@ -151,7 +163,7 @@
         </div>
         <div class="success-details">
           <h2>What's next?</h2>
-          <p>Your ${tierLabel} features are now active. Check your email for a receipt from Stripe. Questions? <a href="/content/faq/index.html">Visit our FAQ</a>.</p>
+          <p>${tierBody} Check your email for a receipt from Stripe. Questions? <a href="/content/faq/index.html">Visit our FAQ</a>.</p>
         </div>
       `;
     </script>

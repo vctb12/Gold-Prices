@@ -1413,7 +1413,7 @@ create policy "Public read plans"
 
 create policy "Admin manage plans"
     on public.plans for all
-    to authenticated
+    to service_role
     using (true)
     with check (true);
 
