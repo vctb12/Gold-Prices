@@ -19,6 +19,29 @@ const AD_DIMENSIONS = {
 
 const isMobile = () => window.innerWidth < 768;
 const isAdminPage = () => window.location.pathname.includes('/admin');
+const renderedAdContainers = new Set();
+
+function resolveSlotFromConfig(adFormat, slotKey = '') {
+  if (slotKey && AD_CONFIG.AD_SLOTS?.[slotKey]) return AD_CONFIG.AD_SLOTS[slotKey];
+  const byFormat = {
+    leaderboard: ['homeLeaderboard', 'countryBanner', 'toolBanner'],
+    rectangle: [
+      'trackerSidebar',
+      'calculatorResult',
+      'homeRectangle',
+      'learnRectangle',
+      'guideMidContent',
+    ],
+    banner: ['toolBanner', 'countryBanner', 'homeLeaderboard'],
+    skyscraper: [],
+  };
+  const candidates = byFormat[adFormat] || [];
+  for (const key of candidates) {
+    const value = AD_CONFIG.AD_SLOTS?.[key];
+    if (value) return value;
+  }
+  return '';
+}
 
 /**
  * Render an AdSense slot in the given container.
@@ -32,17 +55,31 @@ export function renderAdSlot(containerId, adFormat = 'rectangle', adSlotId = '',
   if (!AD_CONFIG.ADSENSE_PUBLISHER_ID) return;
   if (isAdminPage()) return;
   if (typeof IntersectionObserver === 'undefined') return;
+  const hasRenderedContainer = renderedAdContainers.has(containerId);
+  const existingContainer = document.getElementById(containerId);
+  if (hasRenderedContainer && existingContainer) return;
+  if (hasRenderedContainer && !existingContainer) {
+    renderedAdContainers.delete(containerId);
+  }
 
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  const dims = AD_DIMENSIONS[adFormat];
-  if (!dims) return;
-
-  // Resolve slot ID from config if not passed directly
-  const resolvedSlotId = adSlotId || (slotKey && AD_CONFIG.AD_SLOTS[slotKey]) || '';
-
+  const governance = AD_CONFIG.SLOT_GOVERNANCE || {};
   const mobile = isMobile();
+  const effectiveFormat =
+    mobile && adFormat === 'leaderboard' && governance.allowLeaderboardOnMobile === false
+      ? 'banner'
+      : adFormat;
+  // Resolve slot ID from config if not passed directly
+  const resolvedSlotId = adSlotId || resolveSlotFromConfig(effectiveFormat, slotKey);
+  const maxSlotsPerPage = Number.isFinite(governance.maxSlotsPerPage)
+    ? governance.maxSlotsPerPage
+    : 3;
+  if (renderedAdContainers.size >= maxSlotsPerPage) return;
+  if (governance.requiredSlotId !== false && !resolvedSlotId) return;
+  const dims = AD_DIMENSIONS[effectiveFormat];
+  if (!dims) return;
   const w = mobile && dims.mobileWidth ? dims.mobileWidth : dims.width;
   const h = mobile && dims.mobileHeight ? dims.mobileHeight : dims.height;
 
@@ -61,7 +98,7 @@ export function renderAdSlot(containerId, adFormat = 'rectangle', adSlotId = '',
   container.style.borderRadius = 'var(--radius-xs, 4px)';
   container.style.overflow = 'hidden';
   container.setAttribute('aria-label', 'Advertisement');
-  container.dataset.adFormat = adFormat;
+  container.dataset.adFormat = effectiveFormat;
 
   let loaded = false;
 
@@ -70,7 +107,8 @@ export function renderAdSlot(containerId, adFormat = 'rectangle', adSlotId = '',
       if (entries[0].isIntersecting && !loaded) {
         loaded = true;
         observer.disconnect();
-        _loadAd(container, resolvedSlotId, adFormat);
+        renderedAdContainers.add(containerId);
+        _loadAd(container, resolvedSlotId, effectiveFormat);
       }
     },
     { rootMargin: '200px' }

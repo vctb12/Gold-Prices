@@ -1058,6 +1058,7 @@ async function init() {
 
   // Analytics: fire page_view on home load
   track(EVENTS.PAGE_VIEW, { path: location.pathname, locale: lang });
+  track(EVENTS.PRICE_VIEW, { path: location.pathname, locale: lang, surface: 'home' });
 
   // Render cached data immediately for instant content (non-blocking)
   if (goldPrice) {

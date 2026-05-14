@@ -2,7 +2,10 @@
 
 **Canonical source:** `src/lib/analytics.js`  
 **Constants object:** `EVENTS` (exported)  
+**Event schema:** `EVENT_SCHEMA` (required payload fields)  
 **Non-module mirror:** `window.GP_EVENTS` (set by `assets/analytics.js`)
+
+> Phase 8 governance and funnels are documented in `docs/ANALYTICS_GROWTH_AND_SEO.md`.
 
 ---
 

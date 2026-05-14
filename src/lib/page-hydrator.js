@@ -15,6 +15,7 @@ import { injectFooter } from '../components/footer.js';
 import { injectSpotBar, updateSpotBar, updateSpotBarLang } from '../components/spotBar.js';
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { el, safeHref, clear, setText } from './safe-dom.js';
+import { track, EVENTS } from './analytics.js';
 
 const _modUrl = new URL(import.meta.url);
 const _pageUrl = new URL(location.href);
@@ -223,6 +224,7 @@ function wireLangToggles(navCtrl, lang) {
   navCtrl.getLangToggleButtons().forEach((button) => {
     button.addEventListener('click', () => {
       const nextLang = lang === 'ar' ? 'en' : 'ar';
+      track(EVENTS.LANGUAGE_SWITCH, { from: lang, to: nextLang, surface: 'country_page' });
       persistLang(nextLang);
       const url = new URL(window.location.href);
       if (nextLang === 'en') url.searchParams.delete('lang');
@@ -792,6 +794,12 @@ async function hydrate() {
     const pageData = getCountryPageData();
     const { gold, fx } = await fetchPrices();
     renderCountryPage({ country, pageData, lang, gold, fx });
+    track(EVENTS.COUNTRY_PAGE_VIEW, {
+      country_slug: country.slug,
+      currency: country.currency,
+      locale: lang,
+      page_kind: 'country_price',
+    });
     return;
   }
 

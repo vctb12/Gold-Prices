@@ -294,6 +294,7 @@
     <script type="module">
       import { injectNav } from './src/components/nav.js';
       import { injectFooter } from './src/components/footer.js';
+      import { track, EVENTS } from './src/lib/analytics.js';
 
       // Render navigation and footer
       injectNav('en');
@@ -440,9 +441,11 @@
           if (!billingConfigured) return;
           const tier = button.dataset.tier;
           const interval = billingToggle.checked ? 'year' : 'month';
+          track(EVENTS.PRICING_PLAN_CLICK, { tier, interval, surface: 'pricing' });
           hideCheckoutError();
           setButtonState(button, 'loading', originalText);
           try {
+            track(EVENTS.CHECKOUT_START, { tier, interval, surface: 'pricing' });
             await startCheckout(tier, interval);
           } catch (err) {
             console.error('[pricing] Checkout error:', err.message);

@@ -11,6 +11,7 @@ import { renderAdSlot } from '../components/adSlot.js';
 import { CONSTANTS } from '../config/index.js';
 import { KARATS } from '../config/index.js';
 import { escape as esc, safeHref as safeUrl, safeTel } from '../lib/safe-dom.js';
+import { track, EVENTS } from '../lib/analytics.js';
 import {
   createSavedShop,
   isAuthenticated as isAccountAuthenticated,
@@ -38,6 +39,9 @@ const STATE = {
 
 const SHOPS_LAST_REVIEWED_ISO = '2026-04-05';
 const MOBILE_FILTER_BREAKPOINT = 640;
+const FILTER_TRACK_DEBOUNCE_MS = 180;
+const SEARCH_TRACK_DEBOUNCE_MS = 450;
+let _filterTrackTimer = null;
 
 function sanitizeSearchQueryForMessage(value = '') {
   return String(value)
@@ -351,6 +355,22 @@ function t(key) {
   return TXT[STATE.lang]?.[key] ?? TXT.en[key] ?? key;
 }
 
+function trackShopFilterApply(reason = 'filter_change', debounceMs = FILTER_TRACK_DEBOUNCE_MS) {
+  clearTimeout(_filterTrackTimer);
+  _filterTrackTimer = setTimeout(() => {
+    track(EVENTS.SHOP_FILTER_APPLY, {
+      reason,
+      listing_tab: STATE.listingTab,
+      region: STATE.region,
+      country: STATE.country,
+      city: STATE.city,
+      specialty: STATE.specialty,
+      verified_only: STATE.verifiedOnly ? 1 : 0,
+      has_search: STATE.search.trim() ? 1 : 0,
+    });
+  }, debounceMs);
+}
+
 function countryByCode(code) {
   return COUNTRIES.find((country) => country.code === code);
 }
@@ -529,6 +549,7 @@ async function postShopEvent(shopId, action, extra = {}) {
 }
 
 async function submitShopClaim(shopId) {
+  track(EVENTS.SHOP_CLAIM_START, { shop_id: shopId, surface: 'shops' });
   const claimData = await openClaimDialog();
   if (!claimData) return;
   try {
@@ -662,6 +683,11 @@ function openModal(shop) {
     .map((item) => `<span class="shop-tag">${esc(item)}</span>`)
     .join('');
   const inList = isInShortlist(shop.id);
+  track(EVENTS.SHOP_CARD_OPEN, {
+    shop_id: shop.id,
+    listing_type: listingType(shop),
+    surface: 'shops_modal',
+  });
 
   // Build action buttons row
   const actionsHTML = `
@@ -803,13 +829,19 @@ function openModal(shop) {
     });
   });
   modal.querySelectorAll('.modal-action-btn--call').forEach((button) => {
-    button.addEventListener('click', () => postShopEvent(shop.id, 'call'));
+    button.addEventListener('click', () => {
+      postShopEvent(shop.id, 'call');
+      track(EVENTS.SHOP_CALL_CLICK, { shop_id: shop.id, surface: 'shops_modal' });
+    });
   });
   modal.querySelectorAll('.modal-action-btn--website').forEach((button) => {
     button.addEventListener('click', () => postShopEvent(shop.id, 'website'));
   });
   modal.querySelectorAll('.modal-action-btn--whatsapp').forEach((button) => {
-    button.addEventListener('click', () => postShopEvent(shop.id, 'whatsapp'));
+    button.addEventListener('click', () => {
+      postShopEvent(shop.id, 'whatsapp');
+      track(EVENTS.SHOP_WHATSAPP_CLICK, { shop_id: shop.id, surface: 'shops_modal' });
+    });
   });
 
   modal.hidden = false;
@@ -1385,6 +1417,7 @@ function bindShopCardHandlers() {
     btn.addEventListener('click', () => {
       const shopId = btn.closest('.shop-card')?.dataset.shopId;
       postShopEvent(shopId, 'call');
+      track(EVENTS.SHOP_CALL_CLICK, { shop_id: shopId, surface: 'shops_card' });
     });
   });
   grid.querySelectorAll('.shop-action-btn--website').forEach((btn) => {
@@ -1397,6 +1430,7 @@ function bindShopCardHandlers() {
     btn.addEventListener('click', () => {
       const shopId = btn.closest('.shop-card')?.dataset.shopId;
       postShopEvent(shopId, 'whatsapp');
+      track(EVENTS.SHOP_WHATSAPP_CLICK, { shop_id: shopId, surface: 'shops_card' });
     });
   });
   grid.querySelectorAll('.shop-action-btn--directions').forEach((btn) => {
@@ -1645,15 +1679,21 @@ function resetFilters() {
 }
 
 function bindEvents() {
+  window.addEventListener('beforeunload', () => {
+    clearTimeout(_filterTrackTimer);
+  });
+
   document.querySelectorAll('[data-listing-tab]').forEach((button) => {
     button.addEventListener('click', () => {
       STATE.listingTab = button.dataset.listingTab || DEFAULT_LISTING_TAB;
+      trackShopFilterApply('listing_tab');
       render();
     });
   });
 
   document.getElementById('shops-search').addEventListener('input', (event) => {
     STATE.search = event.target.value;
+    trackShopFilterApply('search', SEARCH_TRACK_DEBOUNCE_MS);
     render();
   });
 
@@ -1663,6 +1703,7 @@ function bindEvents() {
     STATE.city = 'all';
     STATE.specialty = 'all';
     buildFilters();
+    trackShopFilterApply('region');
     render();
     collapseMobileFilters();
   });
@@ -1672,6 +1713,7 @@ function bindEvents() {
     STATE.city = 'all';
     STATE.specialty = 'all';
     buildFilters();
+    trackShopFilterApply('country');
     render();
     collapseMobileFilters();
   });
@@ -1680,24 +1722,33 @@ function bindEvents() {
     STATE.city = event.target.value;
     STATE.specialty = 'all';
     buildFilters();
+    trackShopFilterApply('city');
     render();
     collapseMobileFilters();
   });
 
   document.getElementById('shops-specialty-filter').addEventListener('change', (event) => {
     STATE.specialty = event.target.value;
+    trackShopFilterApply('specialty');
     render();
     collapseMobileFilters();
   });
 
   document.getElementById('shops-verified-only').addEventListener('change', (event) => {
     STATE.verifiedOnly = event.target.checked;
+    trackShopFilterApply('verified_only');
     render();
     collapseMobileFilters();
   });
 
-  document.getElementById('shops-clear-filters').addEventListener('click', resetFilters);
-  document.getElementById('shops-controls-clear').addEventListener('click', resetFilters);
+  document.getElementById('shops-clear-filters').addEventListener('click', () => {
+    trackShopFilterApply('clear_filters');
+    resetFilters();
+  });
+  document.getElementById('shops-controls-clear').addEventListener('click', () => {
+    trackShopFilterApply('clear_filters');
+    resetFilters();
+  });
 
   // Modal events
   const modal = document.getElementById('shops-modal');
@@ -1853,6 +1904,11 @@ function init() {
   if (verifiedBox) verifiedBox.checked = STATE.verifiedOnly;
 
   updateLanguage();
+  track(EVENTS.PRICE_VIEW, {
+    path: location.pathname,
+    locale: STATE.lang,
+    surface: 'shops',
+  });
 
   // Handle initial shop modal from URL param
   const initialShopId = _p.get('shop');

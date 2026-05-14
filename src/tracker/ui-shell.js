@@ -11,6 +11,7 @@ import {
   VALID_PANELS,
 } from './state.js';
 import { TRACKER_PANELS, getShortcutMap, getTrackerTab } from './modes.js';
+import { track, EVENTS } from '../lib/analytics.js';
 
 let _openPanel = null;
 
@@ -72,6 +73,7 @@ export function mountShell(state, els, onModeChange, onLangChange) {
   }
 
   function setMode(mode) {
+    const prevMode = state.mode;
     if (getTrackerTab(mode)?.workspace === 'advanced') ensureAdvancedWorkspace();
     state.mode = mode;
     tabs.forEach((tab) => {
@@ -85,6 +87,13 @@ export function mountShell(state, els, onModeChange, onLangChange) {
     });
     persistState(state);
     syncUrlFromState(state, _openPanel);
+    if (prevMode && prevMode !== mode) {
+      track(EVENTS.TRACKER_MODE_CHANGE, {
+        from_mode: prevMode,
+        to_mode: mode,
+        workspace: state.workspaceLevel || 'basic',
+      });
+    }
     if (typeof onModeChange === 'function') onModeChange(mode);
   }
 

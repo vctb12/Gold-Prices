@@ -66,6 +66,23 @@
   // This mirror on window.GP_EVENTS lets any inline or non-bundled script
   // reference event names without duplicating strings.
   window.GP_EVENTS = Object.freeze({
+    PRICE_VIEW: 'price_view',
+    TRACKER_MODE_CHANGE: 'tracker_mode_change',
+    ALERT_CREATE_START: 'alert_create_start',
+    ALERT_CREATE_SUCCESS: 'alert_create_success',
+    CALCULATOR_SUBMIT: 'calculator_submit',
+    CALCULATOR_SHARE: 'calculator_share',
+    SHOP_FILTER_APPLY: 'shop_filter_apply',
+    SHOP_CARD_OPEN: 'shop_card_open',
+    SHOP_WHATSAPP_CLICK: 'shop_whatsapp_click',
+    SHOP_CALL_CLICK: 'shop_call_click',
+    SHOP_CLAIM_START: 'shop_claim_start',
+    PRICING_PLAN_CLICK: 'pricing_plan_click',
+    CHECKOUT_START: 'checkout_start',
+    CHECKOUT_SUCCESS: 'checkout_success',
+    API_KEY_CREATE: 'api_key_create',
+    LANGUAGE_SWITCH: 'language_switch',
+    COUNTRY_PAGE_VIEW: 'country_page_view',
     PAGE_VIEW: 'page_view',
     TRACKER_VIEW: 'tracker_view',
     KARAT_CHANGE: 'karat_change',

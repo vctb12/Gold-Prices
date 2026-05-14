@@ -101,6 +101,7 @@
     <script type="module">
       import { injectNav } from '/src/components/nav.js';
       import { injectFooter } from '/src/components/footer.js';
+      import { track, EVENTS } from '/src/lib/analytics.js';
 
       injectNav('en');
       injectFooter('en');
@@ -166,6 +167,12 @@
           <p>${tierBody} Check your email for a receipt from Stripe. Questions? <a href="/content/faq/index.html">Visit our FAQ</a>.</p>
         </div>
       `;
+
+      track(EVENTS.CHECKOUT_SUCCESS, {
+        source: 'stripe_checkout',
+        tier: tierLabel ? tierLabel.toLowerCase() : 'unknown',
+        has_session_id: params.get('session_id') ? 1 : 0,
+      });
     </script>
   </body>
 </html>

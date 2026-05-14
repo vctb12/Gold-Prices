@@ -28,6 +28,12 @@ export const CONSTANTS = {
 // Fill in after Google AdSense approval. Leave empty to silently hide all ads.
 export const AD_CONFIG = {
   ADSENSE_PUBLISHER_ID: '', // e.g. 'ca-pub-1234567890'
+  SLOT_GOVERNANCE: {
+    maxSlotsPerPage: 3,
+    allowLeaderboardOnMobile: false,
+    requiredSlotId: true,
+    minDistanceRule: 'Avoid placing ad slots back-to-back without meaningful content between them.',
+  },
   AD_SLOTS: {
     homeLeaderboard: '', // 728x90 below hero
     homeRectangle: '', // 300x250 in tool cards sidebar

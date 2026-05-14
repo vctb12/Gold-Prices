@@ -28,6 +28,23 @@ test('EVENTS object is frozen and contains all required event names', async () =
 
   // All required event names from the spec
   const required = [
+    'PRICE_VIEW',
+    'TRACKER_MODE_CHANGE',
+    'ALERT_CREATE_START',
+    'ALERT_CREATE_SUCCESS',
+    'CALCULATOR_SUBMIT',
+    'CALCULATOR_SHARE',
+    'SHOP_FILTER_APPLY',
+    'SHOP_CARD_OPEN',
+    'SHOP_WHATSAPP_CLICK',
+    'SHOP_CALL_CLICK',
+    'SHOP_CLAIM_START',
+    'PRICING_PLAN_CLICK',
+    'CHECKOUT_START',
+    'CHECKOUT_SUCCESS',
+    'API_KEY_CREATE',
+    'LANGUAGE_SWITCH',
+    'COUNTRY_PAGE_VIEW',
     'PAGE_VIEW',
     'TRACKER_VIEW',
     'KARAT_CHANGE',
@@ -126,6 +143,38 @@ test('track() is a no-op when window is undefined (SSG/Node guard)', async () =>
   assert.doesNotThrow(() => track(EVENTS.PAGE_VIEW, { path: '/test', locale: 'en' }));
 });
 
+test('track() does not throw when payload is invalid (validation guard)', async () => {
+  const { track, EVENTS } = await loadAnalytics();
+  assert.doesNotThrow(() => track(EVENTS.CHECKOUT_START, { tier: 'pro' }));
+});
+
+test('track() skips dispatch for invalid payloads', async () => {
+  const { track, EVENTS } = await loadAnalytics();
+  const gtagCalls = [];
+  const prevWindow = global.window;
+  const prevLocation = global.location;
+  const prevNavigator = global.navigator;
+  const prevLocalStorage = global.localStorage;
+
+  try {
+    global.location = { search: '', hostname: 'localhost', pathname: '/pricing.html' };
+    global.navigator = { doNotTrack: '0' };
+    global.localStorage = { getItem: () => null };
+    global.window = {
+      doNotTrack: '0',
+      gtag: (...args) => gtagCalls.push(args),
+    };
+
+    assert.doesNotThrow(() => track(EVENTS.CHECKOUT_START, { tier: 'pro' }));
+    assert.equal(gtagCalls.length, 0, 'invalid payload should not be sent to gtag');
+  } finally {
+    global.window = prevWindow;
+    global.location = prevLocation;
+    global.navigator = prevNavigator;
+    global.localStorage = prevLocalStorage;
+  }
+});
+
 // ── Event name symmetry with window.GP_EVENTS ──────────────────────────────--
 
 test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytics.js', async () => {
@@ -134,6 +183,23 @@ test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytic
   // These are the keys exposed as window.GP_EVENTS in assets/analytics.js.
   // If EVENTS grows, assets/analytics.js must be updated too.
   const WINDOW_GP_EVENTS_KEYS = [
+    'PRICE_VIEW',
+    'TRACKER_MODE_CHANGE',
+    'ALERT_CREATE_START',
+    'ALERT_CREATE_SUCCESS',
+    'CALCULATOR_SUBMIT',
+    'CALCULATOR_SHARE',
+    'SHOP_FILTER_APPLY',
+    'SHOP_CARD_OPEN',
+    'SHOP_WHATSAPP_CLICK',
+    'SHOP_CALL_CLICK',
+    'SHOP_CLAIM_START',
+    'PRICING_PLAN_CLICK',
+    'CHECKOUT_START',
+    'CHECKOUT_SUCCESS',
+    'API_KEY_CREATE',
+    'LANGUAGE_SWITCH',
+    'COUNTRY_PAGE_VIEW',
     'PAGE_VIEW',
     'TRACKER_VIEW',
     'KARAT_CHANGE',
@@ -161,6 +227,23 @@ test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytic
 
   // Verify the values in EVENTS also match what's in assets/analytics.js
   const ASSETS_VALUES = {
+    PRICE_VIEW: 'price_view',
+    TRACKER_MODE_CHANGE: 'tracker_mode_change',
+    ALERT_CREATE_START: 'alert_create_start',
+    ALERT_CREATE_SUCCESS: 'alert_create_success',
+    CALCULATOR_SUBMIT: 'calculator_submit',
+    CALCULATOR_SHARE: 'calculator_share',
+    SHOP_FILTER_APPLY: 'shop_filter_apply',
+    SHOP_CARD_OPEN: 'shop_card_open',
+    SHOP_WHATSAPP_CLICK: 'shop_whatsapp_click',
+    SHOP_CALL_CLICK: 'shop_call_click',
+    SHOP_CLAIM_START: 'shop_claim_start',
+    PRICING_PLAN_CLICK: 'pricing_plan_click',
+    CHECKOUT_START: 'checkout_start',
+    CHECKOUT_SUCCESS: 'checkout_success',
+    API_KEY_CREATE: 'api_key_create',
+    LANGUAGE_SWITCH: 'language_switch',
+    COUNTRY_PAGE_VIEW: 'country_page_view',
     PAGE_VIEW: 'page_view',
     TRACKER_VIEW: 'tracker_view',
     KARAT_CHANGE: 'karat_change',
@@ -185,4 +268,23 @@ test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytic
   for (const [key, val] of Object.entries(ASSETS_VALUES)) {
     assert.equal(EVENTS[key], val, `EVENTS.${key} must equal '${val}'`);
   }
+});
+
+test('EVENT_SCHEMA includes required field definitions for canonical funnel events', async () => {
+  const { EVENT_SCHEMA, EVENTS } = await loadAnalytics();
+  assert.ok(EVENT_SCHEMA[EVENTS.PRICE_VIEW]);
+  assert.deepEqual(EVENT_SCHEMA[EVENTS.CHECKOUT_START].required, ['tier', 'interval']);
+  assert.deepEqual(EVENT_SCHEMA[EVENTS.CHECKOUT_SUCCESS].required, ['source']);
+  assert.deepEqual(EVENT_SCHEMA[EVENTS.COUNTRY_PAGE_VIEW].required, ['country_slug', 'currency']);
+});
+
+test('validateEvent() normalizes aliases and detects missing required fields', async () => {
+  const { validateEvent, EVENTS } = await loadAnalytics();
+  const ok = validateEvent(EVENTS.LANG_CHANGE, { to: 'ar' });
+  assert.equal(ok.valid, true);
+  assert.equal(ok.normalizedName, EVENTS.LANGUAGE_SWITCH);
+
+  const bad = validateEvent(EVENTS.CHECKOUT_START, { tier: 'pro' });
+  assert.equal(bad.valid, false);
+  assert.deepEqual(bad.missing, ['interval']);
 });

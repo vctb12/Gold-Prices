@@ -1111,6 +1111,7 @@ async function init() {
   // Analytics: fire page_view + tracker_view after first data load
   const locale = document.documentElement.lang || 'en';
   track(EVENTS.PAGE_VIEW, { path: location.pathname, locale });
+  track(EVENTS.PRICE_VIEW, { path: location.pathname, locale, surface: 'tracker' });
   track(EVENTS.TRACKER_VIEW, {
     karat: state.selectedKarat,
     country: state.selectedCountry,

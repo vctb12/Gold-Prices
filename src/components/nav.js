@@ -1046,7 +1046,7 @@ function _buildReturnValue() {
 export function updateNavLang(lang) {
   const prev = _currentLang;
   _currentLang = lang;
-  if (prev !== lang) track(EVENTS.LANG_CHANGE, { to: lang });
+  if (prev !== lang) track(EVENTS.LANGUAGE_SWITCH, { from: prev, to: lang, surface: 'nav' });
   const data = NAV_DATA[lang] || NAV_DATA.en;
   const isRtl = lang === 'ar';
 

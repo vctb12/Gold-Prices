@@ -384,7 +384,10 @@ function getPurityForKarat(code) {
 const _calcUseTimers = {};
 function _trackCalcUse(tool, params) {
   clearTimeout(_calcUseTimers[tool]);
-  _calcUseTimers[tool] = setTimeout(() => track(EVENTS.CALCULATOR_USE, params), 1000);
+  _calcUseTimers[tool] = setTimeout(() => {
+    track(EVENTS.CALCULATOR_USE, params);
+    track(EVENTS.CALCULATOR_SUBMIT, { tool, surface: 'calculator', ...params });
+  }, 1000);
 }
 
 // ── Calculator 1: Value ─────────────────────────────────────────────────────
@@ -1013,6 +1016,10 @@ async function fetchLiveData() {
 function initCopyBtn() {
   const btn = document.getElementById('calc-copy-btn');
   if (!btn) return;
+  const getActiveTool = () =>
+    document.querySelector('.calc-tab.active')?.dataset.calc ||
+    document.querySelector('.calc-panel.active')?.id?.replace('panel-', '') ||
+    'value';
   function copyTextFallback(text) {
     try {
       const textArea = document.createElement('textarea');
@@ -1037,6 +1044,12 @@ function initCopyBtn() {
       btn.textContent = t('copied_result');
       btn.setAttribute('aria-label', t('copied_result'));
       btn.classList.add('copied');
+      track(EVENTS.COPY_CLICK, { surface: 'calculator', value_type: 'result' });
+      track(EVENTS.CALCULATOR_SHARE, {
+        tool: getActiveTool(),
+        channel: 'clipboard',
+        surface: 'calculator',
+      });
       setTimeout(() => {
         btn.textContent = t('copy_result');
         btn.setAttribute('aria-label', t('copy_result'));
@@ -1044,7 +1057,12 @@ function initCopyBtn() {
       }, 1500);
     };
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(done).catch(done);
+      navigator.clipboard
+        .writeText(text)
+        .then(done)
+        .catch(() => {
+          if (copyTextFallback(text)) done();
+        });
     } else {
       if (copyTextFallback(text)) done();
     }
@@ -1063,6 +1081,11 @@ function initCopyBtn() {
       b.textContent = `✓ ${t('copied_result')}`;
       b.setAttribute('aria-label', t('copied_result'));
       track(EVENTS.COPY_CLICK, { surface: 'calculator', value_type: 'result' });
+      track(EVENTS.CALCULATOR_SHARE, {
+        tool: getActiveTool(),
+        channel: 'clipboard',
+        surface: 'calculator',
+      });
       setTimeout(() => {
         b.textContent = orig;
         b.setAttribute('aria-label', t('copy_result'));
@@ -1240,6 +1263,7 @@ async function init() {
   setInterval(fetchLiveData, CONSTANTS.GOLD_REFRESH_MS);
 
   track(EVENTS.PAGE_VIEW, { path: location.pathname, locale: STATE.lang });
+  track(EVENTS.PRICE_VIEW, { path: location.pathname, locale: STATE.lang, surface: 'calculator' });
 }
 
 init();
