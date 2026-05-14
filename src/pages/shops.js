@@ -650,6 +650,7 @@ async function saveShopToAccount(shop) {
 function openModal(shop) {
   const modal = document.getElementById('shops-modal');
   const country = countryByCode(shop.countryCode);
+  const whatsappNumber = formatPhoneForWhatsApp(shop.phone);
   const specialties = (shop.specialties || [])
     .map((item) => `<span class="shop-tag">${esc(item)}</span>`)
     .join('');
@@ -680,8 +681,8 @@ function openModal(shop) {
           : ''
       }
       ${
-        formatPhoneForWhatsApp(shop.phone)
-          ? `<a href="https://wa.me/${esc(formatPhoneForWhatsApp(shop.phone))}" target="_blank" rel="noopener" class="modal-action-btn modal-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+        whatsappNumber
+          ? `<a href="https://wa.me/${esc(whatsappNumber)}" target="_blank" rel="noopener" class="modal-action-btn modal-action-btn--whatsapp" aria-label="${t('whatsApp')}">
         <span class="modal-action-icon">💬</span>
         <span class="modal-action-label">${t('whatsApp')}</span>
       </a>`
@@ -1163,6 +1164,7 @@ function renderCards(shops) {
       const qualityLabel = contactQualityLabel(shop);
       const statusLabel = profileStatusLabel(shop);
       const shopListingType = listingType(shop);
+      const whatsappNumber = formatPhoneForWhatsApp(shop.phone);
       const phoneAction = shop.phone
         ? `<a href="tel:${esc(safeTel(shop.phone))}" class="shop-action-btn shop-action-btn--call" aria-label="${t('callShop')}">
             <span class="shop-action-icon">📞</span>
@@ -1181,8 +1183,8 @@ function renderCards(shops) {
             <span class="shop-action-icon">🌐</span>
             <span class="shop-action-label">${t('notAvailable')}</span>
           </button>`;
-      const whatsappAction = formatPhoneForWhatsApp(shop.phone)
-        ? `<a href="https://wa.me/${formatPhoneForWhatsApp(shop.phone)}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+      const whatsappAction = whatsappNumber
+        ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
             <span class="shop-action-icon">💬</span>
             <span class="shop-action-label">${t('whatsApp')}</span>
           </a>`
