@@ -234,8 +234,8 @@ function maskEmail(email) {
   if (typeof email !== 'string') return null;
   const [name, domain] = email.split('@');
   if (!name || !domain) return null;
-  if (name.length <= 2) return `**@${domain}`;
-  return `${name.slice(0, 2)}***@${domain}`;
+  const prefixLength = name.length >= 3 ? 2 : 1;
+  return `${name.slice(0, prefixLength)}***@${domain}`;
 }
 
 function parseIsoDate(value) {
@@ -661,7 +661,11 @@ function moderatePendingSubmission({ submissionId, action, actorEmail, reason })
     };
   }
 
-  const safeReason = sanitizeString(reason, 500) || 'No reason provided';
+  const normalizedReason = sanitizeString(reason, 500);
+  const safeReason =
+    typeof normalizedReason === 'string' && normalizedReason.trim().length > 0
+      ? normalizedReason
+      : 'No reason provided';
   const now = new Date().toISOString();
   const updatedSubmission = pendingShopsRepo.update(sub.id, {
     status: 'rejected',

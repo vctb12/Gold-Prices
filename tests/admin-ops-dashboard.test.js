@@ -9,6 +9,7 @@ const assert = require('node:assert/strict');
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 
 const app = require(path.resolve(__dirname, '..', 'server.js'));
 const auth = require(path.resolve(__dirname, '..', 'server', 'lib', 'auth.js'));
@@ -97,7 +98,7 @@ test('GET /api/v1/admin/ops/control-center returns module payload for admin toke
 });
 
 test('POST /api/v1/admin/ops/shops-moderation/:id/reject logs audit with before/after state', async () => {
-  const id = `pending_test_${Date.now()}`;
+  const id = `pending_test_${crypto.randomUUID()}`;
   pendingRepo.insert({
     id,
     shop_name: 'Test Pending Shop',

@@ -9,6 +9,8 @@ export const ADMIN_DATA_CONSTANTS = {
   API_TIMEOUT_MS: 8000,
 };
 
+let cachedSupabaseTokenKey = null;
+
 export function readJsonCache(key, fallback = null) {
   try {
     const raw = localStorage.getItem(key);
@@ -39,9 +41,13 @@ export function getAuthToken() {
   try {
     const legacy = localStorage.getItem('gp_admin_token');
     if (legacy) return legacy;
-    const sbKey = Object.keys(localStorage).find(
-      (key) => key.startsWith('sb-') && key.endsWith('-auth-token')
-    );
+    let sbKey = cachedSupabaseTokenKey;
+    if (!sbKey || !localStorage.getItem(sbKey)) {
+      sbKey = Object.keys(localStorage).find(
+        (key) => key.startsWith('sb-') && key.endsWith('-auth-token')
+      );
+      cachedSupabaseTokenKey = sbKey || null;
+    }
     if (!sbKey) return null;
     const raw = localStorage.getItem(sbKey);
     if (!raw) return null;

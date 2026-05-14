@@ -888,19 +888,14 @@
           return;
         }
 
-        const allItems = createOpsModuleCards(result.data.data.modules);
+        const allItems = createOpsModuleCards(result.data.data.modules).map((item) => ({
+          ...item,
+          _searchText: `${item.title} ${item.meta || ''}`.toLowerCase(),
+        }));
         const applyFilter = () => {
           const query = (filterInput?.value || '').trim().toLowerCase();
           if (!query) return renderOpsModules(allItems);
-          renderOpsModules(
-            allItems.filter(
-              (item) =>
-                item.title.toLowerCase().includes(query) ||
-                String(item.meta || '')
-                  .toLowerCase()
-                  .includes(query)
-            )
-          );
+          renderOpsModules(allItems.filter((item) => item._searchText.includes(query)));
         };
 
         applyFilter();
