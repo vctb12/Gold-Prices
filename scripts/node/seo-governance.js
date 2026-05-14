@@ -11,6 +11,7 @@ const OUTPUT_ABS = path.join(ROOT, OUTPUT_REL);
 const CHECK_ONLY = process.argv.includes('--check');
 const STRICT = process.argv.includes('--strict');
 const STDOUT_ONLY = process.argv.includes('--stdout');
+const THIN_CONTENT_THRESHOLD = 140;
 
 const SKIP_DIRS = new Set([
   'node_modules',
@@ -64,8 +65,8 @@ function classifyGroup(relPath) {
 
 function stripTags(html = '') {
   return html
-    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style\b[\s\S]*?<\/style\s*>/gi, ' ')
+    .replace(/<script\b[\s\S]*?<\/script(?:\s[^>]*)?>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style(?:\s[^>]*)?>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -131,7 +132,7 @@ function extractRecord(relPath) {
     hreflangs,
     hasSchema,
     wordCount,
-    thinRisk: !noindex && wordCount > 0 && wordCount < 140,
+    thinRisk: !noindex && wordCount > 0 && wordCount < THIN_CONTENT_THRESHOLD,
     missingCanonical: !noindex && !canonical,
     missingHreflang:
       !noindex && !['x-default', 'en', 'ar'].every((lang) => hreflangs.includes(lang)),

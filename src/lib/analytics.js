@@ -225,7 +225,10 @@ export function validateEvent(name, params = {}) {
   if (!schema) return { valid: false, missing: [], normalizedName, schemaExists: false };
   const missing = (schema.required || []).filter((key) => {
     const value = params[key];
-    return value === undefined || value === null;
+    if (value === undefined || value === null) return true;
+    if (typeof value === 'string') return value.trim() === '';
+    if (typeof value === 'number') return Number.isNaN(value);
+    return false;
   });
   return { valid: missing.length === 0, missing, normalizedName, schemaExists: true };
 }
@@ -289,6 +292,10 @@ export function track(name, params = {}) {
 
   const validation = validateEvent(name, params);
   if (!validation.valid) {
+    if (!validation.schemaExists) {
+      console.warn('[analytics] skipped unregistered event', { name });
+      return;
+    }
     if (_isDebugMode()) {
       console.warn('[analytics] skipped invalid event', {
         name,

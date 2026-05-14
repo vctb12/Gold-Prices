@@ -148,6 +148,33 @@ test('track() does not throw when payload is invalid (validation guard)', async 
   assert.doesNotThrow(() => track(EVENTS.CHECKOUT_START, { tier: 'pro' }));
 });
 
+test('track() skips dispatch for invalid payloads', async () => {
+  const { track, EVENTS } = await loadAnalytics();
+  const gtagCalls = [];
+  const prevWindow = global.window;
+  const prevLocation = global.location;
+  const prevNavigator = global.navigator;
+  const prevLocalStorage = global.localStorage;
+
+  try {
+    global.location = { search: '', hostname: 'localhost', pathname: '/pricing.html' };
+    global.navigator = { doNotTrack: '0' };
+    global.localStorage = { getItem: () => null };
+    global.window = {
+      doNotTrack: '0',
+      gtag: (...args) => gtagCalls.push(args),
+    };
+
+    assert.doesNotThrow(() => track(EVENTS.CHECKOUT_START, { tier: 'pro' }));
+    assert.equal(gtagCalls.length, 0, 'invalid payload should not be sent to gtag');
+  } finally {
+    global.window = prevWindow;
+    global.location = prevLocation;
+    global.navigator = prevNavigator;
+    global.localStorage = prevLocalStorage;
+  }
+});
+
 // ── Event name symmetry with window.GP_EVENTS ──────────────────────────────--
 
 test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytics.js', async () => {

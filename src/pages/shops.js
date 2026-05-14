@@ -39,8 +39,9 @@ const STATE = {
 
 const SHOPS_LAST_REVIEWED_ISO = '2026-04-05';
 const MOBILE_FILTER_BREAKPOINT = 640;
+const FILTER_TRACK_DEBOUNCE_MS = 180;
 const SEARCH_TRACK_DEBOUNCE_MS = 450;
-let _searchTrackTimer = null;
+let _filterTrackTimer = null;
 
 function sanitizeSearchQueryForMessage(value = '') {
   return String(value)
@@ -354,17 +355,20 @@ function t(key) {
   return TXT[STATE.lang]?.[key] ?? TXT.en[key] ?? key;
 }
 
-function trackShopFilterApply(reason = 'filter_change') {
-  track(EVENTS.SHOP_FILTER_APPLY, {
-    reason,
-    listing_tab: STATE.listingTab,
-    region: STATE.region,
-    country: STATE.country,
-    city: STATE.city,
-    specialty: STATE.specialty,
-    verified_only: STATE.verifiedOnly ? 1 : 0,
-    has_search: STATE.search.trim() ? 1 : 0,
-  });
+function trackShopFilterApply(reason = 'filter_change', debounceMs = FILTER_TRACK_DEBOUNCE_MS) {
+  clearTimeout(_filterTrackTimer);
+  _filterTrackTimer = setTimeout(() => {
+    track(EVENTS.SHOP_FILTER_APPLY, {
+      reason,
+      listing_tab: STATE.listingTab,
+      region: STATE.region,
+      country: STATE.country,
+      city: STATE.city,
+      specialty: STATE.specialty,
+      verified_only: STATE.verifiedOnly ? 1 : 0,
+      has_search: STATE.search.trim() ? 1 : 0,
+    });
+  }, debounceMs);
 }
 
 function countryByCode(code) {
@@ -1685,8 +1689,7 @@ function bindEvents() {
 
   document.getElementById('shops-search').addEventListener('input', (event) => {
     STATE.search = event.target.value;
-    clearTimeout(_searchTrackTimer);
-    _searchTrackTimer = setTimeout(() => trackShopFilterApply('search'), SEARCH_TRACK_DEBOUNCE_MS);
+    trackShopFilterApply('search', SEARCH_TRACK_DEBOUNCE_MS);
     render();
   });
 
