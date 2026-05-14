@@ -57,29 +57,27 @@ function mapRow(row) {
  */
 export async function fetchShops() {
   try {
-    const preferredUrl = `${SUPABASE_URL}/rest/v1/shop_listings?status=eq.active&select=*&order=sponsored.desc,featured.desc,name.asc`;
-    const legacyUrl = `${SUPABASE_URL}/rest/v1/shops?verified=eq.true&select=*&order=featured.desc,name.asc`;
-
+    const candidates = [
+      `${SUPABASE_URL}/rest/v1/shop_listings?status=eq.active&select=*&order=sponsored.desc,featured.desc,name.asc`,
+      `${SUPABASE_URL}/rest/v1/shops?verified=eq.true&select=*&order=featured.desc,name.asc`,
+    ];
     const baseHeaders = {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       Accept: 'application/json',
     };
 
-    let res = await fetch(preferredUrl, {
-      headers: baseHeaders,
-    });
-
-    if (!res.ok) {
-      res = await fetch(legacyUrl, {
-        headers: {
-          ...baseHeaders,
-        },
-      });
+    let res = null;
+    for (const url of candidates) {
+      const probe = await fetch(url, { headers: baseHeaders });
+      if (probe.ok) {
+        res = probe;
+        break;
+      }
     }
 
-    if (!res.ok) {
-      console.warn('[supabase-data] Fetch failed:', res.status, res.statusText);
+    if (!res?.ok) {
+      console.warn('[supabase-data] Fetch failed on all Supabase shop endpoints');
       return null;
     }
 

@@ -22,10 +22,11 @@ import {
  * replaced by Supabase data once it loads.
  */
 let SHOPS = [...FALLBACK_SHOPS];
+const DEFAULT_LISTING_TAB = 'verified_shop';
 
 const STATE = {
   lang: 'en',
-  listingTab: 'verified_shop',
+  listingTab: DEFAULT_LISTING_TAB,
   search: '',
   region: 'all',
   country: 'all',
@@ -46,7 +47,7 @@ function sanitizeSearchQueryForMessage(value = '') {
     .slice(0, 120);
 }
 
-function encodePhoneForWhatsApp(phone) {
+function formatPhoneForWhatsApp(phone) {
   return encodeURIComponent(String(phone || '').replace(/[^\d]/g, ''));
 }
 
@@ -644,7 +645,7 @@ function openModal(shop) {
       }
       ${
         shop.phone
-          ? `<a href="https://wa.me/${esc(encodePhoneForWhatsApp(shop.phone))}" target="_blank" rel="noopener" class="modal-action-btn modal-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+          ? `<a href="https://wa.me/${esc(formatPhoneForWhatsApp(shop.phone))}" target="_blank" rel="noopener" class="modal-action-btn modal-action-btn--whatsapp" aria-label="${t('whatsApp')}">
         <span class="modal-action-icon">💬</span>
         <span class="modal-action-label">${t('whatsApp')}</span>
       </a>`
@@ -1145,7 +1146,7 @@ function renderCards(shops) {
             <span class="shop-action-label">${t('notAvailable')}</span>
           </button>`;
       const whatsappAction = shop.phone
-        ? `<a href="https://wa.me/${encodePhoneForWhatsApp(shop.phone)}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+        ? `<a href="https://wa.me/${formatPhoneForWhatsApp(shop.phone)}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
             <span class="shop-action-icon">💬</span>
             <span class="shop-action-label">${t('whatsApp')}</span>
           </a>`
@@ -1506,7 +1507,7 @@ function syncUrlToState() {
   else p.delete('specialty');
   if (STATE.verifiedOnly) p.set('verified', '1');
   else p.delete('verified');
-  if (STATE.listingTab) p.set('listing', STATE.listingTab);
+  if (STATE.listingTab !== DEFAULT_LISTING_TAB) p.set('listing', STATE.listingTab);
   else p.delete('listing');
   if (STATE.lang === 'ar') p.set('lang', 'ar');
   else p.delete('lang');
@@ -1585,7 +1586,7 @@ function render() {
 
 function resetFilters() {
   STATE.search = '';
-  STATE.listingTab = 'verified_shop';
+  STATE.listingTab = DEFAULT_LISTING_TAB;
   STATE.region = 'all';
   STATE.country = 'all';
   STATE.city = 'all';
@@ -1601,7 +1602,7 @@ function resetFilters() {
 function bindEvents() {
   document.querySelectorAll('[data-listing-tab]').forEach((button) => {
     button.addEventListener('click', () => {
-      STATE.listingTab = button.dataset.listingTab || 'verified_shop';
+      STATE.listingTab = button.dataset.listingTab || DEFAULT_LISTING_TAB;
       render();
     });
   });

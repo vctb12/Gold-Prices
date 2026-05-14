@@ -18,6 +18,13 @@ const SHOP_CLAIMS_FILE = path.join(ROOT, 'data', 'shop_claims.json');
 const SHOP_CLICKS_FILE = path.join(ROOT, 'data', 'shop_click_events.json');
 const SPONSORED_FILE = path.join(ROOT, 'data', 'sponsored_placements.json');
 const MARKET_CLUSTER_HINT_RX = /cluster|market|souk|area|district/;
+const LISTING_TYPES = {
+  VERIFIED_SHOP: 'verified_shop',
+  MARKET_CLUSTER: 'market_cluster',
+  SPONSOR: 'sponsor',
+  PENDING_UNVERIFIED: 'pending_unverified',
+};
+const VALID_LISTING_TYPES = new Set(Object.values(LISTING_TYPES));
 const ALLOWED_CLICK_ACTIONS = new Set([
   'call',
   'whatsapp',
@@ -83,28 +90,26 @@ function calculateContactCompleteness(shop) {
 
 function inferListingType(shop) {
   const explicit = sanitizeString(shop?.listing_type, 50);
-  if (
-    explicit === 'verified_shop' ||
-    explicit === 'market_cluster' ||
-    explicit === 'sponsor' ||
-    explicit === 'pending_unverified'
-  ) {
+  if (VALID_LISTING_TYPES.has(explicit)) {
     return explicit;
   }
 
-  if (shop?.sponsored === true) return 'sponsor';
+  if (shop?.sponsored === true) return LISTING_TYPES.SPONSOR;
 
   const typeValue = sanitizeString(shop?.type, 80).toLowerCase();
   const notes = sanitizeString(shop?.notes, 500).toLowerCase();
   const noDirectContact = !sanitizeString(shop?.phone) && !sanitizeString(shop?.website);
 
-  if (typeValue === 'market_cluster' || (noDirectContact && MARKET_CLUSTER_HINT_RX.test(notes))) {
-    return 'market_cluster';
+  if (
+    typeValue === LISTING_TYPES.MARKET_CLUSTER ||
+    (noDirectContact && MARKET_CLUSTER_HINT_RX.test(notes))
+  ) {
+    return LISTING_TYPES.MARKET_CLUSTER;
   }
 
-  if (shop?.verified === true) return 'verified_shop';
+  if (shop?.verified === true) return LISTING_TYPES.VERIFIED_SHOP;
 
-  return 'pending_unverified';
+  return LISTING_TYPES.PENDING_UNVERIFIED;
 }
 
 function normalizeShop(raw) {
@@ -114,8 +119,8 @@ function normalizeShop(raw) {
       ? Math.max(0, Math.min(100, Math.round(raw.contact_completeness_score)))
       : calculateContactCompleteness(raw);
   let verificationStatus = 'listed';
-  if (listingType === 'verified_shop') verificationStatus = 'verified';
-  else if (listingType === 'pending_unverified') verificationStatus = 'pending';
+  if (listingType === LISTING_TYPES.VERIFIED_SHOP) verificationStatus = 'verified';
+  else if (listingType === LISTING_TYPES.PENDING_UNVERIFIED) verificationStatus = 'pending';
 
   return {
     id: raw.id || slugify(raw.name || `${raw.city || 'shop'}-${Date.now()}`),
@@ -211,7 +216,7 @@ router.get('/shops', async (req, res) => {
 
   const merged = listings.map((row) => {
     if (sponsoredShopIds.has(row.id) || sponsoredShopIds.has(row.slug)) {
-      return { ...row, listing_type: 'sponsor', sponsored: true };
+      return { ...row, listing_type: LISTING_TYPES.SPONSOR, sponsored: true };
     }
     return row;
   });
@@ -227,19 +232,23 @@ router.get('/shops', async (req, res) => {
     return haystack.includes(q);
   });
 
-  const marketClusters = filtered.filter((row) => row.listing_type === 'market_cluster');
-  const shopListings = filtered.filter((row) => row.listing_type !== 'market_cluster');
+  const marketClusters = filtered.filter(
+    (row) => row.listing_type === LISTING_TYPES.MARKET_CLUSTER
+  );
+  const shopListings = filtered.filter((row) => row.listing_type !== LISTING_TYPES.MARKET_CLUSTER);
 
   return res.json({
     success: true,
     data: {
       total: filtered.length,
       listing_types: {
-        verified_shop: filtered.filter((row) => row.listing_type === 'verified_shop').length,
-        market_cluster: marketClusters.length,
-        sponsor: filtered.filter((row) => row.listing_type === 'sponsor').length,
-        pending_unverified: filtered.filter((row) => row.listing_type === 'pending_unverified')
+        verified_shop: filtered.filter((row) => row.listing_type === LISTING_TYPES.VERIFIED_SHOP)
           .length,
+        market_cluster: marketClusters.length,
+        sponsor: filtered.filter((row) => row.listing_type === LISTING_TYPES.SPONSOR).length,
+        pending_unverified: filtered.filter(
+          (row) => row.listing_type === LISTING_TYPES.PENDING_UNVERIFIED
+        ).length,
       },
       shop_listings: shopListings,
       market_clusters: marketClusters,
@@ -376,7 +385,7 @@ router.post('/admin/shops/:id/verify', authMiddleware('editor'), async (req, res
 
   const updated = await shopsRepo.update(id, {
     verified: true,
-    listing_type: 'verified_shop',
+    listing_type: LISTING_TYPES.VERIFIED_SHOP,
     verified_at: new Date().toISOString(),
     verification_method: verificationMethod,
     source,
@@ -393,7 +402,7 @@ router.post('/admin/shops/:id/reject', authMiddleware('editor'), async (req, res
   const id = sanitizeString(req.params.id, 120);
   const updated = await shopsRepo.update(id, {
     verified: false,
-    listing_type: 'pending_unverified',
+    listing_type: LISTING_TYPES.PENDING_UNVERIFIED,
     verification_method: sanitizeString(req.body?.verification_method, 80) || 'manual_review',
   });
 
