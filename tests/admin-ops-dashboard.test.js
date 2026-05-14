@@ -33,8 +33,8 @@ const port = server.address().port;
 
 after(() => {
   server.close();
-  if (auditBackup != null) fs.writeFileSync(AUDIT_LOG_FILE, auditBackup);
-  if (pendingBackup != null) fs.writeFileSync(PENDING_FILE, pendingBackup);
+  if (auditBackup !== null) fs.writeFileSync(AUDIT_LOG_FILE, auditBackup);
+  if (pendingBackup !== null) fs.writeFileSync(PENDING_FILE, pendingBackup);
 });
 
 function request(method, routePath, { token, body } = {}) {

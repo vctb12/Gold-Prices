@@ -875,7 +875,7 @@
         const token = getAuthToken();
         if (!token) {
           statusEl.textContent =
-            'Admin API token is unavailable in this session. Open module pages directly from cards.';
+            'Admin API token is unavailable. Refresh or sign in again to restore API access, or open module pages directly.';
           renderOpsModules(createOpsModuleCards({}));
           return;
         }
@@ -885,8 +885,9 @@
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!result.ok || !result.data?.success || !result.data?.data?.modules) {
+          console.warn('[admin] ops control-center fetch failed:', result?.status, result?.data);
           statusEl.textContent =
-            'Could not load operations APIs right now. Open a module page for direct checks.';
+            'Could not load operations APIs (network/auth/server). Try refreshing or signing in again, or open module pages directly.';
           renderOpsModules(createOpsModuleCards({}));
           return;
         }

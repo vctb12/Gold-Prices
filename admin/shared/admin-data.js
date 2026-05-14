@@ -56,6 +56,8 @@ export function getAuthToken() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     // Supabase can store either { access_token } or an array [{ access_token }]
+    // depending on client/runtime serialization behavior across auth flows.
+    // Keep both branches for backwards compatibility with existing sessions.
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed.access_token || null;
     }

@@ -665,7 +665,7 @@ function moderatePendingSubmission({ submissionId, action, actorEmail, reason })
   const normalizedReason = sanitizeString(reason, 500);
   const safeReason =
     typeof normalizedReason === 'string' && normalizedReason.trim().length > 0
-      ? normalizedReason
+      ? normalizedReason.trim()
       : 'No reason provided';
   const now = new Date().toISOString();
   const updatedSubmission = pendingShopsRepo.update(sub.id, {
