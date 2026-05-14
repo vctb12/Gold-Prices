@@ -46,7 +46,7 @@ function sanitizeSearchQueryForMessage(value = '') {
     .slice(0, 120);
 }
 
-function normalizePhoneForWhatsApp(phone) {
+function encodePhoneForWhatsApp(phone) {
   return encodeURIComponent(String(phone || '').replace(/[^\d]/g, ''));
 }
 
@@ -113,6 +113,7 @@ const TXT = {
     specialties: 'Specialties',
     status: 'Status',
     phone: 'Phone',
+    contactName: 'Name',
     website: 'Website',
     verifiedStatus: 'Verified details',
     listedStatus: 'Listed profile',
@@ -252,6 +253,7 @@ const TXT = {
     specialties: 'التخصصات',
     status: 'الحالة',
     phone: 'الهاتف',
+    contactName: 'الاسم',
     website: 'الموقع',
     verifiedStatus: 'تفاصيل موثقة',
     listedStatus: 'إدراج منشور',
@@ -424,6 +426,57 @@ function listingType(shop) {
   return 'pending_unverified';
 }
 
+const LISTING_TAB_LABELS = {
+  verified_shop: 'tabVerified',
+  market_cluster: 'tabMarkets',
+  sponsor: 'tabSponsored',
+};
+
+function activeListingTabLabel() {
+  const key = LISTING_TAB_LABELS[STATE.listingTab];
+  return key ? t(key) : null;
+}
+
+async function openClaimDialog() {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'shops-claim-dialog';
+  dialog.innerHTML = `
+    <form method="dialog" class="shops-claim-dialog-form">
+      <h3>${esc(t('claimListing'))}</h3>
+      <p>${esc(t('claimListingPrompt'))}</p>
+      <label>${esc(t('contactName'))}<input name="name" required maxlength="120" /></label>
+      <label>${esc(t('claimEmailPrompt'))}<input name="email" type="email" required maxlength="200" /></label>
+      <menu>
+        <button value="cancel" type="button">${esc(t('closeDetails'))}</button>
+        <button value="submit" type="submit">${esc(t('claimListing'))}</button>
+      </menu>
+    </form>
+  `;
+  document.body.appendChild(dialog);
+
+  return new Promise((resolve) => {
+    const form = dialog.querySelector('form');
+    const cancel = dialog.querySelector('button[value="cancel"]');
+    cancel?.addEventListener('click', () => {
+      dialog.close('cancel');
+    });
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const fd = new FormData(form);
+      const name = String(fd.get('name') || '').trim();
+      const email = String(fd.get('email') || '').trim();
+      if (!name || !email) return;
+      dialog.close('submit');
+      resolve({ name, email });
+    });
+    dialog.addEventListener('close', () => {
+      if (dialog.returnValue !== 'submit') resolve(null);
+      dialog.remove();
+    });
+    dialog.showModal();
+  });
+}
+
 async function postShopEvent(shopId, action, extra = {}) {
   if (!shopId || !action) return;
   try {
@@ -442,15 +495,13 @@ async function postShopEvent(shopId, action, extra = {}) {
 }
 
 async function submitShopClaim(shopId) {
-  const name = window.prompt(t('claimListingPrompt'));
-  if (!name) return;
-  const email = window.prompt(t('claimEmailPrompt'));
-  if (!email) return;
+  const claimData = await openClaimDialog();
+  if (!claimData) return;
   try {
     const res = await fetch(`/api/v1/shops/${encodeURIComponent(shopId)}/claim`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ claimant_name: name, claimant_email: email }),
+      body: JSON.stringify({ claimant_name: claimData.name, claimant_email: claimData.email }),
     });
     if (!res.ok) throw new Error('claim failed');
     announceShopStatus(t('claimListingThanks'));
@@ -593,7 +644,7 @@ function openModal(shop) {
       }
       ${
         shop.phone
-          ? `<a href="https://wa.me/${esc(normalizePhoneForWhatsApp(shop.phone))}" target="_blank" rel="noopener" class="modal-action-btn modal-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+          ? `<a href="https://wa.me/${esc(encodePhoneForWhatsApp(shop.phone))}" target="_blank" rel="noopener" class="modal-action-btn modal-action-btn--whatsapp" aria-label="${t('whatsApp')}">
         <span class="modal-action-icon">💬</span>
         <span class="modal-action-label">${t('whatsApp')}</span>
       </a>`
@@ -1017,9 +1068,8 @@ function updateHeaderStats() {
 function activeFilterSummary() {
   const labels = [];
 
-  if (STATE.listingTab === 'verified_shop') labels.push(t('tabVerified'));
-  if (STATE.listingTab === 'market_cluster') labels.push(t('tabMarkets'));
-  if (STATE.listingTab === 'sponsor') labels.push(t('tabSponsored'));
+  const listingTabLabel = activeListingTabLabel();
+  if (listingTabLabel) labels.push(listingTabLabel);
   if (STATE.region !== 'all') labels.push(regionName(STATE.region));
   if (STATE.country !== 'all') {
     const country = countryByCode(STATE.country);
@@ -1095,7 +1145,7 @@ function renderCards(shops) {
             <span class="shop-action-label">${t('notAvailable')}</span>
           </button>`;
       const whatsappAction = shop.phone
-        ? `<a href="https://wa.me/${normalizePhoneForWhatsApp(shop.phone)}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+        ? `<a href="https://wa.me/${encodePhoneForWhatsApp(shop.phone)}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
             <span class="shop-action-icon">💬</span>
             <span class="shop-action-label">${t('whatsApp')}</span>
           </a>`

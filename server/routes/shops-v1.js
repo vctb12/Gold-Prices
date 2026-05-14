@@ -113,6 +113,9 @@ function normalizeShop(raw) {
     typeof raw?.contact_completeness_score === 'number'
       ? Math.max(0, Math.min(100, Math.round(raw.contact_completeness_score)))
       : calculateContactCompleteness(raw);
+  let verificationStatus = 'listed';
+  if (listingType === 'verified_shop') verificationStatus = 'verified';
+  else if (listingType === 'pending_unverified') verificationStatus = 'pending';
 
   return {
     id: raw.id || slugify(raw.name || `${raw.city || 'shop'}-${Date.now()}`),
@@ -133,12 +136,7 @@ function normalizeShop(raw) {
     featured: Boolean(raw.featured),
     sponsored: Boolean(raw.sponsored),
     listing_type: listingType,
-    verification_status:
-      listingType === 'verified_shop'
-        ? 'verified'
-        : listingType === 'pending_unverified'
-          ? 'pending'
-          : 'listed',
+    verification_status: verificationStatus,
     verified_at: raw.verified_at || null,
     verification_method: sanitizeString(raw.verification_method, 80) || null,
     source: sanitizeString(raw.source || 'directory-fallback', 80),
