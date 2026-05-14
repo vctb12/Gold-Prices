@@ -4,6 +4,7 @@
 # data/gold_price.json if it changed. This is the single production
 # provider-call path; post_gold.yml reads the cached result and does not
 # fetch again.
+# Triggered by schedule and workflow_dispatch (not push).
 # NOT a required merge gate.
 # ------------------------------------------------------------------
 name: Gold Price Fetch (provider-adapter)
