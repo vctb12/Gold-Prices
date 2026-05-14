@@ -298,6 +298,36 @@
             </div>
           </section>
 
+          <!-- ── Operations Control Center ─────────────────────── -->
+          <section class="section card" aria-labelledby="ops-center-title">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title" id="ops-center-title">Operations Control Center</h2>
+                <p class="admin-meta-dim" id="ops-center-subtext">
+                  Provider health, snapshots, alerts, moderation, growth, billing, SEO, automation, and audit.
+                </p>
+              </div>
+              <div class="search-wrap" style="max-width: 320px; width: 100%">
+                <span class="search-icon" aria-hidden="true">🔎</span>
+                <input
+                  type="search"
+                  id="ops-module-search"
+                  placeholder="Filter modules (provider, alerts, seo...)"
+                  aria-label="Filter operations modules"
+                />
+              </div>
+            </div>
+            <div id="ops-center-status" class="admin-meta-dim" aria-live="polite">
+              Loading operations module health…
+            </div>
+            <div class="ops-control-grid" id="ops-control-grid" role="list" aria-label="Operations modules">
+              <div class="ops-control-card is-loading" role="listitem">
+                <div class="ops-control-title">Loading modules…</div>
+                <div class="ops-control-copy">Pulling operational snapshots from admin APIs.</div>
+              </div>
+            </div>
+          </section>
+
           <!-- ── API Status ──────────────────────────────────── -->
           <section class="section card" aria-labelledby="api-status-title">
             <div class="api-status-header">
@@ -378,6 +408,7 @@
         fetchServerAdminStats,
         fetchSupabaseRows,
         formatCount,
+        getAuthToken,
         readJsonCache,
         writeJsonCache,
       } from './shared/admin-data.js';
@@ -672,8 +703,220 @@
         resetCountdown();
       }
 
+      function formatOpsValue(value) {
+        if (value == null) return '—';
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        if (typeof value === 'number') return value.toLocaleString('en-US');
+        return String(value);
+      }
+
+      function createOpsModuleCards(modules = {}) {
+        return [
+          {
+            key: 'providerHealth',
+            title: 'Provider Health',
+            href: './pricing/',
+            value: modules.providerHealth?.latestProvider || 'No provider',
+            meta: modules.providerHealth?.latestTimestampUtc
+              ? `Last quote ${relativeTime(modules.providerHealth.latestTimestampUtc)}`
+              : 'No provider timestamp yet',
+          },
+          {
+            key: 'priceSnapshots',
+            title: 'Price Snapshots',
+            href: './pricing/',
+            value: modules.priceSnapshots?.total ?? 0,
+            meta: 'Recent snapshots in storage',
+          },
+          {
+            key: 'alerts',
+            title: 'Alerts',
+            href: './settings/',
+            value: modules.alerts?.counts?.active ?? 0,
+            meta: `${modules.alerts?.counts?.total ?? 0} total rules`,
+          },
+          {
+            key: 'shopsModeration',
+            title: 'Shops Moderation',
+            href: './shops/#submissions',
+            value: modules.shopsModeration?.counts?.pending ?? 0,
+            meta: `${modules.shopsModeration?.counts?.unverifiedShops ?? 0} unverified listings`,
+          },
+          {
+            key: 'leads',
+            title: 'Leads',
+            href: './leads/',
+            value: modules.leads?.counts?.new ?? 0,
+            meta: `${modules.leads?.counts?.total ?? 0} total leads`,
+          },
+          {
+            key: 'newsletter',
+            title: 'Newsletter',
+            href: './newsletter/',
+            value: modules.newsletter?.counts?.active ?? 0,
+            meta: `${modules.newsletter?.counts?.total ?? 0} total subscribers`,
+          },
+          {
+            key: 'billing',
+            title: 'Billing / Entitlements',
+            href: './analytics/',
+            value: modules.billing?.counts?.active ?? 0,
+            meta: modules.billing?.configured ? 'Stripe configured' : 'Stripe not configured',
+          },
+          {
+            key: 'seo',
+            title: 'SEO Inventory',
+            href: './content/',
+            value: modules.seo?.summary?.withoutCanonical ?? 0,
+            meta: `${modules.seo?.summary?.withoutJsonLd ?? 0} pages without JSON-LD`,
+          },
+          {
+            key: 'xAutomation',
+            title: 'X Automation',
+            href: './social/',
+            value: modules.xAutomation?.lastPost?.postReason || 'No recent post',
+            meta: modules.xAutomation?.lastPost?.timeUtc
+              ? `Last run ${relativeTime(modules.xAutomation.lastPost.timeUtc)}`
+              : 'No recent run timestamp',
+          },
+          {
+            key: 'audit',
+            title: 'Audit Logs',
+            href: './access/',
+            value: modules.audit?.total ?? 0,
+            meta: `${modules.audit?.returned ?? 0} recent entries loaded`,
+          },
+        ];
+      }
+
+      function renderOpsModules(items) {
+        const grid = qs('#ops-control-grid');
+        if (!grid) return;
+        const fragment = document.createDocumentFragment();
+
+        function makeCard({ title, value, meta, href, className = '' }) {
+          const card = document.createElement(href ? 'a' : 'div');
+          card.className = `ops-control-card${className ? ` ${className}` : ''}`;
+          card.setAttribute('role', 'listitem');
+          if (href) {
+            card.href = safeHref(href);
+            card.setAttribute('aria-label', title);
+          }
+
+          const titleEl = document.createElement('div');
+          titleEl.className = 'ops-control-title';
+          titleEl.textContent = title;
+          card.appendChild(titleEl);
+
+          if (value !== undefined) {
+            const valueEl = document.createElement('div');
+            valueEl.className = 'ops-control-value';
+            valueEl.textContent = formatOpsValue(value);
+            card.appendChild(valueEl);
+          }
+
+          const copyEl = document.createElement('div');
+          copyEl.className = 'ops-control-copy';
+          copyEl.textContent = meta;
+          card.appendChild(copyEl);
+          return card;
+        }
+
+        if (!items.length) {
+          fragment.appendChild(
+            makeCard({
+              title: 'No modules matched your filter.',
+              meta: 'Try a broader term such as provider, alerts, billing, or seo.',
+              className: 'is-empty',
+            })
+          );
+          grid.replaceChildren(fragment);
+          return;
+        }
+
+        for (const item of items) {
+          fragment.appendChild(
+            makeCard({
+              title: item.title,
+              value: item.value,
+              meta: item.meta,
+              href: item.href,
+            })
+          );
+        }
+        grid.replaceChildren(fragment);
+      }
+
+      function renderOpsLoading() {
+        const grid = qs('#ops-control-grid');
+        if (!grid) return;
+        const card = document.createElement('div');
+        card.className = 'ops-control-card is-loading';
+        card.setAttribute('role', 'listitem');
+        const titleEl = document.createElement('div');
+        titleEl.className = 'ops-control-title';
+        titleEl.textContent = 'Loading modules…';
+        const copyEl = document.createElement('div');
+        copyEl.className = 'ops-control-copy';
+        copyEl.textContent = 'Pulling operational snapshots from admin APIs.';
+        card.append(titleEl, copyEl);
+        grid.replaceChildren(card);
+      }
+
+      async function loadOpsControlCenter() {
+        const statusEl = qs('#ops-center-status');
+        const grid = qs('#ops-control-grid');
+        const filterInput = qs('#ops-module-search');
+        if (!statusEl || !grid) return;
+
+        statusEl.textContent = 'Loading operations module health…';
+        renderOpsLoading();
+
+        const token = getAuthToken();
+        if (!token) {
+          statusEl.textContent =
+            'Admin API token is unavailable. Refresh or sign in again to restore API access, or open module pages directly.';
+          renderOpsModules(createOpsModuleCards({}));
+          return;
+        }
+
+        const result = await fetchJsonWithTimeout('/api/v1/admin/ops/control-center', {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!result.ok || !result.data?.success || !result.data?.data?.modules) {
+          console.warn('[admin] ops control-center fetch failed:', result?.status, result?.data);
+          statusEl.textContent =
+            'Could not load operations APIs (network/auth/server). Try refreshing or signing in again, or open module pages directly.';
+          renderOpsModules(createOpsModuleCards({}));
+          return;
+        }
+
+        const allItems = createOpsModuleCards(result.data.data.modules).map((item) => ({
+          ...item,
+          _searchText: `${item.title} ${item.meta || ''}`.toLowerCase(),
+        }));
+        const applyFilter = () => {
+          const query = (filterInput?.value || '').trim().toLowerCase();
+          if (!query) return renderOpsModules(allItems);
+          renderOpsModules(allItems.filter((item) => item._searchText.includes(query)));
+        };
+
+        applyFilter();
+        if (filterInput) filterInput.oninput = applyFilter;
+        statusEl.textContent = `Operational snapshot updated ${relativeTime(
+          result.data.data.generatedAt
+        )}.`;
+      }
+
       async function refreshDashboard() {
-        await Promise.all([updateTicker(), loadDashboardCounts(), loadActivity(), runApiChecks()]);
+        await Promise.all([
+          updateTicker(),
+          loadDashboardCounts(),
+          loadActivity(),
+          runApiChecks(),
+          loadOpsControlCenter(),
+        ]);
       }
 
       // ── Icons, greeting, actions ─────────────────────────────

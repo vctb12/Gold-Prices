@@ -9,6 +9,9 @@ export const ADMIN_DATA_CONSTANTS = {
   API_TIMEOUT_MS: 8000,
 };
 
+let cachedSupabaseTokenKey = null;
+let cachedSupabaseTokenKeyScanned = false;
+
 export function readJsonCache(key, fallback = null) {
   try {
     const raw = localStorage.getItem(key);
@@ -35,6 +38,38 @@ export function readLegacyAdminToken() {
   }
 }
 
+export function getAuthToken() {
+  try {
+    const legacy = localStorage.getItem('gp_admin_token');
+    if (legacy) return legacy;
+    if (cachedSupabaseTokenKeyScanned && !cachedSupabaseTokenKey) return null;
+    let sbKey = cachedSupabaseTokenKey;
+    if (!sbKey || !localStorage.getItem(sbKey)) {
+      sbKey = Object.keys(localStorage).find(
+        (key) => key.startsWith('sb-') && key.endsWith('-auth-token')
+      );
+      cachedSupabaseTokenKey = sbKey || null;
+      cachedSupabaseTokenKeyScanned = true;
+    }
+    if (!sbKey) return null;
+    const raw = localStorage.getItem(sbKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Supabase can store either { access_token } or an array [{ access_token }]
+    // depending on client/runtime serialization behavior across auth flows.
+    // Keep both branches for backwards compatibility with existing sessions.
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed.access_token || null;
+    }
+    if (Array.isArray(parsed) && parsed[0] && typeof parsed[0] === 'object') {
+      return parsed[0].access_token || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchJsonWithTimeout(
   url,
   options = {},
@@ -54,7 +89,7 @@ export async function fetchJsonWithTimeout(
 }
 
 export async function fetchServerAdminStats() {
-  const token = readLegacyAdminToken();
+  const token = getAuthToken();
   if (!token) {
     return { ok: false, skipped: true, reason: 'No legacy API token available' };
   }

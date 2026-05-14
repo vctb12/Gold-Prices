@@ -6,6 +6,8 @@
 const express = require('express');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const auth = require('../../lib/auth');
 const { authenticate, authMiddleware } = auth;
@@ -15,7 +17,20 @@ const shopsRepo = require('../../repositories/shops.repository');
 const auditRepo = require('../../repositories/audit.repository');
 const { ValidationError, NotFoundError: _NotFoundError } = require('../../lib/errors');
 const pendingShopsRepo = require('../../repositories/pending-shops.repository');
-const shopsManager = require('../../lib/admin/shop-manager');
+const leadsRepo = require('../../repositories/leads.repository');
+const newsletterRepo = require('../../repositories/newsletter.repository');
+const { getSupabaseClient } = require('../../lib/supabase-client');
+
+const ROOT = path.resolve(__dirname, '../../..');
+const DATA_DIR = path.join(ROOT, 'data');
+const REPORTS_DIR = path.join(ROOT, 'reports');
+const GOLD_PRICE_FILE = path.join(DATA_DIR, 'gold_price.json');
+const PROVIDER_STATE_FILE = path.join(DATA_DIR, 'provider_state.json');
+const LAST_TWEET_STATE_FILE = path.join(DATA_DIR, 'last_tweet_state.json');
+const ALERTS_DATA_FILE = process.env.ALERTS_DATA_FILE || path.join(DATA_DIR, 'alerts-v1.json');
+const BILLING_DATA_FILE = path.join(DATA_DIR, 'billing.json');
+const SEO_INVENTORY_FILE = path.join(REPORTS_DIR, 'seo', 'inventory.json');
+const POST_GOLD_WORKFLOW_FILE = path.join(ROOT, '.github', 'workflows', 'post_gold.yml');
 
 // ---------------------------------------------------------------------------
 // Admin responses carry sensitive data (audit logs, user records, shop
@@ -197,6 +212,513 @@ function validateShopInput(body) {
   return cleaned;
 }
 
+function readJsonSafe(filePath, fallback = null) {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function hasFile(filePath) {
+  try {
+    return fs.existsSync(filePath);
+  } catch {
+    return false;
+  }
+}
+
+function maskEmail(email) {
+  if (typeof email !== 'string') return null;
+  const [name, domain] = email.split('@');
+  if (!name || !domain) return null;
+  const prefixLength = Math.min(2, Math.max(0, name.length - 1));
+  if (prefixLength === 0) return `***@${domain}`;
+  return `${name.slice(0, prefixLength)}***@${domain}`;
+}
+
+function parseIsoDate(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null;
+}
+
+/**
+ * Validate a Supabase query response and throw when it contains an error.
+ * @param {{ error?: { message?: string } } | null | undefined} response
+ * @param {string} context
+ */
+function assertSupabaseResponseOk(response, context) {
+  if (response?.error) {
+    const message = response.error.message || 'Unknown Supabase query error';
+    throw new Error(`${context}: ${message}`);
+  }
+}
+
+async function getProviderHealthSummary() {
+  const sb = getSupabaseClient(false);
+  if (sb) {
+    try {
+      const [providersRes, latestSnapshotRes, recentRunsRes] = await Promise.all([
+        sb
+          .from('provider_health')
+          .select('*')
+          .order('provider_name', { ascending: true })
+          .limit(100),
+        sb
+          .from('price_snapshots')
+          .select('source_provider,timestamp_utc,is_fresh,is_fallback')
+          .order('timestamp_utc', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        sb
+          .from('provider_runs')
+          .select('provider_name,status,created_at,latency_ms')
+          .order('created_at', { ascending: false })
+          .limit(20),
+      ]);
+      assertSupabaseResponseOk(providersRes, 'provider_health query failed');
+      assertSupabaseResponseOk(latestSnapshotRes, 'latest price_snapshots query failed');
+      assertSupabaseResponseOk(recentRunsRes, 'provider_runs query failed');
+      const providers = providersRes?.data;
+      const latestSnapshot = latestSnapshotRes?.data;
+      const recentRuns = recentRunsRes?.data;
+      return {
+        sourceMode: 'supabase',
+        providers: Array.isArray(providers) ? providers : [],
+        latestProvider: latestSnapshot?.source_provider || null,
+        latestTimestampUtc: latestSnapshot?.timestamp_utc || null,
+        latestFresh: latestSnapshot?.is_fresh ?? null,
+        latestFallback: latestSnapshot?.is_fallback ?? null,
+        recentRuns: Array.isArray(recentRuns) ? recentRuns : [],
+      };
+    } catch (err) {
+      console.warn('[admin] provider health supabase fallback:', err.message);
+    }
+  }
+
+  const providerState = readJsonSafe(PROVIDER_STATE_FILE, {});
+  const latestPrice = readJsonSafe(GOLD_PRICE_FILE, {});
+  return {
+    sourceMode: 'file',
+    providers: [],
+    providerStateFileAvailable: hasFile(PROVIDER_STATE_FILE),
+    providerState: providerState || {},
+    latestProvider: latestPrice?.provider || latestPrice?.source || null,
+    latestTimestampUtc: latestPrice?.timestamp_utc || latestPrice?.fetched_at_utc || null,
+    latestFresh: latestPrice?.is_fresh ?? null,
+    latestFallback: latestPrice?.is_fallback ?? null,
+    recentRuns: [],
+  };
+}
+
+async function getPriceSnapshotsSummary(limit = 20) {
+  const boundedLimit = Math.max(1, Math.min(Number(limit) || 20, 200));
+  const sb = getSupabaseClient(false);
+  if (sb) {
+    try {
+      const snapshotsRes = await sb
+        .from('price_snapshots')
+        .select(
+          'id,timestamp_utc,fetched_at_utc,xau_usd_per_oz,xau_aed_per_gram,source_provider,freshness_seconds,is_fresh,is_fallback,provider_chain'
+        )
+        .order('timestamp_utc', { ascending: false })
+        .limit(boundedLimit);
+      assertSupabaseResponseOk(snapshotsRes, 'price_snapshots query failed');
+      const data = snapshotsRes?.data;
+      return {
+        sourceMode: 'supabase',
+        total: Array.isArray(data) ? data.length : 0,
+        snapshots: Array.isArray(data) ? data : [],
+      };
+    } catch (err) {
+      console.warn('[admin] snapshots supabase fallback:', err.message);
+    }
+  }
+
+  const latestPrice = readJsonSafe(GOLD_PRICE_FILE, null);
+  const fallbackSnapshots = latestPrice
+    ? [
+        {
+          id: null,
+          timestamp_utc: latestPrice.timestamp_utc || latestPrice.fetched_at_utc || null,
+          fetched_at_utc: latestPrice.fetched_at_utc || null,
+          xau_usd_per_oz: latestPrice.xau_usd_per_oz ?? latestPrice?.gold?.ounce_usd ?? null,
+          xau_aed_per_gram: latestPrice.aed_per_gram_24k ?? latestPrice?.gold?.gram_aed ?? null,
+          source_provider: latestPrice.provider || latestPrice.source || null,
+          freshness_seconds: latestPrice.freshness_seconds ?? null,
+          is_fresh: latestPrice.is_fresh ?? null,
+          is_fallback: latestPrice.is_fallback ?? null,
+          provider_chain: latestPrice.provider_chain || null,
+        },
+      ]
+    : [];
+  return {
+    sourceMode: 'file',
+    total: fallbackSnapshots.length,
+    snapshots: fallbackSnapshots,
+  };
+}
+
+async function getAlertsSummary() {
+  const sb = getSupabaseClient(false);
+  if (sb) {
+    try {
+      const [rulesRes, eventsRes] = await Promise.all([
+        sb
+          .from('alert_rules')
+          .select('id,is_active,verified_at,unsubscribed_at,currency,condition,updated_at')
+          .order('updated_at', { ascending: false })
+          .limit(5000),
+        sb
+          .from('alert_events')
+          .select('id,event_type,delivery_status,created_at')
+          .order('created_at', { ascending: false })
+          .limit(20),
+      ]);
+      assertSupabaseResponseOk(rulesRes, 'alert_rules query failed');
+      assertSupabaseResponseOk(eventsRes, 'alert_events query failed');
+      const rules = rulesRes?.data;
+      const events = eventsRes?.data;
+      const allRules = Array.isArray(rules) ? rules : [];
+      return {
+        sourceMode: 'supabase',
+        counts: {
+          total: allRules.length,
+          active: allRules.filter((r) => r.is_active === true).length,
+          verified: allRules.filter((r) => Boolean(r.verified_at)).length,
+          unsubscribed: allRules.filter((r) => Boolean(r.unsubscribed_at)).length,
+        },
+        recentEvents: Array.isArray(events) ? events : [],
+      };
+    } catch (err) {
+      console.warn('[admin] alerts supabase fallback:', err.message);
+    }
+  }
+
+  const store = readJsonSafe(ALERTS_DATA_FILE, {});
+  const rules = Array.isArray(store?.alert_rules) ? store.alert_rules : [];
+  const events = Array.isArray(store?.alert_events) ? store.alert_events : [];
+  return {
+    sourceMode: 'file',
+    counts: {
+      total: rules.length,
+      active: rules.filter((r) => r.is_active === true).length,
+      verified: rules.filter((r) => Boolean(r.verified_at)).length,
+      unsubscribed: rules.filter((r) => Boolean(r.unsubscribed_at)).length,
+    },
+    recentEvents: events.slice(-20).reverse(),
+  };
+}
+
+function getLeadsSummary() {
+  const counts = leadsRepo.getLeadCounts();
+  const recent = leadsRepo.getLeads({ limit: 10, offset: 0 }).map((lead) => ({
+    id: lead.id,
+    type: lead.type,
+    status: lead.status,
+    locale: lead.locale || null,
+    source: lead.source || null,
+    email: maskEmail(lead.email),
+    created_at: lead.created_at,
+    updated_at: lead.updated_at,
+  }));
+  return { counts, recent };
+}
+
+function getShopsModerationSummary() {
+  const queueCounts = pendingShopsRepo.getCounts();
+  const pendingQueue = pendingShopsRepo
+    .getPending()
+    .sort((a, b) => new Date(b.submitted_at || 0) - new Date(a.submitted_at || 0))
+    .slice(0, 20)
+    .map((submission) => ({
+      id: submission.id,
+      shop_name: submission.shop_name,
+      city: submission.city,
+      country_code: submission.country_code,
+      status: submission.status,
+      submitted_at: submission.submitted_at || null,
+    }));
+  const unverified = shopManager.getFilteredShops({
+    status: 'unverified',
+    page: 1,
+    limit: 1,
+  }).total;
+  return {
+    counts: {
+      ...queueCounts,
+      unverifiedShops: typeof unverified === 'number' ? unverified : 0,
+    },
+    pendingQueue,
+  };
+}
+
+function getNewsletterSummary() {
+  const counts = newsletterRepo.getCounts();
+  const latestSubscribers = newsletterRepo
+    .getAll()
+    .slice()
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, 10)
+    .map((subscriber) => ({
+      id: subscriber.id,
+      email: maskEmail(subscriber.email),
+      status: subscriber.status,
+      locale: subscriber.locale || null,
+      source: subscriber.source || null,
+      created_at: subscriber.created_at || null,
+      confirmed_at: subscriber.confirmed_at || null,
+    }));
+  return { counts, latestSubscribers };
+}
+
+async function getBillingSummary() {
+  const configured = Boolean(
+    process.env.STRIPE_SECRET_KEY &&
+    process.env.STRIPE_WEBHOOK_SECRET &&
+    process.env.STRIPE_PUBLISHABLE_KEY
+  );
+  const sb = getSupabaseClient(false);
+  if (sb) {
+    try {
+      const [subscriptionsRes, customersRes, auditRes] = await Promise.all([
+        sb
+          .from('subscriptions')
+          .select('id,status,tier,updated_at,cancel_at_period_end')
+          .order('updated_at', { ascending: false })
+          .limit(5000),
+        sb.from('stripe_customers').select('id', { count: 'exact', head: true }),
+        sb
+          .from('billing_audit_logs')
+          .select('id,action,created_at')
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ]);
+      assertSupabaseResponseOk(subscriptionsRes, 'subscriptions query failed');
+      assertSupabaseResponseOk(customersRes, 'stripe_customers count query failed');
+      assertSupabaseResponseOk(auditRes, 'billing_audit_logs query failed');
+      const subscriptions = subscriptionsRes?.data;
+      const customerCount = customersRes?.count;
+      const auditLogs = auditRes?.data;
+      const rows = Array.isArray(subscriptions) ? subscriptions : [];
+      return {
+        sourceMode: 'supabase',
+        configured,
+        counts: {
+          customers: customerCount || 0,
+          subscriptions: rows.length,
+          active: rows.filter((row) => row.status === 'active').length,
+          trialing: rows.filter((row) => row.status === 'trialing').length,
+          past_due: rows.filter((row) => row.status === 'past_due').length,
+          canceled: rows.filter((row) => row.status === 'canceled').length,
+          pro: rows.filter((row) => row.tier === 'pro').length,
+          api: rows.filter((row) => row.tier === 'api').length,
+        },
+        recentAudit: Array.isArray(auditLogs) ? auditLogs : [],
+      };
+    } catch (err) {
+      console.warn('[admin] billing supabase fallback:', err.message);
+    }
+  }
+
+  const store = readJsonSafe(BILLING_DATA_FILE, {});
+  const subs = Array.isArray(store?.subscriptions) ? store.subscriptions : [];
+  const customers = Array.isArray(store?.stripe_customers) ? store.stripe_customers : [];
+  const audit = Array.isArray(store?.billing_audit_logs) ? store.billing_audit_logs : [];
+  return {
+    sourceMode: 'file',
+    configured,
+    counts: {
+      customers: customers.length,
+      subscriptions: subs.length,
+      active: subs.filter((row) => row.status === 'active').length,
+      trialing: subs.filter((row) => row.status === 'trialing').length,
+      past_due: subs.filter((row) => row.status === 'past_due').length,
+      canceled: subs.filter((row) => row.status === 'canceled').length,
+      pro: subs.filter((row) => row.tier === 'pro').length,
+      api: subs.filter((row) => row.tier === 'api').length,
+    },
+    recentAudit: audit.slice(-10).reverse(),
+  };
+}
+
+function getSeoSummary() {
+  const inventory = readJsonSafe(SEO_INVENTORY_FILE, null);
+  if (!inventory || typeof inventory !== 'object') {
+    return {
+      available: false,
+      sourceMode: 'file',
+      message: 'SEO inventory report not available.',
+    };
+  }
+  return {
+    available: true,
+    sourceMode: 'file',
+    generatedAtDate: inventory.generatedAtDate || null,
+    summary: inventory.summary || {},
+  };
+}
+
+function getXAutomationSummary() {
+  const state = readJsonSafe(LAST_TWEET_STATE_FILE, {});
+  const providerState = readJsonSafe(PROVIDER_STATE_FILE, {});
+  return {
+    workflowConfigured: hasFile(POST_GOLD_WORKFLOW_FILE),
+    stateFileAvailable: hasFile(LAST_TWEET_STATE_FILE),
+    lastPost: {
+      tweetId: state.last_tweet_id || null,
+      timeUtc: parseIsoDate(state.last_tweet_time_utc),
+      sourceType: state.last_source_type || null,
+      provider: state.last_provider || null,
+      providerTimestampUtc: parseIsoDate(state.last_provider_timestamp_utc),
+      postReason: state.last_post_reason || null,
+      triggerSource: state.last_trigger_source || null,
+      runId: state.last_trigger_run_id || null,
+      runAttempt: state.last_trigger_run_attempt || null,
+    },
+    providerCircuit: providerState || {},
+  };
+}
+
+async function getAuditLogSummary(limit = 20) {
+  const capped = Math.max(1, Math.min(Number(limit) || 20, 200));
+  const result = await auditRepo.query({ page: 1, limit: capped });
+  const actionCounts = {};
+  for (const row of result.logs || []) {
+    const key = row.action || 'unknown';
+    actionCounts[key] = (actionCounts[key] || 0) + 1;
+  }
+  return {
+    total: result.total || 0,
+    returned: (result.logs || []).length,
+    actionCounts,
+    logs: result.logs || [],
+  };
+}
+
+async function getControlCenterSummary() {
+  const [providerHealth, priceSnapshots, alerts, billing, audit] = await Promise.all([
+    getProviderHealthSummary(),
+    getPriceSnapshotsSummary(10),
+    getAlertsSummary(),
+    getBillingSummary(),
+    getAuditLogSummary(10),
+  ]);
+  return {
+    generatedAt: new Date().toISOString(),
+    modules: {
+      providerHealth,
+      priceSnapshots,
+      alerts,
+      shopsModeration: getShopsModerationSummary(),
+      leads: getLeadsSummary(),
+      newsletter: getNewsletterSummary(),
+      billing,
+      seo: getSeoSummary(),
+      xAutomation: getXAutomationSummary(),
+      audit,
+    },
+  };
+}
+
+function moderatePendingSubmission({ submissionId, action, actorEmail, reason }) {
+  const sub = pendingShopsRepo.getById(submissionId);
+  if (!sub) {
+    return { statusCode: 404, body: { success: false, message: 'Submission not found' } };
+  }
+  if (sub.status !== 'pending') {
+    return {
+      statusCode: 409,
+      body: { success: false, message: `Submission is already ${sub.status}` },
+    };
+  }
+
+  const before = {
+    status: sub.status,
+    reviewed_at: sub.reviewed_at || null,
+    reviewed_by: sub.reviewed_by || null,
+  };
+
+  if (action === 'approve') {
+    const shopData = {
+      name: sub.shop_name,
+      city: sub.city,
+      country: sub.country_code,
+      phone: sub.contact_phone || '',
+      email: sub.contact_email || '',
+      website: sub.website || '',
+      notes: sub.notes || '',
+      type: 'direct',
+      verified: false,
+    };
+    const createResult = shopManager.createShop(shopData, actorEmail);
+    if (!createResult.success) {
+      return {
+        statusCode: 500,
+        body: {
+          success: false,
+          message: `Failed to create shop: ${createResult.message || 'unknown error'}`,
+        },
+      };
+    }
+
+    const now = new Date().toISOString();
+    const updatedSubmission = pendingShopsRepo.update(sub.id, {
+      status: 'approved',
+      reviewed_at: now,
+      reviewed_by: actorEmail,
+      approved_shop_id: createResult.shop.id,
+    });
+
+    auditLog.logAction(actorEmail, 'approve', 'pending_shop', sub.id, {
+      before,
+      after: {
+        status: 'approved',
+        reviewed_at: now,
+        reviewed_by: actorEmail,
+        approved_shop_id: createResult.shop.id,
+      },
+      shop_name: sub.shop_name,
+    });
+
+    return {
+      statusCode: 200,
+      body: { success: true, shop: createResult.shop, submission: updatedSubmission },
+    };
+  }
+
+  const normalizedReason = sanitizeString(reason, 500);
+  const safeReason =
+    typeof normalizedReason === 'string' && normalizedReason.trim().length > 0
+      ? normalizedReason.trim()
+      : 'No reason provided';
+  const now = new Date().toISOString();
+  const updatedSubmission = pendingShopsRepo.update(sub.id, {
+    status: 'rejected',
+    reviewed_at: now,
+    reviewed_by: actorEmail,
+    rejection_reason: safeReason,
+  });
+
+  auditLog.logAction(actorEmail, 'reject', 'pending_shop', sub.id, {
+    before,
+    after: {
+      status: 'rejected',
+      reviewed_at: now,
+      reviewed_by: actorEmail,
+    },
+    shop_name: sub.shop_name,
+    reason: safeReason,
+  });
+
+  return {
+    statusCode: 200,
+    body: { success: true, submission: updatedSubmission },
+  };
+}
+
 // Login endpoint
 router.post('/auth/login', loginRateLimiter, async (req, res) => {
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
@@ -240,6 +762,144 @@ router.get('/auth/verify', authMiddleware(), (req, res) => {
     success: true,
     user: req.user,
   });
+});
+
+// ===== OPERATIONS CONTROL CENTER (admin-only) =====
+
+router.get('/ops/provider-health', adminRateLimiter, authMiddleware('admin'), async (_req, res) => {
+  try {
+    const data = await getProviderHealthSummary();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('[admin] provider-health error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load provider health.' });
+  }
+});
+
+router.get('/ops/price-snapshots', adminRateLimiter, authMiddleware('admin'), async (req, res) => {
+  try {
+    const limit = parseIntParam(req.query.limit, 20, 1, 200);
+    const data = await getPriceSnapshotsSummary(limit);
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('[admin] price-snapshots error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load price snapshots.' });
+  }
+});
+
+router.get('/ops/alerts-summary', adminRateLimiter, authMiddleware('admin'), async (_req, res) => {
+  try {
+    const data = await getAlertsSummary();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('[admin] alerts-summary error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load alerts summary.' });
+  }
+});
+
+router.get('/ops/leads-summary', adminRateLimiter, authMiddleware('admin'), (_req, res) => {
+  try {
+    res.json({ success: true, data: getLeadsSummary() });
+  } catch (err) {
+    console.error('[admin] leads-summary error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load leads summary.' });
+  }
+});
+
+router.get('/ops/shops-moderation', adminRateLimiter, authMiddleware('admin'), (_req, res) => {
+  try {
+    res.json({ success: true, data: getShopsModerationSummary() });
+  } catch (err) {
+    console.error('[admin] shops-moderation error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load moderation summary.' });
+  }
+});
+
+router.post(
+  '/ops/shops-moderation/:id/:action',
+  adminRateLimiter,
+  authMiddleware('editor'),
+  (req, res) => {
+    try {
+      const action = sanitizeString(req.params.action, 20);
+      if (!['approve', 'reject'].includes(action)) {
+        return res.status(400).json({ success: false, message: 'Invalid moderation action.' });
+      }
+      const result = moderatePendingSubmission({
+        submissionId: req.params.id,
+        action,
+        actorEmail: req.user.email,
+        reason: req.body?.reason,
+      });
+      return res.status(result.statusCode).json(result.body);
+    } catch (err) {
+      console.error('[admin] moderation action error:', err);
+      return res.status(500).json({ success: false, message: 'Failed moderation action.' });
+    }
+  }
+);
+
+router.get('/ops/newsletter-stats', adminRateLimiter, authMiddleware('admin'), (_req, res) => {
+  try {
+    res.json({ success: true, data: getNewsletterSummary() });
+  } catch (err) {
+    console.error('[admin] newsletter-stats error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load newsletter stats.' });
+  }
+});
+
+router.get('/ops/billing-stats', adminRateLimiter, authMiddleware('admin'), async (_req, res) => {
+  try {
+    const data = await getBillingSummary();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('[admin] billing-stats error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load billing stats.' });
+  }
+});
+
+router.get('/ops/seo-summary', adminRateLimiter, authMiddleware('admin'), (_req, res) => {
+  try {
+    res.json({ success: true, data: getSeoSummary() });
+  } catch (err) {
+    console.error('[admin] seo-summary error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load SEO summary.' });
+  }
+});
+
+router.get('/ops/x-automation', adminRateLimiter, authMiddleware('admin'), (_req, res) => {
+  try {
+    res.json({ success: true, data: getXAutomationSummary() });
+  } catch (err) {
+    console.error('[admin] x-automation error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load X automation summary.' });
+  }
+});
+
+router.get(
+  '/ops/audit-log-summary',
+  adminRateLimiter,
+  authMiddleware('admin'),
+  async (req, res) => {
+    try {
+      const limit = parseIntParam(req.query.limit, 20, 1, 200);
+      const data = await getAuditLogSummary(limit);
+      res.json({ success: true, data });
+    } catch (err) {
+      console.error('[admin] audit-log-summary error:', err);
+      res.status(500).json({ success: false, message: 'Failed to load audit summary.' });
+    }
+  }
+);
+
+router.get('/ops/control-center', adminRateLimiter, authMiddleware('admin'), async (_req, res) => {
+  try {
+    const data = await getControlCenterSummary();
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error('[admin] control-center error:', err);
+    res.status(500).json({ success: false, message: 'Failed to load operations dashboard.' });
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -717,56 +1377,12 @@ router.post(
   authMiddleware('editor'),
   (req, res) => {
     try {
-      const sub = pendingShopsRepo.getById(req.params.id);
-      if (!sub) {
-        return res.status(404).json({ success: false, message: 'Submission not found' });
-      }
-      if (sub.status !== 'pending') {
-        return res
-          .status(409)
-          .json({ success: false, message: `Submission is already ${sub.status}` });
-      }
-
-      // Create shop in the main directory using the shop manager
-      const shopData = {
-        name: sub.shop_name,
-        city: sub.city,
-        country: sub.country_code,
-        phone: sub.contact_phone || '',
-        email: sub.contact_email || '',
-        website: sub.website || '',
-        notes: sub.notes || '',
-        type: 'direct',
-        verified: false,
-      };
-      const createResult = shopsManager.createShop(shopData, req.user.email);
-
-      if (!createResult.success) {
-        return res.status(500).json({
-          success: false,
-          message: `Failed to create shop: ${createResult.message || 'unknown error'}`,
-        });
-      }
-
-      // Mark submission as approved
-      const now = new Date().toISOString();
-      pendingShopsRepo.update(sub.id, {
-        status: 'approved',
-        reviewed_at: now,
-        reviewed_by: req.user.email,
-        approved_shop_id: createResult.shop.id,
+      const result = moderatePendingSubmission({
+        submissionId: req.params.id,
+        action: 'approve',
+        actorEmail: req.user.email,
       });
-
-      try {
-        auditLog.logAction(req.user.email, 'approve', 'pending_shop', sub.id, {
-          shop_name: sub.shop_name,
-          approved_shop_id: createResult.shop.id,
-        });
-      } catch (auditErr) {
-        console.error('[admin] Audit log failed after approve:', auditErr.message);
-      }
-
-      res.json({ success: true, shop: createResult.shop, submission: sub });
+      return res.status(result.statusCode).json(result.body);
     } catch (err) {
       console.error('[admin] Error approving submission:', err);
       res.status(500).json({ success: false, message: 'Failed to approve submission' });
@@ -778,36 +1394,13 @@ router.post(
 // Marks the submission rejected and records the reason in the audit log.
 router.post('/pending-shops/:id/reject', adminRateLimiter, authMiddleware('editor'), (req, res) => {
   try {
-    const sub = pendingShopsRepo.getById(req.params.id);
-    if (!sub) {
-      return res.status(404).json({ success: false, message: 'Submission not found' });
-    }
-    if (sub.status !== 'pending') {
-      return res
-        .status(409)
-        .json({ success: false, message: `Submission is already ${sub.status}` });
-    }
-
-    const reason = sanitizeString(req.body.reason, 500) || 'No reason provided';
-    const now = new Date().toISOString();
-
-    const updated = pendingShopsRepo.update(sub.id, {
-      status: 'rejected',
-      reviewed_at: now,
-      reviewed_by: req.user.email,
-      rejection_reason: reason,
+    const result = moderatePendingSubmission({
+      submissionId: req.params.id,
+      action: 'reject',
+      actorEmail: req.user.email,
+      reason: req.body?.reason,
     });
-
-    try {
-      auditLog.logAction(req.user.email, 'reject', 'pending_shop', sub.id, {
-        shop_name: sub.shop_name,
-        reason,
-      });
-    } catch (auditErr) {
-      console.error('[admin] Audit log failed after reject:', auditErr.message);
-    }
-
-    res.json({ success: true, submission: updated });
+    return res.status(result.statusCode).json(result.body);
   } catch (err) {
     console.error('[admin] Error rejecting submission:', err);
     res.status(500).json({ success: false, message: 'Failed to reject submission' });

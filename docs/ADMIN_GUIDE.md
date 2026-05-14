@@ -39,17 +39,17 @@ The admin panel uses **Supabase GitHub OAuth**. Only the email address configure
 
 ## Admin Page Matrix
 
-| Page      | Path               | Status                  | Data Source              |
-| --------- | ------------------ | ----------------------- | ------------------------ |
-| Login     | `admin/login/`     | ✅ Working              | Supabase Auth            |
-| Dashboard | `admin/` (index)   | ⚠️ Partial (UI shell)   | localStorage             |
-| Shops     | `admin/shops/`     | ✅ Working (CRUD)       | Supabase `shops`         |
-| Settings  | `admin/settings/`  | ✅ Working (read/write) | Supabase `site_settings` |
-| Pricing   | `admin/pricing/`   | 🔲 UI shell only        | localStorage             |
-| Orders    | `admin/orders/`    | 🔲 UI shell only        | localStorage             |
-| Content   | `admin/content/`   | 🔲 UI shell only        | localStorage             |
-| Social    | `admin/social/`    | 🔲 UI shell only        | localStorage             |
-| Analytics | `admin/analytics/` | 🔲 UI shell only        | localStorage             |
+| Page      | Path               | Status                                | Data Source                     |
+| --------- | ------------------ | ------------------------------------- | ------------------------------- |
+| Login     | `admin/login/`     | ✅ Working                            | Supabase Auth                   |
+| Dashboard | `admin/` (index)   | ✅ Ops control center + summary cards | Supabase + server/file fallback |
+| Shops     | `admin/shops/`     | ✅ Working (CRUD)                     | Supabase `shops`                |
+| Settings  | `admin/settings/`  | ✅ Working (read/write)               | Supabase `site_settings`        |
+| Pricing   | `admin/pricing/`   | 🔲 UI shell only                      | localStorage                    |
+| Orders    | `admin/orders/`    | 🔲 UI shell only                      | localStorage                    |
+| Content   | `admin/content/`   | 🔲 UI shell only                      | localStorage                    |
+| Social    | `admin/social/`    | 🔲 UI shell only                      | localStorage                    |
+| Analytics | `admin/analytics/` | 🔲 UI shell only                      | localStorage                    |
 
 **✅ Working** = reads/writes Supabase tables.  
 **⚠️ Partial** = has some real data but still relies on localStorage for parts.  
@@ -61,10 +61,14 @@ The admin panel uses **Supabase GitHub OAuth**. Only the email address configure
 
 ### 1. Dashboard Overview
 
-- Stat cards for shops, cities, guides, and audit entries
+- Stat cards for key business metrics
+- Operations Control Center modules (provider health, snapshots, alerts, moderation, leads,
+  newsletter, billing, SEO, X automation, audit)
 - Recent activity feed
-- Quick metrics for verified vs pending shops
-- ⚠️ Currently sources most data from localStorage
+- API status checks with refresh timing
+
+See [`docs/ADMIN_OPERATIONS_DASHBOARD.md`](./ADMIN_OPERATIONS_DASHBOARD.md) for endpoint and module
+details.
 
 ### 2. Shop Management (Supabase)
 

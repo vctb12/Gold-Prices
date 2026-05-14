@@ -65,17 +65,17 @@ admin dashboard.
 
 ## What Works Today
 
-| Page      | Path               | Status                | Data Source              |
-| --------- | ------------------ | --------------------- | ------------------------ |
-| Login     | `admin/login/`     | ✅ Working            | Supabase Auth            |
-| Dashboard | `admin/` (index)   | ⚠️ Partial (UI shell) | localStorage             |
-| Shops     | `admin/shops/`     | ✅ Full CRUD          | Supabase `shops`         |
-| Settings  | `admin/settings/`  | ✅ Read/Write         | Supabase `site_settings` |
-| Pricing   | `admin/pricing/`   | 🔲 UI shell           | localStorage             |
-| Orders    | `admin/orders/`    | 🔲 UI shell           | localStorage             |
-| Content   | `admin/content/`   | 🔲 UI shell           | localStorage             |
-| Social    | `admin/social/`    | 🔲 UI shell           | localStorage             |
-| Analytics | `admin/analytics/` | 🔲 UI shell           | localStorage             |
+| Page      | Path               | Status                | Data Source                     |
+| --------- | ------------------ | --------------------- | ------------------------------- |
+| Login     | `admin/login/`     | ✅ Working            | Supabase Auth                   |
+| Dashboard | `admin/` (index)   | ✅ Ops control center | Supabase + server/file fallback |
+| Shops     | `admin/shops/`     | ✅ Full CRUD          | Supabase `shops`                |
+| Settings  | `admin/settings/`  | ✅ Read/Write         | Supabase `site_settings`        |
+| Pricing   | `admin/pricing/`   | 🔲 UI shell           | localStorage                    |
+| Orders    | `admin/orders/`    | 🔲 UI shell           | localStorage                    |
+| Content   | `admin/content/`   | 🔲 UI shell           | localStorage                    |
+| Social    | `admin/social/`    | 🔲 UI shell           | localStorage                    |
+| Analytics | `admin/analytics/` | 🔲 UI shell           | localStorage                    |
 
 ---
 

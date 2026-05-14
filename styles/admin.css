@@ -2593,6 +2593,63 @@ thead th {
   font-size: 0.75rem;
 }
 
+/* Operations Control Center */
+.ops-control-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  margin-top: 14px;
+}
+
+.ops-control-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 100px;
+  padding: 14px;
+  text-decoration: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+}
+
+.ops-control-card:hover {
+  border-color: var(--border-light);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.ops-control-card.is-loading,
+.ops-control-card.is-empty {
+  align-items: flex-start;
+  background: var(--surface-2);
+  grid-column: 1 / -1;
+}
+
+.ops-control-title {
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ops-control-value {
+  color: var(--gold);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.ops-control-copy {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
 /* Dashboard two-column grid */
 .dashboard-grid {
   display: grid;
