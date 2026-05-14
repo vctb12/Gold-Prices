@@ -17,7 +17,6 @@ const shopsRepo = require('../../repositories/shops.repository');
 const auditRepo = require('../../repositories/audit.repository');
 const { ValidationError, NotFoundError: _NotFoundError } = require('../../lib/errors');
 const pendingShopsRepo = require('../../repositories/pending-shops.repository');
-const shopsManager = require('../../lib/admin/shop-manager');
 const leadsRepo = require('../../repositories/leads.repository');
 const newsletterRepo = require('../../repositories/newsletter.repository');
 const { getSupabaseClient } = require('../../lib/supabase-client');
@@ -245,29 +244,41 @@ function parseIsoDate(value) {
   return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null;
 }
 
+function assertSupabaseResponseOk(response, context) {
+  if (response?.error) {
+    const message = response.error.message || 'Unknown Supabase query error';
+    throw new Error(`${context}: ${message}`);
+  }
+}
+
 async function getProviderHealthSummary() {
   const sb = getSupabaseClient(false);
   if (sb) {
     try {
-      const [{ data: providers }, { data: latestSnapshot }, { data: recentRuns }] =
-        await Promise.all([
-          sb
-            .from('provider_health')
-            .select('*')
-            .order('provider_name', { ascending: true })
-            .limit(100),
-          sb
-            .from('price_snapshots')
-            .select('source_provider,timestamp_utc,is_fresh,is_fallback')
-            .order('timestamp_utc', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-          sb
-            .from('provider_runs')
-            .select('provider_name,status,created_at,latency_ms')
-            .order('created_at', { ascending: false })
-            .limit(20),
-        ]);
+      const [providersRes, latestSnapshotRes, recentRunsRes] = await Promise.all([
+        sb
+          .from('provider_health')
+          .select('*')
+          .order('provider_name', { ascending: true })
+          .limit(100),
+        sb
+          .from('price_snapshots')
+          .select('source_provider,timestamp_utc,is_fresh,is_fallback')
+          .order('timestamp_utc', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        sb
+          .from('provider_runs')
+          .select('provider_name,status,created_at,latency_ms')
+          .order('created_at', { ascending: false })
+          .limit(20),
+      ]);
+      assertSupabaseResponseOk(providersRes, 'provider_health query failed');
+      assertSupabaseResponseOk(latestSnapshotRes, 'latest price_snapshots query failed');
+      assertSupabaseResponseOk(recentRunsRes, 'provider_runs query failed');
+      const providers = providersRes?.data;
+      const latestSnapshot = latestSnapshotRes?.data;
+      const recentRuns = recentRunsRes?.data;
       return {
         sourceMode: 'supabase',
         providers: Array.isArray(providers) ? providers : [],
@@ -302,13 +313,15 @@ async function getPriceSnapshotsSummary(limit = 20) {
   const sb = getSupabaseClient(false);
   if (sb) {
     try {
-      const { data } = await sb
+      const snapshotsRes = await sb
         .from('price_snapshots')
         .select(
           'id,timestamp_utc,fetched_at_utc,xau_usd_per_oz,xau_aed_per_gram,source_provider,freshness_seconds,is_fresh,is_fallback,provider_chain'
         )
         .order('timestamp_utc', { ascending: false })
         .limit(boundedLimit);
+      assertSupabaseResponseOk(snapshotsRes, 'price_snapshots query failed');
+      const data = snapshotsRes?.data;
       return {
         sourceMode: 'supabase',
         total: Array.isArray(data) ? data.length : 0,
@@ -347,7 +360,7 @@ async function getAlertsSummary() {
   const sb = getSupabaseClient(false);
   if (sb) {
     try {
-      const [{ data: rules }, { data: events }] = await Promise.all([
+      const [rulesRes, eventsRes] = await Promise.all([
         sb
           .from('alert_rules')
           .select('id,is_active,verified_at,unsubscribed_at,currency,condition,updated_at')
@@ -359,6 +372,10 @@ async function getAlertsSummary() {
           .order('created_at', { ascending: false })
           .limit(20),
       ]);
+      assertSupabaseResponseOk(rulesRes, 'alert_rules query failed');
+      assertSupabaseResponseOk(eventsRes, 'alert_events query failed');
+      const rules = rulesRes?.data;
+      const events = eventsRes?.data;
       const allRules = Array.isArray(rules) ? rules : [];
       return {
         sourceMode: 'supabase',
@@ -461,20 +478,25 @@ async function getBillingSummary() {
   const sb = getSupabaseClient(false);
   if (sb) {
     try {
-      const [{ data: subscriptions }, { count: customerCount }, { data: auditLogs }] =
-        await Promise.all([
-          sb
-            .from('subscriptions')
-            .select('id,status,tier,updated_at,cancel_at_period_end')
-            .order('updated_at', { ascending: false })
-            .limit(5000),
-          sb.from('stripe_customers').select('id', { count: 'exact', head: true }),
-          sb
-            .from('billing_audit_logs')
-            .select('id,action,created_at')
-            .order('created_at', { ascending: false })
-            .limit(10),
-        ]);
+      const [subscriptionsRes, customersRes, auditRes] = await Promise.all([
+        sb
+          .from('subscriptions')
+          .select('id,status,tier,updated_at,cancel_at_period_end')
+          .order('updated_at', { ascending: false })
+          .limit(5000),
+        sb.from('stripe_customers').select('id', { count: 'exact', head: true }),
+        sb
+          .from('billing_audit_logs')
+          .select('id,action,created_at')
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ]);
+      assertSupabaseResponseOk(subscriptionsRes, 'subscriptions query failed');
+      assertSupabaseResponseOk(customersRes, 'stripe_customers count query failed');
+      assertSupabaseResponseOk(auditRes, 'billing_audit_logs query failed');
+      const subscriptions = subscriptionsRes?.data;
+      const customerCount = customersRes?.count;
+      const auditLogs = auditRes?.data;
       const rows = Array.isArray(subscriptions) ? subscriptions : [];
       return {
         sourceMode: 'supabase',
@@ -626,7 +648,7 @@ function moderatePendingSubmission({ submissionId, action, actorEmail, reason })
       type: 'direct',
       verified: false,
     };
-    const createResult = shopsManager.createShop(shopData, actorEmail);
+    const createResult = shopManager.createShop(shopData, actorEmail);
     if (!createResult.success) {
       return {
         statusCode: 500,

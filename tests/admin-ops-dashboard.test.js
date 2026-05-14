@@ -34,7 +34,9 @@ const port = server.address().port;
 after(() => {
   server.close();
   if (auditBackup !== null) fs.writeFileSync(AUDIT_LOG_FILE, auditBackup);
+  else if (fs.existsSync(AUDIT_LOG_FILE)) fs.unlinkSync(AUDIT_LOG_FILE);
   if (pendingBackup !== null) fs.writeFileSync(PENDING_FILE, pendingBackup);
+  else if (fs.existsSync(PENDING_FILE)) fs.unlinkSync(PENDING_FILE);
 });
 
 function request(method, routePath, { token, body } = {}) {
