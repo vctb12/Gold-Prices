@@ -61,7 +61,7 @@ commit derived data; others only read and post to external APIs.
 | `spike_alert.yml` | every 15 min | detects price spikes, posts alerts |
 | `post_gold.yml` | hourly while markets are open (Sun 21:00–Fri 20:59 UTC) + manual dispatch | posts from cached `data/gold_price.json` to X after duplicate/stale/cooldown guards; long posts are attempted and any rejection comes from X |
 | `gold-price-fetch.yml` | hourly while markets are open (Sun 21:00–Fri 20:59 UTC) + manual dispatch | single production provider-call path; updates `data/gold_price.json` for `post_gold.yml` |
-| `check-alerts.yml` | hourly weekdays + manual dispatch | triggers server alert evaluation job; falls back to dry-run when token is missing |
+| `check-alerts.yml` | hourly weekdays + manual dispatch | triggers server alert evaluation job; falls back to dry-run when token is missing and treats dry-run HTTP 405 as a skipped/non-fatal run |
 | `daily-newsletter.yml` | daily at 03:00 UTC | generates + dispatches daily digest |
 | `weekly-newsletter.yml` | weekly Sun at 14:00 UTC | generates + dispatches weekly digest |
 | `sync-db-to-git.yml` | `repository_dispatch: sync-shops` | syncs admin DB to `data/shops.js` |

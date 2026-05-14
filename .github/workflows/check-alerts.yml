@@ -40,6 +40,7 @@ jobs:
           fi
 
       - name: Trigger alerts check
+        id: trigger
         env:
           SITE_URL: https://goldtickerlive.com
           ALERT_JOB_TOKEN: ${{ secrets.ALERT_JOB_TOKEN }}
@@ -48,24 +49,51 @@ jobs:
           set -euo pipefail
           URL="${SITE_URL%/}/api/v1/jobs/check-alerts?dryRun=${DRY_RUN}"
           echo "Calling ${URL}"
+          HTTP_CODE=""
           if [ -n "${ALERT_JOB_TOKEN}" ]; then
-            curl -sS --fail \
+            HTTP_CODE="$(curl -sS \
+              -o /tmp/alerts-check-response.json \
+              -w "%{http_code}" \
               -H "Content-Type: application/json" \
               -H "x-alert-job-token: ${ALERT_JOB_TOKEN}" \
-              -X POST "${URL}" | tee /tmp/alerts-check-response.json
+              -X POST "${URL}")"
           else
             echo "ALERT_JOB_TOKEN missing → running dry mode."
-            curl -sS --fail \
+            HTTP_CODE="$(curl -sS \
+              -o /tmp/alerts-check-response.json \
+              -w "%{http_code}" \
               -H "Content-Type: application/json" \
               -H "x-alerts-dry-run: true" \
-              -X POST "${URL}" | tee /tmp/alerts-check-response.json
+              -X POST "${URL}")"
           fi
+
+          cat /tmp/alerts-check-response.json || true
+          echo "HTTP status: ${HTTP_CODE}"
+          echo "http_code=${HTTP_CODE}" >> "$GITHUB_OUTPUT"
+
+          if [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 300 ]; then
+            exit 0
+          fi
+
+          if [ "${DRY_RUN}" = "true" ] && [ "${HTTP_CODE}" = "405" ]; then
+            echo "::warning::Dry-run request was rejected with HTTP 405; treating this as a non-fatal skipped run."
+            cat > /tmp/alerts-check-response.json <<'JSON'
+{"status":"skipped","reason":"dry_run_http_405","message":"POST is blocked in dry-run mode on the public endpoint."}
+JSON
+            exit 0
+          fi
+
+          echo "::error::Alerts check failed with HTTP ${HTTP_CODE}"
+          exit 1
 
       - name: Step summary
         if: always()
         run: |
           echo "## Alerts check run" >> "$GITHUB_STEP_SUMMARY"
           echo "- Dry run: \`${{ steps.mode.outputs.dry_run }}\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "${{ steps.trigger.outputs.http_code }}" ]; then
+            echo "- HTTP status: \`${{ steps.trigger.outputs.http_code }}\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -f /tmp/alerts-check-response.json ]; then
             echo "- API response captured in logs." >> "$GITHUB_STEP_SUMMARY"
           fi

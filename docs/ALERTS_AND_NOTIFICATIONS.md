@@ -74,6 +74,8 @@ Workflow: `.github/workflows/check-alerts.yml`
 - Supports schedule + manual dispatch
 - Calls `POST /api/v1/jobs/check-alerts`
 - Runs in dry mode when `ALERT_JOB_TOKEN` is absent
+- Dry-run HTTP `405` responses are treated as skipped/non-fatal (to avoid noisy failures when public
+  endpoints block POST in dry mode)
 
 ### Env vars
 
