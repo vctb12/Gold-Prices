@@ -254,10 +254,11 @@ router.post('/create-portal-session', requireBillingUser, async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /api/v1/billing/webhook
-// NOTE: raw body parsing is registered in server.js before the JSON middleware.
+// NOTE: raw body parsing is registered in server.js and the test harness
+// before the global JSON middleware — do NOT add it inline here.
 // ---------------------------------------------------------------------------
 
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', async (req, res) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
     console.error('[billing/webhook] STRIPE_WEBHOOK_SECRET not configured — rejecting event');
