@@ -302,21 +302,24 @@ async function loadUsage() {
   const d = result.data;
   setText('dev-usage-today', String(d.todayCalls ?? 0));
   setText('dev-usage-total', String(d.totalCalls ?? 0));
-  setText('dev-usage-quota', d.quota?.daily ? `${d.quota.daily}/day` : 'Unlimited');
+  const dailyQuota = d.quota?.daily;
+  const quotaLabel = dailyQuota > 0 ? `${dailyQuota}/day` : dailyQuota === 0 ? 'No quota set' : '—';
+  setText('dev-usage-quota', quotaLabel);
   setText('dev-usage-tier', d.quota?.tier || 'free');
 
   // Quota bar
   const bar = getEl('dev-usage-bar');
   const note = getEl('dev-usage-note');
-  if (bar && d.quota?.daily > 0) {
-    const pct = Math.min(100, Math.round(((d.todayCalls || 0) / d.quota.daily) * 100));
+  if (bar && dailyQuota > 0) {
+    const pct = Math.min(100, Math.round(((d.todayCalls || 0) / dailyQuota) * 100));
     bar.style.width = `${pct}%`;
     bar.setAttribute('aria-valuenow', pct);
     if (note)
-      note.textContent = `${d.todayCalls || 0} of ${d.quota.daily} calls used today (${pct}%).`;
+      note.textContent = `${d.todayCalls || 0} of ${dailyQuota} calls used today (${pct}%).`;
   } else if (bar) {
     bar.style.width = '0%';
-    if (note) note.textContent = 'Upgrade your plan to unlock API access with a daily quota.';
+    bar.setAttribute('aria-valuenow', 0);
+    if (note) note.textContent = 'No daily quota configured for your current tier.';
   }
 
   if (summary) summary.hidden = false;
@@ -386,13 +389,28 @@ function attachListeners() {
 }
 
 // ---------------------------------------------------------------------------
+// Language
+// ---------------------------------------------------------------------------
+
+function getLang() {
+  try {
+    const p = JSON.parse(localStorage.getItem('user_prefs') || '{}');
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    return urlLang === 'ar' || p.lang === 'ar' ? 'ar' : 'en';
+  } catch {
+    return 'en';
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
 
 async function init() {
-  injectNav?.();
+  const lang = getLang();
+  injectNav?.(lang);
   injectFooter?.();
-  if (typeof updateNavLang === 'function') updateNavLang('en');
+  if (typeof updateNavLang === 'function') updateNavLang(lang);
 
   attachListeners();
 

@@ -2148,9 +2148,10 @@ create policy "Admin update ai drafts"
 -- ============================================================
 
 -- ── api_rate_limits ────────────────────────────────────────────────────────
--- Per-user, per-tier override table.  When a row exists for a user it takes
--- precedence over the default tier quotas defined in entitlements.js.
--- Use case: custom enterprise limits or temporary quota grants.
+-- Per-user, per-tier override table.  Infrastructure placeholder for future
+-- admin-managed custom quota grants (e.g. enterprise limits).
+-- No application code reads this table yet; the default tier quotas are
+-- defined in server/lib/entitlements.js.
 create table if not exists public.api_rate_limits (
     id              uuid primary key default uuid_generate_v4(),
     user_id         text not null unique,
@@ -2165,8 +2166,7 @@ create table if not exists public.api_rate_limits (
 
 alter table public.api_rate_limits enable row level security;
 
-create index if not exists idx_api_rate_limits_user_id
-    on public.api_rate_limits(user_id);
+-- No explicit index needed: user_id unique constraint already creates one.
 
 create policy "Admin manage api rate limits"
     on public.api_rate_limits for all

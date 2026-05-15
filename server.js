@@ -298,8 +298,8 @@ app.use('/api/v1', submissionsRoutes);
 app.use('/api/v1', leadsRoutes);
 app.use('/api/v1', apiV1Routes);
 app.use('/api/v1', alertsRoutes);
-app.use('/api/v1', publicAccountsRouter);
 app.use('/api/v1', developerApiRoutes);
+app.use('/api/v1', publicAccountsRouter);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

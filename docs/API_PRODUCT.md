@@ -92,7 +92,7 @@ Need higher limits? [Contact us](mailto:hello@goldtickerlive.com) for an enterpr
 
 ## Standard Response Envelope
 
-Every successful response uses this structure:
+Every **successful** response uses this structure:
 
 ```json
 {
@@ -113,6 +113,21 @@ Every successful response uses this structure:
 | `meta.timestamp` | Server-side response time (ISO 8601)                                  |
 | `meta.source`    | Where data came from (`price_snapshots`, `historical-baseline`, etc.) |
 | `meta.freshness` | `fresh` / `stale` / `historical` / `reference` / `static`             |
+
+**Error responses** do not include `data` or `meta`. They use this shape:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "QUOTA_EXCEEDED",
+    "message": "Human-readable description.",
+    "details": { "quota": 100, "used": 101, "resetAt": "2026-05-15T23:59:59Z" }
+  }
+}
+```
+
+`details` is only present on errors that carry additional context (quota/rate-limit errors).
 
 ---
 

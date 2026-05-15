@@ -14,11 +14,12 @@
  *
  * After the middleware runs, req.apiKeyContext is set:
  *   {
- *     keyId:   string,       // API key record ID
- *     userId:  string,       // owner user ID
- *     tier:    string,       // 'free' | 'pro' | 'api'
- *     quota:   number,       // daily call limit for this key
- *     used:    number,       // calls used today (after increment)
+ *     keyId:       string,   // API key record ID
+ *     userId:      string,   // owner user ID
+ *     tier:        string,   // 'free' | 'pro' | 'api'
+ *     quota:       number,   // daily call limit for this key
+ *     used:        number,   // calls used today (after increment)
+ *     historyDays: number,   // days of history the tier allows (0 = unlimited)
  *   }
  *
  * For anonymous requests under optionalApiKey, req.apiKeyContext is null
@@ -35,6 +36,8 @@ const ANON_FREE_DAILY_LIMIT = 10;
 // In-memory anon counter: Map<ip:date, count>.  Resets naturally on server restart.
 // Not persisted — fine for rate-limiting anonymous public access.
 const _anonCounters = new Map();
+// Track the last date we pruned so we only iterate the map once per day.
+let _lastPruneDay = '';
 
 function todayUtc() {
   return new Date().toISOString().slice(0, 10);
@@ -42,14 +45,17 @@ function todayUtc() {
 
 /**
  * Increment the in-memory anon counter and return the new count.
- * Prunes stale keys older than today lazily.
+ * Prunes stale keys once per UTC day rather than on every request.
  */
 function incrementAnonCounter(ip) {
   const today = todayUtc();
   const k = `${ip}:${today}`;
-  // Lazy prune: remove entries from previous days
-  for (const existing of _anonCounters.keys()) {
-    if (!existing.endsWith(`:${today}`)) _anonCounters.delete(existing);
+  // Prune only when the calendar day rolls over (O(n) but at most once/day)
+  if (_lastPruneDay !== today) {
+    for (const existing of _anonCounters.keys()) {
+      if (!existing.endsWith(`:${today}`)) _anonCounters.delete(existing);
+    }
+    _lastPruneDay = today;
   }
   const count = (_anonCounters.get(k) || 0) + 1;
   _anonCounters.set(k, count);
@@ -92,9 +98,10 @@ async function resolveKeyContext(rawKey) {
     };
   }
 
-  // Resolve entitlements to get quota
+  // Resolve entitlements to get quota and history window
   const { tier, entitlements } = await resolveUserEntitlements(keyRecord.userId);
   const quota = entitlements.apiCallsPerDay || 0;
+  const historyDays = entitlements.historyDays || 30;
 
   // Increment usage and check quota
   const used = await billingRepo.incrementApiUsage(keyRecord.id);
@@ -116,6 +123,7 @@ async function resolveKeyContext(rawKey) {
       tier,
       quota,
       used,
+      historyDays,
     },
   };
 }

@@ -256,11 +256,8 @@ async function querySupabase(table, buildQuery) {
 router.get('/public/latest', optionalApiKey, async (req, res) => {
   const ctx = req.apiKeyContext;
 
-  // Determine history days limit based on entitlements (not used here but quota still enforced)
-  const { entitlements } = ctx
-    ? await resolveUserEntitlements(ctx.userId)
-    : { entitlements: { apiCallsPerDay: 0 } };
-  setUsageHeaders(res, ctx, entitlements.apiCallsPerDay);
+  // ctx.quota is set by the middleware from entitlements; no second resolution needed
+  setUsageHeaders(res, ctx, ctx?.quota ?? 0);
 
   // Try Supabase first
   const rows = await querySupabase('price_snapshots', (t) =>
@@ -336,10 +333,10 @@ router.get('/public/latest', optionalApiKey, async (req, res) => {
 
 router.get('/public/history', requireApiKey, async (req, res) => {
   const ctx = req.apiKeyContext;
-  const { entitlements } = await resolveUserEntitlements(ctx.userId);
-  setUsageHeaders(res, ctx, entitlements.apiCallsPerDay);
+  // historyDays and quota are already resolved by the middleware — no second entitlement call needed
+  setUsageHeaders(res, ctx, ctx.quota);
 
-  const historyDays = entitlements.historyDays || 30; // 0 = unlimited
+  const historyDays = ctx.historyDays; // 0 = unlimited
   const range = normalizeHistoryRange(req.query.range);
   const requestedStart = getHistoryWindowStart(range);
 
@@ -406,14 +403,20 @@ router.get('/public/history', requireApiKey, async (req, res) => {
       {
         range,
         historyDaysAllowed: historyDays || 'unlimited',
-        total: history.length,
-        points: filtered.map((p) => ({
-          timestampUtc:
-            String(p.date).length === 7 ? `${p.date}-01T00:00:00Z` : `${p.date}T00:00:00Z`,
-          xauUsdPerOz: coercePositive(p.price),
-          provider: p.source || 'historical-baseline',
-          granularity: String(p.date).length === 7 ? 'monthly' : 'daily',
-        })),
+        total: filtered.length,
+        points: filtered.map((p) => {
+          const xauUsd = coercePositive(p.price);
+          const xauAed =
+            xauUsd != null ? parseFloat(((xauUsd / TROY_OZ_GRAMS) * AED_PEG).toFixed(6)) : null;
+          return {
+            timestampUtc:
+              String(p.date).length === 7 ? `${p.date}-01T00:00:00Z` : `${p.date}T00:00:00Z`,
+            xauUsdPerOz: xauUsd,
+            xauAedPerGram: xauAed,
+            provider: p.source || 'historical-baseline',
+            granularity: String(p.date).length === 7 ? 'monthly' : 'daily',
+          };
+        }),
         disclaimer: 'Historical spot prices only. Not suitable for transaction pricing.',
       },
       { source: 'historical-baseline', freshness: 'reference' }
@@ -425,8 +428,8 @@ router.get('/public/history', requireApiKey, async (req, res) => {
 // GET /api/v1/public/karats
 // ---------------------------------------------------------------------------
 
-// GET /api/v1/public/karats — no per-key quota header needed for static reference data
-router.get('/public/karats', optionalApiKey, (_req, res) => {
+// GET /api/v1/public/karats — open endpoint, no key or quota enforcement
+router.get('/public/karats', (_req, res) => {
   res.json(
     successResponse(
       {
@@ -448,7 +451,8 @@ router.get('/public/karats', optionalApiKey, (_req, res) => {
 // GET /api/v1/public/countries
 // ---------------------------------------------------------------------------
 
-router.get('/public/countries', optionalApiKey, (_req, res) => {
+// GET /api/v1/public/countries — open endpoint, no key or quota enforcement
+router.get('/public/countries', (_req, res) => {
   res.json(
     successResponse(
       {

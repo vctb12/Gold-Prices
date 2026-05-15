@@ -241,8 +241,8 @@
               <span class="usage-stat-label">Tier</span>
             </div>
           </div>
-          <div class="developer-usage-quota-bar-wrap" aria-hidden="true">
-            <div class="developer-usage-quota-bar" id="dev-usage-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="developer-usage-quota-bar-wrap">
+            <div class="developer-usage-quota-bar" id="dev-usage-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Daily API quota used"></div>
           </div>
           <p class="developer-note" id="dev-usage-note"></p>
         </div>
@@ -259,8 +259,6 @@
 
     <div id="footer-placeholder" aria-label="Site footer"></div>
 
-    <script type="module" src="./src/components/nav.js"></script>
-    <script type="module" src="./src/components/footer.js"></script>
     <script type="module" src="./src/pages/developer.js"></script>
     <script>
       if ('serviceWorker' in navigator) {
