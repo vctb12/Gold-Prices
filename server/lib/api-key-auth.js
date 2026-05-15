@@ -133,7 +133,7 @@ async function requireApiKey(req, res, next) {
       error: {
         code: 'API_KEY_REQUIRED',
         message:
-          'An API key is required. Pass it via the X-API-Key header, Authorization: Bearer, or ?api_key= query parameter.',
+          'An API key is required. Pass it via the X-API-Key header or Authorization: Bearer header.',
       },
     });
   }
