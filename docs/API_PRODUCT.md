@@ -1,7 +1,7 @@
 # Gold Ticker Live — Public API
 
-> **Base URL:** `https://goldtickerlive.com/api/v1` **Version:** v1 **Format:** All responses are
-> JSON with a standard envelope: `{ ok, data, meta }`.
+> **Base URL:** `https://goldtickerlive.com/api/v1` **Version:** v1 **Format:** Successful responses
+> use the standard envelope `{ ok, data, meta }`. Error responses return `{ ok, error }`.
 
 Gold Ticker Live provides a lightweight, developer-friendly REST API for gold price data. Prices are
 derived from XAU/USD spot rates and are **reference estimates only** — they do not include retail
@@ -56,24 +56,28 @@ Authorization: Bearer gtl_<your-key>
 
 ## Rate Limits & Quotas
 
-| Tier            | Daily calls | History access |
-| --------------- | ----------- | -------------- |
-| Free (no key)   | 10 / IP     | Not available  |
-| Free (with key) | 100 / day   | 30 days        |
-| Pro             | 250 / day   | 365 days       |
-| API             | 500 / day   | Unlimited      |
+| Tier            | Daily calls                     | History access |
+| --------------- | ------------------------------- | -------------- |
+| Free (no key)   | 10 / day per IP on `/public/latest` | Not available  |
+| Free (with key) | Not currently enforced          | 30 days        |
+| Pro             | Not currently enforced          | 365 days       |
+| API             | Not currently enforced          | Unlimited      |
 
-Quota counters reset at **midnight UTC** each day.
+Anonymous access to `/public/latest` resets at **midnight UTC** each day.
 
-When a key's quota is exceeded the API returns HTTP **429** with:
+Keyed tiers are currently differentiated by feature access (such as history depth), not by an
+enforced daily request quota. If quota enforcement is introduced for keyed plans in a future
+release, this table and the error examples will be updated to reflect the live entitlement rules.
+
+When the anonymous `/public/latest` limit is exceeded, the API returns HTTP **429** with:
 
 ```json
 {
   "ok": false,
   "error": {
     "code": "QUOTA_EXCEEDED",
-    "message": "Daily quota of 100 calls exceeded. Resets at midnight UTC.",
-    "details": { "quota": 100, "used": 101, "resetAt": "2026-05-15T23:59:59Z" }
+    "message": "Anonymous daily limit of 10 requests exceeded for /public/latest. Resets at midnight UTC.",
+    "details": { "quota": 10, "used": 11, "resetAt": "2026-05-15T23:59:59Z" }
   }
 }
 ```
