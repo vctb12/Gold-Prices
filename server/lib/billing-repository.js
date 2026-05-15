@@ -440,8 +440,7 @@ async function createApiKey({ userId, label }) {
   // SHA-256 used as lookup index for a high-entropy (192-bit) random API key.
   // This is intentional — SHA-256 is appropriate here; bcrypt is only required
   // for low-entropy, user-chosen secrets such as passwords.
-  // codeql[js/insufficient-password-hash]
-  const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+  const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex'); // codeql[js/insufficient-password-hash]
   const keyPrefix = rawKey.slice(0, 12);
 
   const sb = getSupabaseClient();
@@ -495,8 +494,7 @@ async function createApiKey({ userId, label }) {
  */
 async function resolveApiKey(rawKey) {
   if (!rawKey) return null;
-  // codeql[js/insufficient-password-hash]
-  const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+  const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex'); // codeql[js/insufficient-password-hash]
   const sb = getSupabaseClient();
   if (sb) {
     try {
