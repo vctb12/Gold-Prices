@@ -37,6 +37,7 @@ const apiV1Routes = require('./server/routes/api-v1');
 const shopsV1Routes = require('./server/routes/shops-v1');
 const alertsRoutes = require('./server/routes/alerts');
 const { publicAccountsRouter } = require('./server/routes/public-accounts');
+const developerApiRoutes = require('./server/routes/developer-api');
 
 // Validate environment feature wiring at startup without crashing optional integrations.
 validateServerEnv(process.env, console);
@@ -297,6 +298,7 @@ app.use('/api/v1', submissionsRoutes);
 app.use('/api/v1', leadsRoutes);
 app.use('/api/v1', apiV1Routes);
 app.use('/api/v1', alertsRoutes);
+app.use('/api/v1', developerApiRoutes);
 app.use('/api/v1', publicAccountsRouter);
 
 // Health check endpoint

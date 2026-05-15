@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-14",
+  "generatedAtDate": "2026-05-15",
   "summary": {
-    "totalHtmlFiles": 656,
-    "withCanonical": 654,
+    "totalHtmlFiles": 657,
+    "withCanonical": 655,
     "withoutCanonical": 2,
-    "withOgImage": 499,
+    "withOgImage": 500,
     "withoutOgImage": 157,
-    "withJsonLd": 643,
+    "withJsonLd": 644,
     "withoutJsonLd": 13,
-    "hreflangEnArPairs": 643,
+    "hreflangEnArPairs": 644,
     "noindexCount": 157
   },
   "records": [
@@ -23807,6 +23807,42 @@
         {
           "lang": "x-default",
           "href": "https://goldtickerlive.com/dashboard.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "developer.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Developer API — Gold Ticker Live",
+      "metaDescription": "Manage your Gold Ticker Live API keys, view usage quotas, and access developer documentation for the gold price REST API.",
+      "canonical": "https://goldtickerlive.com/developer.html",
+      "robots": null,
+      "ogTitle": "Developer API — Gold Ticker Live",
+      "ogDescription": "Create and manage API keys for the Gold Ticker Live gold price REST API. View usage quotas and documentation.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/developer.html",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/developer.html?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/developer.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/developer.html"
         }
       ],
       "jsonLdTypes": [

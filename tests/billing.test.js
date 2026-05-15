@@ -109,7 +109,8 @@ describe('entitlements module', () => {
     const e = entitlements.getEntitlementsForTier('free');
     assert.equal(e.tier, 'free');
     assert.equal(e.alertLimit, 3);
-    assert.equal(e.apiAccess, false);
+    assert.equal(e.apiAccess, true);
+    assert.equal(e.apiCallsPerDay, 100);
     assert.equal(e.adsEnabled, true);
     assert.ok(Array.isArray(e.exportFormats));
     assert.deepEqual(Array.from(e.exportFormats), ['csv']);
@@ -143,9 +144,9 @@ describe('entitlements module', () => {
     assert.equal(result.entitlements.tier, 'free');
   });
 
-  test('hasFeature returns false for apiAccess on free user', async () => {
+  test('hasFeature returns true for apiAccess on free user', async () => {
     const access = await entitlements.hasFeature(null, 'apiAccess');
-    assert.equal(access, false);
+    assert.equal(access, true);
   });
 
   test('getLimit returns 3 alertLimit for free user', async () => {
