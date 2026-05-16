@@ -22,8 +22,17 @@ This document explains how Gold Ticker Live now serves price data in two modes:
 
 ### History (`/api/v1/prices/history`)
 
-- Uses snapshot history from Supabase for requested ranges when available.
-- Falls back to local baseline history (`src/data/historical-baseline.json`) otherwise.
+- `meta.source` now makes the history source explicit:
+  - `supabase` — DB-backed snapshot history from `price_snapshots`
+  - `static-baseline` — reference-only fallback from `src/data/historical-baseline.json`
+  - `json-fallback` — single-point fallback derived from `data/gold_price.json`
+  - `empty` — no Supabase history or fallback data currently available
+- `meta.coverageStartUtc`, `meta.coverageEndUtc`, and `meta.coveragePoints` describe the returned
+  coverage window when timestamps exist.
+- `data.coverage` includes source-specific flags such as `providerBacked`, `referenceOnly`,
+  `snapshotFallback`, or `empty`.
+- Static baseline and JSON fallback responses are clearly marked as fallback/reference data and
+  should not be presented as live retail or live market history.
 
 ### Provider telemetry
 
@@ -65,6 +74,8 @@ The API preserves trust metadata so UI can keep accurate labels:
 - `provider`
 - `timestampUtc`
 - `fetchedAtUtc`
+- `meta.source`
+- `data.coverage`
 
 Use this metadata to avoid presenting stale/cached values as live.
 

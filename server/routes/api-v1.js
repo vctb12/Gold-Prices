@@ -22,6 +22,7 @@ const PACKAGE_JSON_PATH = path.join(ROOT, 'package.json');
 const GOLD_PRICE_FILE = path.join(ROOT, 'data', 'gold_price.json');
 const PROVIDER_STATE_FILE = path.join(ROOT, 'data', 'provider_state.json');
 const PRICE_HISTORY_FILE = path.join(ROOT, 'src', 'data', 'historical-baseline.json');
+const PRICE_SNAPSHOT_SYNC_SCRIPT = path.join(ROOT, 'scripts', 'node', 'sync-price-snapshot.js');
 const EVENTS_FILE = path.join(ROOT, 'data', 'analytics-events.json');
 const LEADS_FILE = path.join(ROOT, 'data', 'leads.json');
 const MAX_EVENT_NAME_LENGTH = 80;
@@ -78,6 +79,19 @@ function buildSystemStatus() {
   const envSnapshot = getRuntimeEnvSnapshot(process.env);
   const goldPrice = readJsonFile(GOLD_PRICE_FILE);
   const providerState = readJsonFile(PROVIDER_STATE_FILE);
+  const supabaseWriteAvailable = Boolean(getSupabaseClient(false));
+  const providerStateAvailable = fileExists(PROVIDER_STATE_FILE);
+  const priceSnapshotSyncScriptAvailable = fileExists(PRICE_SNAPSHOT_SYNC_SCRIPT);
+  const readiness = {
+    supabaseConfigured: envSnapshot.supabaseConfigured,
+    supabaseWriteAvailable,
+    stripeConfigured: envSnapshot.stripeConfigured,
+    stripeWebhookConfigured: envSnapshot.stripeWebhookConfigured,
+    resendConfigured: envSnapshot.resendConfigured,
+    alertJobTokenConfigured: envSnapshot.alertJobTokenConfigured,
+    providerStateAvailable,
+    priceSnapshotSyncAvailable: priceSnapshotSyncScriptAvailable && supabaseWriteAvailable,
+  };
 
   return {
     status: 'ok',
@@ -86,11 +100,17 @@ function buildSystemStatus() {
     uptimeSeconds: Math.floor(process.uptime()),
     checks: {
       dataFileAvailable: fileExists(GOLD_PRICE_FILE),
-      providerStateFileAvailable: fileExists(PROVIDER_STATE_FILE),
+      providerStateFileAvailable: providerStateAvailable,
       supabaseConfigured: envSnapshot.supabaseConfigured,
       newsletterConfigured: envSnapshot.newsletterConfigured,
       stripeConfigured: envSnapshot.stripeConfigured,
+      supabaseWriteAvailable,
+      stripeWebhookConfigured: envSnapshot.stripeWebhookConfigured,
+      resendConfigured: envSnapshot.resendConfigured,
+      alertJobTokenConfigured: envSnapshot.alertJobTokenConfigured,
+      priceSnapshotSyncScriptAvailable,
     },
+    readiness,
     providers: {
       latestSource: goldPrice?.provider || goldPrice?.source || null,
       latestTimestampUtc: goldPrice?.timestamp_utc || goldPrice?.fetched_at_utc || null,
@@ -206,6 +226,188 @@ function mapSnapshotRowToLatestApiData(row) {
   };
 }
 
+function buildHistoryCoverage(points, extra = {}) {
+  if (!Array.isArray(points) || points.length === 0) {
+    return {
+      startTimestampUtc: null,
+      endTimestampUtc: null,
+      pointsAvailable: 0,
+      ...extra,
+    };
+  }
+  const timestamps = points
+    .map((point) => point?.timestampUtc || null)
+    .filter((value) => typeof value === 'string' && value);
+  return {
+    startTimestampUtc: timestamps[0] || null,
+    endTimestampUtc: timestamps[timestamps.length - 1] || null,
+    pointsAvailable: points.length,
+    ...extra,
+  };
+}
+
+function buildHistorySuccessPayload({
+  range,
+  total,
+  points,
+  source,
+  sourceMode,
+  freshness,
+  coverage,
+  latestTimestampUtc = null,
+  latestFetchedAtUtc = null,
+  note = null,
+  fallback = false,
+}) {
+  const normalizedCoverage = coverage || buildHistoryCoverage(points);
+  return successResponse(
+    {
+      range,
+      total,
+      returned: points.length,
+      points,
+      sourceMode,
+      historySource: source,
+      coverage: normalizedCoverage,
+      latestTimestampUtc,
+      latestFetchedAtUtc,
+      fallback,
+      note,
+    },
+    {
+      source,
+      freshness,
+      extra: {
+        mode: sourceMode,
+        fallback,
+        coverageStartUtc: normalizedCoverage.startTimestampUtc,
+        coverageEndUtc: normalizedCoverage.endTimestampUtc,
+        coveragePoints: normalizedCoverage.pointsAvailable,
+      },
+    }
+  );
+}
+
+function buildHistoryResponse({ range, limit, supabaseRows, baselineHistory, latestPricePayload }) {
+  if (Array.isArray(supabaseRows) && supabaseRows.length > 0) {
+    const points = supabaseRows.slice(-limit).map((row) => ({
+      timestampUtc: row.timestamp_utc,
+      fetchedAtUtc: row.fetched_at_utc,
+      xauUsdPerOz: coerceToNumber(row.xau_usd_per_oz, { positive: true }),
+      xauAedPerGram: coerceToNumber(row.xau_aed_per_gram, { positive: true }),
+      provider: row.source_provider,
+      freshnessSeconds: coerceToNumber(row.freshness_seconds, { integer: true }),
+      isFresh: toBooleanOrNull(row.is_fresh),
+      isFallback: toBooleanOrNull(row.is_fallback),
+    }));
+    return {
+      status: 200,
+      body: buildHistorySuccessPayload({
+        range,
+        total: supabaseRows.length,
+        points,
+        source: 'supabase',
+        sourceMode: 'supabase',
+        freshness: 'historical',
+        coverage: buildHistoryCoverage(points, {
+          providerBacked: true,
+          partial: points.length < supabaseRows.length,
+        }),
+        latestTimestampUtc: points[points.length - 1]?.timestampUtc || null,
+        latestFetchedAtUtc: points[points.length - 1]?.fetchedAtUtc || null,
+      }),
+    };
+  }
+
+  if (Array.isArray(baselineHistory)) {
+    const rangeStartTime = new Date(getHistoryWindowStart(range)).getTime();
+    const points = baselineHistory
+      .filter((point) => {
+        const ts = toHistoryTimestampUtc(point?.date);
+        if (!ts) return false;
+        return new Date(ts).getTime() >= rangeStartTime;
+      })
+      .slice(-limit)
+      .map((point) => ({
+        timestampUtc: toHistoryTimestampUtc(point.date),
+        xauUsdPerOz: coerceToNumber(point.price, { positive: true }),
+        provider: point.source || 'historical-baseline',
+        granularity:
+          point.granularity ||
+          (String(point.date).length === ISO_YEAR_MONTH_STRING_LENGTH ? 'monthly' : 'daily'),
+      }));
+    return {
+      status: 200,
+      body: buildHistorySuccessPayload({
+        range,
+        total: baselineHistory.length,
+        points,
+        source: 'static-baseline',
+        sourceMode: 'file',
+        freshness: 'reference',
+        coverage: buildHistoryCoverage(points, {
+          providerBacked: false,
+          referenceOnly: true,
+        }),
+        latestTimestampUtc: points[points.length - 1]?.timestampUtc || null,
+        note: 'Reference baseline fallback. This dataset is not a live shop or live market history feed.',
+        fallback: true,
+      }),
+    };
+  }
+
+  const validatedLatestPayload = validatePricePayload(latestPricePayload);
+  if (validatedLatestPayload.ok) {
+    const point = {
+      timestampUtc: validatedLatestPayload.normalized.timestampUtc,
+      fetchedAtUtc: validatedLatestPayload.normalized.fetchedAtUtc,
+      xauUsdPerOz: validatedLatestPayload.normalized.xauUsdPerOz,
+      xauAedPerGram: validatedLatestPayload.normalized.xauAedPerGram,
+      provider: validatedLatestPayload.normalized.sourceProvider,
+      freshnessSeconds: validatedLatestPayload.normalized.freshnessSeconds,
+      isFresh: validatedLatestPayload.normalized.isFresh,
+      isFallback: validatedLatestPayload.normalized.isFallback,
+    };
+    return {
+      status: 200,
+      body: buildHistorySuccessPayload({
+        range,
+        total: 1,
+        points: [point],
+        source: 'json-fallback',
+        sourceMode: 'file',
+        freshness: 'fallback',
+        coverage: buildHistoryCoverage([point], {
+          providerBacked: false,
+          snapshotFallback: true,
+        }),
+        latestTimestampUtc: point.timestampUtc,
+        latestFetchedAtUtc: point.fetchedAtUtc,
+        note: 'Single-point snapshot fallback only. Treat this as a cached reference point, not full live history.',
+        fallback: true,
+      }),
+    };
+  }
+
+  return {
+    status: 200,
+    body: buildHistorySuccessPayload({
+      range,
+      total: 0,
+      points: [],
+      source: 'empty',
+      sourceMode: 'none',
+      freshness: 'unavailable',
+      coverage: buildHistoryCoverage([], {
+        providerBacked: false,
+        empty: true,
+      }),
+      note: 'No Supabase history, static baseline, or JSON snapshot fallback is currently available.',
+      fallback: true,
+    }),
+  };
+}
+
 const eventsRateLimiter = rateLimit({
   windowMs: EVENTS_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
   max: 60,
@@ -307,6 +509,7 @@ router.get('/prices/latest', async (_req, res) => {
 
 router.get('/prices/history', async (req, res) => {
   const range = normalizeHistoryRange(req.query.range);
+  const limit = parseLimit(req.query.limit, 120, 5000);
   const supabaseStart = getHistoryWindowStart(range);
   const supabaseRows = await querySupabase('price_snapshots', (table) =>
     table
@@ -317,73 +520,16 @@ router.get('/prices/history', async (req, res) => {
       .order('timestamp_utc', { ascending: true })
       .limit(5000)
   );
-
-  if (Array.isArray(supabaseRows) && supabaseRows.length > 0) {
-    return res.json(
-      successResponse(
-        {
-          range,
-          total: supabaseRows.length,
-          returned: supabaseRows.length,
-          points: supabaseRows.map((row) => ({
-            timestampUtc: row.timestamp_utc,
-            fetchedAtUtc: row.fetched_at_utc,
-            xauUsdPerOz: coerceToNumber(row.xau_usd_per_oz, { positive: true }),
-            xauAedPerGram: coerceToNumber(row.xau_aed_per_gram, { positive: true }),
-            provider: row.source_provider,
-            freshnessSeconds: coerceToNumber(row.freshness_seconds, { integer: true }),
-            isFresh: toBooleanOrNull(row.is_fresh),
-            isFallback: toBooleanOrNull(row.is_fallback),
-          })),
-          sourceMode: 'supabase',
-        },
-        {
-          source: 'price_snapshots',
-          freshness: 'historical',
-          extra: { mode: 'supabase' },
-        }
-      )
-    );
-  }
-
   const history = readJsonFile(PRICE_HISTORY_FILE);
-  if (!Array.isArray(history)) {
-    return res
-      .status(503)
-      .json(errorResponse('PRICE_HISTORY_UNAVAILABLE', 'Historical price dataset is unavailable.'));
-  }
-  const limit = parseLimit(req.query.limit, 120, 5000);
-  const rangeStartTime = new Date(getHistoryWindowStart(range)).getTime();
-  const points = history
-    .filter((point) => {
-      const ts = toHistoryTimestampUtc(point?.date);
-      if (!ts) return false;
-      return new Date(ts).getTime() >= rangeStartTime;
-    })
-    .slice(-limit);
-  return res.json(
-    successResponse(
-      {
-        range,
-        total: history.length,
-        returned: points.length,
-        points: points.map((point) => ({
-          timestampUtc: toHistoryTimestampUtc(point.date),
-          xauUsdPerOz: coerceToNumber(point.price, { positive: true }),
-          provider: point.source || 'historical-baseline',
-          granularity:
-            point.granularity ||
-            (String(point.date).length === ISO_YEAR_MONTH_STRING_LENGTH ? 'monthly' : 'daily'),
-        })),
-        sourceMode: 'file',
-      },
-      {
-        source: 'historical-baseline',
-        freshness: 'reference',
-        extra: { mode: 'file' },
-      }
-    )
-  );
+  const latestPricePayload = readJsonFile(GOLD_PRICE_FILE);
+  const response = buildHistoryResponse({
+    range,
+    limit,
+    supabaseRows,
+    baselineHistory: Array.isArray(history) ? history : null,
+    latestPricePayload,
+  });
+  return res.status(response.status).json(response.body);
 });
 
 router.get('/prices/snapshots', async (req, res) => {
@@ -623,3 +769,9 @@ router.post('/leads', leadsRateLimiter, (req, res) => {
 });
 
 module.exports = router;
+module.exports.__testables = {
+  buildHistoryCoverage,
+  buildHistoryResponse,
+  buildHistorySuccessPayload,
+  buildSystemStatus,
+};

@@ -73,6 +73,17 @@ Error shape:
 - Stripe configured or not
 - env validation warnings (non-fatal)
 
+`/api/v1/status` now also exposes a `readiness` object for operations checks:
+
+- `supabaseConfigured`
+- `supabaseWriteAvailable`
+- `stripeConfigured`
+- `stripeWebhookConfigured`
+- `resendConfigured`
+- `alertJobTokenConfigured`
+- `providerStateAvailable`
+- `priceSnapshotSyncAvailable`
+
 ## Environment Validation
 
 Startup performs non-fatal feature-aware env validation:
@@ -143,3 +154,15 @@ Startup performs non-fatal feature-aware env validation:
 - `STRIPE_PRICE_PRO_ANNUAL`
 - `STRIPE_PRICE_API_MONTHLY`
 - `STRIPE_PRICE_API_ANNUAL`
+
+## Backend readiness checklist
+
+- [ ] `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` loaded when DB-backed writes are expected
+- [ ] `/api/v1/status` shows `supabaseWriteAvailable: true` before relying on snapshot persistence
+- [ ] Stripe runtime secrets and price IDs are loaded together
+- [ ] `/api/v1/status` shows `stripeConfigured: true` and `stripeWebhookConfigured: true` before
+      testing live billing flows
+- [ ] `RESEND_API_KEY` and `RESEND_FROM_EMAIL` are loaded together when email delivery is expected
+- [ ] `ALERT_JOB_TOKEN` is configured before enabling non-dry alert job runs
+- [ ] `data/provider_state.json` is present when provider-state telemetry is expected
+- [ ] `scripts/node/sync-price-snapshot.js` is deployed anywhere Supabase snapshot sync is expected

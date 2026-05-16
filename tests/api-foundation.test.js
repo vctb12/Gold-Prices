@@ -55,4 +55,12 @@ test('GET /api/v1/status returns standard envelope and uptime', async () => {
   assert.equal(typeof parsed.data.uptimeSeconds, 'number');
   assert.equal(Array.isArray(parsed.data.warnings), true);
   assert.equal(typeof parsed.meta.timestamp, 'string');
+  assert.equal(typeof parsed.data.readiness.supabaseConfigured, 'boolean');
+  assert.equal(typeof parsed.data.readiness.supabaseWriteAvailable, 'boolean');
+  assert.equal(typeof parsed.data.readiness.stripeConfigured, 'boolean');
+  assert.equal(typeof parsed.data.readiness.stripeWebhookConfigured, 'boolean');
+  assert.equal(typeof parsed.data.readiness.resendConfigured, 'boolean');
+  assert.equal(typeof parsed.data.readiness.alertJobTokenConfigured, 'boolean');
+  assert.equal(typeof parsed.data.readiness.providerStateAvailable, 'boolean');
+  assert.equal(typeof parsed.data.readiness.priceSnapshotSyncAvailable, 'boolean');
 });

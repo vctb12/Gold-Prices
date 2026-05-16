@@ -18,12 +18,16 @@ const path = require('path');
 // Minimal server factory — avoids pulling in the real server.js which
 // requires JWT_SECRET etc. at module load time.
 // ---------------------------------------------------------------------------
-function makeTestApp(billingRoutesPath) {
+function makeTestApp(billingRoutesPath, stripeRoutesPath = null) {
   const express = require('express');
   const app = express();
 
   // Raw-body middleware for the webhook path (mirrors server.js)
   app.use('/api/v1/billing/webhook', express.raw({ type: 'application/json' }));
+  if (stripeRoutesPath) {
+    app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+    app.use('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }));
+  }
   app.use(express.json({ limit: '256kb' }));
 
   const billingModule = require(billingRoutesPath);
@@ -32,6 +36,11 @@ function makeTestApp(billingRoutesPath) {
 
   app.use('/api/v1/billing', billingRouter);
   if (meRouter) app.use('/api/v1/me', meRouter);
+  if (stripeRoutesPath) {
+    const stripeRouter = require(stripeRoutesPath);
+    app.use('/api/stripe', stripeRouter);
+    app.use('/api/v1/stripe', stripeRouter);
+  }
 
   return app;
 }
@@ -58,9 +67,9 @@ function post(server, path, body, headers = {}) {
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => {
         try {
-          resolve({ status: res.statusCode, body: JSON.parse(data) });
+          resolve({ status: res.statusCode, body: JSON.parse(data), headers: res.headers });
         } catch {
-          resolve({ status: res.statusCode, body: data });
+          resolve({ status: res.statusCode, body: data, headers: res.headers });
         }
       });
     });
@@ -84,9 +93,9 @@ function get(server, path, headers = {}) {
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => {
         try {
-          resolve({ status: res.statusCode, body: JSON.parse(data) });
+          resolve({ status: res.statusCode, body: JSON.parse(data), headers: res.headers });
         } catch {
-          resolve({ status: res.statusCode, body: data });
+          resolve({ status: res.statusCode, body: data, headers: res.headers });
         }
       });
     });
@@ -167,6 +176,7 @@ describe('entitlements module', () => {
 describe('billing routes — Stripe not configured', () => {
   let server;
   const routesPath = path.resolve(__dirname, '../server/routes/billing');
+  const stripeRoutesPath = path.resolve(__dirname, '../server/routes/stripe');
 
   before(() => {
     // Ensure Stripe env vars are absent
@@ -176,7 +186,8 @@ describe('billing routes — Stripe not configured', () => {
 
     // Clear require cache so env state is re-evaluated
     delete require.cache[require.resolve(routesPath)];
-    const app = makeTestApp(routesPath);
+    delete require.cache[require.resolve(stripeRoutesPath)];
+    const app = makeTestApp(routesPath, stripeRoutesPath);
     server = app.listen(0);
   });
 
@@ -219,6 +230,42 @@ describe('billing routes — Stripe not configured', () => {
     });
     assert.equal(status, 503);
     assert.ok(typeof body.error === 'string');
+  });
+
+  test('legacy GET /api/stripe/config stays compatible and marks deprecation', async () => {
+    const { status, body, headers } = await get(server, '/api/stripe/config');
+    assert.equal(status, 200);
+    assert.equal(body.configured, false);
+    assert.equal(headers.deprecation, 'true');
+    assert.equal(headers['x-canonical-route'], '/api/v1/billing/config');
+  });
+
+  test('legacy GET /api/v1/stripe/status stays compatible and marks deprecation', async () => {
+    const { status, body, headers } = await get(server, '/api/v1/stripe/status');
+    assert.equal(status, 200);
+    assert.equal(body.configured, false);
+    assert.equal(headers.deprecation, 'true');
+    assert.equal(headers['x-canonical-route'], '/api/v1/billing/status');
+  });
+
+  test('legacy POST /api/stripe/create-checkout requires auth and exposes canonical route', async () => {
+    const { status, headers } = await post(server, '/api/stripe/create-checkout', {
+      tier: 'pro',
+      interval: 'month',
+    });
+    assert.equal(status, 401);
+    assert.equal(headers.deprecation, 'true');
+    assert.equal(headers['x-canonical-route'], '/api/v1/billing/create-checkout-session');
+  });
+
+  test('legacy POST /api/v1/stripe/webhook preserves compatibility and deprecation headers', async () => {
+    const { status, headers } = await post(server, '/api/v1/stripe/webhook', '{"id":"evt_test"}', {
+      'stripe-signature': 'invalid',
+      'Content-Type': 'application/json',
+    });
+    assert.equal(status, 503);
+    assert.equal(headers.deprecation, 'true');
+    assert.equal(headers['x-canonical-route'], '/api/v1/billing/webhook');
   });
 });
 

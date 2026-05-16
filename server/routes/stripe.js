@@ -1,295 +1,93 @@
+'use strict';
+
 /**
- * server/routes/stripe.js
+ * Legacy Stripe compatibility routes.
  *
- * Stripe payment integration routes for subscription management.
- * Handles checkout session creation, webhooks, and customer portal access.
+ * Canonical billing surface lives at /api/v1/billing/*.
+ * This router preserves older /api/stripe/* and /api/v1/stripe/* callers while
+ * attaching deprecation metadata and delegating to the canonical handlers.
  */
 
 const express = require('express');
+const billingRoutes = require('./billing');
+
 const router = express.Router();
-// `_buildUrl` unused until the commented Stripe SDK block below is enabled
-// (Track A #1 in docs/plans/2026-04-24_security-performance-deps-audit.md).
-const { buildUrl: _buildUrl } = require('../lib/site-url');
+const { handlers } = billingRoutes;
 
-// Stripe SDK will be installed separately: npm install stripe
-// For now, we'll structure the routes to be ready for integration
+const CANONICAL_ROUTE_MAP = Object.freeze({
+  '/config': '/api/v1/billing/config',
+  '/status': '/api/v1/billing/status',
+  '/webhook': '/api/v1/billing/webhook',
+  '/create-checkout': '/api/v1/billing/create-checkout-session',
+  '/create-checkout-session': '/api/v1/billing/create-checkout-session',
+  '/create-portal': '/api/v1/billing/create-portal-session',
+  '/create-portal-session': '/api/v1/billing/create-portal-session',
+});
 
-const STRIPE_CONFIG = {
-  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
-  secretKey: process.env.STRIPE_SECRET_KEY || '',
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-  prices: {
-    proMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY || '',
-    proAnnual: process.env.STRIPE_PRICE_PRO_ANNUAL || '',
-    apiMonthly: process.env.STRIPE_PRICE_API_MONTHLY || '',
-    apiAnnual: process.env.STRIPE_PRICE_API_ANNUAL || '',
-  },
-};
-
-/**
- * Fail-closed check for the secrets required to actually talk to Stripe.
- * Called from handlers that would (in the non-stub implementation) call the
- * Stripe SDK. Kept as a runtime check because the module is wired up before
- * the Stripe integration is live; throwing at module-load would break every
- * deploy that hasn't finished the Stripe rollout.
- */
-function getMissingStripeSecrets() {
-  const missing = [];
-  if (!STRIPE_CONFIG.secretKey) missing.push('STRIPE_SECRET_KEY');
-  if (!STRIPE_CONFIG.webhookSecret) missing.push('STRIPE_WEBHOOK_SECRET');
-  return missing;
+function applyDeprecationHeaders(req, res, canonicalPath) {
+  if (!canonicalPath) return;
+  const host = req.get('host');
+  const absoluteCanonicalPath = host ? `${req.protocol}://${host}${canonicalPath}` : canonicalPath;
+  res.setHeader('Deprecation', 'true');
+  res.setHeader('Sunset', 'Wed, 31 Dec 2026 23:59:59 GMT');
+  res.setHeader('Link', `<${absoluteCanonicalPath}>; rel="successor-version"`);
+  res.setHeader('X-Canonical-Route', canonicalPath);
 }
 
-function getMissingStripePriceConfig() {
-  const requiredPrices = {
-    STRIPE_PRICE_PRO_MONTHLY: STRIPE_CONFIG.prices.proMonthly,
-    STRIPE_PRICE_PRO_ANNUAL: STRIPE_CONFIG.prices.proAnnual,
-    STRIPE_PRICE_API_MONTHLY: STRIPE_CONFIG.prices.apiMonthly,
-    STRIPE_PRICE_API_ANNUAL: STRIPE_CONFIG.prices.apiAnnual,
-  };
-
-  return Object.keys(requiredPrices).filter((key) => !requiredPrices[key]);
+function withDeprecation(canonicalPath, ...middlewares) {
+  return [
+    (req, res, next) => {
+      applyDeprecationHeaders(req, res, canonicalPath);
+      next();
+    },
+    ...middlewares,
+  ];
 }
 
-/**
- * POST /api/stripe/create-checkout
- * Create a Stripe Checkout session for subscription
- *
- * Body: { tier: 'pro'|'api', interval: 'month'|'year', userId: string }
- */
-router.post('/create-checkout', async (req, res) => {
-  try {
-    const { tier, interval = 'month', userId } = req.body;
+router.get(
+  '/config',
+  ...withDeprecation(CANONICAL_ROUTE_MAP['/config'], handlers.handleBillingConfig)
+);
+router.get(
+  '/status',
+  ...withDeprecation(CANONICAL_ROUTE_MAP['/status'], handlers.handleBillingStatus)
+);
 
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID required' });
-    }
-
-    if (!['pro', 'api'].includes(tier)) {
-      return res.status(400).json({ error: 'Invalid tier' });
-    }
-
-    if (!['month', 'year'].includes(interval)) {
-      return res.status(400).json({ error: 'Invalid interval' });
-    }
-
-    const missingPriceConfig = getMissingStripePriceConfig();
-    if (missingPriceConfig.length > 0) {
-      return res.status(500).json({
-        error: 'Stripe price configuration is missing',
-        missing: missingPriceConfig,
-      });
-    }
-
-    // Determine price ID
-    const priceKey =
-      tier === 'pro'
-        ? interval === 'month'
-          ? 'proMonthly'
-          : 'proAnnual'
-        : interval === 'month'
-          ? 'apiMonthly'
-          : 'apiAnnual';
-
-    const priceId = STRIPE_CONFIG.prices[priceKey];
-
-    // TODO: Initialize Stripe and create checkout session
-    /*
-    const stripe = require('stripe')(STRIPE_CONFIG.secretKey);
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      line_items: [{
-        price: priceId,
-        quantity: 1,
-      }],
-      success_url: _buildUrl('/subscription/success?session_id={CHECKOUT_SESSION_ID}'),
-      cancel_url: _buildUrl('/pricing'),
-      client_reference_id: userId,
-      subscription_data: {
-        trial_period_days: 7, // 7-day free trial
-        metadata: {
-          userId,
-          tier,
-        },
-      },
-    });
-
-    return res.json({ sessionId: session.id, url: session.url });
-    */
-
-    // Placeholder response until Stripe is installed
-    return res.status(501).json({
-      error: 'Stripe integration pending - install stripe package first',
-      config: { tier, interval, priceId },
-    });
-  } catch (error) {
-    console.error('Error creating checkout session:', error);
-    return res.status(500).json({ error: 'Failed to create checkout session' });
-  }
-});
-
-/**
- * POST /api/stripe/create-portal
- * Create a Stripe Customer Portal session for managing subscription
- *
- * Body: { userId: string }
- */
-router.post('/create-portal', async (req, res) => {
-  try {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID required' });
-    }
-
-    // TODO: Get customer ID from database and create portal session
-    /*
-    const subscriptions = require('../lib/subscriptions');
-    const subscription = await subscriptions.getUserSubscription(userId);
-
-    if (!subscription.stripeCustomerId) {
-      return res.status(404).json({ error: 'No subscription found' });
-    }
-
-    const stripe = require('stripe')(STRIPE_CONFIG.secretKey);
-    const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripeCustomerId,
-      return_url: _buildUrl('/account'),
-    });
-
-    return res.json({ url: session.url });
-    */
-
-    return res.status(501).json({
-      error: 'Stripe integration pending - install stripe package first',
-    });
-  } catch (error) {
-    console.error('Error creating portal session:', error);
-    return res.status(500).json({ error: 'Failed to create portal session' });
-  }
-});
-
-/**
- * POST /api/stripe/webhook
- * Handle Stripe webhook events
- *
- * Events handled:
- * - checkout.session.completed: New subscription created
- * - customer.subscription.updated: Subscription changed
- * - customer.subscription.deleted: Subscription canceled
- * - invoice.payment_succeeded: Payment succeeded
- * - invoice.payment_failed: Payment failed
- */
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  try {
-    // Fail closed if the secrets required to verify the webhook signature
-    // are not configured. Without this guard, a future refactor that
-    // unconditionally calls `stripe.webhooks.constructEvent(...)` against an
-    // empty string secret could silently accept forged events. See
-    // docs/plans/2026-04-24_security-performance-deps-audit.md Track A #5.
-    const missing = getMissingStripeSecrets();
-    if (missing.length > 0) {
-      console.error(
-        '[stripe/webhook] rejecting event — required secrets are missing:',
-        missing.join(', ')
-      );
-      return res.status(503).json({
-        error: 'Stripe webhook handler is not configured',
-      });
-    }
-
-    // `_sig` captured for the future webhook verification flow below.
-    // Prefixed to signal intentional unused binding until Stripe SDK is wired up.
-    const _sig = req.headers['stripe-signature'];
-
-    // TODO: Verify webhook signature and handle events
-    /*
-    const stripe = require('stripe')(STRIPE_CONFIG.secretKey);
-    const subscriptions = require('../lib/subscriptions');
-
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        _sig,
-        STRIPE_CONFIG.webhookSecret
-      );
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object;
-        const userId = session.client_reference_id;
-        const tier = session.metadata.tier;
-
-        // Create subscription record
-        await subscriptions.createSubscription({
-          userId,
-          tier,
-          stripeCustomerId: session.customer,
-          stripeSubscriptionId: session.subscription,
-          status: 'active',
-          currentPeriodEnd: new Date(session.subscription.current_period_end * 1000),
-        });
-        break;
-      }
-
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object;
-        await subscriptions.updateSubscription(subscription.id, {
-          status: subscription.status,
-          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        });
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const subscription = event.data.object;
-        await subscriptions.updateSubscription(subscription.id, {
-          status: 'canceled',
-          canceledAt: new Date(),
-        });
-        break;
-      }
-
-      case 'invoice.payment_succeeded':
-        console.log('Payment succeeded for', event.data.object.customer);
-        break;
-
-      case 'invoice.payment_failed':
-        console.log('Payment failed for', event.data.object.customer);
-        // TODO: Send email notification to user
-        break;
-
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-    }
-
-    res.json({ received: true });
-    */
-
-    return res.status(501).json({
-      error: 'Stripe webhook handler pending - install stripe package first',
-    });
-  } catch (error) {
-    console.error('Error handling webhook:', error);
-    return res.status(500).json({ error: 'Webhook handler failed' });
-  }
-});
-
-/**
- * GET /api/stripe/config
- * Get Stripe publishable key for client-side
- */
-router.get('/config', (_req, res) => {
-  res.json({
-    publishableKey: STRIPE_CONFIG.publishableKey,
-  });
-});
+router.post(
+  '/create-checkout',
+  ...withDeprecation(
+    CANONICAL_ROUTE_MAP['/create-checkout'],
+    handlers.requireBillingUser,
+    handlers.handleCreateCheckoutSession
+  )
+);
+router.post(
+  '/create-checkout-session',
+  ...withDeprecation(
+    CANONICAL_ROUTE_MAP['/create-checkout-session'],
+    handlers.requireBillingUser,
+    handlers.handleCreateCheckoutSession
+  )
+);
+router.post(
+  '/create-portal',
+  ...withDeprecation(
+    CANONICAL_ROUTE_MAP['/create-portal'],
+    handlers.requireBillingUser,
+    handlers.handleCreatePortalSession
+  )
+);
+router.post(
+  '/create-portal-session',
+  ...withDeprecation(
+    CANONICAL_ROUTE_MAP['/create-portal-session'],
+    handlers.requireBillingUser,
+    handlers.handleCreatePortalSession
+  )
+);
+router.post(
+  '/webhook',
+  ...withDeprecation(CANONICAL_ROUTE_MAP['/webhook'], handlers.handleWebhook)
+);
 
 module.exports = router;

@@ -148,7 +148,7 @@ async function requireBillingUser(req, res, next) {
 // POST /api/v1/billing/create-checkout-session
 // ---------------------------------------------------------------------------
 
-router.post('/create-checkout-session', requireBillingUser, async (req, res) => {
+async function handleCreateCheckoutSession(req, res) {
   if (!getBillingConfigured()) {
     return res.status(503).json({
       error: 'Billing is not configured',
@@ -220,13 +220,15 @@ router.post('/create-checkout-session', requireBillingUser, async (req, res) => 
     console.error('[billing] create-checkout-session error:', err.message);
     return res.status(500).json({ error: 'Failed to create checkout session' });
   }
-});
+}
+
+router.post('/create-checkout-session', requireBillingUser, handleCreateCheckoutSession);
 
 // ---------------------------------------------------------------------------
 // POST /api/v1/billing/create-portal-session
 // ---------------------------------------------------------------------------
 
-router.post('/create-portal-session', requireBillingUser, async (req, res) => {
+async function handleCreatePortalSession(req, res) {
   if (!getBillingConfigured()) {
     return res.status(503).json({
       error: 'Billing is not configured',
@@ -261,7 +263,9 @@ router.post('/create-portal-session', requireBillingUser, async (req, res) => {
     console.error('[billing] create-portal-session error:', err.message);
     return res.status(500).json({ error: 'Failed to create portal session' });
   }
-});
+}
+
+router.post('/create-portal-session', requireBillingUser, handleCreatePortalSession);
 
 // ---------------------------------------------------------------------------
 // POST /api/v1/billing/webhook
@@ -269,7 +273,7 @@ router.post('/create-portal-session', requireBillingUser, async (req, res) => {
 // before the global JSON middleware — do NOT add it inline here.
 // ---------------------------------------------------------------------------
 
-router.post('/webhook', async (req, res) => {
+async function handleWebhook(req, res) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
     console.error('[billing/webhook] STRIPE_WEBHOOK_SECRET not configured — rejecting event');
@@ -323,7 +327,9 @@ router.post('/webhook', async (req, res) => {
   });
 
   return res.json({ received: true });
-});
+}
+
+router.post('/webhook', handleWebhook);
 
 async function _handleWebhookEvent(event) {
   switch (event.type) {
@@ -455,7 +461,7 @@ async function _handleWebhookEvent(event) {
 // GET /api/v1/billing/status
 // ---------------------------------------------------------------------------
 
-router.get('/status', async (req, res) => {
+async function handleBillingStatus(req, res) {
   const configured = getBillingConfigured();
   const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY || null;
 
@@ -498,19 +504,23 @@ router.get('/status', async (req, res) => {
     },
     subscription: userSubscription,
   });
-});
+}
+
+router.get('/status', handleBillingStatus);
 
 // ---------------------------------------------------------------------------
 // GET /api/v1/billing/config (publishable key for Stripe.js)
 // ---------------------------------------------------------------------------
 
-router.get('/config', (_req, res) => {
+function handleBillingConfig(_req, res) {
   const configured = getBillingConfigured();
   return res.json({
     configured,
     publishableKey: configured ? process.env.STRIPE_PUBLISHABLE_KEY || null : null,
   });
-});
+}
+
+router.get('/config', handleBillingConfig);
 
 // ---------------------------------------------------------------------------
 // meRouter — mounted at /api/v1/me in server.js
@@ -519,7 +529,7 @@ router.get('/config', (_req, res) => {
 
 const meRouter = express.Router();
 
-meRouter.get('/entitlements', requireBillingUser, async (req, res) => {
+async function handleMeEntitlements(req, res) {
   try {
     const { tier, subscription, entitlements } = await resolveUserEntitlements(req.billingUser.id);
     return res.json({
@@ -533,7 +543,18 @@ meRouter.get('/entitlements', requireBillingUser, async (req, res) => {
     console.error('[billing] /me/entitlements error:', err.message);
     return res.status(500).json({ error: 'Failed to resolve entitlements' });
   }
-});
+}
+
+meRouter.get('/entitlements', requireBillingUser, handleMeEntitlements);
 
 module.exports = router;
 module.exports.meRouter = meRouter;
+module.exports.handlers = {
+  requireBillingUser,
+  handleCreateCheckoutSession,
+  handleCreatePortalSession,
+  handleWebhook,
+  handleBillingStatus,
+  handleBillingConfig,
+  handleMeEntitlements,
+};

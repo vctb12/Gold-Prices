@@ -9,7 +9,7 @@ function hasValue(v) {
 
 function getRuntimeEnvSnapshot(env = process.env) {
   const supabaseConfigured = hasValue(env.SUPABASE_URL) && hasValue(env.SUPABASE_SERVICE_ROLE_KEY);
-  const newsletterConfigured = hasValue(env.RESEND_API_KEY) && hasValue(env.RESEND_FROM_EMAIL);
+  const resendConfigured = hasValue(env.RESEND_API_KEY) && hasValue(env.RESEND_FROM_EMAIL);
   const stripeConfigured =
     hasValue(env.STRIPE_SECRET_KEY) &&
     hasValue(env.STRIPE_WEBHOOK_SECRET) &&
@@ -20,9 +20,12 @@ function getRuntimeEnvSnapshot(env = process.env) {
     storageBackend: env.STORAGE_BACKEND || 'file',
     corsOriginsConfigured: hasValue(env.CORS_ORIGINS),
     supabaseConfigured,
-    newsletterConfigured,
+    newsletterConfigured: resendConfigured,
+    resendConfigured,
     stripeConfigured,
+    stripeWebhookConfigured: hasValue(env.STRIPE_WEBHOOK_SECRET),
     adminPinConfigured: hasValue(env.ADMIN_ACCESS_PIN),
+    alertJobTokenConfigured: hasValue(env.ALERT_JOB_TOKEN),
   };
 }
 

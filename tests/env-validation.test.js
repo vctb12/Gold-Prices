@@ -2,7 +2,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { validateServerEnv } = require('../server/lib/env-validation');
+const { getRuntimeEnvSnapshot, validateServerEnv } = require('../server/lib/env-validation');
 
 test('validateServerEnv warns for partial Stripe config', () => {
   const logs = [];
@@ -29,4 +29,24 @@ test('validateServerEnv passes when optional features are disabled and productio
   const result = validateServerEnv(env, { warn: () => {} });
   assert.equal(result.ok, true);
   assert.deepEqual(result.warnings, []);
+});
+
+test('getRuntimeEnvSnapshot exposes readiness-friendly integration booleans', () => {
+  const snapshot = getRuntimeEnvSnapshot({
+    SUPABASE_URL: 'https://example.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'service-role',
+    STRIPE_SECRET_KEY: 'sk_test_123',
+    STRIPE_WEBHOOK_SECRET: 'whsec_test_123',
+    STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
+    RESEND_API_KEY: 're_123',
+    RESEND_FROM_EMAIL: 'alerts@goldtickerlive.com',
+    ALERT_JOB_TOKEN: 'token_123',
+  });
+
+  assert.equal(snapshot.supabaseConfigured, true);
+  assert.equal(snapshot.stripeConfigured, true);
+  assert.equal(snapshot.stripeWebhookConfigured, true);
+  assert.equal(snapshot.resendConfigured, true);
+  assert.equal(snapshot.newsletterConfigured, true);
+  assert.equal(snapshot.alertJobTokenConfigured, true);
 });

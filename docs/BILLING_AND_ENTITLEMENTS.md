@@ -61,7 +61,17 @@ free features continue working normally.
 
 ## API Endpoints
 
-All billing routes are mounted at `/api/v1/billing/`.
+Canonical billing routes are mounted at `/api/v1/billing/`.
+
+Legacy compatibility routes remain available at `/api/stripe/*` and `/api/v1/stripe/*` for older
+clients, but they now delegate to the canonical billing handlers and return deprecation metadata:
+
+- `Deprecation: true`
+- `Sunset: Wed, 31 Dec 2026 23:59:59 GMT`
+- `Link: <.../api/v1/billing/...>; rel="successor-version"`
+- `X-Canonical-Route: /api/v1/billing/...`
+
+Prefer migrating any caller, automation, or documentation to `/api/v1/billing/*`.
 
 ### `GET /api/v1/billing/config`
 
@@ -128,7 +138,7 @@ Stripe calls this endpoint. **Not for direct use** — configure in Stripe Dashb
 - Stores each event idempotently by `event.id`.
 - Handles: `checkout.session.completed`, `customer.subscription.updated`,
   `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`.
-- Returns `200` even on handler errors (to prevent Stripe infinite retries); errors are logged.
+- Returns `500` on handler errors so Stripe can retry transient failures; errors are logged.
 
 ### `GET /api/v1/me/entitlements`
 
@@ -252,14 +262,27 @@ with `feature='tier'` and `value='"pro"'`.
 
 ## File Map
 
-| Path                                | Role                                          |
-| ----------------------------------- | --------------------------------------------- |
-| `server/routes/billing.js`          | Express routes for all billing endpoints      |
-| `server/lib/billing-repository.js`  | Supabase + file-backed persistence            |
-| `server/lib/entitlements.js`        | Tier feature flag definitions and resolution  |
-| `server/lib/subscriptions.js`       | Legacy shim — delegates to billing-repository |
-| `server/routes/stripe.js`           | Legacy stub (backwards-compat, returns 501)   |
-| `supabase/schema.sql`               | Database schema — Phase 6 billing section     |
-| `pricing.html`                      | Pricing page with live Stripe Checkout CTAs   |
-| `content/subscription/success.html` | Post-checkout confirmation page               |
-| `docs/BILLING_AND_ENTITLEMENTS.md`  | This file                                     |
+| Path                                | Role                                                  |
+| ----------------------------------- | ----------------------------------------------------- |
+| `server/routes/billing.js`          | Express routes for all billing endpoints              |
+| `server/lib/billing-repository.js`  | Supabase + file-backed persistence                    |
+| `server/lib/entitlements.js`        | Tier feature flag definitions and resolution          |
+| `server/lib/subscriptions.js`       | Legacy shim — delegates to billing-repository         |
+| `server/routes/stripe.js`           | Legacy compatibility wrapper with deprecation headers |
+| `supabase/schema.sql`               | Database schema — Phase 6 billing section             |
+| `pricing.html`                      | Pricing page with live Stripe Checkout CTAs           |
+| `content/subscription/success.html` | Post-checkout confirmation page                       |
+| `docs/BILLING_AND_ENTITLEMENTS.md`  | This file                                             |
+
+## Migration note
+
+Use this mapping when cleaning up older clients:
+
+| Legacy route                  | Canonical route                           |
+| ----------------------------- | ----------------------------------------- |
+| `/api/stripe/config`          | `/api/v1/billing/config`                  |
+| `/api/stripe/status`          | `/api/v1/billing/status`                  |
+| `/api/stripe/create-checkout` | `/api/v1/billing/create-checkout-session` |
+| `/api/stripe/create-portal`   | `/api/v1/billing/create-portal-session`   |
+| `/api/stripe/webhook`         | `/api/v1/billing/webhook`                 |
+| `/api/v1/stripe/*`            | matching `/api/v1/billing/*` route        |
