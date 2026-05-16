@@ -1139,8 +1139,7 @@ function createPublicAccountsRouter(options = {}) {
   });
 
   router.delete('/me', deleteAccountLimiter, async (req, res) => {
-    const confirmToken =
-      req.body?.confirm || req.get('x-delete-confirm') || req.query?.confirm || null;
+    const confirmToken = req.body?.confirm || null;
     if (!hasValidDeleteConfirmation(confirmToken)) {
       return res
         .status(400)

@@ -74,7 +74,14 @@ function upsertStore(mutator) {
     subscriptions: [],
     entitlements: [],
   };
-  const store = fs.existsSync(storePath) ? JSON.parse(fs.readFileSync(storePath, 'utf8')) : initial;
+  let store = initial;
+  if (fs.existsSync(storePath)) {
+    try {
+      store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+    } catch {
+      store = initial;
+    }
+  }
   mutator(store);
   fs.writeFileSync(storePath, JSON.stringify(store, null, 2));
 }
@@ -191,7 +198,7 @@ test('DELETE /api/v1/me blocks admin/editor role users', async () => {
     path: '/api/v1/me',
     userId: 'admin-user',
     userEmail: 'admin-user@example.com',
-    headers: { 'x-test-user-role': 'admin', 'x-delete-confirm': 'DELETE' },
+    headers: { 'x-test-user-role': 'admin' },
     body: { confirm: 'DELETE' },
   });
   assert.equal(response.status, 403);
@@ -202,7 +209,7 @@ test('DELETE /api/v1/me blocks admin/editor role users', async () => {
     path: '/api/v1/me',
     userId: 'editor-user',
     userEmail: 'editor-user@example.com',
-    headers: { 'x-test-user-role': 'editor', 'x-delete-confirm': 'DELETE' },
+    headers: { 'x-test-user-role': 'editor' },
     body: { confirm: 'DELETE' },
   });
   assert.equal(forbiddenEditor.status, 403);
@@ -393,7 +400,6 @@ test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is i
     path: '/api/v1/me',
     userId: 'delete-user',
     userEmail: 'delete-user@example.com',
-    headers: { 'x-delete-confirm': 'DELETE' },
     body: { confirm: 'DELETE' },
   });
   assert.equal(deleteRes.status, 200);
@@ -422,7 +428,6 @@ test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is i
     path: '/api/v1/me',
     userId: 'delete-user',
     userEmail: 'delete-user@example.com',
-    headers: { 'x-delete-confirm': 'DELETE' },
     body: { confirm: 'DELETE' },
   });
   assert.equal(secondDelete.status, 200);

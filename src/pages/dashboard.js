@@ -101,11 +101,8 @@ function tokenMatchesConfirmation(typed) {
   const token = getDeleteConfirmationToken();
   const normalizedTyped = String(typed || '').trim();
   if (!normalizedTyped) return false;
-  // Always accept case-insensitive DELETE, and for Arabic UI also accept the
-  // localized token exactly as shown to the user.
-  return (
-    normalizedTyped.toUpperCase() === 'DELETE' || (token !== 'DELETE' && normalizedTyped === token)
-  );
+  // Always accept case-insensitive DELETE, and also accept the localized token.
+  return normalizedTyped.toUpperCase() === 'DELETE' || normalizedTyped === token;
 }
 
 function userFacingApiError(error, fallbackKey) {
