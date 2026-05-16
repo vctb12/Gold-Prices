@@ -7,6 +7,7 @@ loads_skills:
   - security-review
   - seo-governance
   - pricing-data-integrity
+description: General Gold Ticker Live reviewer for product trust, pricing honesty, bilingual quality, release readiness, and cross-page consistency.
 ---
 
 # Agent: Gold Ticker Live Reviewer
