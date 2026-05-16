@@ -34,7 +34,7 @@ let initRender,
 const state = createInitialState();
 const el = {};
 let serverAlertsAvailable = false;
-let accountAlertEmail = null;
+let accountEmailForAlerts = null;
 const ALERT_EMAIL_FOCUS_DELAY_MS = 120;
 
 function trackerTx(key, params = {}) {
@@ -413,7 +413,7 @@ async function probeServerAlertsAvailability() {
 
 async function createServerAlert({ condition, target }) {
   const typedEmail = el.alertEmail?.value?.trim();
-  const email = (typedEmail || accountAlertEmail || '').toLowerCase();
+  const email = (typedEmail || accountEmailForAlerts || '').toLowerCase();
   if (!email) {
     throw new Error(trackerTx('alerts.serverEmailRequired'));
   }
@@ -447,7 +447,7 @@ async function prefillServerAlertEmailFromAccount() {
     const me = await getMe();
     const email = me?.user?.email?.trim()?.toLowerCase();
     if (!email) return;
-    accountAlertEmail = email;
+    accountEmailForAlerts = email;
     if (el.alertEmail && !el.alertEmail.value) {
       el.alertEmail.value = email;
     }

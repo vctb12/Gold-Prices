@@ -965,6 +965,16 @@ function sanitizeNotificationSubscriptionForExport(row) {
   };
 }
 
+function sanitizeApiKeyForExport(key) {
+  return {
+    id: key.id,
+    keyPrefix: key.keyPrefix,
+    label: key.label,
+    revoked: Boolean(key.revoked),
+    createdAt: key.createdAt || null,
+  };
+}
+
 function createPublicAccountsRouter(options = {}) {
   const router = express.Router();
   const storePath =
@@ -1062,13 +1072,7 @@ function createPublicAccountsRouter(options = {}) {
           notificationSubscriptions,
           // Export metadata only; keyPrefix is safe for user reference, while
           // raw keys and key hashes are intentionally excluded for security.
-          apiKeys: (apiKeys || []).map((key) => ({
-            id: key.id,
-            keyPrefix: key.keyPrefix,
-            label: key.label,
-            revoked: Boolean(key.revoked),
-            createdAt: key.createdAt || null,
-          })),
+          apiKeys: (apiKeys || []).map(sanitizeApiKeyForExport),
           subscriptions: {
             active:
               resolvedEntitlements?.subscription &&
@@ -1113,7 +1117,7 @@ function createPublicAccountsRouter(options = {}) {
       'Local app data was removed. Supabase auth-user deletion requires service-role configuration.';
 
     const hasServiceRoleKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
-    const sb = hasServiceRoleKey ? getSupabaseClient(false) : null;
+    const sb = hasServiceRoleKey ? getSupabaseClient() : null;
     if (sb?.auth?.admin?.deleteUser) {
       try {
         const { error } = await sb.auth.admin.deleteUser(req.publicUser.id);

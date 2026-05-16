@@ -269,7 +269,7 @@ async function init() {
   document.getElementById('dashboard-delete-btn')?.addEventListener('click', async () => {
     const confirmInput = document.getElementById('dashboard-delete-confirm');
     const typed = confirmInput?.value?.trim();
-    if (typed !== DELETE_CONFIRMATION_TEXT) {
+    if (!typed || typed.toUpperCase() !== DELETE_CONFIRMATION_TEXT) {
       setPrivacyStatus(tx('deleteConfirmRequired'));
       return;
     }
