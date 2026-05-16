@@ -6,6 +6,7 @@ use_with_prompts:
   - .github/prompts/country-pages-expansion.prompt.md
 loads_skills:
   - seo-governance
+description: SEO governance specialist for canonical URLs, sitemap policy, noindex controls, hreflang, structured data, thin-page handling, and indexing safety.
 ---
 
 # Agent: SEO Governance
