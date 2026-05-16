@@ -19,6 +19,7 @@ import { cacheKeyUserPrefs } from './dashboard.shared.js';
 
 const params = new URLSearchParams(window.location.search);
 let lang = params.get('lang') === 'ar' ? 'ar' : 'en';
+const DELETE_CONFIRMATION_TEXT = 'DELETE';
 
 const T = {
   en: {
@@ -38,14 +39,14 @@ const T = {
       'Export your account data as JSON or permanently delete your account data from the app.',
     exportBtn: 'Export my data',
     dangerTitle: 'Danger zone',
-    deleteHelp: 'Type DELETE to confirm permanent deletion.',
+    deleteHelp: `Type ${DELETE_CONFIRMATION_TEXT} to confirm permanent deletion.`,
     deleteLabel: 'Confirmation text',
-    deletePlaceholder: 'Type DELETE',
+    deletePlaceholder: `Type ${DELETE_CONFIRMATION_TEXT}`,
     deleteBtn: 'Delete my account',
     exportPreparing: 'Preparing your export…',
     exportDone: 'Data export downloaded.',
     exportFailed: 'Could not export your data right now.',
-    deleteConfirmRequired: 'Type DELETE exactly to continue.',
+    deleteConfirmRequired: `Type ${DELETE_CONFIRMATION_TEXT} exactly to continue.`,
     deleting: 'Deleting account data…',
     deleteDone: 'Account deletion completed. You will be signed out.',
     deleteFailed: 'Could not delete your account right now.',
@@ -68,14 +69,14 @@ const T = {
     privacyCopy: 'يمكنك تنزيل بيانات حسابك بصيغة JSON أو حذف بيانات الحساب نهائياً من التطبيق.',
     exportBtn: 'تنزيل بياناتي',
     dangerTitle: 'منطقة حساسة',
-    deleteHelp: 'اكتب DELETE لتأكيد الحذف النهائي.',
+    deleteHelp: `اكتب ${DELETE_CONFIRMATION_TEXT} لتأكيد الحذف النهائي.`,
     deleteLabel: 'نص التأكيد',
-    deletePlaceholder: 'اكتب DELETE',
+    deletePlaceholder: `اكتب ${DELETE_CONFIRMATION_TEXT}`,
     deleteBtn: 'حذف حسابي',
     exportPreparing: 'جارٍ تجهيز ملف البيانات…',
     exportDone: 'تم تنزيل ملف البيانات.',
     exportFailed: 'تعذر تنزيل بياناتك حالياً.',
-    deleteConfirmRequired: 'اكتب DELETE كما هي للمتابعة.',
+    deleteConfirmRequired: `اكتب ${DELETE_CONFIRMATION_TEXT} كما هي للمتابعة.`,
     deleting: 'جارٍ حذف بيانات الحساب…',
     deleteDone: 'اكتمل حذف الحساب. سيتم تسجيل خروجك.',
     deleteFailed: 'تعذر حذف حسابك حالياً.',
@@ -268,7 +269,7 @@ async function init() {
   document.getElementById('dashboard-delete-btn')?.addEventListener('click', async () => {
     const confirmInput = document.getElementById('dashboard-delete-confirm');
     const typed = confirmInput?.value?.trim();
-    if (typed !== 'DELETE') {
+    if (typed !== DELETE_CONFIRMATION_TEXT) {
       setPrivacyStatus(tx('deleteConfirmRequired'));
       return;
     }

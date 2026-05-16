@@ -1060,7 +1060,8 @@ function createPublicAccountsRouter(options = {}) {
           userSessions,
           alertRules,
           notificationSubscriptions,
-          // Export metadata only; never include raw key material or key hashes.
+          // Export metadata only; keyPrefix is safe for user reference, while
+          // raw keys and key hashes are intentionally excluded for security.
           apiKeys: (apiKeys || []).map((key) => ({
             id: key.id,
             keyPrefix: key.keyPrefix,

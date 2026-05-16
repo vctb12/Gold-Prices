@@ -35,6 +35,7 @@ const state = createInitialState();
 const el = {};
 let serverAlertsAvailable = false;
 let accountAlertEmail = null;
+const ALERT_EMAIL_FOCUS_DELAY_MS = 120;
 
 function trackerTx(key, params = {}) {
   const fullKey = `tracker.${key}`;
@@ -1113,7 +1114,7 @@ async function init() {
       el.alertDelivery.value = 'server';
       updateServerAlertUiState();
     }
-    setTimeout(() => el.alertEmail?.focus(), 50);
+    setTimeout(() => el.alertEmail?.focus(), ALERT_EMAIL_FOCUS_DELAY_MS);
   });
   el.saveWatchlistAccount?.addEventListener('click', () => {
     saveWatchlistToAccount().catch(() => {
