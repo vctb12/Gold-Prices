@@ -6,7 +6,7 @@ use_with_prompts:
 loads_skills:
   - backend-admin-supabase
   - security-review
-  description: Backend and admin specialist for server routes, Supabase, authentication boundaries, dashboards, operational APIs, and data-management workflows.
+description: Backend and admin specialist for server routes, Supabase, authentication boundaries, dashboards, operational APIs, and data-management workflows.
 ---
 
 # Agent: Backend / Admin
