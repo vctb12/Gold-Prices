@@ -17,6 +17,7 @@ import { getDayOpenPrice } from '../lib/cache.js';
 
 let _state, _el, _priceFor, _currentSpot, _showToast;
 let _chartListenersAttached = false;
+const MIN_QUICK_CALC_WEIGHT_GRAMS = 0.01;
 // Holds the latest chart rows so the chart mousemove handler (attached once)
 // can always read the most-current data without re-registering on every render.
 let _latestChartRows = [];
@@ -811,7 +812,12 @@ export function renderQuickCalculator() {
       })
     : null;
 
-  if (!spot || !Number.isFinite(weight) || weight <= 0 || !Number.isFinite(perGram)) {
+  if (
+    !spot ||
+    !Number.isFinite(weight) ||
+    weight < MIN_QUICK_CALC_WEIGHT_GRAMS ||
+    !Number.isFinite(perGram)
+  ) {
     setText(_el.quickCalcResult, '—');
     setText(_el.quickCalcMeta, tx('quickCalc.waiting'));
     return;

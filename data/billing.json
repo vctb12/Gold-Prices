@@ -1,0 +1,61 @@
+{
+  "stripe_customers": [],
+  "subscriptions": [],
+  "stripe_events": [],
+  "api_keys": [],
+  "api_usage": [],
+  "billing_audit_logs": [
+    {
+      "id": "5a5b73dc-779c-46e3-8d4f-0451e1847552",
+      "userId": "delete-user",
+      "action": "public_account_delete",
+      "tier": null,
+      "metadata": {
+        "mode": "safe_mode",
+        "authUserDeleted": false,
+        "deleted": {
+          "profiles": 0,
+          "user_preferences": 0,
+          "saved_calculations": 1,
+          "watchlists": 1,
+          "saved_shops": 1,
+          "user_sessions": 0,
+          "api_keys": 0,
+          "subscriptions": 0,
+          "entitlements": 0,
+          "alert_rules": 1,
+          "notification_subscriptions": 0
+        },
+        "ip": "::ffff:127.0.0.1",
+        "userEmail": "delete-user@example.com"
+      },
+      "createdAt": "2026-05-16T06:25:40.089Z"
+    },
+    {
+      "id": "acabf60e-1509-4322-9764-0c4f70e98528",
+      "userId": "delete-user",
+      "action": "public_account_delete",
+      "tier": null,
+      "metadata": {
+        "mode": "safe_mode",
+        "authUserDeleted": false,
+        "deleted": {
+          "profiles": 1,
+          "user_preferences": 0,
+          "saved_calculations": 0,
+          "watchlists": 0,
+          "saved_shops": 0,
+          "user_sessions": 1,
+          "api_keys": 0,
+          "subscriptions": 0,
+          "entitlements": 0,
+          "alert_rules": 0,
+          "notification_subscriptions": 0
+        },
+        "ip": "::ffff:127.0.0.1",
+        "userEmail": "delete-user@example.com"
+      },
+      "createdAt": "2026-05-16T06:25:40.093Z"
+    }
+  ]
+}
