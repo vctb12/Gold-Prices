@@ -411,7 +411,8 @@ async function probeServerAlertsAvailability() {
 }
 
 async function createServerAlert({ condition, target }) {
-  const email = (el.alertEmail?.value?.trim() || accountAlertEmail || '').toLowerCase();
+  const typedEmail = el.alertEmail?.value?.trim();
+  const email = (typedEmail || accountAlertEmail || '').toLowerCase();
   if (!email) {
     throw new Error(trackerTx('alerts.serverEmailRequired'));
   }

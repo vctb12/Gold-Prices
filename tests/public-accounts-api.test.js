@@ -224,6 +224,26 @@ test('GET /api/v1/me/export returns account data and excludes sensitive fields',
   assert.equal(serialized.includes('verification_token_hash'), false);
   assert.equal(serialized.includes('unsubscribe_token_hash'), false);
   assert.equal(serialized.includes('SUPABASE_SERVICE_ROLE_KEY'), false);
+  assert.equal(
+    Array.isArray(data.apiKeys) &&
+      data.apiKeys.some((row) => row?.key_hash || row?.keyHash || row?.key),
+    false
+  );
+  assert.equal(
+    Array.isArray(data.alertRules) &&
+      data.alertRules.some(
+        (row) =>
+          row?.management_token_hash || row?.managementTokenHash || row?.verification_token_hash
+      ),
+    false
+  );
+  assert.equal(
+    Array.isArray(data.notificationSubscriptions) &&
+      data.notificationSubscriptions.some(
+        (row) => row?.unsubscribe_token_hash || row?.unsubscribeTokenHash
+      ),
+    false
+  );
 });
 
 test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is idempotent', async () => {

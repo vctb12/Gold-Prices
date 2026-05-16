@@ -258,7 +258,7 @@ async function init() {
     try {
       setPrivacyStatus(tx('exportPreparing'));
       const payload = await exportMyData();
-      const dateStamp = new Date().toISOString().replaceAll(':', '-');
+      const dateStamp = new Date().toISOString().replace(/:/g, '-').replace(/\..+$/, '');
       downloadJsonFile(`gold-ticker-live-export-${dateStamp}.json`, payload);
       setPrivacyStatus(tx('exportDone'));
     } catch {

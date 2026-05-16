@@ -1060,6 +1060,7 @@ function createPublicAccountsRouter(options = {}) {
           userSessions,
           alertRules,
           notificationSubscriptions,
+          // Export metadata only; never include raw key material or key hashes.
           apiKeys: (apiKeys || []).map((key) => ({
             id: key.id,
             keyPrefix: key.keyPrefix,
@@ -1110,7 +1111,8 @@ function createPublicAccountsRouter(options = {}) {
     let authDeletionMessage =
       'Local app data was removed. Supabase auth-user deletion requires service-role configuration.';
 
-    const sb = getSupabaseClient(false);
+    const hasServiceRoleKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const sb = hasServiceRoleKey ? getSupabaseClient(false) : null;
     if (sb?.auth?.admin?.deleteUser) {
       try {
         const { error } = await sb.auth.admin.deleteUser(req.publicUser.id);
@@ -1126,6 +1128,9 @@ function createPublicAccountsRouter(options = {}) {
         authDeletionMessage =
           'Local app data was removed. Supabase auth-user deletion failed and requires owner review.';
       }
+    } else if (!hasServiceRoleKey) {
+      authDeletionMessage =
+        'Local app data was removed. Supabase auth-user deletion is not configured because SUPABASE_SERVICE_ROLE_KEY is missing.';
     }
 
     res.json(
