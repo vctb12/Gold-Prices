@@ -19,7 +19,10 @@ import { cacheKeyUserPrefs } from './dashboard.shared.js';
 
 const params = new URLSearchParams(window.location.search);
 let lang = params.get('lang') === 'ar' ? 'ar' : 'en';
-const DELETE_CONFIRMATION_TEXT = 'DELETE';
+const DELETE_CONFIRMATION_TOKENS = Object.freeze({
+  en: 'DELETE',
+  ar: 'حذف',
+});
 
 const T = {
   en: {
@@ -39,14 +42,14 @@ const T = {
       'Export your account data as JSON or permanently delete your account data from the app.',
     exportBtn: 'Export my data',
     dangerTitle: 'Danger zone',
-    deleteHelp: `Type ${DELETE_CONFIRMATION_TEXT} to confirm permanent deletion.`,
+    deleteHelp: (token) => `Type ${token} to confirm permanent deletion.`,
     deleteLabel: 'Confirmation text',
-    deletePlaceholder: `Type ${DELETE_CONFIRMATION_TEXT}`,
+    deletePlaceholder: 'Type DELETE',
     deleteBtn: 'Delete my account',
     exportPreparing: 'Preparing your export…',
     exportDone: 'Data export downloaded.',
     exportFailed: 'Could not export your data right now.',
-    deleteConfirmRequired: `Type ${DELETE_CONFIRMATION_TEXT} exactly to continue.`,
+    deleteConfirmRequired: (token) => `Type ${token} exactly to continue.`,
     deleting: 'Deleting account data…',
     deleteDone: 'Account deletion completed. You will be signed out.',
     deleteFailed: 'Could not delete your account right now.',
@@ -69,14 +72,14 @@ const T = {
     privacyCopy: 'يمكنك تنزيل بيانات حسابك بصيغة JSON أو حذف بيانات الحساب نهائياً من التطبيق.',
     exportBtn: 'تنزيل بياناتي',
     dangerTitle: 'منطقة حساسة',
-    deleteHelp: `اكتب ${DELETE_CONFIRMATION_TEXT} لتأكيد الحذف النهائي.`,
+    deleteHelp: (token) => `اكتب ${token} لتأكيد الحذف النهائي.`,
     deleteLabel: 'نص التأكيد',
-    deletePlaceholder: `اكتب ${DELETE_CONFIRMATION_TEXT}`,
+    deletePlaceholder: 'اكتب حذف',
     deleteBtn: 'حذف حسابي',
     exportPreparing: 'جارٍ تجهيز ملف البيانات…',
     exportDone: 'تم تنزيل ملف البيانات.',
     exportFailed: 'تعذر تنزيل بياناتك حالياً.',
-    deleteConfirmRequired: `اكتب ${DELETE_CONFIRMATION_TEXT} كما هي للمتابعة.`,
+    deleteConfirmRequired: (token) => `اكتب ${token} كما هي للمتابعة.`,
     deleting: 'جارٍ حذف بيانات الحساب…',
     deleteDone: 'اكتمل حذف الحساب. سيتم تسجيل خروجك.',
     deleteFailed: 'تعذر حذف حسابك حالياً.',
@@ -88,6 +91,24 @@ const T = {
 function tx(key, arg) {
   const value = T[lang]?.[key] || T.en[key] || key;
   return typeof value === 'function' ? value(arg) : value;
+}
+
+function getDeleteConfirmationToken() {
+  return DELETE_CONFIRMATION_TOKENS[lang] || DELETE_CONFIRMATION_TOKENS.en;
+}
+
+function tokenMatchesConfirmation(typed) {
+  const token = getDeleteConfirmationToken();
+  const normalizedTyped = String(typed || '').trim();
+  if (!normalizedTyped) return false;
+  if (token === 'DELETE') return normalizedTyped.toUpperCase() === 'DELETE';
+  return normalizedTyped === token || normalizedTyped.toUpperCase() === 'DELETE';
+}
+
+function userFacingApiError(error, fallbackKey) {
+  if (error?.code === 'AUTH_REQUIRED' || error?.status === 401) return tx('authRequired');
+  const code = error?.code || error?.status || null;
+  return code ? `${tx(fallbackKey)} (${code})` : tx(fallbackKey);
 }
 
 function setStatus(message) {
@@ -126,10 +147,17 @@ function applyStaticCopy() {
   ];
   mapping.forEach(([id, key]) => {
     const node = document.getElementById(id);
-    if (node) node.textContent = tx(key);
+    if (!node) return;
+    if (key === 'deleteHelp' || key === 'deleteConfirmRequired') {
+      node.textContent = tx(key, getDeleteConfirmationToken());
+    } else {
+      node.textContent = tx(key);
+    }
   });
   const confirmInput = document.getElementById('dashboard-delete-confirm');
   if (confirmInput) confirmInput.placeholder = tx('deletePlaceholder');
+  const deleteToken = document.getElementById('dashboard-delete-token');
+  if (deleteToken) deleteToken.textContent = getDeleteConfirmationToken();
 }
 
 function downloadJsonFile(fileName, value) {
@@ -203,6 +231,7 @@ async function refreshDashboard() {
 
 async function init() {
   setLang(lang);
+  document.getElementById('dashboard-privacy-card')?.removeAttribute('hidden');
   injectSpotBar(lang, 0);
   const nav = injectNav(lang, 0);
   injectFooter(lang, 0);
@@ -262,20 +291,21 @@ async function init() {
       const dateStamp = new Date().toISOString().replace(/:/g, '-').replace(/\..+$/, '');
       downloadJsonFile(`gold-ticker-live-export-${dateStamp}.json`, payload);
       setPrivacyStatus(tx('exportDone'));
-    } catch {
-      setPrivacyStatus(tx('exportFailed'));
+    } catch (error) {
+      console.error('[dashboard] export failed', error);
+      setPrivacyStatus(userFacingApiError(error, 'exportFailed'));
     }
   });
   document.getElementById('dashboard-delete-btn')?.addEventListener('click', async () => {
     const confirmInput = document.getElementById('dashboard-delete-confirm');
     const typed = confirmInput?.value?.trim();
-    if (!typed || typed.toUpperCase() !== DELETE_CONFIRMATION_TEXT) {
-      setPrivacyStatus(tx('deleteConfirmRequired'));
+    if (!tokenMatchesConfirmation(typed)) {
+      setPrivacyStatus(tx('deleteConfirmRequired', getDeleteConfirmationToken()));
       return;
     }
     try {
       setPrivacyStatus(tx('deleting'));
-      const result = await deleteMyAccount();
+      const result = await deleteMyAccount(typed);
       setPrivacyStatus(result?.auth?.message || tx('deleteDone'));
       if (confirmInput) confirmInput.value = '';
       try {
@@ -284,8 +314,9 @@ async function init() {
       } catch {
         setPrivacyStatus(tx('signOutAfterDeleteFailed'));
       }
-    } catch {
-      setPrivacyStatus(tx('deleteFailed'));
+    } catch (error) {
+      console.error('[dashboard] account deletion failed', error);
+      setPrivacyStatus(userFacingApiError(error, 'deleteFailed'));
     }
   });
 

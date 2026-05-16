@@ -36,6 +36,7 @@ const el = {};
 let serverAlertsAvailable = false;
 let accountEmailForAlerts = null;
 const ALERT_EMAIL_FOCUS_DELAY_MS = 120;
+let didPrefillAccountAlertEmail = false;
 
 function trackerTx(key, params = {}) {
   const fullKey = `tracker.${key}`;
@@ -170,7 +171,9 @@ function localizeStaticTrackerCopy() {
   );
   if (quickToolsHeading) quickToolsHeading.textContent = trackerTx('quickToolsTitle');
 
-  const quickToolLinks = document.querySelectorAll('.tracker-side-card--links a');
+  const quickToolLinks = document.querySelectorAll(
+    '.tracker-side-card--links a, .tracker-side-card--links button'
+  );
   const quickToolLabels = [
     trackerTx('quickToolsCalculator'),
     trackerTx('quickToolsCountryPage'),
@@ -378,6 +381,9 @@ function updateServerAlertUiState() {
   if (el.alertEmailWrap) {
     el.alertEmailWrap.hidden = !(wantsServer && canUseServer);
   }
+  if (el.alertAccountHint) {
+    el.alertAccountHint.hidden = !(didPrefillAccountAlertEmail && wantsServer && canUseServer);
+  }
   if (el.alertScopeWrap) {
     el.alertScopeWrap.hidden = wantsServer && canUseServer;
   }
@@ -448,12 +454,12 @@ async function prefillServerAlertEmailFromAccount() {
     const email = me?.user?.email?.trim()?.toLowerCase();
     if (!email) return;
     accountEmailForAlerts = email;
-    if (el.alertEmail && !el.alertEmail.value) {
+    const canPrefill = el.alertEmail && !el.alertEmail.value;
+    if (canPrefill) {
       el.alertEmail.value = email;
+      didPrefillAccountAlertEmail = true;
     }
-    if (el.alertAccountHint) {
-      el.alertAccountHint.hidden = false;
-    }
+    updateServerAlertUiState();
   } catch {
     // non-blocking
   }

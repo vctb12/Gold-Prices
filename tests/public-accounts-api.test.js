@@ -23,7 +23,7 @@ after(() => {
   if (fs.existsSync(storePath)) fs.unlinkSync(storePath);
 });
 
-function request({ method, path: urlPath, userId, userEmail, body }) {
+function request({ method, path: urlPath, userId, userEmail, body, headers = {} }) {
   return new Promise((resolve, reject) => {
     const req = http.request(
       {
@@ -34,7 +34,13 @@ function request({ method, path: urlPath, userId, userEmail, body }) {
         headers: {
           ...(userId ? { 'x-test-user-id': userId } : {}),
           ...(userEmail ? { 'x-test-user-email': userEmail } : {}),
-          ...(body ? { 'Content-Type': 'application/json' } : {}),
+          ...(body
+            ? {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(JSON.stringify(body)),
+              }
+            : {}),
+          ...headers,
         },
       },
       (res) => {
@@ -52,6 +58,25 @@ function request({ method, path: urlPath, userId, userEmail, body }) {
     if (body) req.write(JSON.stringify(body));
     req.end();
   });
+}
+
+function upsertStore(mutator) {
+  const initial = {
+    profiles: [],
+    user_preferences: [],
+    saved_calculations: [],
+    watchlists: [],
+    saved_shops: [],
+    user_sessions: [],
+    alert_rules: [],
+    notification_subscriptions: [],
+    api_keys: [],
+    subscriptions: [],
+    entitlements: [],
+  };
+  const store = fs.existsSync(storePath) ? JSON.parse(fs.readFileSync(storePath, 'utf8')) : initial;
+  mutator(store);
+  fs.writeFileSync(storePath, JSON.stringify(store, null, 2));
 }
 
 test('public accounts auth guard blocks unauthorized requests', async () => {
@@ -149,6 +174,41 @@ test('DELETE /api/v1/me rejects unauthorized requests', async () => {
   assert.equal(response.json?.ok, false);
 });
 
+test('DELETE /api/v1/me requires explicit confirmation payload', async () => {
+  const response = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'confirm-user',
+    userEmail: 'confirm-user@example.com',
+  });
+  assert.equal(response.status, 400);
+  assert.equal(response.json?.ok, false);
+});
+
+test('DELETE /api/v1/me blocks admin/editor role users', async () => {
+  const response = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'admin-user',
+    userEmail: 'admin-user@example.com',
+    headers: { 'x-test-user-role': 'admin', 'x-delete-confirm': 'DELETE' },
+    body: { confirm: 'DELETE' },
+  });
+  assert.equal(response.status, 403);
+  assert.equal(response.json?.ok, false);
+
+  const forbiddenEditor = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'editor-user',
+    userEmail: 'editor-user@example.com',
+    headers: { 'x-test-user-role': 'editor', 'x-delete-confirm': 'DELETE' },
+    body: { confirm: 'DELETE' },
+  });
+  assert.equal(forbiddenEditor.status, 403);
+  assert.equal(forbiddenEditor.json?.ok, false);
+});
+
 test('GET /api/v1/me/export returns account data and excludes sensitive fields', async () => {
   await request({
     method: 'POST',
@@ -196,6 +256,21 @@ test('GET /api/v1/me/export returns account data and excludes sensitive fields',
       threshold_value: 2600,
     },
   });
+  upsertStore((store) => {
+    store.alert_rules.push({
+      id: 'legacy-email-alert-export',
+      user_id: null,
+      email: 'export-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'below',
+      threshold_value: 2000,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  });
 
   const exportRes = await request({
     method: 'GET',
@@ -213,6 +288,10 @@ test('GET /api/v1/me/export returns account data and excludes sensitive fields',
   assert.equal(Array.isArray(data.watchlist), true);
   assert.equal(Array.isArray(data.savedShops), true);
   assert.equal(Array.isArray(data.alertRules), true);
+  assert.equal(
+    data.alertRules.some((row) => row.email === 'export-user@example.com'),
+    true
+  );
   assert.equal(Array.isArray(data.notificationSubscriptions), true);
   assert.equal(Array.isArray(data.apiKeys), true);
   assert.equal(typeof data.subscriptions, 'object');
@@ -281,16 +360,51 @@ test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is i
     },
   });
 
+  await request({
+    method: 'POST',
+    path: '/api/v1/alerts',
+    body: {
+      email: 'delete-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'above',
+      threshold_value: 2800,
+    },
+  });
+  upsertStore((store) => {
+    store.alert_rules.push({
+      id: 'legacy-email-alert-delete',
+      user_id: null,
+      email: 'delete-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'above',
+      threshold_value: 2800,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  });
+
   const deleteRes = await request({
     method: 'DELETE',
     path: '/api/v1/me',
     userId: 'delete-user',
     userEmail: 'delete-user@example.com',
+    headers: { 'x-delete-confirm': 'DELETE' },
+    body: { confirm: 'DELETE' },
   });
   assert.equal(deleteRes.status, 200);
   assert.equal(deleteRes.json?.ok, true);
   assert.equal(deleteRes.json?.data?.auth?.mode, 'safe_mode');
   assert.equal(deleteRes.json?.data?.auth?.userDeleted, false);
+  assert.equal(deleteRes.json?.data?.auth?.sessionInvalidated, false);
+  assert.equal(deleteRes.json?.data?.deleted?.saved_calculations > 0, true);
+  assert.equal(deleteRes.json?.data?.deleted?.watchlists > 0, true);
+  assert.equal(deleteRes.json?.data?.deleted?.saved_shops > 0, true);
+  assert.equal(deleteRes.json?.data?.deleted?.alert_rules > 0, true);
 
   const meAfterDelete = await request({
     method: 'GET',
@@ -308,7 +422,12 @@ test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is i
     path: '/api/v1/me',
     userId: 'delete-user',
     userEmail: 'delete-user@example.com',
+    headers: { 'x-delete-confirm': 'DELETE' },
+    body: { confirm: 'DELETE' },
   });
   assert.equal(secondDelete.status, 200);
   assert.equal(secondDelete.json?.ok, true);
+  assert.equal(secondDelete.json?.data?.deleted?.saved_calculations, 0);
+  assert.equal(secondDelete.json?.data?.deleted?.watchlists, 0);
+  assert.equal(secondDelete.json?.data?.deleted?.saved_shops, 0);
 });

@@ -754,7 +754,8 @@ body.tracker-pro-page {
   display: block;
 }
 
-.tracker-side-ul a {
+.tracker-side-ul a,
+.tracker-side-link-btn {
   display: flex;
   align-items: center;
   padding: 0.4rem 0.5rem;
@@ -763,12 +764,19 @@ body.tracker-pro-page {
   font-size: 0.85rem;
   color: var(--tp-hero-muted);
   text-decoration: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: start;
+  cursor: pointer;
   transition:
     background var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out);
 }
 
-.tracker-side-ul a:hover {
+.tracker-side-ul a:hover,
+.tracker-side-link-btn:hover,
+.tracker-side-link-btn:focus-visible {
   background: var(--tp-hero-surface-2);
   color: var(--tp-hero-text);
 }

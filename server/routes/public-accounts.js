@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -13,6 +14,7 @@ const { resolveUserEntitlements } = require('../lib/entitlements');
 const ROOT = path.resolve(__dirname, '../..');
 const DEFAULT_STORE_PATH = path.join(ROOT, 'data', 'public-accounts.json');
 const MAX_SAVED_ROWS = 200;
+const DELETE_CONFIRMATION_TOKENS = Object.freeze(['DELETE', 'حذف']);
 
 function nowIso() {
   return new Date().toISOString();
@@ -107,12 +109,22 @@ function parseDevUser(req) {
   const id = toSafeString(req.headers['x-test-user-id'], 128);
   if (!id) return null;
   const email = toSafeString(req.headers['x-test-user-email'], 320) || `${id}@example.test`;
+  const role = toSafeString(req.headers['x-test-user-role'], 32);
   return {
     id,
     email,
     user_metadata: {},
-    app_metadata: {},
+    app_metadata: role ? { role } : {},
   };
+}
+
+function hasValidDeleteConfirmation(confirmValue) {
+  const token = toSafeString(confirmValue, 32);
+  if (!token) return false;
+  const normalized = token.toUpperCase();
+  return DELETE_CONFIRMATION_TOKENS.some((allowed) =>
+    allowed === 'DELETE' ? normalized === 'DELETE' : token === allowed
+  );
 }
 
 async function resolveSupabaseUserFromHttp(token) {
@@ -165,6 +177,24 @@ function createDataLayer(storePath) {
   };
 
   return {
+    async getProfile(userId) {
+      return runWithFallback(
+        async (sb) => {
+          const { data, error } = await sb
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .maybeSingle();
+          if (error) throw error;
+          return data || null;
+        },
+        () => {
+          const store = readStore(storePath);
+          return store.profiles.find((row) => row.id === userId) || null;
+        }
+      );
+    },
+
     async getOrCreateProfile(user) {
       return runWithFallback(
         async (sb) => {
@@ -756,7 +786,7 @@ function createDataLayer(storePath) {
     async deleteAccountData(user) {
       const userId = user.id;
       const normalizedEmail = toSafeString(String(user.email || '').toLowerCase(), 320);
-      const counts = {
+      const emptyCounts = () => ({
         profiles: 0,
         user_preferences: 0,
         saved_calculations: 0,
@@ -768,95 +798,89 @@ function createDataLayer(storePath) {
         entitlements: 0,
         alert_rules: 0,
         notification_subscriptions: 0,
-      };
+      });
+      const sb = getSupabaseClient(false);
+      if (sb) {
+        const counts = emptyCounts();
+        const deleteAndCount = async (table, matcher) => {
+          const { data, error } = await matcher(sb.from(table).delete()).select('id');
+          if (error) throw error;
+          return Array.isArray(data) ? data.length : 0;
+        };
 
-      await runWithFallback(
-        async (sb) => {
-          const deleteAndCount = async (table, matcher) => {
-            const { data, error } = await matcher(sb.from(table).delete()).select('id');
-            if (error) throw error;
-            return Array.isArray(data) ? data.length : 0;
-          };
+        counts.saved_calculations = await deleteAndCount('saved_calculations', (q) =>
+          q.eq('user_id', userId)
+        );
+        counts.watchlists = await deleteAndCount('watchlists', (q) => q.eq('user_id', userId));
+        counts.saved_shops = await deleteAndCount('saved_shops', (q) => q.eq('user_id', userId));
+        counts.user_sessions = await deleteAndCount('user_sessions', (q) =>
+          q.eq('user_id', userId)
+        );
+        counts.user_preferences = await deleteAndCount('user_preferences', (q) =>
+          q.eq('user_id', userId)
+        );
+        counts.api_keys = await deleteAndCount('api_keys', (q) => q.eq('user_id', userId));
+        counts.subscriptions = await deleteAndCount('subscriptions', (q) =>
+          q.eq('user_id', userId)
+        );
+        counts.entitlements = await deleteAndCount('entitlements', (q) => q.eq('user_id', userId));
+        counts.alert_rules = await deleteAndCount('alert_rules', (q) => q.eq('user_id', userId));
+        counts.notification_subscriptions = await deleteAndCount(
+          'notification_subscriptions',
+          (q) => q.eq('user_id', userId)
+        );
 
-          counts.saved_calculations = await deleteAndCount('saved_calculations', (q) =>
-            q.eq('user_id', userId)
+        if (normalizedEmail) {
+          counts.alert_rules += await deleteAndCount('alert_rules', (q) =>
+            q.is('user_id', null).eq('email', normalizedEmail)
           );
-          counts.watchlists = await deleteAndCount('watchlists', (q) => q.eq('user_id', userId));
-          counts.saved_shops = await deleteAndCount('saved_shops', (q) => q.eq('user_id', userId));
-          counts.user_sessions = await deleteAndCount('user_sessions', (q) =>
-            q.eq('user_id', userId)
-          );
-          counts.user_preferences = await deleteAndCount('user_preferences', (q) =>
-            q.eq('user_id', userId)
-          );
-          counts.api_keys = await deleteAndCount('api_keys', (q) => q.eq('user_id', userId));
-          counts.subscriptions = await deleteAndCount('subscriptions', (q) =>
-            q.eq('user_id', userId)
-          );
-          counts.entitlements = await deleteAndCount('entitlements', (q) =>
-            q.eq('user_id', userId)
-          );
-          counts.alert_rules = await deleteAndCount('alert_rules', (q) => q.eq('user_id', userId));
-          counts.notification_subscriptions = await deleteAndCount(
+          counts.notification_subscriptions += await deleteAndCount(
             'notification_subscriptions',
-            (q) => q.eq('user_id', userId)
+            (q) => q.is('user_id', null).eq('destination', normalizedEmail)
           );
-
-          if (normalizedEmail) {
-            counts.alert_rules += await deleteAndCount('alert_rules', (q) =>
-              q.is('user_id', null).eq('email', normalizedEmail)
-            );
-            counts.notification_subscriptions += await deleteAndCount(
-              'notification_subscriptions',
-              (q) => q.is('user_id', null).eq('destination', normalizedEmail)
-            );
-          }
-
-          counts.profiles = await deleteAndCount('profiles', (q) => q.eq('id', userId));
-        },
-        () => {
-          const store = readStore(storePath);
-          const removeOwned = (key, predicate) => {
-            const before = store[key].length;
-            store[key] = store[key].filter((row) => !predicate(row));
-            return before - store[key].length;
-          };
-          counts.saved_calculations = removeOwned(
-            'saved_calculations',
-            (row) => row.user_id === userId
-          );
-          counts.watchlists = removeOwned('watchlists', (row) => row.user_id === userId);
-          counts.saved_shops = removeOwned('saved_shops', (row) => row.user_id === userId);
-          counts.user_sessions = removeOwned('user_sessions', (row) => row.user_id === userId);
-          counts.user_preferences = removeOwned(
-            'user_preferences',
-            (row) => row.user_id === userId
-          );
-          counts.profiles = removeOwned('profiles', (row) => row.id === userId);
-          counts.api_keys = removeOwned(
-            'api_keys',
-            (row) => row.user_id === userId || row.userId === userId
-          );
-          counts.subscriptions = removeOwned(
-            'subscriptions',
-            (row) => row.user_id === userId || row.userId === userId
-          );
-          counts.entitlements = removeOwned(
-            'entitlements',
-            (row) => row.user_id === userId || row.userId === userId
-          );
-          counts.alert_rules = removeOwned('alert_rules', (row) => {
-            const rowEmail = toSafeString(String(row.email || '').toLowerCase(), 320);
-            return row.user_id === userId || (normalizedEmail && rowEmail === normalizedEmail);
-          });
-          counts.notification_subscriptions = removeOwned('notification_subscriptions', (row) => {
-            const destination = toSafeString(String(row.destination || '').toLowerCase(), 320);
-            return row.user_id === userId || (normalizedEmail && destination === normalizedEmail);
-          });
-          writeStore(storePath, store);
         }
-      );
 
+        counts.profiles = await deleteAndCount('profiles', (q) => q.eq('id', userId));
+        return counts;
+      }
+
+      const counts = emptyCounts();
+      const store = readStore(storePath);
+      const removeOwned = (key, predicate) => {
+        const before = store[key].length;
+        store[key] = store[key].filter((row) => !predicate(row));
+        return before - store[key].length;
+      };
+      counts.saved_calculations = removeOwned(
+        'saved_calculations',
+        (row) => row.user_id === userId
+      );
+      counts.watchlists = removeOwned('watchlists', (row) => row.user_id === userId);
+      counts.saved_shops = removeOwned('saved_shops', (row) => row.user_id === userId);
+      counts.user_sessions = removeOwned('user_sessions', (row) => row.user_id === userId);
+      counts.user_preferences = removeOwned('user_preferences', (row) => row.user_id === userId);
+      counts.profiles = removeOwned('profiles', (row) => row.id === userId);
+      counts.api_keys = removeOwned(
+        'api_keys',
+        (row) => row.user_id === userId || row.userId === userId
+      );
+      counts.subscriptions = removeOwned(
+        'subscriptions',
+        (row) => row.user_id === userId || row.userId === userId
+      );
+      counts.entitlements = removeOwned(
+        'entitlements',
+        (row) => row.user_id === userId || row.userId === userId
+      );
+      counts.alert_rules = removeOwned('alert_rules', (row) => {
+        const rowEmail = toSafeString(String(row.email || '').toLowerCase(), 320);
+        return row.user_id === userId || (normalizedEmail && rowEmail === normalizedEmail);
+      });
+      counts.notification_subscriptions = removeOwned('notification_subscriptions', (row) => {
+        const destination = toSafeString(String(row.destination || '').toLowerCase(), 320);
+        return row.user_id === userId || (normalizedEmail && destination === normalizedEmail);
+      });
+      writeStore(storePath, store);
       return counts;
     },
   };
@@ -981,6 +1005,13 @@ function createPublicAccountsRouter(options = {}) {
     options.storePath || process.env.PUBLIC_ACCOUNTS_DATA_FILE || DEFAULT_STORE_PATH;
   const dataLayer = createDataLayer(storePath);
   const resolveUser = options.resolveUser || resolveSupabaseUser;
+  const deleteAccountLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: errorResponse('RATE_LIMITED', 'Too many account deletion attempts. Please try later.'),
+  });
 
   router.use('/me', async (req, res, next) => {
     const devUser = parseDevUser(req);
@@ -1034,25 +1065,33 @@ function createPublicAccountsRouter(options = {}) {
   });
 
   router.get('/me/export', async (req, res) => {
-    const profile = await dataLayer.getOrCreateProfile(req.publicUser);
-    const [preferences, savedCalculations, watchlist, savedShops, userSessions] = await Promise.all(
-      [
-        dataLayer.getPreferences(req.publicUser.id),
-        dataLayer.listSavedCalculations(req.publicUser.id),
-        dataLayer.listWatchlist(req.publicUser.id),
-        dataLayer.listSavedShops(req.publicUser.id),
-        dataLayer.listUserSessions(req.publicUser.id),
-      ]
-    );
-    const [alertRules, notificationSubscriptions, apiKeys, resolvedEntitlements, subscriptionRows] =
-      await Promise.all([
-        dataLayer.listAlertRulesForUser(req.publicUser.id, req.publicUser.email),
-        dataLayer.listNotificationSubscriptionsForUser(req.publicUser.id, req.publicUser.email),
-        billingRepo.listApiKeys(req.publicUser.id),
-        resolveUserEntitlements(req.publicUser.id),
-        dataLayer.listSubscriptionRows(req.publicUser.id),
-      ]);
-    const entitlementRows = await dataLayer.listEntitlementRows(req.publicUser.id);
+    const [
+      profile,
+      preferences,
+      savedCalculations,
+      watchlist,
+      savedShops,
+      userSessions,
+      alertRules,
+      notificationSubscriptions,
+      apiKeys,
+      resolvedEntitlements,
+      subscriptionRows,
+      entitlementRows,
+    ] = await Promise.all([
+      dataLayer.getProfile(req.publicUser.id),
+      dataLayer.getPreferences(req.publicUser.id),
+      dataLayer.listSavedCalculations(req.publicUser.id),
+      dataLayer.listWatchlist(req.publicUser.id),
+      dataLayer.listSavedShops(req.publicUser.id),
+      dataLayer.listUserSessions(req.publicUser.id),
+      dataLayer.listAlertRulesForUser(req.publicUser.id, req.publicUser.email),
+      dataLayer.listNotificationSubscriptionsForUser(req.publicUser.id, req.publicUser.email),
+      billingRepo.listApiKeys(req.publicUser.id),
+      resolveUserEntitlements(req.publicUser.id),
+      dataLayer.listSubscriptionRows(req.publicUser.id),
+      dataLayer.listEntitlementRows(req.publicUser.id),
+    ]);
 
     res.json(
       successResponse(
@@ -1099,8 +1138,23 @@ function createPublicAccountsRouter(options = {}) {
     );
   });
 
-  router.delete('/me', async (req, res) => {
-    const role = await dataLayer.getAdminRoleForUser(req.publicUser.id);
+  router.delete('/me', deleteAccountLimiter, async (req, res) => {
+    const confirmToken =
+      req.body?.confirm || req.get('x-delete-confirm') || req.query?.confirm || null;
+    if (!hasValidDeleteConfirmation(confirmToken)) {
+      return res
+        .status(400)
+        .json(
+          errorResponse(
+            'VALIDATION_ERROR',
+            'Deletion requires explicit confirmation. Send confirm as DELETE (or حذف).'
+          )
+        );
+    }
+
+    const role =
+      req.publicUser?.app_metadata?.role ||
+      (await dataLayer.getAdminRoleForUser(req.publicUser.id));
     if (role === 'admin' || role === 'editor') {
       return res
         .status(403)
@@ -1109,12 +1163,39 @@ function createPublicAccountsRouter(options = {}) {
         );
     }
 
-    const deleted = await dataLayer.deleteAccountData(req.publicUser);
+    const activeSubscription = await billingRepo.getActiveSubscription(req.publicUser.id);
+    if (
+      activeSubscription &&
+      ['active', 'trialing', 'past_due', 'incomplete'].includes(activeSubscription.status)
+    ) {
+      return res
+        .status(409)
+        .json(
+          errorResponse(
+            'SUBSCRIPTION_ACTIVE',
+            'Please cancel your paid subscription first to avoid ongoing billing, then retry account deletion.'
+          )
+        );
+    }
+
+    let deleted;
+    try {
+      deleted = await dataLayer.deleteAccountData(req.publicUser);
+    } catch (error) {
+      return res
+        .status(500)
+        .json(
+          errorResponse(
+            'DELETE_FAILED',
+            error?.message || 'Could not delete account data right now. Please retry.'
+          )
+        );
+    }
 
     let authUserDeleted = false;
     let authDeletionMode = 'safe_mode';
     let authDeletionMessage =
-      'Local app data was removed. Supabase auth-user deletion requires service-role configuration.';
+      'Local app data was removed. Current session may stay valid until token expiry because Supabase auth-user deletion requires service-role configuration.';
 
     const hasServiceRoleKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
     const sb = hasServiceRoleKey ? getSupabaseClient() : null;
@@ -1127,15 +1208,32 @@ function createPublicAccountsRouter(options = {}) {
           authDeletionMessage = 'Account data and Supabase auth user were deleted.';
         } else {
           authDeletionMessage =
-            'Local app data was removed. Supabase auth-user deletion failed and requires owner review.';
+            'Local app data was removed. Current session may remain valid because Supabase auth-user deletion failed and requires owner review.';
         }
       } catch {
         authDeletionMessage =
-          'Local app data was removed. Supabase auth-user deletion failed and requires owner review.';
+          'Local app data was removed. Current session may remain valid because Supabase auth-user deletion failed and requires owner review.';
       }
     } else if (!hasServiceRoleKey) {
       authDeletionMessage =
-        'Local app data was removed. Supabase auth-user deletion is not configured because SUPABASE_SERVICE_ROLE_KEY is missing.';
+        'Local app data was removed. Current session may stay valid until token expiry because SUPABASE_SERVICE_ROLE_KEY is missing.';
+    }
+
+    try {
+      await billingRepo.appendAuditLog({
+        userId: req.publicUser.id,
+        action: 'public_account_delete',
+        tier: activeSubscription?.tier || null,
+        metadata: {
+          mode: authDeletionMode,
+          authUserDeleted,
+          deleted,
+          ip: resolveClientIp(req),
+          userEmail: req.publicUser.email || null,
+        },
+      });
+    } catch {
+      // audit logging should never fail deletion response
     }
 
     res.json(
@@ -1146,6 +1244,7 @@ function createPublicAccountsRouter(options = {}) {
             userDeleted: authUserDeleted,
             mode: authDeletionMode,
             message: authDeletionMessage,
+            sessionInvalidated: authUserDeleted,
           },
         },
         { source: 'public-accounts', freshness: 'live' }
