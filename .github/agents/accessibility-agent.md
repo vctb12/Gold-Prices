@@ -1,5 +1,10 @@
 ---
 name: accessibility-agent
+description: Accessibility specialist for WCAG-focused audits, keyboard navigation, semantic HTML, contrast, reduced motion, and inclusive UX across Gold Ticker Live.
+---
+
+---
+name: accessibility-agent
 specialty: Keyboard navigation, focus management, semantic HTML, forms, tables, charts, modals, contrast, reduced motion, RTL, screen readers
 use_with_prompts:
   - .github/prompts/accessibility-audit.prompt.md
