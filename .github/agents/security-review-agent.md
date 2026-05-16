@@ -5,6 +5,7 @@ use_with_prompts:
   - .github/prompts/pr-review.prompt.md
 loads_skills:
   - security-review
+description: Security specialist for secrets, auth boundaries, dependency risks, workflow hardening, server safety, and sensitive configuration review.
 ---
 
 # Agent: Security Review
