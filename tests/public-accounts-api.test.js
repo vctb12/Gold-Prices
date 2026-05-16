@@ -23,7 +23,7 @@ after(() => {
   if (fs.existsSync(storePath)) fs.unlinkSync(storePath);
 });
 
-function request({ method, path: urlPath, userId, userEmail, body }) {
+function request({ method, path: urlPath, userId, userEmail, body, headers = {} }) {
   return new Promise((resolve, reject) => {
     const req = http.request(
       {
@@ -34,7 +34,13 @@ function request({ method, path: urlPath, userId, userEmail, body }) {
         headers: {
           ...(userId ? { 'x-test-user-id': userId } : {}),
           ...(userEmail ? { 'x-test-user-email': userEmail } : {}),
-          ...(body ? { 'Content-Type': 'application/json' } : {}),
+          ...(body
+            ? {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(JSON.stringify(body)),
+              }
+            : {}),
+          ...headers,
         },
       },
       (res) => {
@@ -52,6 +58,32 @@ function request({ method, path: urlPath, userId, userEmail, body }) {
     if (body) req.write(JSON.stringify(body));
     req.end();
   });
+}
+
+function upsertStore(mutator) {
+  const initial = {
+    profiles: [],
+    user_preferences: [],
+    saved_calculations: [],
+    watchlists: [],
+    saved_shops: [],
+    user_sessions: [],
+    alert_rules: [],
+    notification_subscriptions: [],
+    api_keys: [],
+    subscriptions: [],
+    entitlements: [],
+  };
+  let store = initial;
+  if (fs.existsSync(storePath)) {
+    try {
+      store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+    } catch {
+      store = initial;
+    }
+  }
+  mutator(store);
+  fs.writeFileSync(storePath, JSON.stringify(store, null, 2));
 }
 
 test('public accounts auth guard blocks unauthorized requests', async () => {
@@ -135,4 +167,272 @@ test('watchlist CRUD works and unauthorized tokens are rejected', async () => {
     userId: 'user-1',
   });
   assert.equal(del.status, 200);
+});
+
+test('GET /api/v1/me/export rejects unauthorized requests', async () => {
+  const response = await request({ method: 'GET', path: '/api/v1/me/export' });
+  assert.equal(response.status, 401);
+  assert.equal(response.json?.ok, false);
+});
+
+test('DELETE /api/v1/me rejects unauthorized requests', async () => {
+  const response = await request({ method: 'DELETE', path: '/api/v1/me' });
+  assert.equal(response.status, 401);
+  assert.equal(response.json?.ok, false);
+});
+
+test('DELETE /api/v1/me requires explicit confirmation payload', async () => {
+  const response = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'confirm-user',
+    userEmail: 'confirm-user@example.com',
+  });
+  assert.equal(response.status, 400);
+  assert.equal(response.json?.ok, false);
+});
+
+test('DELETE /api/v1/me blocks admin/editor role users', async () => {
+  const response = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'admin-user',
+    userEmail: 'admin-user@example.com',
+    headers: { 'x-test-user-role': 'admin' },
+    body: { confirm: 'DELETE' },
+  });
+  assert.equal(response.status, 403);
+  assert.equal(response.json?.ok, false);
+
+  const forbiddenEditor = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'editor-user',
+    userEmail: 'editor-user@example.com',
+    headers: { 'x-test-user-role': 'editor' },
+    body: { confirm: 'DELETE' },
+  });
+  assert.equal(forbiddenEditor.status, 403);
+  assert.equal(forbiddenEditor.json?.ok, false);
+});
+
+test('GET /api/v1/me/export returns account data and excludes sensitive fields', async () => {
+  await request({
+    method: 'POST',
+    path: '/api/v1/me/saved-calculations',
+    userId: 'export-user',
+    userEmail: 'export-user@example.com',
+    body: {
+      tool: 'value',
+      label: 'Export sample',
+      input_data: { weight: 10, karat: '24' },
+      output_data: { value: 'AED 3000' },
+    },
+  });
+  await request({
+    method: 'POST',
+    path: '/api/v1/me/watchlist',
+    userId: 'export-user',
+    userEmail: 'export-user@example.com',
+    body: {
+      item_type: 'currency',
+      item_key: 'AED',
+      item_label: 'AED',
+    },
+  });
+  await request({
+    method: 'POST',
+    path: '/api/v1/me/saved-shops',
+    userId: 'export-user',
+    userEmail: 'export-user@example.com',
+    body: {
+      shop_id: 'shop-1',
+      shop_name: 'Demo Shop',
+    },
+  });
+  await request({
+    method: 'POST',
+    path: '/api/v1/alerts',
+    body: {
+      user_id: 'export-user',
+      email: 'export-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'above',
+      threshold_value: 2600,
+    },
+  });
+  upsertStore((store) => {
+    store.alert_rules.push({
+      id: 'legacy-email-alert-export',
+      user_id: null,
+      email: 'export-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'below',
+      threshold_value: 2000,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  });
+
+  const exportRes = await request({
+    method: 'GET',
+    path: '/api/v1/me/export',
+    userId: 'export-user',
+    userEmail: 'export-user@example.com',
+  });
+
+  assert.equal(exportRes.status, 200);
+  assert.equal(exportRes.json?.ok, true);
+  const data = exportRes.json?.data || {};
+  assert.equal(typeof data.exportedAt, 'string');
+  assert.equal(data.user?.id, 'export-user');
+  assert.equal(Array.isArray(data.savedCalculations), true);
+  assert.equal(Array.isArray(data.watchlist), true);
+  assert.equal(Array.isArray(data.savedShops), true);
+  assert.equal(Array.isArray(data.alertRules), true);
+  assert.equal(
+    data.alertRules.some((row) => row.email === 'export-user@example.com'),
+    true
+  );
+  assert.equal(Array.isArray(data.notificationSubscriptions), true);
+  assert.equal(Array.isArray(data.apiKeys), true);
+  assert.equal(typeof data.subscriptions, 'object');
+  assert.equal(typeof data.entitlements, 'object');
+
+  const serialized = JSON.stringify(data);
+  assert.equal(serialized.includes('key_hash'), false);
+  assert.equal(serialized.includes('management_token_hash'), false);
+  assert.equal(serialized.includes('verification_token_hash'), false);
+  assert.equal(serialized.includes('unsubscribe_token_hash'), false);
+  assert.equal(serialized.includes('SUPABASE_SERVICE_ROLE_KEY'), false);
+  assert.equal(
+    Array.isArray(data.apiKeys) &&
+      data.apiKeys.some((row) => row?.key_hash || row?.keyHash || row?.key),
+    false
+  );
+  assert.equal(
+    Array.isArray(data.alertRules) &&
+      data.alertRules.some(
+        (row) =>
+          row?.management_token_hash || row?.managementTokenHash || row?.verification_token_hash
+      ),
+    false
+  );
+  assert.equal(
+    Array.isArray(data.notificationSubscriptions) &&
+      data.notificationSubscriptions.some(
+        (row) => row?.unsubscribe_token_hash || row?.unsubscribeTokenHash
+      ),
+    false
+  );
+});
+
+test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is idempotent', async () => {
+  await request({
+    method: 'POST',
+    path: '/api/v1/me/saved-calculations',
+    userId: 'delete-user',
+    userEmail: 'delete-user@example.com',
+    body: {
+      tool: 'value',
+      label: 'Delete sample',
+      input_data: { weight: 1, karat: '24' },
+      output_data: { value: 'AED 300' },
+    },
+  });
+  await request({
+    method: 'POST',
+    path: '/api/v1/me/watchlist',
+    userId: 'delete-user',
+    userEmail: 'delete-user@example.com',
+    body: {
+      item_type: 'currency',
+      item_key: 'USD',
+      item_label: 'USD',
+    },
+  });
+  await request({
+    method: 'POST',
+    path: '/api/v1/me/saved-shops',
+    userId: 'delete-user',
+    userEmail: 'delete-user@example.com',
+    body: {
+      shop_id: 'shop-delete',
+      shop_name: 'Delete Shop',
+    },
+  });
+
+  await request({
+    method: 'POST',
+    path: '/api/v1/alerts',
+    body: {
+      email: 'delete-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'above',
+      threshold_value: 2800,
+    },
+  });
+  upsertStore((store) => {
+    store.alert_rules.push({
+      id: 'legacy-email-alert-delete',
+      user_id: null,
+      email: 'delete-user@example.com',
+      channel: 'email',
+      symbol: 'XAUUSD',
+      currency: 'USD',
+      condition: 'above',
+      threshold_value: 2800,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  });
+
+  const deleteRes = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'delete-user',
+    userEmail: 'delete-user@example.com',
+    body: { confirm: 'DELETE' },
+  });
+  assert.equal(deleteRes.status, 200);
+  assert.equal(deleteRes.json?.ok, true);
+  assert.equal(deleteRes.json?.data?.auth?.mode, 'safe_mode');
+  assert.equal(deleteRes.json?.data?.auth?.userDeleted, false);
+  assert.equal(deleteRes.json?.data?.auth?.sessionInvalidated, false);
+  assert.ok(deleteRes.json?.data?.deleted?.saved_calculations > 0);
+  assert.ok(deleteRes.json?.data?.deleted?.watchlists > 0);
+  assert.ok(deleteRes.json?.data?.deleted?.saved_shops > 0);
+  assert.ok(deleteRes.json?.data?.deleted?.alert_rules > 0);
+
+  const meAfterDelete = await request({
+    method: 'GET',
+    path: '/api/v1/me',
+    userId: 'delete-user',
+    userEmail: 'delete-user@example.com',
+  });
+  assert.equal(meAfterDelete.status, 200);
+  assert.equal(meAfterDelete.json?.data?.counts?.savedCalculations, 0);
+  assert.equal(meAfterDelete.json?.data?.counts?.watchlist, 0);
+  assert.equal(meAfterDelete.json?.data?.counts?.savedShops, 0);
+
+  const secondDelete = await request({
+    method: 'DELETE',
+    path: '/api/v1/me',
+    userId: 'delete-user',
+    userEmail: 'delete-user@example.com',
+    body: { confirm: 'DELETE' },
+  });
+  assert.equal(secondDelete.status, 200);
+  assert.equal(secondDelete.json?.ok, true);
+  assert.equal(secondDelete.json?.data?.deleted?.saved_calculations, 0);
+  assert.equal(secondDelete.json?.data?.deleted?.watchlists, 0);
+  assert.equal(secondDelete.json?.data?.deleted?.saved_shops, 0);
 });

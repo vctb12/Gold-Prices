@@ -50,6 +50,13 @@ STRIPE_PRICE_API_YEARLY=price_…    # or STRIPE_PRICE_API_ANNUAL
 When these vars are absent the billing API returns `{ configured: false }` — the tracker and all
 free features continue working normally.
 
+### Owner secret checklist
+
+- [ ] Add all Stripe vars above in repository/environment secrets together (never partially)
+- [ ] Verify `SITE_URL` matches the deployed domain for checkout/portal redirects
+- [ ] Keep all `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` values server-only
+- [ ] Confirm webhook endpoint and signing secret are for the same Stripe mode (test vs live)
+
 ---
 
 ## API Endpoints

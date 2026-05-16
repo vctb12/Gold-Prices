@@ -37,6 +37,8 @@ Public auth is isolated from admin auth:
 All endpoints below require a valid public-user bearer token.
 
 - `GET /api/v1/me`
+- `GET /api/v1/me/export`
+- `DELETE /api/v1/me`
 - `GET /api/v1/me/preferences`
 - `PATCH /api/v1/me/preferences`
 - `GET /api/v1/me/saved-calculations`
@@ -48,6 +50,39 @@ All endpoints below require a valid public-user bearer token.
 - `GET /api/v1/me/saved-shops`
 - `POST /api/v1/me/saved-shops`
 - `DELETE /api/v1/me/saved-shops/:id`
+
+## Account export (`GET /api/v1/me/export`)
+
+Returns a JSON export for the authenticated user with:
+
+- profile + preferences
+- saved calculations, watchlist, saved shops, sessions
+- alert rules and notification subscriptions linked by `user_id` (and by matching email for userless
+  legacy rows)
+- API key metadata only (`id`, `keyPrefix`, `label`, `revoked`, timestamps)
+- subscription + entitlement metadata
+
+Never includes raw keys, hashes, bearer tokens, password material, or service-role secrets.
+
+## Account deletion (`DELETE /api/v1/me`)
+
+For authenticated users, removes app data from:
+
+- `profiles`
+- `user_preferences`
+- `saved_calculations`
+- `watchlists`
+- `saved_shops`
+- `user_sessions`
+- `api_keys`
+- `subscriptions`
+- `entitlements`
+- alert rows (`alert_rules`, `notification_subscriptions`) owned by user and matching legacy email
+  rows
+
+If Supabase auth-user deletion is not available (missing service-role admin path), the API returns a
+safe-mode response: local app data is removed, and the response clearly states that auth-user
+deletion needs owner configuration.
 
 ## Storage Behavior
 

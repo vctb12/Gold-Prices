@@ -9,6 +9,7 @@ import { track, EVENTS } from '../lib/analytics.js';
 import { getBaselineRange } from '../lib/historical-data.js';
 import {
   createWatchlistItem,
+  getMe,
   isAuthenticated as isAccountAuthenticated,
   redirectToAccount,
 } from '../lib/public-account-client.js';
@@ -33,6 +34,9 @@ let initRender,
 const state = createInitialState();
 const el = {};
 let serverAlertsAvailable = false;
+let accountEmailForAlerts = null;
+const ALERT_EMAIL_FOCUS_DELAY_MS = 120;
+let didPrefillAccountAlertEmail = false;
 
 function trackerTx(key, params = {}) {
   const fullKey = `tracker.${key}`;
@@ -167,17 +171,22 @@ function localizeStaticTrackerCopy() {
   );
   if (quickToolsHeading) quickToolsHeading.textContent = trackerTx('quickToolsTitle');
 
-  const quickToolLinks = document.querySelectorAll('.tracker-side-card--links a');
+  const quickToolLinks = document.querySelectorAll(
+    '.tracker-side-card--links a, .tracker-side-card--links button'
+  );
   const quickToolLabels = [
     trackerTx('quickToolsCalculator'),
     trackerTx('quickToolsCountryPage'),
     trackerTx('quickToolsCountries'),
     trackerTx('quickToolsShops'),
     trackerTx('quickToolsMethodology'),
+    trackerTx('quickToolsCreateServerAlert'),
+    trackerTx('quickToolsSpotVsRetail'),
   ];
   quickToolLinks.forEach((link, index) => {
     if (quickToolLabels[index]) link.textContent = quickToolLabels[index];
   });
+  setNodeText('tp-alert-account-hint', trackerTx('alerts.accountPrefillHint'));
   syncCurrentCountryPageLink();
 
   const quickReference = document.querySelector('.tracker-hero-aside');
@@ -311,6 +320,7 @@ function ui() {
     alertTarget: document.getElementById('tp-alert-target'),
     alertEmail: document.getElementById('tp-alert-email'),
     alertEmailWrap: document.getElementById('tp-alert-email-wrap'),
+    alertAccountHint: document.getElementById('tp-alert-account-hint'),
     alertList: document.getElementById('tp-alert-list'),
     alertPermission: document.getElementById('tp-alert-permission'),
     alertServerStatus: document.getElementById('tp-alert-server-status'),
@@ -359,6 +369,7 @@ function ui() {
     briefHeadline: document.getElementById('tp-brief-headline'),
     briefCopy: document.getElementById('tp-brief-copy'),
     toastStack: document.getElementById('tp-toast-stack'),
+    createServerAlertLink: document.getElementById('tp-create-server-alert-link'),
   };
 }
 
@@ -369,6 +380,9 @@ function updateServerAlertUiState() {
 
   if (el.alertEmailWrap) {
     el.alertEmailWrap.hidden = !(wantsServer && canUseServer);
+  }
+  if (el.alertAccountHint) {
+    el.alertAccountHint.hidden = !(didPrefillAccountAlertEmail && wantsServer && canUseServer);
   }
   if (el.alertScopeWrap) {
     el.alertScopeWrap.hidden = wantsServer && canUseServer;
@@ -404,7 +418,8 @@ async function probeServerAlertsAvailability() {
 }
 
 async function createServerAlert({ condition, target }) {
-  const email = el.alertEmail?.value?.trim()?.toLowerCase();
+  const typedEmail = el.alertEmail?.value?.trim();
+  const email = (typedEmail || accountEmailForAlerts || '').toLowerCase();
   if (!email) {
     throw new Error(trackerTx('alerts.serverEmailRequired'));
   }
@@ -430,6 +445,24 @@ async function createServerAlert({ condition, target }) {
     throw new Error(payload?.error?.message || trackerTx('alerts.serverCreateFailed'));
   }
   return payload?.data || null;
+}
+
+async function prefillServerAlertEmailFromAccount() {
+  if (!isAccountAuthenticated()) return;
+  try {
+    const me = await getMe();
+    const email = me?.user?.email?.trim()?.toLowerCase();
+    if (!email) return;
+    accountEmailForAlerts = email;
+    const canPrefill = el.alertEmail && !el.alertEmail.value;
+    if (canPrefill) {
+      el.alertEmail.value = email;
+      didPrefillAccountAlertEmail = true;
+    }
+    updateServerAlertUiState();
+  } catch {
+    // non-blocking
+  }
 }
 
 async function syncAlertToAccount({ condition, target }) {
@@ -1078,6 +1111,17 @@ async function init() {
   serverAlertsAvailable = await probeServerAlertsAvailability();
   updateServerAlertUiState();
   bindCoreEvents();
+  await prefillServerAlertEmailFromAccount();
+  el.createServerAlertLink?.addEventListener('click', (event) => {
+    event.preventDefault();
+    const alertsTab = document.getElementById('tab-alerts');
+    alertsTab?.click();
+    if (serverAlertsAvailable && el.alertDelivery) {
+      el.alertDelivery.value = 'server';
+      updateServerAlertUiState();
+    }
+    setTimeout(() => el.alertEmail?.focus(), ALERT_EMAIL_FOCUS_DELAY_MS);
+  });
   el.saveWatchlistAccount?.addEventListener('click', () => {
     saveWatchlistToAccount().catch(() => {
       showToast(

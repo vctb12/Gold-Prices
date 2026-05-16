@@ -298,6 +298,8 @@ export const TRANSLATIONS = {
     'tracker.quickToolsCountries': '🌍 Countries',
     'tracker.quickToolsShops': '🏪 Shops directory',
     'tracker.quickToolsMethodology': '📖 Methodology',
+    'tracker.quickToolsCreateServerAlert': '🔔 Create server alert',
+    'tracker.quickToolsSpotVsRetail': '🧾 Spot vs retail',
     'tracker.quickReferenceAriaLabel': 'Quick reference',
     'tracker.countdown': 'Next update in {seconds}s',
     'tracker.offlineBanner': "⚠️ You're offline — showing cached prices from {time}",
@@ -338,6 +340,8 @@ export const TRANSLATIONS = {
     'tracker.alerts.serverCreated':
       'Server alert created ({mode}). Verify your email to activate it.',
     'tracker.alerts.serverManage': 'Manage',
+    'tracker.alerts.accountPrefillHint':
+      'Signed-in account detected. Email is prefilled for faster server alert setup.',
     'tracker.presets.empty': 'No presets saved. Save the current view via the form above.',
     'tracker.presets.load': 'Load',
     'tracker.presets.current': '● current',
@@ -990,6 +994,8 @@ export const TRANSLATIONS = {
     'tracker.quickToolsCountries': '🌍 الدول',
     'tracker.quickToolsShops': '🏪 دليل المحلات',
     'tracker.quickToolsMethodology': '📖 المنهجية',
+    'tracker.quickToolsCreateServerAlert': '🔔 إنشاء تنبيه خادم',
+    'tracker.quickToolsSpotVsRetail': '🧾 الفوري مقابل التجزئة',
     'tracker.quickReferenceAriaLabel': 'مرجع سريع',
     'tracker.countdown': 'التحديث التالي خلال {seconds}ث',
     'tracker.offlineBanner': '⚠️ أنت غير متصل — يتم عرض الأسعار المخزنة من {time}',
@@ -1029,6 +1035,8 @@ export const TRANSLATIONS = {
     'tracker.alerts.serverCreateFailed': 'تعذر إنشاء تنبيه الخادم حالياً.',
     'tracker.alerts.serverCreated': 'تم إنشاء تنبيه الخادم ({mode}). أكد بريدك لتفعيل التنبيه.',
     'tracker.alerts.serverManage': 'إدارة',
+    'tracker.alerts.accountPrefillHint':
+      'تم اكتشاف تسجيل الدخول. تمت تعبئة البريد تلقائياً لتسريع إعداد تنبيه الخادم.',
     'tracker.presets.empty': 'لا توجد إعدادات محفوظة. احفظ العرض الحالي من النموذج أعلاه.',
     'tracker.presets.load': 'تحميل',
     'tracker.presets.current': '● الحالي',

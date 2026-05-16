@@ -61,3 +61,29 @@ test('importLocalStorageData requires auth token', async () => {
     }
   );
 });
+
+test('exportMyData requires auth token', async () => {
+  global.localStorage = createLocalStorageMock();
+  const mod = await import('../src/lib/public-account-client.js');
+
+  await assert.rejects(
+    () => mod.exportMyData(),
+    (error) => {
+      assert.equal(error.code, 'AUTH_REQUIRED');
+      return true;
+    }
+  );
+});
+
+test('deleteMyAccount requires auth token', async () => {
+  global.localStorage = createLocalStorageMock();
+  const mod = await import('../src/lib/public-account-client.js');
+
+  await assert.rejects(
+    () => mod.deleteMyAccount(),
+    (error) => {
+      assert.equal(error.code, 'AUTH_REQUIRED');
+      return true;
+    }
+  );
+});

@@ -22,6 +22,14 @@ SUPABASE_ANON_KEY=your-anon-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here   # server side only
 ```
 
+Owner setup checklist:
+
+- [ ] `SUPABASE_URL` set in runtime env
+- [ ] `SUPABASE_ANON_KEY` set (for token validation and browser auth flows)
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` set (required for privileged server operations, including full
+      auth-user deletion)
+- [ ] Keep service-role key out of client bundles and logs
+
 > **Never commit `.env` to source control.** The `.env.example` file shows what's needed.
 
 ---

@@ -61,3 +61,50 @@
   justify-content: space-between;
   gap: 0.5rem;
 }
+
+.dashboard-help {
+  margin: 0;
+  color: var(--muted-text, #475569);
+  font-size: 0.9rem;
+}
+
+.dashboard-actions-privacy {
+  margin-top: 0.25rem;
+}
+
+.dashboard-danger-zone {
+  margin-top: 0.75rem;
+  border: 1px solid var(--color-error-border, #fecaca);
+  background: var(--color-error-bg, #fef2f2);
+  border-radius: 0.85rem;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.dashboard-danger-zone h3 {
+  margin: 0;
+}
+
+.dashboard-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.dashboard-field input {
+  min-height: 2.5rem;
+  border: 1px solid var(--border-muted, #d1d5db);
+  border-radius: 0.6rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.dashboard-card-privacy .btn-danger {
+  border: 1px solid var(--color-error-border, #ef4444);
+  color: var(--color-error, #b91c1c);
+  background: var(--surface-1, #fff);
+}
+
+.dashboard-card-privacy .btn-danger:hover,
+.dashboard-card-privacy .btn-danger:focus-visible {
+  background: var(--color-error-bg, #fef2f2);
+}

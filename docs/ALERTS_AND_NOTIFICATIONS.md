@@ -83,8 +83,26 @@ See `docs/environment-variables.md` and `.env.example`:
 
 - `ALERT_EMAIL_DRY_RUN`
 - `ALERT_JOB_TOKEN`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
 - `ALERTS_DATA_FILE`
 - `ALERTS_PRICE_FILE`
+
+### Dry-run behavior
+
+- When `ALERT_EMAIL_DRY_RUN=true`, delivery is logged as dry-run and no email is sent.
+- When `RESEND_API_KEY` / `RESEND_FROM_EMAIL` are missing, the system automatically stays in
+  dry-run.
+- When `ALERT_JOB_TOKEN` is missing, `/api/v1/jobs/check-alerts` only allows dry-run requests.
+
+### Production checklist
+
+- [ ] Set `ALERT_JOB_TOKEN` in GitHub secrets and runtime env
+- [ ] Set `RESEND_API_KEY` and `RESEND_FROM_EMAIL`
+- [ ] Set `ALERT_EMAIL_DRY_RUN=false`
+- [ ] Confirm `.github/workflows/check-alerts.yml` can call `/api/v1/jobs/check-alerts`
+- [ ] Verify a real alert path end-to-end (create → verify email → trigger run →
+      delivery/unsubscribe)
 
 ## Notes for next phases
 
