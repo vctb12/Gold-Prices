@@ -401,10 +401,10 @@ test('DELETE /api/v1/me removes account data, safe-modes auth deletion, and is i
   assert.equal(deleteRes.json?.data?.auth?.mode, 'safe_mode');
   assert.equal(deleteRes.json?.data?.auth?.userDeleted, false);
   assert.equal(deleteRes.json?.data?.auth?.sessionInvalidated, false);
-  assert.equal(deleteRes.json?.data?.deleted?.saved_calculations > 0, true);
-  assert.equal(deleteRes.json?.data?.deleted?.watchlists > 0, true);
-  assert.equal(deleteRes.json?.data?.deleted?.saved_shops > 0, true);
-  assert.equal(deleteRes.json?.data?.deleted?.alert_rules > 0, true);
+  assert.ok(deleteRes.json?.data?.deleted?.saved_calculations > 0);
+  assert.ok(deleteRes.json?.data?.deleted?.watchlists > 0);
+  assert.ok(deleteRes.json?.data?.deleted?.saved_shops > 0);
+  assert.ok(deleteRes.json?.data?.deleted?.alert_rules > 0);
 
   const meAfterDelete = await request({
     method: 'GET',
