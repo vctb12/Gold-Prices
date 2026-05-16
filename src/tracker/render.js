@@ -93,13 +93,14 @@ function formatPercent(value) {
 function getHistorySourceLabel(rows = []) {
   if (!rows.length) return tx('historySource.unavailable');
   const sources = new Set(rows.map((row) => String(row.source || '').toLowerCase()));
-  const hasSupabase = [...sources].some((source) => source.includes('supabase'));
-  const hasBaseline = [...sources].some(
-    (source) => source.includes('baseline') || source.includes('estimated')
-  );
-  const hasLocal = [...sources].some(
-    (source) => source.includes('local') || source.includes('cache')
-  );
+  let hasSupabase = false;
+  let hasBaseline = false;
+  let hasLocal = false;
+  for (const source of sources) {
+    if (source.includes('supabase')) hasSupabase = true;
+    if (source.includes('baseline') || source.includes('estimated')) hasBaseline = true;
+    if (source.includes('local') || source.includes('cache')) hasLocal = true;
+  }
 
   if (hasSupabase && !hasBaseline && !hasLocal) return tx('historySource.supabase');
   if (hasSupabase && (hasBaseline || hasLocal)) return tx('historySource.mixedSupabase');
@@ -817,9 +818,10 @@ export function renderQuickCalculator() {
   }
 
   const total = perGram * weight;
+  const numberLocale = _state.lang === 'ar' ? 'ar-AE' : 'en-US';
   setText(
     _el.quickCalcResult,
-    `${currency} ${total.toLocaleString('en', {
+    `${currency} ${total.toLocaleString(numberLocale, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`
@@ -827,7 +829,7 @@ export function renderQuickCalculator() {
   setText(
     _el.quickCalcMeta,
     tx('quickCalc.summary', {
-      weight: weight.toLocaleString('en', {
+      weight: weight.toLocaleString(numberLocale, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }),

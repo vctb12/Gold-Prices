@@ -26,6 +26,7 @@ let initRender,
   renderMarkets,
   renderComparisonWorkspace,
   renderAlerts,
+  renderQuickCalculator,
   renderPresets,
   renderPlanners,
   renderArchive;
@@ -1110,6 +1111,7 @@ async function init() {
     renderMarkets,
     renderComparisonWorkspace,
     renderAlerts,
+    renderQuickCalculator,
     renderPresets,
     renderPlanners,
     renderArchive,
@@ -1205,8 +1207,8 @@ async function init() {
     el.shareBtn?.click();
   });
   [el.quickCalcWeight, el.quickCalcKarat, el.quickCalcCurrency].forEach((field) => {
-    field?.addEventListener('input', () => renderAll());
-    field?.addEventListener('change', () => renderAll());
+    field?.addEventListener('input', () => renderQuickCalculator?.());
+    field?.addEventListener('change', () => renderQuickCalculator?.());
   });
   el.saveWatchlistAccount?.addEventListener('click', () => {
     saveWatchlistToAccount().catch(() => {
