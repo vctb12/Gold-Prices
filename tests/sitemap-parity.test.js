@@ -127,3 +127,26 @@ test('sitemap-parity invariants — canonical sitemap retains required top-level
     `Required top-level URLs missing from build/generateSitemap.js output: ${missing.join(', ')}`
   );
 });
+
+test('sitemap-parity invariants — canonical sitemap excludes targeted noindex pages', () => {
+  const snapshot = snapshotSitemap();
+  let buildLocs;
+  try {
+    buildLocs = locsFromXml(runBuildSitemap());
+  } finally {
+    restoreSitemap(snapshot);
+  }
+
+  const blocked = [
+    'https://goldtickerlive.com/uae/dubai/gold-rate/18-karat/',
+    'https://goldtickerlive.com/content/guides/invest-in-gold-gcc.html',
+    'https://goldtickerlive.com/content/social/x-post-generator.html',
+  ];
+
+  const present = blocked.filter((u) => buildLocs.has(u));
+  assert.deepEqual(
+    present,
+    [],
+    `Noindex URLs should not be emitted by build/generateSitemap.js: ${present.join(', ')}`
+  );
+});

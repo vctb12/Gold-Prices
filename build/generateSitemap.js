@@ -13,6 +13,23 @@ const ROOT     = path.resolve(__dirname, '..');
 const SITE_URL = 'https://goldtickerlive.com';
 const TODAY    = new Date().toISOString().slice(0, 10);
 
+function isNoindexFile(filePath) {
+  try {
+    const html = fs.readFileSync(filePath, 'utf8');
+    return /<meta[^>]+name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html);
+  } catch {
+    return false;
+  }
+}
+
+function sitemapUrlToFilePath(loc) {
+  const pathname = new URL(loc).pathname;
+  if (pathname === '/') return path.join(ROOT, 'index.html');
+  const rel = pathname.replace(/^\/+/, '');
+  if (rel.endsWith('.html')) return path.join(ROOT, rel);
+  return path.join(ROOT, rel, 'index.html');
+}
+
 /** Safely evaluate a JS array literal from a trusted local config file. */
 function evalConfigArray(src) {
   return vm.runInNewContext(`(${src})`, Object.create(null), { timeout: 2000 });
@@ -88,6 +105,8 @@ const staticPages = [
 ];
 
 for (const p of staticPages) {
+  const filePath = sitemapUrlToFilePath(p.loc);
+  if (fs.existsSync(filePath) && isNoindexFile(filePath)) continue;
   urls.push(url(p.loc, p.changefreq, p.priority));
 }
 
@@ -95,7 +114,7 @@ for (const p of staticPages) {
 for (const country of COUNTRIES) {
   if (!country.slug) continue;
   const htmlPath = path.join(ROOT, 'countries', country.slug, 'index.html');
-  if (fs.existsSync(htmlPath)) {
+  if (fs.existsSync(htmlPath) && !isNoindexFile(htmlPath)) {
     const oldUrl = `${SITE_URL}/countries/${country.slug}/`;
     urls.push(url(oldUrl, 'monthly', '0.40'));
   }
@@ -104,13 +123,47 @@ for (const country of COUNTRIES) {
 // Generated: country landing
 for (const country of COUNTRIES) {
   if (!country.slug) continue;
-  urls.push(url(`${SITE_URL}/${country.slug}/gold-price/`, 'hourly', '0.90'));
+  const countryGoldPriceFile = path.join(ROOT, 'countries', country.slug, 'gold-price', 'index.html');
+  if (!(fs.existsSync(countryGoldPriceFile) && isNoindexFile(countryGoldPriceFile))) {
+    urls.push(url(`${SITE_URL}/${country.slug}/gold-price/`, 'hourly', '0.90'));
+  }
 
   for (const city of (country.cities || [])) {
-    urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-prices/`, 'hourly', '0.85'));
-    urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-shops/`,  'weekly', '0.70'));
+    const cityGoldPricesFile = path.join(
+      ROOT,
+      'countries',
+      country.slug,
+      city.slug,
+      'gold-prices',
+      'index.html'
+    );
+    if (!(fs.existsSync(cityGoldPricesFile) && isNoindexFile(cityGoldPricesFile))) {
+      urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-prices/`, 'hourly', '0.85'));
+    }
+
+    const cityGoldShopsFile = path.join(
+      ROOT,
+      'countries',
+      country.slug,
+      city.slug,
+      'gold-shops',
+      'index.html'
+    );
+    if (!(fs.existsSync(cityGoldShopsFile) && isNoindexFile(cityGoldShopsFile))) {
+      urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-shops/`,  'weekly', '0.70'));
+    }
 
     for (const karat of KARATS.filter(k => ['24', '22', '21', '18'].includes(k.code))) {
+      const karatFile = path.join(
+        ROOT,
+        'countries',
+        country.slug,
+        city.slug,
+        'gold-rate',
+        `${karat.code}-karat`,
+        'index.html'
+      );
+      if (fs.existsSync(karatFile) && isNoindexFile(karatFile)) continue;
       urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-rate/${karat.code}-karat/`, 'hourly', '0.75'));
     }
   }

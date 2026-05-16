@@ -1,0 +1,1488 @@
+{
+  "schemaVersion": 1,
+  "generatedFor": "PR2 noindex safety pass",
+  "summary": {
+    "countries_per_karat_pages": {
+      "files": 349,
+      "totalMatches": 2212
+    },
+    "investment_return": {
+      "files": 4,
+      "totalMatches": 11
+    },
+    "invest_in_gold_gcc": {
+      "files": 5,
+      "totalMatches": 11
+    },
+    "social_x_post_generator": {
+      "files": 5,
+      "totalMatches": 11
+    }
+  },
+  "references": {
+    "countries_per_karat_pages": [
+      {
+        "path": "countries/algeria/algiers/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/algiers/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/algiers/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/algiers/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/constantine/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/constantine/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/constantine/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/constantine/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/oran/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/oran/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/oran/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/oran/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/manama/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/manama/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/manama/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/manama/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/muharraq/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/muharraq/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/muharraq/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/muharraq/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/rifaa/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/rifaa/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/rifaa/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/bahrain/rifaa/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/alexandria/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/alexandria/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/alexandria/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/alexandria/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/cairo/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/cairo/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/cairo/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/cairo/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/giza/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/giza/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/giza/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/egypt/giza/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/chennai/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/chennai/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/chennai/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/chennai/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/delhi/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/delhi/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/delhi/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/delhi/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/mumbai/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/mumbai/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/mumbai/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/india/mumbai/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/baghdad/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/baghdad/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/baghdad/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/baghdad/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/basra/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/basra/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/basra/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/basra/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/erbil/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/erbil/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/erbil/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/iraq/erbil/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/amman/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/amman/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/amman/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/amman/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/irbid/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/irbid/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/irbid/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/irbid/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/zarqa/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/zarqa/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/zarqa/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/jordan/zarqa/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/hawalli/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/hawalli/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/hawalli/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/hawalli/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/kuwait-city/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/kuwait-city/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/kuwait-city/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/kuwait-city/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/salmiya/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/salmiya/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/salmiya/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/kuwait/salmiya/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/beirut/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/beirut/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/beirut/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/beirut/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/sidon/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/sidon/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/sidon/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/sidon/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/tripoli/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/tripoli/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/tripoli/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/lebanon/tripoli/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/benghazi/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/benghazi/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/benghazi/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/benghazi/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/misrata/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/misrata/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/misrata/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/misrata/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/tripoli/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/tripoli/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/tripoli/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/libya/tripoli/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/casablanca/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/casablanca/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/casablanca/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/casablanca/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/marrakech/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/marrakech/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/marrakech/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/marrakech/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/rabat/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/rabat/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/rabat/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/morocco/rabat/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/muscat/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/muscat/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/muscat/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/muscat/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/salalah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/salalah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/salalah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/salalah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/sohar/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/sohar/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/sohar/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/oman/sohar/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/islamabad/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/islamabad/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/islamabad/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/islamabad/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/karachi/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/karachi/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/karachi/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/karachi/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/lahore/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/lahore/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/lahore/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/pakistan/lahore/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/gaza/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/gaza/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/gaza/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/gaza/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/nablus/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/nablus/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/nablus/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/nablus/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/ramallah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/ramallah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/ramallah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/palestine/ramallah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-rayyan/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-rayyan/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-rayyan/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-rayyan/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-wakrah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-wakrah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-wakrah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/al-wakrah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/doha/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/doha/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/doha/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/qatar/doha/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/dammam/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/dammam/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/dammam/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/dammam/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/jeddah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/jeddah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/jeddah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/jeddah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/mecca/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/mecca/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/mecca/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/mecca/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/medina/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/medina/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/medina/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/medina/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/riyadh/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/riyadh/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/riyadh/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/saudi-arabia/riyadh/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/khartoum/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/khartoum/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/khartoum/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/khartoum/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/omdurman/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/omdurman/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/omdurman/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/omdurman/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/port-sudan/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/port-sudan/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/port-sudan/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/sudan/port-sudan/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/aleppo/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/aleppo/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/aleppo/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/aleppo/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/damascus/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/damascus/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/damascus/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/damascus/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/homs/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/homs/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/homs/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/syria/homs/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sfax/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sfax/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sfax/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sfax/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sousse/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sousse/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sousse/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/sousse/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/tunis/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/tunis/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/tunis/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/tunisia/tunis/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/ankara/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/ankara/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/ankara/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/ankara/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/istanbul/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/istanbul/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/istanbul/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/istanbul/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/izmir/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/izmir/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/izmir/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/turkey/izmir/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/abu-dhabi/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/abu-dhabi/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/abu-dhabi/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/abu-dhabi/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ajman/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ajman/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ajman/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ajman/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/dubai/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/dubai/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/dubai/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/dubai/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/fujairah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/fujairah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/fujairah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/fujairah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ras-al-khaimah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ras-al-khaimah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ras-al-khaimah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/ras-al-khaimah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/sharjah/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/sharjah/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/sharjah/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/sharjah/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/umm-al-quwain/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/umm-al-quwain/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/umm-al-quwain/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/uae/umm-al-quwain/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/aden/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/aden/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/aden/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/aden/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/sanaa/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/sanaa/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/sanaa/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/sanaa/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/taiz/gold-rate/18-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/taiz/gold-rate/21-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/taiz/gold-rate/22-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/yemen/taiz/gold-rate/24-karat/index.html",
+        "matches": 7
+      },
+      {
+        "path": "countries/algeria/algiers/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/algeria/constantine/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/algeria/oran/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/bahrain/manama/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/bahrain/muharraq/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/bahrain/rifaa/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/egypt/alexandria/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/egypt/cairo/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/egypt/giza/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/india/chennai/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/india/delhi/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/india/mumbai/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/iraq/baghdad/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/iraq/basra/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/iraq/erbil/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/jordan/amman/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/jordan/irbid/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/jordan/zarqa/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/kuwait/hawalli/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/kuwait/kuwait-city/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/kuwait/salmiya/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/lebanon/beirut/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/lebanon/sidon/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/lebanon/tripoli/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/libya/benghazi/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/libya/misrata/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/libya/tripoli/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/morocco/casablanca/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/morocco/marrakech/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/morocco/rabat/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/oman/muscat/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/oman/salalah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/oman/sohar/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/pakistan/islamabad/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/pakistan/karachi/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/pakistan/lahore/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/palestine/gaza/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/palestine/nablus/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/palestine/ramallah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/qatar/al-rayyan/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/qatar/al-wakrah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/qatar/doha/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/saudi-arabia/dammam/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/saudi-arabia/jeddah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/saudi-arabia/mecca/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/saudi-arabia/medina/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/saudi-arabia/riyadh/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/sudan/khartoum/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/sudan/omdurman/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/sudan/port-sudan/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/syria/aleppo/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/syria/damascus/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/syria/homs/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/tunisia/sfax/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/tunisia/sousse/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/tunisia/tunis/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/turkey/ankara/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/turkey/istanbul/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/turkey/izmir/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/abu-dhabi/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/ajman/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/dubai/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/fujairah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/ras-al-khaimah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/sharjah/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/uae/umm-al-quwain/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/yemen/aden/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/yemen/sanaa/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "countries/yemen/taiz/gold-rate/index.html",
+        "matches": 4
+      },
+      {
+        "path": "docs/SEO_STRATEGY.md",
+        "matches": 1
+      },
+      {
+        "path": "reports/sitemap-parity.md",
+        "matches": 1
+      },
+      {
+        "path": "scripts/node/fix-asset-refs.js",
+        "matches": 1
+      },
+      {
+        "path": "tests/sitemap.test.js",
+        "matches": 1
+      }
+    ],
+    "investment_return": [
+      {
+        "path": "content/tools/investment-return.html",
+        "matches": 6
+      },
+      {
+        "path": "README.md",
+        "matches": 2
+      },
+      {
+        "path": "src/components/nav-data.js",
+        "matches": 2
+      },
+      {
+        "path": "tests/sitemap.test.js",
+        "matches": 1
+      }
+    ],
+    "invest_in_gold_gcc": [
+      {
+        "path": "content/guides/invest-in-gold-gcc.html",
+        "matches": 6
+      },
+      {
+        "path": "README.md",
+        "matches": 2
+      },
+      {
+        "path": "build/generateSitemap.js",
+        "matches": 1
+      },
+      {
+        "path": "tests/sitemap-parity.test.js",
+        "matches": 1
+      },
+      {
+        "path": "tests/sitemap.test.js",
+        "matches": 1
+      }
+    ],
+    "social_x_post_generator": [
+      {
+        "path": "content/social/x-post-generator.html",
+        "matches": 6
+      },
+      {
+        "path": "README.md",
+        "matches": 2
+      },
+      {
+        "path": "build/generateSitemap.js",
+        "matches": 1
+      },
+      {
+        "path": "tests/sitemap-parity.test.js",
+        "matches": 1
+      },
+      {
+        "path": "tests/sitemap.test.js",
+        "matches": 1
+      }
+    ]
+  },
+  "notes": [
+    "Inventory is for link-risk planning before later deletion/redirect PR.",
+    "This PR does not remove links by default; it documents inbound references."
+  ]
+}

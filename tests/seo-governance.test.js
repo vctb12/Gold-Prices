@@ -7,6 +7,7 @@ const {
   classifyGroup,
   getWordCount,
   buildDuplicateRisk,
+  REQUIRED_NOINDEX_PATTERNS,
   summarize,
 } = require('../scripts/node/seo-governance.js');
 
@@ -71,4 +72,27 @@ test('summarize reports grouped counts and risk totals', () => {
   assert.equal(report.totals.thinRiskPages, 1);
   assert.equal(report.totals.missingCanonical, 1);
   assert.equal(report.totals.missingSchema, 1);
+});
+
+test('required noindex policy flags targeted pages that are still indexable', () => {
+  const needsNoindexPath = 'countries/uae/dubai/gold-rate/18-karat/index.html';
+  assert.equal(REQUIRED_NOINDEX_PATTERNS.some((p) => p.test(needsNoindexPath)), true);
+
+  const report = summarize([
+    {
+      path: needsNoindexPath,
+      group: 'cities',
+      noindex: false,
+      title: '18K',
+      description: 'desc',
+      wordCount: 150,
+      thinRisk: false,
+      missingCanonical: false,
+      missingHreflang: false,
+      missingSchema: false,
+    },
+  ]);
+
+  assert.equal(report.totals.requiredNoindexViolations, 1);
+  assert.deepEqual(report.risks.requiredNoindexMissing, [needsNoindexPath]);
 });

@@ -12,6 +12,12 @@ const CHECK_ONLY = process.argv.includes('--check');
 const STRICT = process.argv.includes('--strict');
 const STDOUT_ONLY = process.argv.includes('--stdout');
 const THIN_CONTENT_THRESHOLD = 140;
+const REQUIRED_NOINDEX_PATTERNS = [
+  /^countries\/[^/]+\/[^/]+\/gold-rate\/(?:18|21|22|24)-karat\/index\.html$/,
+  /^content\/tools\/investment-return\.html$/,
+  /^content\/guides\/invest-in-gold-gcc\.html$/,
+  /^content\/social\/.+\.html$/,
+];
 
 const SKIP_DIRS = new Set([
   'node_modules',
@@ -164,6 +170,12 @@ function summarize(records) {
   const thinRisk = records
     .filter((r) => r.thinRisk)
     .map((r) => ({ path: r.path, words: r.wordCount }));
+  const requiredNoindexMissing = records
+    .filter(
+      (r) =>
+        REQUIRED_NOINDEX_PATTERNS.some((pattern) => pattern.test(r.path)) && !r.noindex
+    )
+    .map((r) => r.path);
   const duplicateRisk = buildDuplicateRisk(records);
 
   return {
@@ -176,6 +188,7 @@ function summarize(records) {
       missingCanonical: missingCanonical.length,
       missingHreflang: missingHreflang.length,
       missingSchema: missingSchema.length,
+      requiredNoindexViolations: requiredNoindexMissing.length,
     },
     risks: {
       thinRisk: thinRisk.slice(0, 200),
@@ -183,6 +196,7 @@ function summarize(records) {
       missingCanonical: missingCanonical.slice(0, 200),
       missingHreflang: missingHreflang.slice(0, 200),
       missingSchema: missingSchema.slice(0, 200),
+      requiredNoindexMissing: requiredNoindexMissing.slice(0, 400),
     },
   };
 }
@@ -248,6 +262,7 @@ module.exports = {
   classifyGroup,
   getWordCount,
   buildDuplicateRisk,
+  REQUIRED_NOINDEX_PATTERNS,
   summarize,
   buildReport,
 };

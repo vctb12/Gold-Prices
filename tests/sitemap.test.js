@@ -115,6 +115,19 @@ test('offline.html is excluded from sitemap', () => {
   assert.deepEqual(offline, [], 'offline.html should not appear in sitemap');
 });
 
+test('configured noindex pages are excluded from sitemap', () => {
+  const xml = ensureSitemap();
+  const all = locs(xml);
+  const blocked = [
+    `${CANONICAL_ORIGIN}/countries/uae/dubai/gold-rate/18-karat/`,
+    `${CANONICAL_ORIGIN}/content/tools/investment-return.html`,
+    `${CANONICAL_ORIGIN}/content/guides/invest-in-gold-gcc.html`,
+    `${CANONICAL_ORIGIN}/content/social/x-post-generator.html`,
+  ];
+  const present = blocked.filter((u) => all.includes(u));
+  assert.deepEqual(present, [], 'Noindex pages should not appear in sitemap: ' + present.join(', '));
+});
+
 test('every existing country page is present in the sitemap', () => {
   const xml = ensureSitemap();
   const all = new Set(locs(xml));
