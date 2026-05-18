@@ -107,7 +107,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f data/gold_price.json ]; then
             git add data/gold_price.json || true
-            git diff --cached --quiet || git commit -m "chore(data): refresh gold price before post [skip ci]"
+            git diff --cached --quiet || git commit -m "chore(data): refresh gold price before post"
             git push || true
           fi
 

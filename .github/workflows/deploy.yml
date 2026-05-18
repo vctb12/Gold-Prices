@@ -7,6 +7,13 @@
 name: Deploy to GitHub Pages
 
 on:
+  schedule:
+    # Safety net: redeploy during market hours so Pages never drifts more than ~30 min
+    # behind main, even if a future regression re-introduces [skip ci] on data commits.
+    # Windows mirror gold-price-fetch.yml's open-market schedule. All times UTC.
+    - cron: '*/30 21-23 * * 0'   # Sun open (21:00–23:30 UTC)
+    - cron: '*/30 * * * 1-4'     # Mon–Thu (full day UTC)
+    - cron: '*/30 0-20 * * 5'    # Fri until close (00:00–20:30 UTC)
   push:
     branches: [main]
     paths-ignore:
@@ -26,7 +33,10 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  # Cancel in-flight builds when a newer push lands so bursty data refreshes
+  # (gold-price-fetch.yml runs every 6 min) don't queue redundant deploys.
+  # The latest data always wins.
+  cancel-in-progress: true
 
 jobs:
   build:
