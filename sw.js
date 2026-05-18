@@ -102,6 +102,7 @@ self.addEventListener('fetch', (event) => {
   if (!url.protocol.startsWith('http')) return;
 
   // Legacy GitHub Pages base-path redirect support.
+  // Keep this pattern in sync with `_redirects` and `.htaccess`.
   // Ensures /Gold-Prices/* normalizes to /* for old links and bookmarks.
   if (url.origin === self.location.origin && /^\/Gold-Prices(?:\/|$)/.test(url.pathname)) {
     const normalizedPath = url.pathname.replace(/^\/Gold-Prices/, '') || '/';
