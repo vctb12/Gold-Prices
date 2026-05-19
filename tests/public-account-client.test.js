@@ -296,7 +296,17 @@ test('buildSupabaseBrowserClient requires browser supabase client', async () => 
   assert.equal(mod.buildSupabaseBrowserClient(), null);
 
   global.window = { supabase: {} };
-  assert.throws(() => mod.buildSupabaseBrowserClient(), /createClient/);
+  assert.throws(
+    () => mod.buildSupabaseBrowserClient(),
+    (error) => {
+      assert.match(
+        String(error?.message || ''),
+        /createClient is not a function/,
+        'should throw when window.supabase exists but createClient is missing'
+      );
+      return true;
+    }
+  );
 
   global.window = {
     supabase: {
