@@ -39,6 +39,12 @@ const STATUS_BADGE_CLASS = {
   stale: 'tracker-badge--stale',
   unavailable: 'tracker-badge--unavailable',
 };
+const SOURCE_STATE_BADGE_CLASS = {
+  live: 'tracker-badge-live',
+  cached: 'tracker-badge--cached',
+  stale: 'tracker-badge--stale',
+  unavailable: 'tracker-badge--unavailable',
+};
 
 export function initRender({ state, el, priceFor, currentSpot, showToast }) {
   _state = state;
@@ -239,6 +245,7 @@ export function renderHero() {
   const spot = _currentSpot();
   const freshness = getFreshnessModel();
   const liveBadge = document.getElementById('tp-live-badge');
+  const sourceStateBadge = document.getElementById('tp-source-state-badge');
   const summaryHeading = document.getElementById('tp-live-summary-heading');
   const isConnecting = !spot && !_state.hasLiveFailure;
   const summaryFreshness = isConnecting
@@ -274,6 +281,20 @@ export function renderHero() {
     } else {
       setText(_el.liveBadgeText, _state.hasLiveFailure ? tx('liveUnavailable') : tx('connecting'));
     }
+  }
+
+  if (sourceStateBadge) {
+    sourceStateBadge.classList.remove(...TRACKER_BADGE_CLASSES);
+    sourceStateBadge.classList.add(
+      isConnecting
+        ? 'tracker-badge-live'
+        : SOURCE_STATE_BADGE_CLASS[freshness.key] || 'tracker-badge--cached'
+    );
+    const label = isConnecting ? tx('connecting') : freshness.sourceLabel;
+    const tooltip = isConnecting ? tx('connecting') : freshness.tooltip;
+    sourceStateBadge.textContent = label;
+    sourceStateBadge.title = tooltip;
+    sourceStateBadge.setAttribute('aria-label', tooltip);
   }
 
   if (_el.xauUsdValue) {

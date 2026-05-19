@@ -113,9 +113,15 @@ function localizeStaticTrackerCopy() {
 
   const titleSub = document.querySelector('.tracker-hero-title-sub');
   if (titleSub) titleSub.textContent = trackerTx('heroSub');
+  const heroKicker = document.getElementById('tp-hero-kicker');
+  if (heroKicker) heroKicker.textContent = trackerTx('heroKicker');
   const heroTitle = document.getElementById('tp-hero-title');
   if (heroTitle && titleSub) {
-    heroTitle.replaceChildren(`${trackerTx('heroTitle')} `, titleSub);
+    if (heroKicker) {
+      heroTitle.replaceChildren(heroKicker, ` ${trackerTx('heroTitle')} `, titleSub);
+    } else {
+      heroTitle.replaceChildren(`${trackerTx('heroTitle')} `, titleSub);
+    }
   }
 
   setInlineLinkText(

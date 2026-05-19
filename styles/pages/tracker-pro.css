@@ -402,6 +402,11 @@ body.tracker-pro-page {
   /* inherits base dark badge styles */
 }
 
+.tracker-badge-source {
+  border-style: dashed;
+  font-weight: var(--weight-bold);
+}
+
 /* Hero title */
 .tracker-hero-title {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
@@ -410,6 +415,16 @@ body.tracker-pro-page {
   color: var(--tp-hero-text);
   margin-bottom: var(--space-3);
   font-weight: var(--weight-extrabold);
+}
+
+.tracker-hero-kicker {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tp-gold-soft);
 }
 
 .tracker-hero-title-sub {
@@ -805,7 +820,7 @@ body.tracker-pro-page {
 
 .tracker-mode-shell {
   position: sticky;
-  top: var(--nav-height, 64px);
+  top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
   z-index: 120;
   background: var(--tp-panel);
   border-bottom: 1.5px solid var(--tp-border);
@@ -3251,7 +3266,9 @@ td.tracker-chg-down {
   /* Sticky controls strip on mobile */
   .tracker-hero-controls {
     position: sticky;
-    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
+    top: calc(
+      var(--nav-height, 64px) + var(--spot-bar-height, 0px) + env(safe-area-inset-top, 0px)
+    );
     z-index: 20;
     background: linear-gradient(180deg, #1a1208 0%, #0d0a07 100%);
     padding-block: var(--space-3);
