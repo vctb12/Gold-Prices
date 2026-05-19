@@ -39,12 +39,6 @@ const STATUS_BADGE_CLASS = {
   stale: 'tracker-badge--stale',
   unavailable: 'tracker-badge--unavailable',
 };
-const SOURCE_STATE_BADGE_CLASS = {
-  live: 'tracker-badge-live',
-  cached: 'tracker-badge--cached',
-  stale: 'tracker-badge--stale',
-  unavailable: 'tracker-badge--unavailable',
-};
 
 export function initRender({ state, el, priceFor, currentSpot, showToast }) {
   _state = state;
@@ -288,7 +282,7 @@ export function renderHero() {
     sourceStateBadge.classList.add(
       isConnecting
         ? 'tracker-badge-live'
-        : SOURCE_STATE_BADGE_CLASS[freshness.key] || 'tracker-badge--cached'
+        : STATUS_BADGE_CLASS[freshness.key] || 'tracker-badge--cached'
     );
     const label = isConnecting ? tx('connecting') : freshness.sourceLabel;
     const tooltip = isConnecting ? tx('connecting') : freshness.tooltip;

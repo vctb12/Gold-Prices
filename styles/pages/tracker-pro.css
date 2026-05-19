@@ -3266,9 +3266,7 @@ td.tracker-chg-down {
   /* Sticky controls strip on mobile */
   .tracker-hero-controls {
     position: sticky;
-    top: calc(
-      var(--nav-height, 64px) + var(--spot-bar-height, 0px) + env(safe-area-inset-top, 0px)
-    );
+    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
     z-index: 20;
     background: linear-gradient(180deg, #1a1208 0%, #0d0a07 100%);
     padding-block: var(--space-3);

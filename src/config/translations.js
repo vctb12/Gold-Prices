@@ -118,7 +118,7 @@ export const TRANSLATIONS = {
     'tracker.pageTitle': 'Live Tracker',
     'tracker.heroTitle': 'Gold Command Center',
     'tracker.heroSub': 'Spot-linked live reference workspace',
-    'tracker.heroKicker': 'Tracker flagship',
+    'tracker.heroKicker': 'Gold command center',
     'tracker.heroCopy':
       'Track reference prices across 24+ markets, 7 karats, and live freshness states before you compare shop quotes.',
     'tracker.heroCopyLink': 'How prices are calculated →',
@@ -851,7 +851,7 @@ export const TRANSLATIONS = {
     'tracker.pageTitle': 'تتبع مباشر',
     'tracker.heroTitle': 'مركز قيادة الذهب',
     'tracker.heroSub': 'مساحة مرجعية مباشرة مرتبطة بالسعر الفوري',
-    'tracker.heroKicker': 'المنصة الأساسية',
+    'tracker.heroKicker': 'مركز قيادة الذهب',
     'tracker.heroCopy':
       'تابع الأسعار المرجعية عبر أكثر من 24 سوقًا و7 عيارات مع حالات حداثة واضحة قبل مقارنة عروض المحلات.',
     'tracker.heroCopyLink': 'كيف نحسب الأسعار ←',
