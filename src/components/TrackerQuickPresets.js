@@ -2,8 +2,8 @@ import { el } from '../lib/safe-dom.js';
 
 export function renderTrackerQuickPresets({ t = (key) => key } = {}) {
   const presets = [
-    { href: '#mode=live&range=24H', label: t('trackerAddons.quickPresets.live24h') },
-    { href: '#mode=live&range=7D', label: t('trackerAddons.quickPresets.live7d') },
+    { href: '#mode=live&r=24H', label: t('trackerAddons.quickPresets.live24h') },
+    { href: '#mode=live&r=7D', label: t('trackerAddons.quickPresets.live7d') },
     { href: '#mode=compare', label: t('trackerAddons.quickPresets.compare') },
     { href: '#mode=exports', label: t('trackerAddons.quickPresets.exports') },
   ];

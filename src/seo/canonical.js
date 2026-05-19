@@ -3,7 +3,7 @@ export const CANONICAL_BASE = 'https://goldtickerlive.com';
 export function normalizePathname(pathname = '/') {
   let normalized = pathname || '/';
   if (!normalized.startsWith('/')) normalized = `/${normalized}`;
-  if (normalized.startsWith('/Gold-Prices/')) {
+  if (normalized === '/Gold-Prices' || normalized.startsWith('/Gold-Prices/')) {
     normalized = normalized.replace(/^\/Gold-Prices/, '') || '/';
   }
   return normalized;

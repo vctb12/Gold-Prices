@@ -1,12 +1,11 @@
 import { el } from '../lib/safe-dom.js';
 import { KARATS } from '../config/karats.js';
 
-const METHODOLOGY_KARATS = ['24', '22', '21', '18', '14', '9'];
-const STATIC_PURITY = { 9: 0.375 };
+const METHODOLOGY_KARATS = ['24', '22', '21', '18', '14'];
 
 function getPurity(code) {
   const fromConfig = KARATS.find((k) => k.code === code)?.purity;
-  return fromConfig ?? STATIC_PURITY[code] ?? 0;
+  return fromConfig ?? 0;
 }
 
 export function renderMethodologySection({ t = (key) => key, className = '' } = {}) {

@@ -18,7 +18,7 @@ import { renderFreshnessBadge } from '../components/FreshnessBadge.js';
 import { renderMarketStatusPanel } from '../components/MarketStatusPanel.js';
 import { el, clear } from '../lib/safe-dom.js';
 import { track, EVENTS } from '../lib/analytics.js';
-import { getLiveFreshness } from '../lib/live-status.js';
+import { getLiveFreshness, getMarketStatus } from '../lib/live-status.js';
 import {
   createSavedCalculation,
   isAuthenticated as isAccountAuthenticated,
@@ -918,6 +918,7 @@ function renderCalculatorTrustAddons() {
         state: freshness.key,
         source: 'goldpricez.com',
         updatedAt: STATE.freshness.goldUpdatedAt,
+        marketOpen: getMarketStatus().isOpen,
         className: 'calc-freshness-badge',
         t: tGlobal,
       })

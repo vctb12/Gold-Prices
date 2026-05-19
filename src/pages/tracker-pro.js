@@ -935,6 +935,7 @@ function startAutoRefresh() {
       await fetchLive();
       checkAlerts();
       renderAll();
+      renderTrackerAddonPanels();
     } finally {
       _fetchInFlight = false;
     }
@@ -1068,6 +1069,7 @@ async function refreshData(forceLive = true, includeWire = true) {
     console.warn('[chart-hook] setDailyHistory failed', _e);
   }
   persistState(state);
+  renderTrackerAddonPanels();
 }
 
 async function fetchLive() {

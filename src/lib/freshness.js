@@ -7,8 +7,8 @@ export const FRESHNESS_CONFIG = {
   estimated: { tone: 'estimated', translationKey: 'freshness.badge.estimated' },
   fallback: { tone: 'fallback', translationKey: 'freshness.badge.fallback' },
   closed: { tone: 'closed', translationKey: 'freshness.badge.closed' },
-  stale: { tone: 'fallback', translationKey: 'freshness.badge.fallback' },
-  unavailable: { tone: 'fallback', translationKey: 'freshness.badge.fallback' },
+  stale: { tone: 'fallback', translationKey: 'freshness.badge.stale' },
+  unavailable: { tone: 'fallback', translationKey: 'freshness.badge.unavailable' },
 };
 
 export function normalizeFreshnessState(state, { marketOpen = true } = {}) {

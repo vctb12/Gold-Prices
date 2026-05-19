@@ -7827,7 +7827,7 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
 }
 
 .freshness-badge--live .freshness-badge__state {
-  color: var(--color-live-ink);
+  color: var(--color-live);
 }
 
 .freshness-badge--cached .freshness-badge__state,
@@ -7835,7 +7835,7 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
 .freshness-badge--estimated .freshness-badge__state,
 .freshness-badge--fallback .freshness-badge__state,
 .freshness-badge--closed .freshness-badge__state {
-  color: var(--color-warning-ink);
+  color: var(--color-warning-text);
 }
 
 .market-status-panel {
