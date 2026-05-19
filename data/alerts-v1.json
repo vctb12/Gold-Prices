@@ -1,0 +1,224 @@
+{
+  "alert_rules": [
+    {
+      "user_id": "export-user",
+      "email": "export-user@example.com",
+      "channel": "email",
+      "symbol": "XAUUSD",
+      "currency": "USD",
+      "condition": "above",
+      "threshold_value": 2600,
+      "karat": null,
+      "country_code": null,
+      "is_active": false,
+      "cooldown_minutes": 60,
+      "last_triggered_at": null,
+      "id": "70e2d46e-bba3-49d4-9cb8-51f1934252f0",
+      "management_token_hash": "f33769ec11a8a6c71d8d9e8ecd241b7cb007bd3897e7985c04e5513c34ff1fa1",
+      "verification_token_hash": "3b8674f176fb55302b59cc3aed1086fec57150dc4f8c4c0f6e6704585d2332c3",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "created_at": "2026-05-19T05:55:42.323Z",
+      "updated_at": "2026-05-19T05:55:42.323Z"
+    },
+    {
+      "user_id": null,
+      "email": "delete-user@example.com",
+      "channel": "email",
+      "symbol": "XAUUSD",
+      "currency": "USD",
+      "condition": "above",
+      "threshold_value": 2800,
+      "karat": null,
+      "country_code": null,
+      "is_active": false,
+      "cooldown_minutes": 60,
+      "last_triggered_at": null,
+      "id": "bed69f95-7052-49cd-9296-c423a95aa52a",
+      "management_token_hash": "5fc72ba1e73b11a4d7ca59bd30e311e32765e65dd08107c9ad0410c16fcb361c",
+      "verification_token_hash": "328cb375d6e0f0d184830bf834d856a1eef7712734f5dd16c6753ad459d8978e",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "created_at": "2026-05-19T05:55:42.337Z",
+      "updated_at": "2026-05-19T05:55:42.337Z"
+    },
+    {
+      "user_id": "export-user",
+      "email": "export-user@example.com",
+      "channel": "email",
+      "symbol": "XAUUSD",
+      "currency": "USD",
+      "condition": "above",
+      "threshold_value": 2600,
+      "karat": null,
+      "country_code": null,
+      "is_active": false,
+      "cooldown_minutes": 60,
+      "last_triggered_at": null,
+      "id": "64a5502b-58bf-4499-90e7-53b676e9fe42",
+      "management_token_hash": "006a52553236ad76d32ec7f477541b0f0bb595cb91bf6cb62233b387b448cb50",
+      "verification_token_hash": "915bd17966c32bd77436d9e39eda612bc2e35f6dbb7fb63f245dbcc12edb8f3d",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "created_at": "2026-05-19T05:56:29.000Z",
+      "updated_at": "2026-05-19T05:56:29.000Z"
+    },
+    {
+      "user_id": null,
+      "email": "delete-user@example.com",
+      "channel": "email",
+      "symbol": "XAUUSD",
+      "currency": "USD",
+      "condition": "above",
+      "threshold_value": 2800,
+      "karat": null,
+      "country_code": null,
+      "is_active": false,
+      "cooldown_minutes": 60,
+      "last_triggered_at": null,
+      "id": "925f5856-8653-4390-b43d-13050c8aa376",
+      "management_token_hash": "7f537da653277b41d5241a565daa640aabc7bdd62f3b1b0c060c3dc3479f93d1",
+      "verification_token_hash": "2381a717524708e423fdd534679818399135f2164a741cc362b63ea96447fd41",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "created_at": "2026-05-19T05:56:29.017Z",
+      "updated_at": "2026-05-19T05:56:29.017Z"
+    }
+  ],
+  "alert_events": [
+    {
+      "id": "e37de8c6-b7b1-49aa-963e-9fa42784de17",
+      "created_at": "2026-05-19T05:55:42.324Z",
+      "alert_rule_id": "70e2d46e-bba3-49d4-9cb8-51f1934252f0",
+      "price_snapshot_id": null,
+      "channel": "email",
+      "status": "dry_run",
+      "payload": {
+        "type": "verify",
+        "email_mode": "dry-run"
+      },
+      "error_message": null,
+      "sent_at": "2026-05-19T05:55:42.324Z"
+    },
+    {
+      "id": "18e31692-58e8-4cab-b328-624c2e719af8",
+      "created_at": "2026-05-19T05:55:42.337Z",
+      "alert_rule_id": "bed69f95-7052-49cd-9296-c423a95aa52a",
+      "price_snapshot_id": null,
+      "channel": "email",
+      "status": "dry_run",
+      "payload": {
+        "type": "verify",
+        "email_mode": "dry-run"
+      },
+      "error_message": null,
+      "sent_at": "2026-05-19T05:55:42.337Z"
+    },
+    {
+      "id": "37a41743-acd4-4b68-9036-c4c9e38ad07d",
+      "created_at": "2026-05-19T05:56:29.002Z",
+      "alert_rule_id": "64a5502b-58bf-4499-90e7-53b676e9fe42",
+      "price_snapshot_id": null,
+      "channel": "email",
+      "status": "dry_run",
+      "payload": {
+        "type": "verify",
+        "email_mode": "dry-run"
+      },
+      "error_message": null,
+      "sent_at": "2026-05-19T05:56:29.001Z"
+    },
+    {
+      "id": "3c8b2372-2ca1-44e0-91d9-80362d5a1f2f",
+      "created_at": "2026-05-19T05:56:29.017Z",
+      "alert_rule_id": "925f5856-8653-4390-b43d-13050c8aa376",
+      "price_snapshot_id": null,
+      "channel": "email",
+      "status": "dry_run",
+      "payload": {
+        "type": "verify",
+        "email_mode": "dry-run"
+      },
+      "error_message": null,
+      "sent_at": "2026-05-19T05:56:29.017Z"
+    }
+  ],
+  "notification_subscriptions": [
+    {
+      "id": "27d2e000-4407-436d-a859-f9b99059b729",
+      "user_id": "export-user",
+      "channel": "email",
+      "destination": "export-user@example.com",
+      "destination_hash": "6bb606a03579cee908355853ff15da2aab875ebaf5f5becb13b31725c679d058",
+      "unsubscribe_token_hash": "a5ec88d44f654d415d9d6a6ed0e82812d00ff180f9051b1fa3dc19f1d8ce4524",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "metadata": {
+        "scope": "price-alerts-v1",
+        "symbol": "XAUUSD",
+        "currency": "USD",
+        "createdAt": "2026-05-19T05:55:42.323Z",
+        "unsubscribe_token": "T5Tcg72GDEng-hr6Pkfg9GSVYNO3mg06"
+      },
+      "created_at": "2026-05-19T05:55:42.323Z",
+      "updated_at": "2026-05-19T05:55:42.323Z"
+    },
+    {
+      "id": "d7816156-8ace-428a-9edd-006d86106745",
+      "user_id": null,
+      "channel": "email",
+      "destination": "delete-user@example.com",
+      "destination_hash": "7d7f681c105a59a3d7415d3f50f699537779a4305bad261390b0deac32468914",
+      "unsubscribe_token_hash": "6432d331ef0c8d6fbe571dfe8e054a1bfbaec4366deaa1a0fbafebb12c3f60d3",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "metadata": {
+        "scope": "price-alerts-v1",
+        "symbol": "XAUUSD",
+        "currency": "USD",
+        "createdAt": "2026-05-19T05:55:42.337Z",
+        "unsubscribe_token": "cER9H1ZypX2NPzwacb7X8oJqJ5H01Mzr"
+      },
+      "created_at": "2026-05-19T05:55:42.337Z",
+      "updated_at": "2026-05-19T05:55:42.337Z"
+    },
+    {
+      "id": "db9c2afc-8607-40f9-9569-5fee7691e95b",
+      "user_id": "export-user",
+      "channel": "email",
+      "destination": "export-user@example.com",
+      "destination_hash": "6bb606a03579cee908355853ff15da2aab875ebaf5f5becb13b31725c679d058",
+      "unsubscribe_token_hash": "4fdefd11d3f61af2401c14c5b4c1e650a7a27a1df95eb9107700cb43a1c53305",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "metadata": {
+        "scope": "price-alerts-v1",
+        "symbol": "XAUUSD",
+        "currency": "USD",
+        "createdAt": "2026-05-19T05:56:29.000Z",
+        "unsubscribe_token": "pIwQVgy4dR4NfBhowrx7MFnJd_xlDyvS"
+      },
+      "created_at": "2026-05-19T05:56:29.000Z",
+      "updated_at": "2026-05-19T05:56:29.000Z"
+    },
+    {
+      "id": "4ff70ee3-e351-45e0-8871-3cf2cbed591d",
+      "user_id": null,
+      "channel": "email",
+      "destination": "delete-user@example.com",
+      "destination_hash": "7d7f681c105a59a3d7415d3f50f699537779a4305bad261390b0deac32468914",
+      "unsubscribe_token_hash": "ab0f45aa63f180b912d32774652dd25192573e51b125a556e9df6dbacacdf1ff",
+      "verified_at": null,
+      "unsubscribed_at": null,
+      "metadata": {
+        "scope": "price-alerts-v1",
+        "symbol": "XAUUSD",
+        "currency": "USD",
+        "createdAt": "2026-05-19T05:56:29.017Z",
+        "unsubscribe_token": "mRTRLQZqXSTtkLvvbRXIdDmTXYdWAO3_"
+      },
+      "created_at": "2026-05-19T05:56:29.017Z",
+      "updated_at": "2026-05-19T05:56:29.017Z"
+    }
+  ]
+}
