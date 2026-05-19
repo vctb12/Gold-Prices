@@ -9,6 +9,10 @@ import * as cache from '../lib/cache.js';
 import * as calc from '../lib/price-calculator.js';
 import * as fmt from '../lib/formatter.js';
 import { getMarketStatus, getLiveFreshness } from '../lib/live-status.js';
+import { createRealtimePricingEngine } from '../lib/realtime-pricing-engine.js';
+import { PrimaryQuoteProvider } from '../lib/quote-providers/primary-provider.js';
+import { SecondaryQuoteProvider } from '../lib/quote-providers/secondary-provider.js';
+import { formatProviderLabel } from '../lib/provider-labels.js';
 import { injectNav, updateNavLang } from '../components/nav.js';
 import { injectFooter } from '../components/footer.js';
 import { injectTicker, updateTicker, updateTickerLang } from '../components/ticker.js';
@@ -16,6 +20,8 @@ import { injectSpotBar, updateSpotBar, updateSpotBarLang } from '../components/s
 import { renderAdSlot } from '../components/adSlot.js';
 import { renderFreshnessBadge } from '../components/FreshnessBadge.js';
 import { renderMarketStatusPanel } from '../components/MarketStatusPanel.js';
+import { renderQuoteMetaPanel } from '../components/QuoteMetaPanel.js';
+import { renderRealtimeSlaPanel } from '../components/RealtimeSlaPanel.js';
 import { renderMethodologySection } from '../components/MethodologySection.js';
 import { renderLocationGuideSection } from '../components/LocationGuideSection.js';
 import '../lib/reveal.js';
@@ -56,7 +62,10 @@ let rates = {};
 let goldUpdatedAt = null;
 let goldIsFresh = null;
 let goldIsFallback = null;
+let goldProviderId = 'primary-provider';
 let priceSourceLabel = 'cached/fallback';
+let _realtimeSnapshot = null;
+let _realtimeEngine = null;
 let _refreshTimer = null;
 let _freshnessTimer = null;
 
@@ -186,12 +195,14 @@ function getFreshnessMeta() {
     isFallback: goldIsFallback,
     isFresh: goldIsFresh,
   });
-  const sourceText = tx(SOURCE_TX_KEY[freshness.key] || 'sourceCached');
+  const statusText = tx(SOURCE_TX_KEY[freshness.key] || 'sourceCached');
+  const sourceText = formatProviderLabel(goldProviderId);
   return {
     freshnessTime: freshness.timeText,
     ageText: freshness.ageText,
     isLive: freshness.key === 'live',
     key: freshness.key,
+    statusText,
     sourceText,
   };
 }
@@ -222,12 +233,12 @@ function startFreshnessTimer() {
   let prevSnapshotText = '';
   _freshnessTimer = setInterval(() => {
     if (!goldPrice || !goldUpdatedAt) return;
-    const { ageText, sourceText, key } = getFreshnessMeta();
+    const { ageText, statusText, sourceText, key } = getFreshnessMeta();
     const ageClass = freshnessAgeClass(getLiveFreshness({ updatedAt: goldUpdatedAt, lang }).ageMs);
-    const hlcText = `${tx('updated')}: ${ageText} · ${tx('source')}: ${sourceText}`;
-    const kstripText = `${tx('updated')}: ${ageText} · ${tx('source')}: ${sourceText}`;
-    const commandText = `${sourceText} · ${ageText}`;
-    const snapshotText = `${tx('updated')}: ${ageText}`;
+    const hlcText = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`;
+    const kstripText = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`;
+    const commandText = `${statusText} · ${sourceText} · ${ageText}`;
+    const snapshotText = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('updated')}: ${ageText}`;
     const hlcEl = document.getElementById('hlc-updated');
     if (hlcEl && hlcText !== prevHlcText) {
       hlcEl.textContent = hlcText;
@@ -248,7 +259,7 @@ function startFreshnessTimer() {
     }
     const snapshotStatus = document.getElementById('home-snapshot-status-value');
     const snapshotNote = document.getElementById('home-snapshot-status-note');
-    if (snapshotStatus) snapshotStatus.textContent = sourceText;
+    if (snapshotStatus) snapshotStatus.textContent = `${statusText} · ${sourceText}`;
     if (snapshotNote && snapshotText !== prevSnapshotText) {
       snapshotNote.textContent = snapshotText;
       prevSnapshotText = snapshotText;
@@ -297,25 +308,28 @@ function renderHeroCard() {
   setTextById('hlc-aed22', fmt.formatPrice(aed22g, 'AED', 2));
   setTextById('hlc-aed21', fmt.formatPrice(aed21g, 'AED', 2));
   setTextById('hlc-aed18', fmt.formatPrice(aed18g, 'AED', 2));
-  const { ageText, isLive, sourceText, key } = getFreshnessMeta();
+  const { ageText, isLive, statusText, sourceText, key } = getFreshnessMeta();
   const ageClass = freshnessAgeClass(getLiveFreshness({ updatedAt: goldUpdatedAt, lang }).ageMs);
   const hlcUpdatedEl = document.getElementById('hlc-updated');
   if (hlcUpdatedEl) {
-    hlcUpdatedEl.textContent = `${tx('updated')}: ${ageText} · ${tx('source')}: ${sourceText}`;
+    hlcUpdatedEl.textContent = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`;
     hlcUpdatedEl.dataset.freshnessKey = key;
     hlcUpdatedEl.dataset.freshnessAge = ageClass;
   } else {
-    setTextById('hlc-updated', `${tx('updated')}: ${ageText} · ${tx('source')}: ${sourceText}`);
+    setTextById(
+      'hlc-updated',
+      `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`
+    );
   }
   const kstripUpdatedEl = document.getElementById('karat-strip-updated');
   if (kstripUpdatedEl) {
-    kstripUpdatedEl.textContent = `${tx('updated')}: ${ageText} · ${tx('source')}: ${sourceText}`;
+    kstripUpdatedEl.textContent = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`;
     kstripUpdatedEl.dataset.freshnessKey = key;
     kstripUpdatedEl.dataset.freshnessAge = ageClass;
   } else {
     setTextById(
       'karat-strip-updated',
-      `${tx('updated')}: ${ageText} · ${tx('source')}: ${sourceText}`
+      `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`
     );
   }
 
@@ -359,7 +373,7 @@ function renderHeroCard() {
     uae21k: aed21g,
     uae18k: aed18g,
     updatedAt: goldUpdatedAt,
-    hasLiveFailure: priceSourceLabel !== 'live',
+    hasLiveFailure: key !== 'live',
     isFallback: goldIsFallback,
     isFresh: goldIsFresh,
   });
@@ -384,8 +398,8 @@ function renderHeroCard() {
     const timeStr = goldUpdatedAt ? fmt.formatTimestampShort(goldUpdatedAt, lang) : '—';
     bar.classList.toggle('home-freshness-bar--stale', stale);
     barText.textContent = stale
-      ? `${tx('sourceCached')} · ${tx('updated')}: ${timeStr}`
-      : `${tx('sourceLive')} · ${tx('updated')}: ${timeStr}`;
+      ? `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${timeStr}`
+      : `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${timeStr}`;
     bar.removeAttribute('hidden');
   }
   renderHomeTrustAddons();
@@ -405,7 +419,7 @@ function renderHomeTrustAddons() {
       renderFreshnessBadge({
         lang,
         state: freshness.key,
-        source: 'GoldPriceZ',
+        source: formatProviderLabel(goldProviderId),
         updatedAt: goldUpdatedAt,
         marketOpen: getMarketStatus().isOpen,
         className: 'home-freshness-badge',
@@ -421,6 +435,46 @@ function renderHomeTrustAddons() {
         lang,
         className: 'home-market-status',
         t: txGlobal,
+      })
+    );
+  }
+
+  renderHomeRealtimePanels();
+}
+
+function renderHomeRealtimePanels() {
+  const metaMount = document.getElementById('home-quote-meta-slot');
+  if (metaMount) {
+    const freshness = getFreshnessMeta();
+    metaMount.replaceChildren(
+      renderQuoteMetaPanel({
+        lang,
+        statusLabel: freshness.statusText,
+        sourceLabel: freshness.sourceText,
+        providerId: formatProviderLabel(goldProviderId),
+        providerTimestamp: goldUpdatedAt,
+        fetchedAt: _realtimeSnapshot?.quote?.fetchedAt || goldUpdatedAt,
+        ageLabel: freshness.ageText,
+        pollIntervalMs: _realtimeSnapshot?.metrics?.nextPollInMs ?? null,
+        lastFetchLatencyMs: _realtimeSnapshot?.metrics?.latestNetworkLatencyMs ?? null,
+        t: txGlobal,
+        className: 'home-quote-meta-panel',
+      })
+    );
+  }
+
+  const slaMount = document.getElementById('home-realtime-sla-slot');
+  if (slaMount) {
+    const debugFreshness = new URLSearchParams(location.search).get('debugFreshness') === '1';
+    if (!debugFreshness) {
+      slaMount.replaceChildren();
+      return;
+    }
+    slaMount.replaceChildren(
+      renderRealtimeSlaPanel({
+        snapshot: _realtimeSnapshot,
+        t: txGlobal,
+        className: 'home-realtime-sla-panel',
       })
     );
   }
@@ -457,9 +511,13 @@ function renderCommandCenter(values = {}) {
     aed18g = null,
     usd24oz = goldPrice,
   } = values;
-  const { ageText, sourceText, key } = getFreshnessMeta();
+  const { ageText, statusText, sourceText, key } = getFreshnessMeta();
 
-  setTrustChip('home-command-freshness', `${sourceText} · ${ageText}`, key);
+  setTrustChip(
+    'home-command-freshness',
+    `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${ageText}`,
+    key
+  );
   setTrustChip(
     'home-command-spot-chip',
     usd24oz ? `XAU/USD ${fmt.formatPrice(usd24oz, 'USD', 2)}` : 'XAU/USD —',
@@ -473,8 +531,8 @@ function renderCommandCenter(values = {}) {
 
   setTextById('home-snapshot-uae-value', aed24g ? fmt.formatPrice(aed24g, 'AED', 2) : '—');
   setTextById('home-snapshot-global-value', usd24oz ? fmt.formatPrice(usd24oz, 'USD', 2) : '—');
-  setTextById('home-snapshot-status-value', sourceText);
-  setTextById('home-snapshot-status-note', `${tx('updated')}: ${ageText}`);
+  setTextById('home-snapshot-status-value', `${statusText} · ${sourceText}`);
+  setTextById('home-snapshot-status-note', `${txGlobal('freshness.updatedUtcLabel')}: ${ageText}`);
 }
 
 // ── Render karat price strip ───────────────────────────────────────────────
@@ -833,51 +891,82 @@ function applyLangToPage() {
 async function fetchLiveData() {
   if (!navigator.onLine) return;
 
-  const [goldRes, fxRes] = await Promise.allSettled([api.fetchGold(), api.fetchFX()]);
+  const fxRes = await Promise.allSettled([api.fetchFX()]);
+  const fxResult = fxRes[0];
 
-  if (goldRes.status === 'fulfilled') {
-    goldPrice = goldRes.value.price;
-    goldUpdatedAt = goldRes.value.updatedAt || new Date().toISOString();
-    goldIsFresh = goldRes.value.isFresh ?? null;
-    goldIsFallback = goldRes.value.isFallback ?? null;
-    priceSourceLabel = goldRes.value.source === 'cache-fallback' ? 'cached/fallback' : 'live';
-    cache.saveGoldPrice(goldRes.value.price, goldRes.value.updatedAt);
+  if (fxResult.status === 'fulfilled') {
+    rates = fxResult.value.rates ?? {};
+    cache.saveFXRates(rates, {
+      lastUpdateUtc: fxResult.value.time_last_update_utc,
+      nextUpdateUtc: fxResult.value.time_next_update_utc,
+    });
+    renderGCCGrid();
+  }
+}
+
+function applyRealtimeSnapshot(snapshot) {
+  _realtimeSnapshot = snapshot;
+
+  const quote = snapshot?.quote;
+  if (quote?.price) {
+    goldPrice = quote.price;
+    goldUpdatedAt = quote.providerTimestamp || quote.fetchedAt || new Date().toISOString();
+    goldProviderId = quote.providerId || goldProviderId;
+    goldIsFallback = quote.isFallback ?? quote.forcedState === 'fallback';
+    goldIsFresh = quote.isFresh ?? snapshot?.freshness?.state === 'live';
+    priceSourceLabel = snapshot?.freshness?.state === 'live' ? 'live' : 'cached/fallback';
+    cache.saveGoldPrice(quote.price, goldUpdatedAt);
     renderHeroCard();
   } else if (!goldPrice) {
     priceSourceLabel = 'unavailable';
-    // Show explicit unavailable state in hero
     const priceEl = document.getElementById('hlc-price');
     if (priceEl) {
       priceEl.classList.remove('hlc-price--loading');
       priceEl.textContent = '—';
     }
-    const updEl = document.getElementById('hlc-updated');
-    if (updEl) {
-      updEl.textContent = tx('priceUnavailableApi');
-      updEl.dataset.freshnessKey = 'unavailable';
-      updEl.dataset.freshnessAge = 'unavailable';
-    }
-    const karatUpdEl = document.getElementById('karat-strip-updated');
-    if (karatUpdEl) {
-      karatUpdEl.textContent = tx('priceUnavailableApi');
-      karatUpdEl.dataset.freshnessKey = 'unavailable';
-      karatUpdEl.dataset.freshnessAge = 'unavailable';
-    }
-    document.getElementById('hero-live-card')?.removeAttribute('aria-busy');
-    setTrustChip('home-command-freshness', tx('sourceUnavailable'), 'unavailable');
-    setTrustChip('home-command-spot-chip', 'XAU/USD —', 'unavailable');
-    setTextById('home-snapshot-status-value', tx('sourceUnavailable'));
-    setTextById('home-snapshot-status-note', tx('priceUnavailableApi'));
   }
 
-  if (fxRes.status === 'fulfilled') {
-    rates = fxRes.value.rates ?? {};
-    cache.saveFXRates(rates, {
-      lastUpdateUtc: fxRes.value.time_last_update_utc,
-      nextUpdateUtc: fxRes.value.time_next_update_utc,
+  renderHomeRealtimePanels();
+}
+
+function initRealtimeEngine() {
+  if (_realtimeEngine) return;
+
+  const primaryProvider = new PrimaryQuoteProvider({ timeoutMs: 5000 });
+  const secondaryProvider = new SecondaryQuoteProvider({ timeoutMs: 5000 });
+
+  _realtimeEngine = createRealtimePricingEngine({
+    primaryProvider,
+    secondaryProvider,
+    config: {
+      activePollMs: 5000,
+      hiddenPollMs: 20000,
+      fetchTimeoutMs: 5000,
+      jitterMs: 250,
+      backoffMs: [5000, 10000, 20000, 40000, 60000],
+    },
+    debug: new URLSearchParams(location.search).get('debugFreshness') === '1',
+  });
+
+  const cacheBoot = cache.getFallbackGoldPrice();
+  if (cacheBoot) {
+    _realtimeEngine.seedFromCache({
+      price: cacheBoot.price,
+      updatedAt: cacheBoot.updatedAt,
+      fetchedAt: cacheBoot.fetchedAt,
+      providerId: 'cache',
+      source: 'cache',
     });
-    renderGCCGrid();
   }
+
+  _realtimeEngine.subscribe((snapshot) => {
+    applyRealtimeSnapshot(snapshot);
+  });
+
+  _realtimeEngine.start();
+  document.addEventListener('visibilitychange', () => {
+    _realtimeEngine?.setVisibility(!document.hidden);
+  });
 }
 
 function initLazyBelowFoldFeatures() {
@@ -1161,9 +1250,10 @@ async function init() {
   }
 
   // Fetch live data (non-blocking)
+  initRealtimeEngine();
   fetchLiveData();
 
-  // Auto-refresh every 90 seconds
+  // FX auto-refresh (gold polling handled by realtime pricing engine)
   if (_refreshTimer) clearInterval(_refreshTimer);
   _refreshTimer = setInterval(fetchLiveData, CONSTANTS.GOLD_REFRESH_MS);
 
@@ -1206,6 +1296,10 @@ async function init() {
       if (_freshnessTimer) {
         clearInterval(_freshnessTimer);
         _freshnessTimer = null;
+      }
+      if (_realtimeEngine) {
+        _realtimeEngine.stop();
+        _realtimeEngine = null;
       }
     },
     { once: true }
