@@ -5,16 +5,25 @@ import { formatTimestampShort } from './formatter.js';
  *
  * - `OPEN_SUN_MINUTES`: minutes past midnight UTC when the market re-opens on Sunday.
  * - `CLOSE_FRI_MINUTES`: minutes past midnight UTC when the market closes on Friday.
- * - `STALE_AFTER_MS`: age in ms after which a price is considered stale (12 minutes).
- *   The gold-price-fetch workflow runs every 6 minutes while markets are open.
- *   A 12-minute threshold tolerates one missed cron tick before the "Live"
- *   pill flips to "stale", preventing the UI from claiming "Live" data that
- *   is actually two cron windows old.
+ * - `DELAYED_AFTER_MS`: age in ms after which a price is considered `delayed`
+ *   (still trustworthy, but no longer "Live"). 30 minutes is half of the
+ *   actual hourly refresh window so the pill flips honestly midway through.
+ * - `STALE_AFTER_MS`: age in ms after which a price is considered stale
+ *   (75 minutes). The gold-price-fetch workflow runs **hourly** at minute :02
+ *   (`'2 * * * 1-4'` etc., see `.github/workflows/gold-price-fetch.yml`), so
+ *   a 75-minute threshold tolerates one missed cron tick before the badge
+ *   flips to "stale". This must match upstream cadence — never claim "Live"
+ *   for data that is older than the refresh interval.
+ *
+ * If you change the cron cadence, update these thresholds in lock-step and
+ * keep `docs/realtime-baseline-audit.md` in sync. The truth invariant is:
+ *   DELAYED_AFTER_MS < STALE_AFTER_MS <= upstream cron interval + tolerance
  */
 export const GOLD_MARKET = {
   OPEN_SUN_MINUTES: 22 * 60,
   CLOSE_FRI_MINUTES: 21 * 60,
-  STALE_AFTER_MS: 12 * 60 * 1000,
+  DELAYED_AFTER_MS: 30 * 60 * 1000,
+  STALE_AFTER_MS: 75 * 60 * 1000,
 };
 
 /**
@@ -107,19 +116,55 @@ export function formatRelativeAge(ageMs, lang = 'en') {
 /**
  * Derive the freshness key and human-readable age text for a price timestamp.
  *
- * Freshness keys:
- * - `'live'`        — data is within `staleAfterMs` and no live fetch failure.
- * - `'cached'`      — data is within `staleAfterMs` but a live fetch failure occurred.
- * - `'stale'`       — data is older than `staleAfterMs`.
- * - `'unavailable'` — `updatedAt` is absent.
+ * Freshness keys (anti-mislabel ordering — hard guards first, then age):
+ * - `'unavailable'` — `updatedAt` is absent or unparseable.
+ * - `'fallback'`    — upstream marked this snapshot as a provider fallback
+ *                     (`isFallback === true`). Highest-priority truth signal;
+ *                     overrides age. The upstream pipeline already detected
+ *                     that the live provider call failed; we must never
+ *                     repaint this as "Live" no matter how recent the file
+ *                     write timestamp is.
+ * - `'stale'`       — age > `staleAfterMs` (default 75 min). Anything older
+ *                     than the upstream refresh window is no longer trustworthy.
+ * - `'cached'`      — local live fetch failed and we are serving from cache,
+ *                     but the cached value is still within the freshness window.
+ * - `'delayed'`     — age > `delayedAfterMs` (default 30 min) but ≤ stale.
+ *                     Still trustworthy, but no longer "Live". UI must visibly
+ *                     reflect the delay so users see source/freshness honestly.
+ * - `'live'`        — age ≤ `delayedAfterMs`, upstream marked fresh, no local
+ *                     fetch failure. The only state where "Live" may be shown.
  *
- * @param {{ updatedAt?: string|Date|number|null, lang?: 'en'|'ar', hasLiveFailure?: boolean, staleAfterMs?: number }} [options]
- * @returns {{ key: 'live'|'cached'|'stale'|'unavailable', ageMs: number, ageText: string, timeText: string, updatedAt: string|Date|number|null }}
+ * The function is the single sanctioned source of truth for the
+ * `live | delayed | cached | stale | fallback | unavailable` vocabulary used
+ * across hero, tracker, footer ticker, country pages, and footer ticker.
+ * Do not branch on raw `ageMs` outside this module — call it instead so the
+ * anti-mislabel guards stay centralized.
+ *
+ * @param {{
+ *   updatedAt?: string|Date|number|null,
+ *   lang?: 'en'|'ar',
+ *   hasLiveFailure?: boolean,
+ *   isFallback?: boolean|null,
+ *   isFresh?: boolean|null,
+ *   delayedAfterMs?: number,
+ *   staleAfterMs?: number,
+ * }} [options]
+ * @returns {{
+ *   key: 'live'|'delayed'|'cached'|'stale'|'fallback'|'unavailable',
+ *   ageMs: number,
+ *   ageText: string,
+ *   timeText: string,
+ *   updatedAt: string|Date|number|null,
+ *   reason: string,
+ * }}
  */
 export function getLiveFreshness({
   updatedAt,
   lang = 'en',
   hasLiveFailure = false,
+  isFallback = null,
+  isFresh = null,
+  delayedAfterMs = GOLD_MARKET.DELAYED_AFTER_MS,
   staleAfterMs = GOLD_MARKET.STALE_AFTER_MS,
 } = {}) {
   if (!updatedAt) {
@@ -129,19 +174,39 @@ export function getLiveFreshness({
       ageText: '—',
       timeText: '—',
       updatedAt: null,
+      reason: 'missing-timestamp',
     };
   }
 
   const ageMs = getAgeMs(updatedAt);
-  const key = ageMs > staleAfterMs ? 'stale' : hasLiveFailure ? 'cached' : 'live';
+  const ageText = formatRelativeAge(ageMs, lang);
+  const timeText = formatTimestampShort(updatedAt, lang);
 
-  return {
-    key,
-    ageMs,
-    ageText: formatRelativeAge(ageMs, lang),
-    timeText: formatTimestampShort(updatedAt, lang),
-    updatedAt,
-  };
+  // Hard anti-mislabel guard 1: upstream pipeline already flagged this
+  // snapshot as a provider fallback. Never paint as Live regardless of age.
+  if (isFallback === true) {
+    return { key: 'fallback', ageMs, ageText, timeText, updatedAt, reason: 'upstream-fallback' };
+  }
+
+  // Hard anti-mislabel guard 2: upstream explicitly says stale.
+  if (isFresh === false) {
+    return { key: 'stale', ageMs, ageText, timeText, updatedAt, reason: 'upstream-stale' };
+  }
+
+  // Age-based classification.
+  if (ageMs > staleAfterMs) {
+    return { key: 'stale', ageMs, ageText, timeText, updatedAt, reason: 'age-exceeds-stale' };
+  }
+
+  if (hasLiveFailure) {
+    return { key: 'cached', ageMs, ageText, timeText, updatedAt, reason: 'local-fetch-failed' };
+  }
+
+  if (ageMs > delayedAfterMs) {
+    return { key: 'delayed', ageMs, ageText, timeText, updatedAt, reason: 'age-exceeds-delayed' };
+  }
+
+  return { key: 'live', ageMs, ageText, timeText, updatedAt, reason: 'fresh' };
 }
 
 /**

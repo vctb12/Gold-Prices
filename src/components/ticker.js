@@ -65,10 +65,14 @@ function freshnessLabel(key, lang) {
   switch (key) {
     case 'live':
       return isAr ? 'مباشر' : 'Live';
+    case 'delayed':
+      return isAr ? 'متأخر قليلاً' : 'Delayed';
     case 'cached':
       return isAr ? 'مخزن مؤقتاً' : 'Cached';
     case 'stale':
       return isAr ? 'قديم' : 'Stale';
+    case 'fallback':
+      return isAr ? 'بديل احتياطي' : 'Fallback';
     case 'unavailable':
     default:
       return isAr ? 'غير متاح' : 'Unavailable';
@@ -242,6 +246,8 @@ export function updateTicker(data = {}) {
       updatedAt: data.updatedAt,
       lang: _currentLang,
       hasLiveFailure: Boolean(data.hasLiveFailure),
+      isFallback: data.isFallback ?? null,
+      isFresh: data.isFresh ?? null,
     });
     bar.setAttribute('data-freshness', fresh.key);
     const label = freshnessLabel(fresh.key, _currentLang);

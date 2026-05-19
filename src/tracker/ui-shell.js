@@ -288,11 +288,15 @@ export function updateShellTickerFromState(state, spot, priceFor) {
     uae18k: priceFor({ currency: 'AED', karat: '18', unit: 'gram', spot }),
     updatedAt: state.live?.updatedAt,
     hasLiveFailure: Boolean(state.hasLiveFailure),
+    isFallback: state.live?.isFallback ?? null,
+    isFresh: state.live?.isFresh ?? null,
   });
   updateSpotBar({
     xauUsd: spot,
     aed24kGram: aed24,
     updatedAt: state.live?.updatedAt,
     hasLiveFailure: Boolean(state.hasLiveFailure),
+    isFallback: state.live?.isFallback ?? null,
+    isFresh: state.live?.isFresh ?? null,
   });
 }

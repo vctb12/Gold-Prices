@@ -141,6 +141,8 @@ export function updateSpotBar(data = {}) {
         updatedAt: data.updatedAt,
         lang: _currentLang,
         hasLiveFailure: Boolean(data.hasLiveFailure),
+        isFallback: data.isFallback ?? null,
+        isFresh: data.isFresh ?? null,
       });
       _barEl.setAttribute('data-freshness', fresh.key);
       el.textContent = `${fresh.timeText} · ${fresh.ageText}`;
@@ -158,10 +160,14 @@ function freshnessLabel(key, lang) {
   switch (key) {
     case 'live':
       return isAr ? 'مباشر' : 'Live';
+    case 'delayed':
+      return isAr ? 'متأخر قليلاً' : 'Delayed';
     case 'cached':
       return isAr ? 'مخزن مؤقتاً' : 'Cached';
     case 'stale':
       return isAr ? 'قديم' : 'Stale';
+    case 'fallback':
+      return isAr ? 'بديل احتياطي' : 'Fallback';
     case 'unavailable':
     default:
       return isAr ? 'غير متاح' : 'Unavailable';

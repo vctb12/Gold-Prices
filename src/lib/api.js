@@ -135,10 +135,38 @@ function normalizeGoldResponse(data) {
     data?.meta?.source ||
     'goldpricez';
 
+  // Pipe upstream truth metadata through so the client freshness engine can
+  // honor anti-mislabel guards (isFallback, isFresh) instead of relying on
+  // age alone. The provider-adapter writes these into data/gold_price.json
+  // and the backend forwards them via /api/v1/prices/latest.
+  const isFresh =
+    payload?.isFresh === true || payload?.is_fresh === true
+      ? true
+      : payload?.isFresh === false || payload?.is_fresh === false
+        ? false
+        : null;
+  const isFallback =
+    payload?.isFallback === true || payload?.is_fallback === true
+      ? true
+      : payload?.isFallback === false || payload?.is_fallback === false
+        ? false
+        : null;
+  const freshnessSeconds = Number(payload?.freshnessSeconds ?? payload?.freshness_seconds);
+  const maxFreshnessSeconds = Number(
+    payload?.maxFreshnessSeconds ?? payload?.max_freshness_seconds
+  );
+  const sourceTimestamp =
+    payload?.sourceTimestamp || payload?.source_updated_at_gmt || payload?.timestamp_source || null;
+
   return {
     price,
     updatedAt,
     source,
+    isFresh,
+    isFallback,
+    freshnessSeconds: Number.isFinite(freshnessSeconds) ? freshnessSeconds : null,
+    maxFreshnessSeconds: Number.isFinite(maxFreshnessSeconds) ? maxFreshnessSeconds : null,
+    sourceTimestamp,
     raw: data,
   };
 }

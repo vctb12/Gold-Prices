@@ -1018,7 +1018,15 @@ async function fetchLive() {
     const [goldRes, fxRes] = await Promise.allSettled([api.fetchGold(), api.fetchFX()]);
     if (goldRes.status === 'fulfilled') {
       const data = goldRes.value;
-      state.live = { price: data.price, updatedAt: data.updatedAt, raw: data };
+      state.live = {
+        price: data.price,
+        updatedAt: data.updatedAt,
+        isFresh: data.isFresh ?? null,
+        isFallback: data.isFallback ?? null,
+        freshnessSeconds: data.freshnessSeconds ?? null,
+        sourceTimestamp: data.sourceTimestamp ?? null,
+        raw: data,
+      };
       state.hasLiveFailure = false;
       cache.saveGoldPrice(data.price, data.updatedAt);
       cache.checkDayOpenReset({ goldPriceUsdPerOz: data.price });

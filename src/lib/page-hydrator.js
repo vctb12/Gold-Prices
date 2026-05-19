@@ -172,8 +172,10 @@ async function fetchPrices() {
 
 function freshnessTone(key) {
   if (key === 'live') return 'live';
+  if (key === 'delayed') return 'delayed';
   if (key === 'cached') return 'cached';
   if (key === 'stale') return 'stale';
+  if (key === 'fallback') return 'fallback';
   return 'unavailable';
 }
 
@@ -656,13 +658,21 @@ function renderFreshnessBadgeLegacy(updatedAt) {
   const freshness = getLiveFreshness({ updatedAt, hasLiveFailure: false, lang: 'en' });
   const colorMap = {
     live: 'var(--color-live, #10b981)',
+    delayed: 'var(--color-warning, #f59e0b)',
     cached: 'var(--color-warning, #f59e0b)',
     stale: 'var(--color-stale, #f97316)',
+    fallback: 'var(--color-stale, #f97316)',
     unavailable: 'var(--text-tertiary, #6b7280)',
   };
   const color = colorMap[freshness.key] || 'var(--text-tertiary, #6b7280)';
   const fragment = document.createDocumentFragment();
-  if (freshness.key === 'cached' || freshness.key === 'stale' || freshness.key === 'unavailable') {
+  if (
+    freshness.key === 'delayed' ||
+    freshness.key === 'cached' ||
+    freshness.key === 'stale' ||
+    freshness.key === 'fallback' ||
+    freshness.key === 'unavailable'
+  ) {
     fragment.appendChild(
       el('div', { class: 'ph-freshness-banner', role: 'alert' }, [
         '⚠️ Prices may be delayed. Last known data shown. ',

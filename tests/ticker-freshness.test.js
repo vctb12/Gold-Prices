@@ -172,17 +172,32 @@ test('ticker sets data-freshness="cached" when hasLiveFailure is true', async ()
   dom.restore();
 });
 
-test('ticker sets data-freshness="stale" for a timestamp older than 10 min', async () => {
+test('ticker sets data-freshness="stale" for a timestamp older than the stale threshold', async () => {
   const dom = installDom();
   const { injectTicker, updateTicker } = await loadTicker();
   injectTicker('en', 0);
-  const oldIso = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  // > STALE_AFTER_MS (75 min) — see src/lib/live-status.js.
+  const oldIso = new Date(Date.now() - 90 * 60 * 1000).toISOString();
   updateTicker({
     xauUsd: 2300,
     updatedAt: oldIso,
     hasLiveFailure: false,
   });
   assert.equal(dom.getTicker().getAttribute('data-freshness'), 'stale');
+  dom.restore();
+});
+
+test('ticker sets data-freshness="fallback" when upstream reports isFallback=true', async () => {
+  const dom = installDom();
+  const { injectTicker, updateTicker } = await loadTicker();
+  injectTicker('en', 0);
+  updateTicker({
+    xauUsd: 2300,
+    updatedAt: new Date().toISOString(),
+    hasLiveFailure: false,
+    isFallback: true,
+  });
+  assert.equal(dom.getTicker().getAttribute('data-freshness'), 'fallback');
   dom.restore();
 });
 

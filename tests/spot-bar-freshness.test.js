@@ -168,7 +168,9 @@ test('spotBar sets data-freshness="stale" for an old timestamp regardless of fai
   const { injectSpotBar, updateSpotBar } = await loadSpotBar();
 
   injectSpotBar('en', 0);
-  const oldIso = new Date(Date.now() - 30 * 60 * 1000).toISOString(); // 30 min ago
+  // > STALE_AFTER_MS (75 min) — see src/lib/live-status.js. Anything older
+  // than the upstream hourly refresh window must classify as stale.
+  const oldIso = new Date(Date.now() - 90 * 60 * 1000).toISOString(); // 90 min ago
   updateSpotBar({
     xauUsd: 2300,
     aed24kGram: 280,
@@ -176,6 +178,38 @@ test('spotBar sets data-freshness="stale" for an old timestamp regardless of fai
     hasLiveFailure: false,
   });
   assert.equal(dom.getBar().getAttribute('data-freshness'), 'stale');
+  dom.restore();
+});
+
+test('spotBar sets data-freshness="delayed" between DELAYED_AFTER_MS and STALE_AFTER_MS', async () => {
+  const dom = installDom();
+  const { injectSpotBar, updateSpotBar } = await loadSpotBar();
+
+  injectSpotBar('en', 0);
+  const oldIso = new Date(Date.now() - 45 * 60 * 1000).toISOString(); // 45 min ago
+  updateSpotBar({
+    xauUsd: 2300,
+    aed24kGram: 280,
+    updatedAt: oldIso,
+    hasLiveFailure: false,
+  });
+  assert.equal(dom.getBar().getAttribute('data-freshness'), 'delayed');
+  dom.restore();
+});
+
+test('spotBar sets data-freshness="fallback" when isFallback=true even with a fresh timestamp', async () => {
+  const dom = installDom();
+  const { injectSpotBar, updateSpotBar } = await loadSpotBar();
+
+  injectSpotBar('en', 0);
+  updateSpotBar({
+    xauUsd: 2300,
+    aed24kGram: 280,
+    updatedAt: new Date().toISOString(),
+    hasLiveFailure: false,
+    isFallback: true,
+  });
+  assert.equal(dom.getBar().getAttribute('data-freshness'), 'fallback');
   dom.restore();
 });
 

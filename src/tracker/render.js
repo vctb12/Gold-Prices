@@ -30,15 +30,19 @@ const TRACKER_BADGE_CLASSES = [
 ];
 const SOURCE_BADGE_CLASS = {
   live: 'tracker-source-badge--live',
+  delayed: 'tracker-source-badge--estimated',
   cached: 'tracker-source-badge--cached',
   stale: 'tracker-source-badge--estimated',
+  fallback: 'tracker-source-badge--estimated',
   closed: 'tracker-source-badge--closed',
   unavailable: 'tracker-source-badge--unavailable',
 };
 const STATUS_BADGE_CLASS = {
   live: 'tracker-badge-live',
+  delayed: 'tracker-badge--cached',
   cached: 'tracker-badge--cached',
   stale: 'tracker-badge--stale',
+  fallback: 'tracker-badge--stale',
   closed: 'tracker-badge--closed',
   unavailable: 'tracker-badge--unavailable',
 };
@@ -172,6 +176,8 @@ function getFreshnessModel() {
     updatedAt: _state.live?.updatedAt,
     lang: _state.lang,
     hasLiveFailure: _state.hasLiveFailure,
+    isFallback: _state.live?.isFallback ?? null,
+    isFresh: _state.live?.isFresh ?? null,
   });
   const market = getMarketStatus();
   const effectiveKey = market.isOpen ? freshness.key : 'closed';
@@ -338,7 +344,12 @@ export function renderHero() {
       } else {
         refreshText = tx('connecting');
       }
-    } else if (freshness.key === 'stale' || freshness.key === 'cached') {
+    } else if (
+      freshness.key === 'stale' ||
+      freshness.key === 'cached' ||
+      freshness.key === 'delayed' ||
+      freshness.key === 'fallback'
+    ) {
       refreshText = tx('refreshBadgeStale', { time: freshness.timeText });
     } else {
       refreshText = tx('refreshBadgeDetailed', {
@@ -434,7 +445,15 @@ export function renderHero() {
         ? tx('liveUnavailable')
         : tx('connecting');
     mobileStatus.dataset.tone =
-      freshness.key === 'live' ? 'live' : freshness.key === 'unavailable' ? 'neutral' : 'warning';
+      freshness.key === 'live'
+        ? 'live'
+        : freshness.key === 'delayed'
+          ? 'delayed'
+          : freshness.key === 'fallback'
+            ? 'fallback'
+            : freshness.key === 'unavailable'
+              ? 'neutral'
+              : 'warning';
   }
   const mobileSource = document.getElementById('tp-mobile-summary-source');
   if (mobileSource) {

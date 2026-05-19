@@ -34,8 +34,10 @@ const KARAT_STRIP_UNIT_MULT = {
 // Maps freshness key → home.source* translation key
 const SOURCE_TX_KEY = {
   live: 'sourceLive',
+  delayed: 'sourceDelayed',
   cached: 'sourceCached',
   stale: 'sourceStale',
+  fallback: 'sourceFallback',
   unavailable: 'sourceUnavailable',
 };
 
@@ -45,6 +47,8 @@ let goldPrice = null;
 let dayOpenPrice = null;
 let rates = {};
 let goldUpdatedAt = null;
+let goldIsFresh = null;
+let goldIsFallback = null;
 let priceSourceLabel = 'cached/fallback';
 let _refreshTimer = null;
 let _freshnessTimer = null;
@@ -168,6 +172,8 @@ function getFreshnessMeta() {
     updatedAt: goldUpdatedAt,
     lang,
     hasLiveFailure: priceSourceLabel !== 'live',
+    isFallback: goldIsFallback,
+    isFresh: goldIsFresh,
   });
   const sourceText = tx(SOURCE_TX_KEY[freshness.key] || 'sourceCached');
   return {
@@ -263,6 +269,8 @@ function renderHeroCard() {
     aed24kGram: aed24g,
     updatedAt: goldUpdatedAt,
     hasLiveFailure: priceSourceLabel !== 'live',
+    isFallback: goldIsFallback,
+    isFresh: goldIsFresh,
   });
 
   const priceEl = document.getElementById('hlc-price');
@@ -341,6 +349,8 @@ function renderHeroCard() {
     uae18k: aed18g,
     updatedAt: goldUpdatedAt,
     hasLiveFailure: priceSourceLabel !== 'live',
+    isFallback: goldIsFallback,
+    isFresh: goldIsFresh,
   });
 
   // Update karat strip
@@ -750,6 +760,8 @@ async function fetchLiveData() {
   if (goldRes.status === 'fulfilled') {
     goldPrice = goldRes.value.price;
     goldUpdatedAt = goldRes.value.updatedAt || new Date().toISOString();
+    goldIsFresh = goldRes.value.isFresh ?? null;
+    goldIsFallback = goldRes.value.isFallback ?? null;
     priceSourceLabel = goldRes.value.source === 'cache-fallback' ? 'cached/fallback' : 'live';
     cache.saveGoldPrice(goldRes.value.price, goldRes.value.updatedAt);
     renderHeroCard();
