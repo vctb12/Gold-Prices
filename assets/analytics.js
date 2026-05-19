@@ -68,6 +68,8 @@
   window.GP_EVENTS = Object.freeze({
     PRICE_VIEW: 'price_view',
     TRACKER_MODE_CHANGE: 'tracker_mode_change',
+    COMPARE_ACTION: 'compare_action',
+    EXPORT_CLICK: 'export_click',
     ALERT_CREATE_START: 'alert_create_start',
     ALERT_CREATE_SUCCESS: 'alert_create_success',
     CALCULATOR_SUBMIT: 'calculator_submit',

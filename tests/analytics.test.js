@@ -185,6 +185,8 @@ test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytic
   const WINDOW_GP_EVENTS_KEYS = [
     'PRICE_VIEW',
     'TRACKER_MODE_CHANGE',
+    'COMPARE_ACTION',
+    'EXPORT_CLICK',
     'ALERT_CREATE_START',
     'ALERT_CREATE_SUCCESS',
     'CALCULATOR_SUBMIT',
@@ -229,6 +231,8 @@ test('EVENTS keys match the GP_EVENTS constant names expected in assets/analytic
   const ASSETS_VALUES = {
     PRICE_VIEW: 'price_view',
     TRACKER_MODE_CHANGE: 'tracker_mode_change',
+    COMPARE_ACTION: 'compare_action',
+    EXPORT_CLICK: 'export_click',
     ALERT_CREATE_START: 'alert_create_start',
     ALERT_CREATE_SUCCESS: 'alert_create_success',
     CALCULATOR_SUBMIT: 'calculator_submit',
