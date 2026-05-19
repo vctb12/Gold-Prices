@@ -12,6 +12,23 @@ export function initEvents({ state, el, ...callbacks }) {
 }
 
 export function bindCoreEvents() {
+  const trackCompareAction = (action, extra = {}) => {
+    track(EVENTS.COMPARE_ACTION, {
+      surface: 'tracker',
+      action,
+      mode: _state.mode || 'compare',
+      ...extra,
+    });
+  };
+
+  const trackExportClick = (exportType) => {
+    track(EVENTS.EXPORT_CLICK, {
+      surface: 'tracker',
+      export_type: exportType,
+      mode: _state.mode || 'live',
+    });
+  };
+
   const comparePresets = {
     'gcc-core': { countries: ['AE', 'SA', 'KW'], karats: ['24', '22', '21'] },
     'uae-karats': { countries: ['AE', '', ''], karats: ['24', '22', '21', '18'] },
@@ -165,6 +182,9 @@ export function bindCoreEvents() {
       _state.activeRegion = btn.dataset.region;
       regionTabs.forEach((b) => b.classList.remove('is-active'));
       btn.classList.add('is-active');
+      trackCompareAction('region_switch', {
+        region: _state.activeRegion || 'gcc',
+      });
       _cb.renderMarkets();
     });
   });
@@ -183,6 +203,9 @@ export function bindCoreEvents() {
       next[index] = select.value;
       _state.compareCountries = next.filter(Boolean).slice(0, 3);
       persistState(_state);
+      trackCompareAction('country_select', {
+        selected_count: _state.compareCountries.length,
+      });
       _cb.populateSelects();
       _cb.renderAll();
     });
@@ -200,6 +223,9 @@ export function bindCoreEvents() {
       }
       _state.compareKarats = [...current];
       persistState(_state);
+      trackCompareAction('karat_toggle', {
+        selected_count: _state.compareKarats.length,
+      });
       _cb.populateSelects();
       _cb.renderAll();
     });
@@ -213,6 +239,9 @@ export function bindCoreEvents() {
       _state.compareCountries = preset.countries;
       _state.compareKarats = preset.karats;
       persistState(_state);
+      trackCompareAction('preset_apply', {
+        preset: button.dataset.comparePreset || 'custom',
+      });
       _cb.populateSelects();
       _cb.renderAll();
     });
@@ -426,18 +455,54 @@ export function bindCoreEvents() {
   });
 
   // Exports
-  _el.exportArchive?.addEventListener('click', () => _cb.exportArchiveData());
-  _el.exportArchive2?.addEventListener('click', () => _cb.exportArchiveData());
-  _el.exportHistory?.addEventListener('click', () => _cb.exportHistoryData());
-  _el.exportHistory2?.addEventListener('click', () => _cb.exportHistoryData());
-  _el.downloadJson?.addEventListener('click', () => _cb.exportJsonData());
-  _el.downloadJson2?.addEventListener('click', () => _cb.exportJsonData());
-  _el.exportChart?.addEventListener('click', () => _cb.exportChartData());
-  _el.exportChart2?.addEventListener('click', () => _cb.exportChartData());
-  _el.exportCompare?.addEventListener('click', () => _cb.exportComparisonData());
-  _el.exportCompare2?.addEventListener('click', () => _cb.exportComparisonData());
-  _el.exportWatchlist?.addEventListener('click', () => _cb.exportWatchlistData());
-  _el.downloadBrief?.addEventListener('click', () => _cb.exportBriefData());
+  _el.exportArchive?.addEventListener('click', () => {
+    trackExportClick('archive_csv');
+    _cb.exportArchiveData();
+  });
+  _el.exportArchive2?.addEventListener('click', () => {
+    trackExportClick('archive_csv');
+    _cb.exportArchiveData();
+  });
+  _el.exportHistory?.addEventListener('click', () => {
+    trackExportClick('history_csv');
+    _cb.exportHistoryData();
+  });
+  _el.exportHistory2?.addEventListener('click', () => {
+    trackExportClick('history_csv');
+    _cb.exportHistoryData();
+  });
+  _el.downloadJson?.addEventListener('click', () => {
+    trackExportClick('tracker_json');
+    _cb.exportJsonData();
+  });
+  _el.downloadJson2?.addEventListener('click', () => {
+    trackExportClick('tracker_json');
+    _cb.exportJsonData();
+  });
+  _el.exportChart?.addEventListener('click', () => {
+    trackExportClick('chart_csv');
+    _cb.exportChartData();
+  });
+  _el.exportChart2?.addEventListener('click', () => {
+    trackExportClick('chart_csv');
+    _cb.exportChartData();
+  });
+  _el.exportCompare?.addEventListener('click', () => {
+    trackExportClick('compare_csv');
+    _cb.exportComparisonData();
+  });
+  _el.exportCompare2?.addEventListener('click', () => {
+    trackExportClick('compare_csv');
+    _cb.exportComparisonData();
+  });
+  _el.exportWatchlist?.addEventListener('click', () => {
+    trackExportClick('watchlist_csv');
+    _cb.exportWatchlistData();
+  });
+  _el.downloadBrief?.addEventListener('click', () => {
+    trackExportClick('brief_txt');
+    _cb.exportBriefData();
+  });
 
   // Alert list: delete button delegation
   _el.alertList?.addEventListener('click', (e) => {

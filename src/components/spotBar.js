@@ -19,6 +19,20 @@ import { getLiveFreshness } from '../lib/live-status.js';
 let _barEl = null;
 let _prevXauUsd = null;
 let _currentLang = 'en';
+let _resizeObserver = null;
+let _resizeHandler = null;
+
+function syncSpotBarHeight() {
+  if (!_barEl) return;
+  const measuredHeight =
+    typeof _barEl.getBoundingClientRect === 'function'
+      ? _barEl.getBoundingClientRect().height
+      : _barEl.offsetHeight;
+  const heightPx = Math.max(0, Math.round(measuredHeight || 0));
+  if (document?.documentElement?.style) {
+    document.documentElement.style.setProperty('--spot-bar-height', `${heightPx}px`);
+  }
+}
 
 export function injectSpotBar(lang = 'en', depth = 0) {
   if (document.getElementById('spot-price-bar')) return;
@@ -81,6 +95,16 @@ export function injectSpotBar(lang = 'en', depth = 0) {
 
   _barEl = bar;
   document.body.classList.add('has-spot-bar');
+  syncSpotBarHeight();
+  if (typeof ResizeObserver === 'function') {
+    _resizeObserver?.disconnect();
+    _resizeObserver = new ResizeObserver(() => syncSpotBarHeight());
+    _resizeObserver.observe(_barEl);
+  } else if (typeof window !== 'undefined') {
+    if (_resizeHandler) window.removeEventListener('resize', _resizeHandler);
+    _resizeHandler = () => syncSpotBarHeight();
+    window.addEventListener('resize', _resizeHandler, { passive: true });
+  }
 }
 
 export function updateSpotBar(data = {}) {
@@ -150,4 +174,5 @@ export function updateSpotBarLang(lang) {
   const isAr = lang === 'ar';
   const labelEl = _barEl.querySelector('[data-spot-label="aed"]');
   if (labelEl) labelEl.textContent = isAr ? '24K / غ AED' : '24K AED/g';
+  syncSpotBarHeight();
 }

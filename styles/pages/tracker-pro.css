@@ -349,6 +349,12 @@ body.tracker-pro-page {
   color: #f0a350;
 }
 
+.tracker-badge--closed {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
 .tracker-badge--unavailable {
   border-color: rgb(200 60 60 / 30%);
   background: rgb(200 60 60 / 10%);
@@ -2482,6 +2488,11 @@ td.tracker-chg-down {
   background: var(--tp-danger-soft);
   border-color: rgb(179 39 47 / 20%);
   color: var(--tp-danger);
+}
+.tracker-source-badge--closed {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-text);
 }
 .tracker-source-badge--local-snapshot {
   background: rgb(16 111 120 / 8%);

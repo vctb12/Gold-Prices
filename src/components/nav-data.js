@@ -1032,7 +1032,7 @@ export const PAGE_SHELLS = [
     section: 'markets',
     shell: 'editorial',
     accent: 'insight',
-    patterns: ['/insights.html', '/invest.html', '/content/news/'],
+    patterns: ['/insights.html', '/invest.html'],
   },
   {
     page: 'country',

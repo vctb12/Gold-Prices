@@ -90,12 +90,19 @@
 /content/social/                     /insights.html               301
 /content/social/index.html           /insights.html               301
 /content/todays-best-rates/          /tracker.html#mode=compare   301
+/content/todays-best-rates/index.html /tracker.html#mode=compare  301
 /content/compare-countries/          /tracker.html#mode=compare   301
+/content/compare-countries/index.html /tracker.html#mode=compare  301
 /content/premium-watch/              /insights.html               301
+/content/premium-watch/index.html    /insights.html               301
 /content/news/                       /insights.html               301
+/content/news/index.html             /insights.html               301
 /content/changelog/                  /insights.html               301
+/content/changelog/index.html        /insights.html               301
 /content/22k-gold-price-guide/       /learn.html#karats           301
+/content/22k-gold-price-guide/index.html /learn.html#karats       301
 /content/24k-gold-price-guide/       /learn.html#karats           301
+/content/24k-gold-price-guide/index.html /learn.html#karats       301
 
 # --- Country pages: /countries/<slug>.html → /countries/<slug>/ -------------
 # Baseline scan (reports/links-initial.json) shows several internal links use

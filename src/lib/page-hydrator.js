@@ -349,7 +349,7 @@ function renderCountryHero({ country, pageData, lang, gold, goldFreshness, fxFre
     const compareHref =
       country.group === 'gcc'
         ? withBase('content/gcc-gold-price-comparison/')
-        : withBase('content/compare-countries/');
+        : withBase('tracker.html#mode=compare');
     const actionItems = [
       {
         href: buildTrackerHref({ currency: country.currency, karat: focusKarat, lang }),

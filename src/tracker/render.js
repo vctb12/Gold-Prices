@@ -25,18 +25,21 @@ const TRACKER_BADGE_CLASSES = [
   'tracker-badge-live',
   'tracker-badge--cached',
   'tracker-badge--stale',
+  'tracker-badge--closed',
   'tracker-badge--unavailable',
 ];
 const SOURCE_BADGE_CLASS = {
   live: 'tracker-source-badge--live',
   cached: 'tracker-source-badge--cached',
   stale: 'tracker-source-badge--estimated',
+  closed: 'tracker-source-badge--closed',
   unavailable: 'tracker-source-badge--unavailable',
 };
 const STATUS_BADGE_CLASS = {
   live: 'tracker-badge-live',
   cached: 'tracker-badge--cached',
   stale: 'tracker-badge--stale',
+  closed: 'tracker-badge--closed',
   unavailable: 'tracker-badge--unavailable',
 };
 
@@ -170,21 +173,26 @@ function getFreshnessModel() {
     lang: _state.lang,
     hasLiveFailure: _state.hasLiveFailure,
   });
-  const sourceLabel = tx(`source.${freshness.key}`);
+  const market = getMarketStatus();
+  const effectiveKey = market.isOpen ? freshness.key : 'closed';
+  const sourceLabel = tx(`source.${effectiveKey}`);
   const tooltip =
-    freshness.key === 'unavailable'
-      ? tx('liveUnavailable')
-      : tx('summary.freshnessCopy', {
-          source: sourceLabel,
-          age: freshness.ageText,
-          time: freshness.timeText,
-        });
+    effectiveKey === 'closed'
+      ? tx('closedStateDetail', { time: freshness.timeText })
+      : freshness.key === 'unavailable'
+        ? tx('liveUnavailable')
+        : tx('summary.freshnessCopy', {
+            source: sourceLabel,
+            age: freshness.ageText,
+            time: freshness.timeText,
+          });
 
   return {
     ...freshness,
+    effectiveKey,
     sourceLabel,
-    sourceBadgeClass: SOURCE_BADGE_CLASS[freshness.key] || SOURCE_BADGE_CLASS.cached,
-    badgeClass: STATUS_BADGE_CLASS[freshness.key] || STATUS_BADGE_CLASS.cached,
+    sourceBadgeClass: SOURCE_BADGE_CLASS[effectiveKey] || SOURCE_BADGE_CLASS.cached,
+    badgeClass: STATUS_BADGE_CLASS[effectiveKey] || STATUS_BADGE_CLASS.cached,
     tooltip,
   };
 }
@@ -282,7 +290,7 @@ export function renderHero() {
     sourceStateBadge.classList.add(
       isConnecting
         ? 'tracker-badge-live'
-        : STATUS_BADGE_CLASS[freshness.key] || 'tracker-badge--cached'
+        : STATUS_BADGE_CLASS[freshness.effectiveKey] || 'tracker-badge--cached'
     );
     const label = isConnecting ? tx('connecting') : freshness.sourceLabel;
     const tooltip = isConnecting ? tx('connecting') : freshness.tooltip;

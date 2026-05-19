@@ -100,6 +100,29 @@ test('NAV_DATA groups contain no duplicate hrefs within a group', async () => {
   }
 });
 
+test('NAV_DATA has no links to removed consolidated content landings', async () => {
+  const { NAV_DATA } = await loadNav();
+  const removed = new Set([
+    '/content/compare-countries/',
+    '/content/todays-best-rates/',
+    '/content/premium-watch/',
+    '/content/news/',
+    '/content/changelog/',
+    '/content/22k-gold-price-guide/',
+    '/content/24k-gold-price-guide/',
+  ]);
+  for (const lang of ['en', 'ar']) {
+    for (const group of NAV_DATA[lang].groups) {
+      for (const item of group.items) {
+        assert.ok(
+          !removed.has(item.href),
+          `${lang}.${group.key} still references removed landing: ${item.href}`
+        );
+      }
+    }
+  }
+});
+
 test('NAV_DATA has no duplicate hrefs across groups (ignoring anchors/query)', async () => {
   const { NAV_DATA } = await loadNav();
   for (const lang of ['en', 'ar']) {

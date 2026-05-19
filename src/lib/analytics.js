@@ -29,6 +29,8 @@ export const EVENTS = Object.freeze({
   // Phase 8 canonical events
   PRICE_VIEW: 'price_view',
   TRACKER_MODE_CHANGE: 'tracker_mode_change',
+  COMPARE_ACTION: 'compare_action',
+  EXPORT_CLICK: 'export_click',
   ALERT_CREATE_START: 'alert_create_start',
   ALERT_CREATE_SUCCESS: 'alert_create_success',
   CALCULATOR_SUBMIT: 'calculator_submit',
@@ -74,6 +76,8 @@ export const EVENTS = Object.freeze({
 export const EVENT_SCHEMA = Object.freeze({
   [EVENTS.PRICE_VIEW]: { required: ['path', 'surface'] },
   [EVENTS.TRACKER_MODE_CHANGE]: { required: ['from_mode', 'to_mode'] },
+  [EVENTS.COMPARE_ACTION]: { required: ['surface', 'action'] },
+  [EVENTS.EXPORT_CLICK]: { required: ['surface', 'export_type'] },
   [EVENTS.ALERT_CREATE_START]: { required: ['surface', 'delivery', 'currency'] },
   [EVENTS.ALERT_CREATE_SUCCESS]: { required: ['surface', 'delivery', 'currency', 'direction'] },
   [EVENTS.CALCULATOR_SUBMIT]: { required: ['tool'] },

@@ -14,6 +14,17 @@ import { TRACKER_PANELS, getShortcutMap, getTrackerTab } from './modes.js';
 import { track, EVENTS } from '../lib/analytics.js';
 
 let _openPanel = null;
+const _overlayReturnFocus = new Map();
+const _overlayKeyHandlers = new Map();
+
+function getFocusableElements(container) {
+  if (!container) return [];
+  return Array.from(
+    container.querySelectorAll(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((node) => !node.hidden && node.getAttribute('aria-hidden') !== 'true');
+}
 
 export function mountShell(state, els, onModeChange, onLangChange) {
   // Mount shared shell
@@ -21,10 +32,14 @@ export function mountShell(state, els, onModeChange, onLangChange) {
   const navCtrl = injectNav(state.lang, 0);
   navCtrl.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {
+      const from = state.lang;
       state.lang = state.lang === 'en' ? 'ar' : 'en';
       persistState(state);
       document.documentElement.lang = state.lang;
       document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+      if (from !== state.lang) {
+        track(EVENTS.LANGUAGE_SWITCH, { from, to: state.lang, surface: 'tracker_shell' });
+      }
       updateNavLang(state.lang);
       updateTickerLang(state.lang);
       updateSpotBarLang(state.lang);
@@ -112,11 +127,18 @@ export function mountShell(state, els, onModeChange, onLangChange) {
     TRACKER_PANELS.map((panel) => [panel.id, document.getElementById(panel.panelId)])
   );
 
-  function openOverlay(name) {
+  function openOverlay(name, trigger) {
     if (!VALID_PANELS.has(name)) return;
     if (_openPanel && _openPanel !== name) closeOverlay(_openPanel);
     const overlay = overlays[name];
     if (!overlay) return;
+    const triggerEl =
+      trigger instanceof HTMLElement
+        ? trigger
+        : document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+    if (triggerEl) _overlayReturnFocus.set(name, triggerEl);
     _openPanel = name;
     state.panel = name;
     overlay.hidden = false;
@@ -127,6 +149,33 @@ export function mountShell(state, els, onModeChange, onLangChange) {
       btn.classList.add('is-active');
       btn.setAttribute('aria-expanded', 'true');
     });
+    const panel = overlay.querySelector('.tp-overlay-panel');
+    const focusable = getFocusableElements(panel);
+    const firstTarget = focusable[0] || panel;
+    if (firstTarget && panel && focusable.length === 0 && !panel.hasAttribute('tabindex')) {
+      panel.setAttribute('tabindex', '-1');
+    }
+    firstTarget?.focus();
+    const keyHandler = (event) => {
+      if (event.key !== 'Tab') return;
+      const nodes = getFocusableElements(panel);
+      if (!nodes.length) {
+        event.preventDefault();
+        panel?.focus();
+        return;
+      }
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    _overlayKeyHandlers.set(name, keyHandler);
+    overlay.addEventListener('keydown', keyHandler);
     // Sync URL with panel open
     syncUrlFromState(state, _openPanel);
   }
@@ -146,17 +195,25 @@ export function mountShell(state, els, onModeChange, onLangChange) {
       });
     _openPanel = null;
     state.panel = null;
+    const keyHandler = _overlayKeyHandlers.get(panelName);
+    if (keyHandler) {
+      overlay.removeEventListener('keydown', keyHandler);
+      _overlayKeyHandlers.delete(panelName);
+    }
+    const returnTarget = _overlayReturnFocus.get(panelName);
+    if (returnTarget && document.contains(returnTarget)) returnTarget.focus();
+    _overlayReturnFocus.delete(panelName);
     syncUrlFromState(state);
   }
 
-  function toggleOverlay(name) {
+  function toggleOverlay(name, trigger) {
     if (_openPanel === name) closeOverlay(name);
-    else openOverlay(name);
+    else openOverlay(name, trigger);
   }
 
   // Wire overlay toggle buttons (Alerts, Planner in mode bar)
   document.querySelectorAll('.tracker-overlay-btn[data-overlay]').forEach((btn) => {
-    btn.addEventListener('click', () => toggleOverlay(btn.dataset.overlay));
+    btn.addEventListener('click', () => toggleOverlay(btn.dataset.overlay, btn));
   });
 
   // Wire overlay close buttons
