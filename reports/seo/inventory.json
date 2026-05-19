@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-16",
+  "generatedAtDate": "2026-05-19",
   "summary": {
-    "totalHtmlFiles": 657,
-    "withCanonical": 655,
+    "totalHtmlFiles": 646,
+    "withCanonical": 644,
     "withoutCanonical": 2,
-    "withOgImage": 500,
-    "withoutOgImage": 157,
-    "withJsonLd": 644,
-    "withoutJsonLd": 13,
-    "hreflangEnArPairs": 644,
-    "noindexCount": 436
+    "withOgImage": 493,
+    "withoutOgImage": 153,
+    "withJsonLd": 637,
+    "withoutJsonLd": 9,
+    "hreflangEnArPairs": 637,
+    "noindexCount": 432
   },
   "records": [
     {
@@ -98,150 +98,6 @@
         {
           "lang": "x-default",
           "href": "https://goldtickerlive.com/calculator.html"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/22k-gold-price-guide/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "22K Gold Price Guide — UAE & GCC Jewelry | Gold Ticker Live",
-      "metaDescription": "A practical 22K gold guide for UAE and GCC jewelry buyers, including purity, AED per gram references and retail-price context.",
-      "canonical": "https://goldtickerlive.com/content/22k-gold-price-guide/",
-      "robots": null,
-      "ogTitle": "22K Gold Price Guide — UAE & GCC Jewelry | Gold Ticker Live",
-      "ogDescription": "A practical 22K gold guide for UAE and GCC jewelry buyers, including purity, AED per gram references and retail-price context.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/22k-gold-price-guide/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/22k-gold-price-guide/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/22k-gold-price-guide/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/22k-gold-price-guide/"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/24k-gold-price-guide/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "24K Gold Price Guide — Pure Gold, Bars & Coins | Gold Ticker Live",
-      "metaDescription": "Understand 24K gold prices, pure gold reference values, bars, coins and how 24K differs from 22K jewelry in UAE and GCC markets.",
-      "canonical": "https://goldtickerlive.com/content/24k-gold-price-guide/",
-      "robots": null,
-      "ogTitle": "24K Gold Price Guide — Pure Gold, Bars & Coins | Gold Ticker Live",
-      "ogDescription": "Understand 24K gold prices, pure gold reference values, bars, coins and how 24K differs from 22K jewelry in UAE and GCC markets.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/24k-gold-price-guide/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/24k-gold-price-guide/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/24k-gold-price-guide/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/24k-gold-price-guide/"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/changelog/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Gold Ticker Live Changelog & Data Status",
-      "metaDescription": "Track Gold Ticker Live product improvements, data-source transparency, freshness labels and major public-site updates.",
-      "canonical": "https://goldtickerlive.com/content/changelog/",
-      "robots": null,
-      "ogTitle": "Gold Ticker Live Changelog & Data Status",
-      "ogDescription": "Track Gold Ticker Live product improvements, data-source transparency, freshness labels and major public-site updates.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/changelog/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/changelog/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/changelog/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/changelog/"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/compare-countries/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Compare Gold Prices Across Countries | Gold Ticker Live",
-      "metaDescription": "Compare spot-linked gold reference prices across UAE, GCC and Arab markets, then understand why final retail prices can still differ locally.",
-      "canonical": "https://goldtickerlive.com/content/compare-countries/",
-      "robots": null,
-      "ogTitle": "Compare Gold Prices Across Countries | Gold Ticker Live",
-      "ogDescription": "Compare spot-linked gold reference prices across UAE, GCC and Arab markets, then understand why final retail prices can still differ locally.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/compare-countries/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/compare-countries/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/compare-countries/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/compare-countries/"
         }
       ],
       "jsonLdTypes": [
@@ -618,27 +474,6 @@
       "jsonLdParseFailures": null
     },
     {
-      "path": "content/guides/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Not a public page — Gold Ticker Live",
-      "metaDescription": "This path is an internal directory index and is not intended for end users.",
-      "canonical": "https://goldtickerlive.com/content/guides/",
-      "robots": "noindex,nofollow",
-      "ogTitle": "Not a public page — Gold Ticker Live",
-      "ogDescription": "This path is an internal directory index and is not intended for end users.",
-      "ogImage": null,
-      "ogUrl": "https://goldtickerlive.com/content/guides/",
-      "ogType": "website",
-      "twitterCard": "summary",
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
-      "jsonLdParseFailures": null
-    },
-    {
       "path": "content/guides/invest-in-gold-gcc.html",
       "exempt": null,
       "lang": "en",
@@ -713,63 +548,6 @@
       "jsonLdParseFailures": null
     },
     {
-      "path": "content/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Not a public page — Gold Ticker Live",
-      "metaDescription": "This path is an internal directory index and is not intended for end users.",
-      "canonical": "https://goldtickerlive.com/content/",
-      "robots": "noindex,nofollow",
-      "ogTitle": "Not a public page — Gold Ticker Live",
-      "ogDescription": "This path is an internal directory index and is not intended for end users.",
-      "ogImage": null,
-      "ogUrl": "https://goldtickerlive.com/content/",
-      "ogType": "website",
-      "twitterCard": "summary",
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/news/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Gold Market Updates for UAE & GCC | Gold Ticker Live",
-      "metaDescription": "A curated Gold Ticker Live market updates hub explaining gold price drivers without fake breaking-news claims or trading advice.",
-      "canonical": "https://goldtickerlive.com/content/news/",
-      "robots": null,
-      "ogTitle": "Gold Market Updates for UAE & GCC | Gold Ticker Live",
-      "ogDescription": "A curated Gold Ticker Live market updates hub explaining gold price drivers without fake breaking-news claims or trading advice.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/news/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/news/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/news/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/news/"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
       "path": "content/order-gold/index.html",
       "exempt": null,
       "lang": "en",
@@ -797,42 +575,6 @@
         {
           "lang": "x-default",
           "href": "https://goldtickerlive.com/content/order-gold/"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/premium-watch/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Premium Watch — Retail Gold Premium Guide | Gold Ticker Live",
-      "metaDescription": "Learn how retail gold premiums, making charges, VAT and shop margins sit above spot-linked gold reference prices in UAE and GCC markets.",
-      "canonical": "https://goldtickerlive.com/content/premium-watch/",
-      "robots": null,
-      "ogTitle": "Premium Watch — Retail Gold Premium Guide | Gold Ticker Live",
-      "ogDescription": "Learn how retail gold premiums, making charges, VAT and shop margins sit above spot-linked gold reference prices in UAE and GCC markets.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/premium-watch/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/premium-watch/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/premium-watch/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/premium-watch/"
         }
       ],
       "jsonLdTypes": [
@@ -875,27 +617,6 @@
         "BreadcrumbList"
       ],
       "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/social/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Not a public page — Gold Ticker Live",
-      "metaDescription": "This path is an internal directory index and is not intended for end users.",
-      "canonical": "https://goldtickerlive.com/content/social/",
-      "robots": "noindex,nofollow",
-      "ogTitle": "Not a public page — Gold Ticker Live",
-      "ogDescription": "This path is an internal directory index and is not intended for end users.",
-      "ogImage": null,
-      "ogUrl": "https://goldtickerlive.com/content/social/",
-      "ogType": "website",
-      "twitterCard": "summary",
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
       "jsonLdParseFailures": null
     },
     {
@@ -1021,63 +742,6 @@
       "ogUrl": null,
       "ogType": null,
       "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/todays-best-rates/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Today&#x27;s Best Gold Rates — UAE, GCC & Arab Markets | Gold Ticker Live",
-      "metaDescription": "Find the right way to compare today’s spot-linked gold reference rates across countries, karats and currencies on Gold Ticker Live.",
-      "canonical": "https://goldtickerlive.com/content/todays-best-rates/",
-      "robots": null,
-      "ogTitle": "Today&#x27;s Best Gold Rates — UAE, GCC & Arab Markets | Gold Ticker Live",
-      "ogDescription": "Find the right way to compare today’s spot-linked gold reference rates across countries, karats and currencies on Gold Ticker Live.",
-      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/content/todays-best-rates/",
-      "ogType": "website",
-      "twitterCard": "summary_large_image",
-      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
-      "hreflang": [
-        {
-          "lang": "ar",
-          "href": "https://goldtickerlive.com/content/todays-best-rates/?lang=ar"
-        },
-        {
-          "lang": "en",
-          "href": "https://goldtickerlive.com/content/todays-best-rates/"
-        },
-        {
-          "lang": "x-default",
-          "href": "https://goldtickerlive.com/content/todays-best-rates/"
-        }
-      ],
-      "jsonLdTypes": [
-        "BreadcrumbList"
-      ],
-      "hasStructuredData": true,
-      "jsonLdParseFailures": null
-    },
-    {
-      "path": "content/tools/index.html",
-      "exempt": null,
-      "lang": "en",
-      "dir": "ltr",
-      "title": "Not a public page — Gold Ticker Live",
-      "metaDescription": "This path is an internal directory index and is not intended for end users.",
-      "canonical": "https://goldtickerlive.com/content/tools/",
-      "robots": "noindex,nofollow",
-      "ogTitle": "Not a public page — Gold Ticker Live",
-      "ogDescription": "This path is an internal directory index and is not intended for end users.",
-      "ogImage": null,
-      "ogUrl": "https://goldtickerlive.com/content/tools/",
-      "ogType": "website",
-      "twitterCard": "summary",
       "twitterImage": null,
       "hreflang": [],
       "jsonLdTypes": [],
@@ -24202,11 +23866,11 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Live Gold Price Tracker — UAE & GCC | Gold Ticker Live",
+      "title": "Gold Command Center — Live Tracker UAE & GCC | Gold Ticker Live",
       "metaDescription": "Live gold prices for UAE, Saudi Arabia, Kuwait, Qatar and 20+ countries. 24K, 22K, 21K, 18K per gram and per ounce. Bilingual EN/AR, refreshed every 90s.",
       "canonical": "https://goldtickerlive.com/tracker.html",
       "robots": null,
-      "ogTitle": "Live Gold Price Tracker — UAE, GCC & Arab World | Gold Ticker Live",
+      "ogTitle": "Gold Command Center — Live Tracker for UAE, GCC & Arab World | Gold Ticker Live",
       "ogDescription": "Live gold prices for UAE, Saudi Arabia, Kuwait, Qatar and 20+ countries. 24K, 22K, 21K, 18K per gram and per ounce. Bilingual EN/AR, refreshed every 90s.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
       "ogUrl": "https://goldtickerlive.com/tracker.html",

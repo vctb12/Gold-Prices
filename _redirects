@@ -64,18 +64,38 @@
 /guides          /content/guides/              301
 /faq             /content/faq/                 301
 /search          /content/search/              301
-/compare         /content/compare-countries/   301
+/compare         /tracker.html#mode=compare    301
 /gold-history    /content/gold-price-history/  301
 /history         /content/gold-price-history/  301
 /making-charges  /content/gold-making-charges-guide/  301
 /spot-vs-retail  /content/spot-vs-retail-gold-price/  301
 /uae-guide       /content/uae-gold-buying-guide/       301
 /dubai-guide     /content/dubai-gold-rate-guide/       301
-/22k             /content/22k-gold-price-guide/        301
-/24k             /content/24k-gold-price-guide/        301
-/best-rates      /content/todays-best-rates/           301
-/news            /content/news/                        301
+/22k             /learn.html#karats                   301
+/24k             /learn.html#karats                   301
+/best-rates      /tracker.html#mode=compare           301
+/news            /insights.html                       301
 /submit-shop     /content/submit-shop/                 301
+
+# --- Consolidated landing pages (architecture simplification) ----------------
+/content/index.html                  /learn.html                  301
+/content                             /learn.html                  301
+/content/                            /learn.html                  301
+/content/guides/                     /learn.html                  301
+/content/guides/index.html           /learn.html                  301
+/content/tools/                      /calculator.html             301
+/content/tools/index.html            /calculator.html             301
+/content/embed/                      /tracker.html                301
+/content/embed/index.html            /tracker.html                301
+/content/social/                     /insights.html               301
+/content/social/index.html           /insights.html               301
+/content/todays-best-rates/          /tracker.html#mode=compare   301
+/content/compare-countries/          /tracker.html#mode=compare   301
+/content/premium-watch/              /insights.html               301
+/content/news/                       /insights.html               301
+/content/changelog/                  /insights.html               301
+/content/22k-gold-price-guide/       /learn.html#karats           301
+/content/24k-gold-price-guide/       /learn.html#karats           301
 
 # --- Country pages: /countries/<slug>.html → /countries/<slug>/ -------------
 # Baseline scan (reports/links-initial.json) shows several internal links use

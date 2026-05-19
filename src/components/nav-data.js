@@ -92,10 +92,10 @@ const RAW_NAV_DATA = {
                 primary: true,
               },
               {
-                href: '/content/todays-best-rates/',
-                label: "Today's best rates",
-                description: 'Compare references safely',
-                icon: 'RATE',
+                href: '/tracker.html#mode=compare',
+                label: 'Compare rates',
+                description: 'Cross-market reference board',
+                icon: 'CMP',
               },
               {
                 href: '/content/gold-price-history/',
@@ -144,9 +144,9 @@ const RAW_NAV_DATA = {
             description: 'Understand differences between references.',
             items: [
               {
-                href: '/content/compare-countries/',
-                label: 'Compare countries',
-                description: 'Side-by-side country guide',
+                href: '/tracker.html#mode=compare&r=30D',
+                label: 'Tracker compare mode',
+                description: 'Side-by-side market comparison',
                 icon: 'CMP',
               },
               {
@@ -162,15 +162,15 @@ const RAW_NAV_DATA = {
                 icon: 'SPOT',
               },
               {
-                href: '/content/22k-gold-price-guide/',
-                label: '22K gold guide',
-                description: 'Pricing, purity, and uses',
+                href: '/learn.html#karats',
+                label: 'Karat guide',
+                description: 'Purity, pricing, and usage',
                 icon: '22K',
               },
               {
-                href: '/content/24k-gold-price-guide/',
-                label: '24K gold guide',
-                description: 'Pure gold pricing explained',
+                href: '/learn.html#pricing',
+                label: 'Pricing basics',
+                description: 'How spot-linked references work',
                 icon: '24K',
               },
             ],
@@ -352,9 +352,9 @@ const RAW_NAV_DATA = {
             description: 'Separate spot references from retail quotes.',
             items: [
               {
-                href: '/content/premium-watch/',
-                label: 'Premium watch',
-                description: 'Retail premium concepts',
+                href: '/content/guides/gold-karat-comparison.html',
+                label: 'Karat premium context',
+                description: 'Purity context behind retail gaps',
                 icon: 'PRM',
               },
               {
@@ -478,9 +478,9 @@ const RAW_NAV_DATA = {
                 icon: 'INV',
               },
               {
-                href: '/content/news/',
-                label: 'Gold news',
-                description: 'Curated market updates',
+                href: '/insights.html#weekly-brief',
+                label: 'Weekly brief',
+                description: 'Curated market context',
                 icon: 'NEWS',
               },
             ],
@@ -573,9 +573,9 @@ const RAW_NAV_DATA = {
                 primary: true,
               },
               {
-                href: '/content/todays-best-rates/',
-                label: 'أفضل الأسعار اليوم',
-                description: 'قارن المراجع بأمان',
+                href: '/tracker.html#mode=compare',
+                label: 'مقارنة الأسعار',
+                description: 'لوحة مرجعية عبر الأسواق',
                 icon: 'RATE',
               },
               {
@@ -625,9 +625,9 @@ const RAW_NAV_DATA = {
             description: 'افهم الفروق بين المراجع.',
             items: [
               {
-                href: '/content/compare-countries/',
-                label: 'مقارنة الدول',
-                description: 'دليل مقارنة جنباً إلى جنب',
+                href: '/tracker.html#mode=compare&r=30D',
+                label: 'وضع المقارنة في المتتبع',
+                description: 'مقارنة الأسواق جنباً إلى جنب',
                 icon: 'CMP',
               },
               {
@@ -643,15 +643,15 @@ const RAW_NAV_DATA = {
                 icon: 'SPOT',
               },
               {
-                href: '/content/22k-gold-price-guide/',
-                label: 'دليل عيار 22',
-                description: 'التسعير والنقاء والاستخدامات',
+                href: '/learn.html#karats',
+                label: 'دليل العيارات',
+                description: 'النقاء والتسعير والاستخدامات',
                 icon: '22K',
               },
               {
-                href: '/content/24k-gold-price-guide/',
-                label: 'دليل عيار 24',
-                description: 'تسعير الذهب الخالص',
+                href: '/learn.html#pricing',
+                label: 'أساسيات التسعير',
+                description: 'كيف تعمل المراجع المرتبطة بالسعر الفوري',
                 icon: '24K',
               },
             ],
@@ -833,9 +833,9 @@ const RAW_NAV_DATA = {
             description: 'افصل السعر المرجعي عن عرض المحل.',
             items: [
               {
-                href: '/content/premium-watch/',
-                label: 'مراقبة العلاوة',
-                description: 'فكرة علاوة التجزئة',
+                href: '/content/guides/gold-karat-comparison.html',
+                label: 'سياق علاوة العيارات',
+                description: 'سياق النقاء وراء فروق التجزئة',
                 icon: 'PRM',
               },
               {
@@ -959,9 +959,9 @@ const RAW_NAV_DATA = {
                 icon: 'INV',
               },
               {
-                href: '/content/news/',
-                label: 'أخبار الذهب',
-                description: 'تحديثات سوق منتقاة',
+                href: '/insights.html#weekly-brief',
+                label: 'الملخص الأسبوعي',
+                description: 'سياق سوق منتقى',
                 icon: 'NEWS',
               },
             ],
