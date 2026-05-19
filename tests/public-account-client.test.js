@@ -5,40 +5,40 @@ const assert = require('node:assert/strict');
 
 function createLocalStorageMock(initial = {}) {
   const store = new Map(Object.entries(initial));
-  const target = {};
+  const localStorageMock = {};
   function syncEnumerableKeys() {
-    for (const key of Object.keys(target)) {
+    for (const key of Object.keys(localStorageMock)) {
       if (!['getItem', 'setItem', 'removeItem', 'clear', 'key', 'length'].includes(key)) {
-        delete target[key];
+        delete localStorageMock[key];
       }
     }
     for (const [key, value] of store.entries()) {
-      target[key] = value;
+      localStorageMock[key] = value;
     }
   }
   syncEnumerableKeys();
 
-  target.getItem = (key) => (store.has(key) ? store.get(key) : null);
-  target.setItem = (key, value) => {
+  localStorageMock.getItem = (key) => (store.has(key) ? store.get(key) : null);
+  localStorageMock.setItem = (key, value) => {
     store.set(key, String(value));
     syncEnumerableKeys();
   };
-  target.removeItem = (key) => {
+  localStorageMock.removeItem = (key) => {
     store.delete(key);
     syncEnumerableKeys();
   };
-  target.clear = () => {
+  localStorageMock.clear = () => {
     store.clear();
     syncEnumerableKeys();
   };
-  target.key = (index) => Array.from(store.keys())[index] || null;
-  Object.defineProperty(target, 'length', {
+  localStorageMock.key = (index) => Array.from(store.keys())[index] || null;
+  Object.defineProperty(localStorageMock, 'length', {
     get() {
       return store.size;
     },
   });
 
-  return target;
+  return localStorageMock;
 }
 
 beforeEach(() => {
