@@ -147,6 +147,17 @@ test.describe('Tracker page — live mode & navigation', () => {
       'data-state',
       /(checking|ready|limited|blocked)/
     );
+    const compareReadiness = await page
+      .locator('#tp-export-readiness-pill')
+      .getAttribute('data-state');
+    const compareExport = page.locator('#tp-export-compare');
+    const historyExport = page.locator('#tp-export-history');
+    if (compareReadiness === 'blocked') {
+      await expect(compareExport).toBeDisabled();
+      await expect(historyExport).toBeDisabled();
+    } else {
+      await expect(compareExport).toBeEnabled();
+    }
   });
 
   test('compare tab is visible and clickable without needing advanced workspace', async ({

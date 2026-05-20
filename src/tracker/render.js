@@ -145,7 +145,7 @@ function getExportReadinessState() {
   if (!rows.length && !fallbackLike) {
     return {
       state: 'checking',
-      disableHistoryExports: false,
+      disableHistoryExports: true,
       disableLiveExports: !hasLiveSpot,
       label: tx('exportReadiness.checking'),
       reason: tx('exportCommand.note'),
@@ -163,6 +163,8 @@ function getExportReadinessState() {
   }
 
   if (!hasSupabase && (hasBaseline || hasLocal)) {
+    // Baseline/local-only history remains export-limited because it lacks provider-backed
+    // provenance guarantees; live-only exports can still proceed when spot is available.
     return {
       state: 'limited',
       disableHistoryExports: true,
