@@ -6,9 +6,9 @@ export class PrimaryQuoteProvider extends BaseQuoteProvider {
     super({ providerId, timeoutMs });
   }
 
-  async fetchQuote() {
+  async fetchQuote({ signal, timeoutMs } = {}) {
     const startedAt = Date.now();
-    const data = await api.fetchGold();
+    const data = await api.fetchGold({ signal, timeoutMs });
     const latencyMs = Date.now() - startedAt;
 
     return this.normalizeQuote({

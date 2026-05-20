@@ -64,7 +64,6 @@ let goldUpdatedAt = null;
 let goldIsFresh = null;
 let goldIsFallback = null;
 let goldProviderId = 'primary-provider';
-let priceSourceLabel = 'cached/fallback';
 let _realtimeSnapshot = null;
 let _realtimeEngine = null;
 let _refreshTimer = null;
@@ -188,11 +187,15 @@ function setTrustChip(id, text, freshnessKey = 'neutral') {
     freshnessKey === 'live' ? 'live' : freshnessKey === 'unavailable' ? 'neutral' : 'warning';
 }
 
+function hasRealtimePathFailure() {
+  return _realtimeSnapshot?.quote?.providerPathSuccessful === false;
+}
+
 function getFreshnessMeta() {
   const freshness = getLiveFreshness({
     updatedAt: goldUpdatedAt,
     lang,
-    hasLiveFailure: priceSourceLabel !== 'live',
+    hasLiveFailure: hasRealtimePathFailure(),
     isFallback: goldIsFallback,
     isFresh: goldIsFresh,
   });
@@ -291,7 +294,7 @@ function renderHeroCard() {
     xauUsd: usd24oz,
     aed24kGram: aed24g,
     updatedAt: goldUpdatedAt,
-    hasLiveFailure: priceSourceLabel !== 'live',
+    hasLiveFailure: hasRealtimePathFailure(),
     isFallback: goldIsFallback,
     isFresh: goldIsFresh,
   });
@@ -374,7 +377,7 @@ function renderHeroCard() {
     uae21k: aed21g,
     uae18k: aed18g,
     updatedAt: goldUpdatedAt,
-    hasLiveFailure: key !== 'live',
+    hasLiveFailure: hasRealtimePathFailure(),
     isFallback: goldIsFallback,
     isFresh: goldIsFresh,
   });
@@ -412,7 +415,7 @@ function renderHomeTrustAddons() {
     const freshness = getLiveFreshness({
       updatedAt: goldUpdatedAt,
       lang,
-      hasLiveFailure: priceSourceLabel !== 'live',
+      hasLiveFailure: hasRealtimePathFailure(),
       isFallback: goldIsFallback,
       isFresh: goldIsFresh,
     });
@@ -914,11 +917,9 @@ function applyRealtimeSnapshot(snapshot) {
     goldProviderId = quote.providerId || goldProviderId;
     goldIsFallback = quote.isFallback ?? quote.forcedState === 'fallback';
     goldIsFresh = quote.isFresh ?? snapshot?.freshness?.state === 'live';
-    priceSourceLabel = snapshot?.freshness?.state === 'live' ? 'live' : 'cached/fallback';
     cache.saveGoldPrice(quote.price, goldUpdatedAt);
     renderHeroCard();
   } else if (!goldPrice) {
-    priceSourceLabel = 'unavailable';
     const priceEl = document.getElementById('hlc-price');
     if (priceEl) {
       priceEl.classList.remove('hlc-price--loading');
@@ -1228,7 +1229,6 @@ async function init() {
     dayOpenPrice = cacheState.dayOpenGoldPriceUsdPerOz;
     rates = cacheState.rates;
     goldUpdatedAt = cacheState.freshness?.goldUpdatedAt || null;
-    priceSourceLabel = 'cached/fallback';
   }
 
   applyLangToPage();

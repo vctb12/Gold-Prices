@@ -62,9 +62,11 @@ export function createRealtimePricingEngine({
 
   const state = {
     running: false,
+    runId: 0,
     visible: typeof document === 'undefined' ? true : !document.hidden,
     timerId: null,
     inFlight: null,
+    pollPromise: null,
     activeProviderId: primaryProvider.providerId,
     quote: null,
     freshness: { state: 'unavailable', ageMs: Number.POSITIVE_INFINITY, reason: 'boot' },
@@ -102,7 +104,13 @@ export function createRealtimePricingEngine({
       nextPollInMs: cfg.activePollMs,
       visibilityRecoveryLatencyMs: null,
     },
+    alertState: {
+      warningFlagsKey: '',
+      criticalFlagsKey: '',
+    },
   };
+
+  const isMarketOpen = () => getMarketStatus(new Date(nowFn())).isOpen;
 
   function emit(type, payload = {}, level = 'info') {
     const event = { type, level, at: nowFn(), ...payload };
@@ -180,7 +188,7 @@ export function createRealtimePricingEngine({
     if (
       state.lastAppliedAt &&
       nowFn() - state.lastAppliedAt > NO_SUCCESS_CRITICAL_MS &&
-      getMarketStatus().isOpen
+      isMarketOpen()
     ) {
       criticalFlags.push('no_successful_quote_over_120s_market_open');
     }
@@ -198,8 +206,20 @@ export function createRealtimePricingEngine({
     state.metrics.warningFlags = warningFlags;
     state.metrics.criticalFlags = criticalFlags;
 
-    if (warningFlags.length) emit('SLO_BREACH_WARNING', { warningFlags }, 'warning');
-    if (criticalFlags.length) emit('SLO_BREACH_CRITICAL', { criticalFlags }, 'critical');
+    const warningFlagsKey = warningFlags.join('|');
+    const criticalFlagsKey = criticalFlags.join('|');
+    const warningChanged = warningFlagsKey !== state.alertState.warningFlagsKey;
+    const criticalChanged = criticalFlagsKey !== state.alertState.criticalFlagsKey;
+
+    state.alertState.warningFlagsKey = warningFlagsKey;
+    state.alertState.criticalFlagsKey = criticalFlagsKey;
+
+    if (warningChanged && warningFlags.length) {
+      emit('SLO_BREACH_WARNING', { warningFlags }, 'warning');
+    }
+    if (criticalChanged && criticalFlags.length) {
+      emit('SLO_BREACH_CRITICAL', { criticalFlags }, 'critical');
+    }
   }
 
   function snapshot() {
@@ -215,7 +235,7 @@ export function createRealtimePricingEngine({
           providerHealthy: health.getSnapshot(state.activeProviderId).healthy,
           providerPathSuccessful: state.quote.providerPathSuccessful !== false,
           forcedState: state.quote.forcedState || (state.quote.isFallback ? 'fallback' : null),
-          marketOpen: getMarketStatus().isOpen,
+          marketOpen: isMarketOpen(),
         })
       : { state: 'unavailable', ageMs: Number.POSITIVE_INFINITY, reason: 'no-quote' };
 
@@ -442,7 +462,7 @@ export function createRealtimePricingEngine({
       providerHealthy: providerStatus.healthy,
       providerPathSuccessful: quote.providerPathSuccessful !== false,
       forcedState: quote.forcedState || (quote.isFallback ? 'fallback' : null),
-      marketOpen: getMarketStatus().isOpen,
+      marketOpen: isMarketOpen(),
     });
 
     state.quote.status = freshness.state;
@@ -463,45 +483,62 @@ export function createRealtimePricingEngine({
 
   async function pollOnce(reason = 'manual') {
     if (!state.running) return;
+    if (state.pollPromise) return state.pollPromise;
 
-    const pollStartedAt = nowFn();
-    state.rolling.pollAttempts.push({ at: pollStartedAt, reason });
+    const currentRunId = state.runId;
+    const pollPromise = (async () => {
+      const pollStartedAt = nowFn();
+      state.rolling.pollAttempts.push({ at: pollStartedAt, reason });
 
-    try {
-      const { quote, latencyMs } = await fetchQuoteWithFailover();
-      const applyLatencyMs = Math.max(0, nowFn() - pollStartedAt);
-      const applied = applyQuote(quote, { pollStartedAt, applyLatencyMs });
+      try {
+        const { quote, latencyMs } = await fetchQuoteWithFailover();
+        if (!state.running || currentRunId !== state.runId) return;
 
-      if (applied) {
-        state.failureCount = 0;
-        state.consecutiveFailures = 0;
-        state.rolling.pollSuccesses.push({ at: nowFn(), reason });
+        const applyLatencyMs = Math.max(0, nowFn() - pollStartedAt);
+        const applied = applyQuote(quote, { pollStartedAt, applyLatencyMs });
+
+        if (applied) {
+          state.failureCount = 0;
+          state.consecutiveFailures = 0;
+          state.rolling.pollSuccesses.push({ at: nowFn(), reason });
+        }
+
+        if (Number.isFinite(latencyMs)) {
+          state.metrics.latestNetworkLatencyMs = latencyMs;
+        }
+      } catch (error) {
+        if (!state.running || currentRunId !== state.runId) return;
+        state.failureCount += 1;
+        state.consecutiveFailures += 1;
+        emit(
+          'POLL_FAILED',
+          {
+            reason,
+            activeProviderId: state.activeProviderId,
+            consecutiveFailures: state.consecutiveFailures,
+            error: error?.message || String(error),
+          },
+          'warning'
+        );
       }
 
-      if (Number.isFinite(latencyMs)) {
-        state.metrics.latestNetworkLatencyMs = latencyMs;
-      }
-    } catch (error) {
-      state.failureCount += 1;
-      state.consecutiveFailures += 1;
-      emit(
-        'POLL_FAILED',
-        {
-          reason,
-          activeProviderId: state.activeProviderId,
-          consecutiveFailures: state.consecutiveFailures,
-          error: error?.message || String(error),
-        },
-        'warning'
-      );
-    }
+      if (!state.running || currentRunId !== state.runId) return;
+      notify();
+      scheduleNextPoll();
+    })();
 
-    notify();
-    scheduleNextPoll();
+    const settledPromise = pollPromise.finally(() => {
+      if (state.pollPromise === settledPromise) {
+        state.pollPromise = null;
+      }
+    });
+    state.pollPromise = settledPromise;
+    return settledPromise;
   }
 
   function start() {
     if (state.running) return;
+    state.runId += 1;
     state.running = true;
     health.setActiveProvider(state.activeProviderId);
     scheduleNextPoll({ immediate: true });
@@ -509,6 +546,7 @@ export function createRealtimePricingEngine({
   }
 
   function stop() {
+    state.runId += 1;
     state.running = false;
     if (state.timerId) clearTimeoutFn(state.timerId);
     state.timerId = null;
@@ -516,6 +554,7 @@ export function createRealtimePricingEngine({
       state.inFlight.controller.abort();
       state.inFlight = null;
     }
+    state.pollPromise = null;
     notify();
   }
 

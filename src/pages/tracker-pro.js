@@ -321,19 +321,21 @@ function localizeStaticTrackerCopy() {
 }
 
 function renderTrackerAddonPanels() {
+  const freshnessKey = realtimeSnapshot?.freshness?.state || state.live?.status || 'unavailable';
+  const freshnessMeta = getLiveFreshness({
+    updatedAt: state.live?.updatedAt,
+    lang: state.lang,
+    hasLiveFailure: state.hasLiveFailure,
+    isFallback: state.live?.isFallback ?? null,
+    isFresh: state.live?.isFresh ?? null,
+  });
+
   const freshnessSlot = document.getElementById('tp-freshness-badge-slot');
   if (freshnessSlot) {
-    const freshness = getLiveFreshness({
-      updatedAt: state.live?.updatedAt,
-      lang: state.lang,
-      hasLiveFailure: state.hasLiveFailure,
-      isFallback: state.live?.isFallback ?? null,
-      isFresh: state.live?.isFresh ?? null,
-    });
     freshnessSlot.replaceChildren(
       renderFreshnessBadge({
         lang: state.lang,
-        state: freshness.key,
+        state: freshnessKey,
         source: formatProviderLabel(state.live?.providerId || 'primary-provider'),
         updatedAt: state.live?.updatedAt,
         marketOpen: getMarketStatus().isOpen,
@@ -354,22 +356,15 @@ function renderTrackerAddonPanels() {
 
   const quoteMetaSlot = document.getElementById('tp-quote-meta-slot');
   if (quoteMetaSlot) {
-    const freshness = getLiveFreshness({
-      updatedAt: state.live?.updatedAt,
-      lang: state.lang,
-      hasLiveFailure: state.hasLiveFailure,
-      isFallback: state.live?.isFallback ?? null,
-      isFresh: state.live?.isFresh ?? null,
-    });
     quoteMetaSlot.replaceChildren(
       renderQuoteMetaPanel({
         lang: state.lang,
-        statusLabel: trackerTx(`source.${freshness.key}`),
+        statusLabel: trackerTx(`source.${freshnessKey}`),
         sourceLabel: formatProviderLabel(state.live?.providerId || 'primary-provider'),
         providerId: formatProviderLabel(state.live?.providerId || 'primary-provider'),
-        providerTimestamp: state.live?.updatedAt,
-        fetchedAt: state.live?.fetchedAt || state.live?.updatedAt,
-        ageLabel: freshness.ageText,
+        providerTimestamp: state.live?.sourceTimestamp,
+        fetchedAt: state.live?.fetchedAt,
+        ageLabel: freshnessMeta.ageText,
         pollIntervalMs: realtimeSnapshot?.metrics?.nextPollInMs ?? null,
         lastFetchLatencyMs: realtimeSnapshot?.metrics?.latestNetworkLatencyMs ?? null,
         t: txGlobal,
@@ -1125,7 +1120,7 @@ function applyRealtimeSnapshot(snapshot) {
       raw: quote.providerRaw || quote,
       fetchedAt: quote.fetchedAt || null,
     };
-    state.hasLiveFailure = snapshot?.freshness?.state !== 'live';
+    state.hasLiveFailure = quote.providerPathSuccessful === false;
     cache.saveGoldPrice(state.live.price, state.live.updatedAt);
     cache.checkDayOpenReset({ goldPriceUsdPerOz: state.live.price });
     const today = new Date().toISOString().slice(0, 10);

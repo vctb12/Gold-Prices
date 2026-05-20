@@ -14,12 +14,17 @@ export function renderQuoteMetaPanel({
   t = (key) => key,
   className = '',
 } = {}) {
+  const withUtcSuffix = (value) => {
+    const formatted = formatUtcTimestamp(value, lang);
+    return formatted === '—' ? formatted : `${formatted} UTC`;
+  };
+
   const rows = [
     ['freshness.meta.status', statusLabel],
     ['freshness.meta.source', sourceLabel],
     ['freshness.meta.providerId', providerId || '—'],
-    ['freshness.meta.providerTimestamp', `${formatUtcTimestamp(providerTimestamp, lang)} UTC`],
-    ['freshness.meta.fetchedAt', `${formatUtcTimestamp(fetchedAt, lang)} UTC`],
+    ['freshness.meta.providerTimestamp', withUtcSuffix(providerTimestamp)],
+    ['freshness.meta.fetchedAt', withUtcSuffix(fetchedAt)],
     ['freshness.meta.age', ageLabel],
     [
       'freshness.meta.pollInterval',
