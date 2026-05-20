@@ -11,6 +11,7 @@ import {
 } from '../lib/historical-data.js';
 import { clear, el, setText, escape } from '../lib/safe-dom.js';
 import { getLiveFreshness, getMarketStatus } from '../lib/live-status.js';
+import { formatProviderLabel } from '../lib/provider-labels.js';
 import { pulseFreshness } from '../lib/freshness-pulse.js';
 import { countUp } from '../lib/count-up.js';
 import { getDayOpenPrice } from '../lib/cache.js';
@@ -181,22 +182,26 @@ function getFreshnessModel() {
   });
   const market = getMarketStatus();
   const effectiveKey = market.isOpen ? freshness.key : 'closed';
-  const sourceLabel = tx(`source.${effectiveKey}`);
+  const statusLabel = tx(`source.${effectiveKey}`);
+  const providerLabel = formatProviderLabel(
+    _state.live?.providerId || _state.live?.source || 'primary-provider'
+  );
   const tooltip =
     effectiveKey === 'closed'
       ? tx('closedStateDetail', { time: freshness.timeText })
       : freshness.key === 'unavailable'
         ? tx('liveUnavailable')
-        : tx('summary.freshnessCopy', {
-            source: sourceLabel,
+        : `${tx('summary.freshnessCopy', {
+            source: statusLabel,
             age: freshness.ageText,
             time: freshness.timeText,
-          });
+          })} · ${tx('summary.sourceTitle')}: ${providerLabel}`;
 
   return {
     ...freshness,
     effectiveKey,
-    sourceLabel,
+    sourceLabel: statusLabel,
+    providerLabel,
     sourceBadgeClass: SOURCE_BADGE_CLASS[effectiveKey] || SOURCE_BADGE_CLASS.cached,
     badgeClass: STATUS_BADGE_CLASS[effectiveKey] || STATUS_BADGE_CLASS.cached,
     tooltip,
@@ -220,7 +225,7 @@ function buildSourceBadge(freshness) {
       title: freshness.tooltip,
       'aria-label': freshness.tooltip,
     },
-    freshness.sourceLabel
+    freshness.providerLabel
   );
 }
 
@@ -298,7 +303,7 @@ export function renderHero() {
         ? 'tracker-badge-live'
         : STATUS_BADGE_CLASS[freshness.effectiveKey] || 'tracker-badge--cached'
     );
-    const label = isConnecting ? tx('connecting') : freshness.sourceLabel;
+    const label = isConnecting ? tx('connecting') : freshness.providerLabel;
     const tooltip = isConnecting ? tx('connecting') : freshness.tooltip;
     sourceStateBadge.textContent = label;
     sourceStateBadge.title = tooltip;

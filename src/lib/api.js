@@ -58,16 +58,24 @@ export function setSimulateFxFail(v) {
  * @param {number} timeoutMs
  * @returns {Promise<Response>}
  */
-async function fetchWithTimeout(url, timeoutMs) {
+async function fetchWithTimeout(url, timeoutMs, { signal } = {}) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
+  const abortFromExternalSignal = () => controller.abort();
+  if (signal?.aborted) {
+    abortFromExternalSignal();
+  } else if (signal) {
+    signal.addEventListener('abort', abortFromExternalSignal, { once: true });
+  }
   try {
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(id);
+    if (signal) signal.removeEventListener('abort', abortFromExternalSignal);
     if (!res.ok) throw new NetworkError(`HTTP ${res.status}: ${url}`);
     return res;
   } catch (e) {
     clearTimeout(id);
+    if (signal) signal.removeEventListener('abort', abortFromExternalSignal);
     if (e.name === 'AbortError') throw new TimeoutError(`Timeout fetching ${url}`);
     if (e instanceof NetworkError || e instanceof TimeoutError) throw e;
     throw new NetworkError(e.message);
@@ -180,15 +188,18 @@ function normalizeGoldResponse(data) {
  * @returns {Promise<{ price: number, updatedAt: string, source: string, raw?: object }>}
  * @throws {NetworkError} When both the data file fetch and the local cache fail.
  */
-export async function fetchGold() {
+export async function fetchGold({ signal, timeoutMs } = {}) {
   if (_simulateGoldFail) throw new NetworkError('Simulated gold API failure');
+  const effectiveTimeoutMs =
+    Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : CONSTANTS.GOLD_FETCH_TIMEOUT;
 
   // Prefer backend API when available, then fall back to static JSON so
   // GitHub Pages mode stays fully functional.
   try {
     const backendRes = await fetchWithTimeout(
       GOLD_BACKEND_URL,
-      Math.min(CONSTANTS.GOLD_FETCH_TIMEOUT, 4000)
+      Math.min(effectiveTimeoutMs, 4000),
+      { signal }
     );
     const backendData = await backendRes.json();
     const normalized = normalizeGoldResponse(backendData);
@@ -199,10 +210,9 @@ export async function fetchGold() {
 
   try {
     return await retryWithBackoff(async () => {
-      const res = await fetchWithTimeout(
-        `${GOLD_DATA_URL}?t=${Date.now()}`,
-        CONSTANTS.GOLD_FETCH_TIMEOUT
-      );
+      const res = await fetchWithTimeout(`${GOLD_DATA_URL}?t=${Date.now()}`, effectiveTimeoutMs, {
+        signal,
+      });
       const data = await res.json();
       const normalized = normalizeGoldResponse(data);
       if (!normalized) throw new DataError('Invalid gold price data file');

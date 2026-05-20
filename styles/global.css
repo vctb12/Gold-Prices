@@ -7868,6 +7868,68 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
   padding: var(--space-3);
 }
 
+.quote-meta-panel__list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(110px, max-content) 1fr;
+  gap: var(--space-2) var(--space-3);
+}
+
+.quote-meta-panel__label,
+.quote-meta-panel__value {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.quote-meta-panel__label {
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.quote-meta-panel__value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.realtime-sla-panel__metrics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.realtime-sla-panel__metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.realtime-sla-panel__metric-value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.realtime-sla-panel__metric.is-breach .realtime-sla-panel__metric-value {
+  color: var(--color-error);
+}
+
+.realtime-sla-panel__flags {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs);
+}
+
+.realtime-sla-panel__flags--warning {
+  color: var(--color-warning-text);
+}
+
+.realtime-sla-panel__flags--critical {
+  color: var(--color-error);
+}
+
 .tracker-addon-card > h3 {
   margin: 0 0 var(--space-2);
   font-size: var(--text-base);

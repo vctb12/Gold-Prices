@@ -3,6 +3,11 @@ import { CONSTANTS, KARATS, COUNTRIES, TRANSLATIONS } from '../config/index.js';
 import * as api from '../lib/api.js';
 import * as cache from '../lib/cache.js';
 import '../lib/reveal.js';
+import { createRealtimePricingEngine } from '../lib/realtime-pricing-engine.js';
+import { REALTIME_POLLING_DEFAULTS } from '../lib/realtime-config.js';
+import { PrimaryQuoteProvider } from '../lib/quote-providers/primary-provider.js';
+import { SecondaryQuoteProvider } from '../lib/quote-providers/secondary-provider.js';
+import { formatProviderLabel } from '../lib/provider-labels.js';
 import { createInitialState, persistState } from '../tracker/state.js';
 import { el as safeEl } from '../lib/safe-dom.js';
 import { track, EVENTS } from '../lib/analytics.js';
@@ -10,6 +15,8 @@ import { getBaselineRange } from '../lib/historical-data.js';
 import { getLiveFreshness, getMarketStatus } from '../lib/live-status.js';
 import { renderFreshnessBadge } from '../components/FreshnessBadge.js';
 import { renderMarketStatusPanel } from '../components/MarketStatusPanel.js';
+import { renderQuoteMetaPanel } from '../components/QuoteMetaPanel.js';
+import { renderRealtimeSlaPanel } from '../components/RealtimeSlaPanel.js';
 import { renderTrackerQuickPresets } from '../components/TrackerQuickPresets.js';
 import { renderTrackerCompareHints } from '../components/TrackerCompareHints.js';
 import { renderExportHelpTips } from '../components/ExportHelpTips.js';
@@ -45,6 +52,8 @@ let serverAlertsAvailable = false;
 let accountEmailForAlerts = null;
 const ALERT_EMAIL_FOCUS_DELAY_MS = 120;
 let didPrefillAccountAlertEmail = false;
+let realtimeEngine = null;
+let realtimeSnapshot = null;
 
 function trackerTx(key, params = {}) {
   const fullKey = `tracker.${key}`;
@@ -312,20 +321,22 @@ function localizeStaticTrackerCopy() {
 }
 
 function renderTrackerAddonPanels() {
+  const freshnessKey = realtimeSnapshot?.freshness?.state || state.live?.status || 'unavailable';
+  const freshnessMeta = getLiveFreshness({
+    updatedAt: state.live?.updatedAt,
+    lang: state.lang,
+    hasLiveFailure: state.hasLiveFailure,
+    isFallback: state.live?.isFallback ?? null,
+    isFresh: state.live?.isFresh ?? null,
+  });
+
   const freshnessSlot = document.getElementById('tp-freshness-badge-slot');
   if (freshnessSlot) {
-    const freshness = getLiveFreshness({
-      updatedAt: state.live?.updatedAt,
-      lang: state.lang,
-      hasLiveFailure: state.hasLiveFailure,
-      isFallback: state.live?.isFallback ?? null,
-      isFresh: state.live?.isFresh ?? null,
-    });
     freshnessSlot.replaceChildren(
       renderFreshnessBadge({
         lang: state.lang,
-        state: freshness.key,
-        source: 'GoldPriceZ',
+        state: freshnessKey,
+        source: formatProviderLabel(state.live?.providerId || 'primary-provider'),
         updatedAt: state.live?.updatedAt,
         marketOpen: getMarketStatus().isOpen,
         t: txGlobal,
@@ -341,6 +352,39 @@ function renderTrackerAddonPanels() {
         t: txGlobal,
       })
     );
+  }
+
+  const quoteMetaSlot = document.getElementById('tp-quote-meta-slot');
+  if (quoteMetaSlot) {
+    quoteMetaSlot.replaceChildren(
+      renderQuoteMetaPanel({
+        lang: state.lang,
+        statusLabel: trackerTx(`source.${freshnessKey}`),
+        sourceLabel: formatProviderLabel(state.live?.providerId || 'primary-provider'),
+        providerId: formatProviderLabel(state.live?.providerId || 'primary-provider'),
+        providerTimestamp: state.live?.sourceTimestamp,
+        fetchedAt: state.live?.fetchedAt,
+        ageLabel: freshnessMeta.ageText,
+        pollIntervalMs: realtimeSnapshot?.metrics?.nextPollInMs ?? null,
+        lastFetchLatencyMs: realtimeSnapshot?.metrics?.latestNetworkLatencyMs ?? null,
+        t: txGlobal,
+      })
+    );
+  }
+
+  const slaSlot = document.getElementById('tp-realtime-sla-slot');
+  if (slaSlot) {
+    const debugFreshness = new URLSearchParams(location.search).get('debugFreshness') === '1';
+    if (!debugFreshness) {
+      slaSlot.replaceChildren();
+    } else {
+      slaSlot.replaceChildren(
+        renderRealtimeSlaPanel({
+          snapshot: realtimeSnapshot,
+          t: txGlobal,
+        })
+      );
+    }
   }
 
   document
@@ -898,11 +942,12 @@ async function exportJsonData() {
 let _autoRefreshTimer = null;
 let _countdownTimer = null;
 let _countdownValue = 0;
-let _fetchInFlight = false; // guard against overlapping auto-refresh ticks
+let _fetchInFlight = false; // used for non-pricing refresh tasks only
 
 function startCountdown() {
   clearInterval(_countdownTimer);
-  _countdownValue = Math.floor(CONSTANTS.GOLD_REFRESH_MS / 1000);
+  const nextPollMs = realtimeSnapshot?.metrics?.nextPollInMs ?? CONSTANTS.GOLD_REFRESH_MS;
+  _countdownValue = Math.floor(nextPollMs / 1000);
 
   // Query once; reused by every tick and the initial paint.
   const el_countdown = document.getElementById('tp-countdown');
@@ -924,25 +969,29 @@ function startCountdown() {
 }
 
 function startAutoRefresh() {
+  if (realtimeEngine) realtimeEngine.start();
   if (_autoRefreshTimer) return;
-  _autoRefreshTimer = setInterval(async () => {
-    if (!state.autoRefresh) return;
-    // Skip this tick if the previous fetch hasn't finished yet.
-    if (_fetchInFlight) return;
-    _fetchInFlight = true;
-    startCountdown();
-    try {
-      await fetchLive();
-      checkAlerts();
-      renderAll();
-      renderTrackerAddonPanels();
-    } finally {
-      _fetchInFlight = false;
-    }
-  }, CONSTANTS.GOLD_REFRESH_MS);
+  _autoRefreshTimer = setInterval(
+    async () => {
+      if (!state.autoRefresh) return;
+      if (_fetchInFlight) return;
+      _fetchInFlight = true;
+      try {
+        await ensureUnifiedHistory();
+        await refreshWire();
+        checkAlerts();
+        renderAll();
+        renderTrackerAddonPanels();
+      } finally {
+        _fetchInFlight = false;
+      }
+    },
+    Math.max(CONSTANTS.GOLD_REFRESH_MS, 20000)
+  );
 }
 
 function stopAutoRefresh() {
+  if (realtimeEngine) realtimeEngine.stop();
   clearInterval(_autoRefreshTimer);
   _autoRefreshTimer = null;
 }
@@ -1054,6 +1103,74 @@ function populateSelects() {
 
 // ── Data fetch ────────────────────────────────────────────────────────────────
 
+function applyRealtimeSnapshot(snapshot) {
+  realtimeSnapshot = snapshot;
+  const quote = snapshot?.quote;
+  if (quote?.price) {
+    state.live = {
+      price: quote.price,
+      updatedAt: quote.providerTimestamp || quote.fetchedAt,
+      providerId: quote.providerId,
+      source: quote.source || quote.providerId,
+      status: snapshot?.freshness?.state || quote.status || 'cached',
+      isFresh: quote.isFresh ?? null,
+      isFallback: quote.isFallback ?? null,
+      freshnessSeconds: quote.freshnessSeconds ?? null,
+      sourceTimestamp: quote.providerTimestamp ?? null,
+      raw: quote.providerRaw || quote,
+      fetchedAt: quote.fetchedAt || null,
+    };
+    state.hasLiveFailure = quote.providerPathSuccessful === false;
+    cache.saveGoldPrice(state.live.price, state.live.updatedAt);
+    cache.checkDayOpenReset({ goldPriceUsdPerOz: state.live.price });
+    const today = new Date().toISOString().slice(0, 10);
+    const alreadySaved = (state.snapshots || []).some((s) => s.date === today);
+    if (!alreadySaved) {
+      state.snapshots = [
+        ...(state.snapshots || []),
+        { date: today, price: state.live.price, timestamp: Date.now() },
+      ];
+    }
+  } else if (!state.live) {
+    state.hasLiveFailure = true;
+  }
+
+  startCountdown();
+  renderAll?.();
+  renderTrackerAddonPanels();
+}
+
+function initRealtimeEngine() {
+  if (realtimeEngine) return;
+
+  realtimeEngine = createRealtimePricingEngine({
+    primaryProvider: new PrimaryQuoteProvider({ timeoutMs: 5000 }),
+    secondaryProvider: new SecondaryQuoteProvider({ timeoutMs: 5000 }),
+    config: REALTIME_POLLING_DEFAULTS,
+    debug: new URLSearchParams(location.search).get('debugFreshness') === '1',
+  });
+
+  const cacheBoot = cache.getFallbackGoldPrice();
+  if (cacheBoot) {
+    realtimeEngine.seedFromCache({
+      price: cacheBoot.price,
+      updatedAt: cacheBoot.updatedAt,
+      fetchedAt: cacheBoot.fetchedAt,
+      providerId: 'cache',
+      source: 'cache',
+    });
+  }
+
+  realtimeEngine.subscribe((snapshot) => {
+    applyRealtimeSnapshot(snapshot);
+  });
+
+  if (state.autoRefresh) realtimeEngine.start();
+  document.addEventListener('visibilitychange', () => {
+    realtimeEngine?.setVisibility(!document.hidden);
+  });
+}
+
 async function refreshData(forceLive = true, includeWire = true) {
   const tasks = [];
   if (forceLive) tasks.push(fetchLive());
@@ -1073,55 +1190,18 @@ async function refreshData(forceLive = true, includeWire = true) {
 }
 
 async function fetchLive() {
-  try {
-    const [goldRes, fxRes] = await Promise.allSettled([api.fetchGold(), api.fetchFX()]);
-    if (goldRes.status === 'fulfilled') {
-      const data = goldRes.value;
-      state.live = {
-        price: data.price,
-        updatedAt: data.updatedAt,
-        isFresh: data.isFresh ?? null,
-        isFallback: data.isFallback ?? null,
-        freshnessSeconds: data.freshnessSeconds ?? null,
-        sourceTimestamp: data.sourceTimestamp ?? null,
-        raw: data,
-      };
-      state.hasLiveFailure = false;
-      cache.saveGoldPrice(data.price, data.updatedAt);
-      cache.checkDayOpenReset({ goldPriceUsdPerOz: data.price });
-      const today = new Date().toISOString().slice(0, 10);
-      const alreadySaved = (state.snapshots || []).some((s) => s.date === today);
-      if (!alreadySaved) {
-        state.snapshots = [
-          ...(state.snapshots || []),
-          { date: today, price: data.price, timestamp: Date.now() },
-        ];
-      }
-    } else {
-      state.hasLiveFailure = true;
-      if (!state.live) {
-        const fb = cache.getFallbackGoldPrice();
-        if (fb) {
-          state.live = { price: fb.price, updatedAt: fb.updatedAt, raw: fb };
-          // Push fallback into advanced chart if present
-          try {
-            if (window.__GOLD_CHART && typeof window.__GOLD_CHART.addPoint === 'function') {
-              window.__GOLD_CHART.addPoint(fb.price, fb.updatedAt || Date.now());
-            }
-          } catch (_e) {}
-        }
-      }
-    }
+  if (realtimeEngine) {
+    await realtimeEngine.refreshNow('manual-refresh');
+  }
 
-    if (fxRes.status === 'fulfilled') {
-      const data = fxRes.value;
-      state.rates = data.rates;
-      state.fxMeta = {
-        lastUpdateUtc: data.time_last_update_utc,
-        nextUpdateUtc: new Date(data.time_next_update_utc).getTime(),
-      };
-      cache.saveFXRates(state.rates, state.fxMeta);
-    }
+  try {
+    const data = await api.fetchFX();
+    state.rates = data.rates;
+    state.fxMeta = {
+      lastUpdateUtc: data.time_last_update_utc,
+      nextUpdateUtc: new Date(data.time_next_update_utc).getTime(),
+    };
+    cache.saveFXRates(state.rates, state.fxMeta);
   } catch (_e) {
     console.warn('[tracker] refreshData failed', _e);
     state.hasLiveFailure = true;
@@ -1247,6 +1327,7 @@ async function init() {
   localizeStaticTrackerCopy();
   populateSelects();
   renderTrackerAddonPanels();
+  initRealtimeEngine();
   serverAlertsAvailable = await probeServerAlertsAvailability();
   updateServerAlertUiState();
   bindCoreEvents();
@@ -1389,6 +1470,15 @@ async function init() {
       if (state.mode === 'live') renderChart();
     }, 150);
   });
+
+  window.addEventListener(
+    'pagehide',
+    () => {
+      realtimeEngine?.stop();
+      realtimeEngine = null;
+    },
+    { once: true }
+  );
 }
 
 // Offline detection
