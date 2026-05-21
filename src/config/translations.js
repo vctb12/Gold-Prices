@@ -332,6 +332,12 @@ export const TRANSLATIONS = {
       'Share a short brief now, or open the exports workspace for CSV/JSON files with source labels.',
     'tracker.exportCommand.note':
       'Exports always include source/freshness context. When historical baseline points are used, files remain labeled as baseline-derived reference data.',
+    'tracker.exportReadiness.checking': 'Checking export source…',
+    'tracker.exportReadiness.ready': 'Export ready · live + source-labeled data',
+    'tracker.exportReadiness.limited': 'Export limited · mixed live/baseline sources',
+    'tracker.exportReadiness.blocked': 'Export paused · fallback/baseline-only data',
+    'tracker.exportReadiness.blockedReason':
+      'Exports unlock automatically when live source data returns.',
     'tracker.historySource.label': 'History source: {source}',
     'tracker.historySource.preparing': 'History source: preparing…',
     'tracker.historySource.unavailable': 'Unavailable',
@@ -1164,6 +1170,12 @@ export const TRANSLATIONS = {
       'شارك ملخصاً قصيراً الآن، أو افتح مساحة التصدير لتنزيل ملفات CSV/JSON مع تسميات المصدر.',
     'tracker.exportCommand.note':
       'تشمل ملفات التصدير دائماً سياق المصدر وحداثة البيانات. وعند استخدام نقاط من الخط الأساسي التاريخي تبقى الملفات معلّمة بوضوح كبيانات مرجعية مشتقة من الخط الأساسي.',
+    'tracker.exportReadiness.checking': 'جارٍ فحص مصدر التصدير…',
+    'tracker.exportReadiness.ready': 'التصدير جاهز · بيانات مباشرة مع وسم المصدر',
+    'tracker.exportReadiness.limited': 'تصدير محدود · مصادر مختلطة مباشرة/أساسية',
+    'tracker.exportReadiness.blocked': 'التصدير متوقف مؤقتاً · بيانات احتياطية/أساسية فقط',
+    'tracker.exportReadiness.blockedReason':
+      'سيُفعّل التصدير تلقائياً عند عودة بيانات المصدر المباشر.',
     'tracker.historySource.label': 'مصدر السجل: {source}',
     'tracker.historySource.preparing': 'مصدر السجل: جارٍ التحضير…',
     'tracker.historySource.unavailable': 'غير متاح',

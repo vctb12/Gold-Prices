@@ -1063,6 +1063,37 @@ body.tracker-workspace-basic .tracker-advanced-only {
   flex-shrink: 0;
 }
 
+.tracker-export-readiness-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--tp-border);
+  background: var(--surface-secondary);
+  color: var(--tp-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  padding: 0.3rem 0.65rem;
+}
+
+.tracker-export-readiness-pill[data-state='ready'] {
+  border-color: var(--color-live-border);
+  background: var(--color-live-bg);
+  color: var(--color-live);
+}
+
+.tracker-export-readiness-pill[data-state='limited'] {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.tracker-export-readiness-pill[data-state='blocked'] {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
 /* Subpanels */
 .tracker-subpanel {
   padding: var(--space-4);

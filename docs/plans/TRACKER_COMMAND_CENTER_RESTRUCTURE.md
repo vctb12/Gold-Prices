@@ -17,6 +17,7 @@
 5. Compact inline calculator panel (weight × karat × currency)
 6. Export/share command section with explicit source/freshness note
 7. Methodology links preserved across trust-sensitive sections
+8. Export readiness pill with live/limited/blocked state driven by source + freshness
 
 ## Components/files touched
 
@@ -26,6 +27,7 @@
 - `styles/pages/tracker-pro.css`
 - `src/config/translations.js`
 - `tests/e2e/tracker-flow.spec.js`
+- `tests/tracker-dom.test.js`
 
 ## Key risks
 
@@ -34,6 +36,7 @@
 2. Live-mode density changes can regress small-screen layout at 360px/414px.
 3. New inline calculator must use existing pricing helpers and must not alter core price formulas.
 4. Freshness/source cues must remain visible and not be weakened.
+5. Export gating must avoid silent failures; blocked states must explain why exports are paused.
 
 ## Rollback plan
 

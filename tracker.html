@@ -833,6 +833,7 @@
                 id="tp-quick-calc-weight"
                 min="0"
                 step="0.01"
+                inputmode="decimal"
                 value="10"
                 aria-labelledby="tp-quick-calc-weight-label"
               />
@@ -876,6 +877,14 @@
               </p>
             </div>
             <div class="tracker-head-actions">
+              <span
+                class="tracker-export-readiness-pill"
+                id="tp-export-readiness-pill"
+                role="status"
+                aria-live="polite"
+              >
+                Checking export source…
+              </span>
               <button
                 type="button"
                 class="btn btn-sm btn-outline"

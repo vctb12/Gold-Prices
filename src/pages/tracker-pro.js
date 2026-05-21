@@ -285,6 +285,7 @@ function localizeStaticTrackerCopy() {
   setNodeText('tp-quick-calc-method-link', trackerTx('quickCalc.methodLink'));
   setNodeText('tp-export-command-title', trackerTx('exportCommand.title'));
   setNodeText('tp-export-command-copy', trackerTx('exportCommand.copy'));
+  setNodeText('tp-export-readiness-pill', trackerTx('exportReadiness.checking'));
   setButtonCopy(document.getElementById('tp-share-inline'), trackerTx('actions.copyBrief'));
   setButtonCopy(
     document.getElementById('tp-open-exports-inline'),

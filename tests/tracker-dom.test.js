@@ -388,6 +388,13 @@ test('tracker-dom: export panel has JSON download button', () => {
   assert.ok(/id="tp-download-json"/.test(HTML), '#tp-download-json must exist for JSON export');
 });
 
+test('tracker-dom: export readiness pill exists in command panel', () => {
+  assert.ok(
+    /id="tp-export-readiness-pill"/.test(HTML),
+    '#tp-export-readiness-pill must exist to show export source readiness'
+  );
+});
+
 // ── Chart source note ─────────────────────────────────────────────────────────
 
 test('tracker-dom: chart source note element exists', () => {
@@ -404,5 +411,14 @@ test('tracker-dom: chart source note is not trivially short', () => {
   assert.ok(
     /tp-chart-source-note/.test(noteSnippet),
     'chart source note element must be present in the DOM'
+  );
+});
+
+test('tracker-dom: quick calculator weight input uses decimal inputmode', () => {
+  const weightInputMatch = HTML.match(/id="tp-quick-calc-weight"[^>]*>/);
+  assert.ok(weightInputMatch, '#tp-quick-calc-weight input must exist');
+  assert.ok(
+    /inputmode="decimal"/.test(weightInputMatch[0]),
+    '#tp-quick-calc-weight should set inputmode="decimal" for mobile keyboards'
   );
 });
