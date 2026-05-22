@@ -276,6 +276,51 @@ test('index.html: X/Twitter social link URL has no spaces and uses https://x.com
   }
 });
 
+// --- calculator inputmode guard ----------------------------------------
+test('calculator.html: numeric inputs keep mobile inputmode hints', () => {
+  const html = fs.readFileSync(path.join(REPO_ROOT, 'calculator.html'), 'utf8');
+  const numberInputTags = [...html.matchAll(/<input\b[^>]*type=["']number["'][^>]*>/gi)].map(
+    (m) => m[0]
+  );
+  const expectedModesById = new Map([
+    ['val-weight', 'decimal'],
+    ['scrap-weight', 'decimal'],
+    ['scrap-payout', 'numeric'],
+    ['zakat-weight', 'decimal'],
+    ['buy-amount', 'decimal'],
+    ['conv-amount', 'decimal'],
+  ]);
+  const seenIds = new Set();
+  const unexpectedIds = [];
+  for (const tag of numberInputTags) {
+    const id = (tag.match(/\bid=["']([^"']+)["']/i) || [])[1];
+    assert.ok(id, `calculator.html: numeric input missing id attribute in tag: ${tag}`);
+    const inputmode = (tag.match(/\binputmode=["']([^"']+)["']/i) || [])[1];
+    if (!expectedModesById.has(id)) {
+      unexpectedIds.push(id);
+      continue;
+    }
+    seenIds.add(id);
+    assert.ok(inputmode, `calculator.html: #${id} missing inputmode attribute`);
+    assert.equal(
+      inputmode,
+      expectedModesById.get(id),
+      `calculator.html: #${id} should keep inputmode="${expectedModesById.get(id)}"`
+    );
+  }
+  assert.deepEqual(
+    unexpectedIds,
+    [],
+    `calculator.html: unexpected numeric input ids: ${unexpectedIds.join(', ')}`
+  );
+  const missingIds = [...expectedModesById.keys()].filter((id) => !seenIds.has(id));
+  assert.deepEqual(
+    missingIds,
+    [],
+    `calculator.html: missing expected numeric inputs: ${missingIds.join(', ')}`
+  );
+});
+
 // --- sitemap generator correctness (runs against current filesystem) --
 test('sitemap generator excludes every noindex / meta-refresh stub', () => {
   // Invoke the generator in-process by requiring it after writing to a
