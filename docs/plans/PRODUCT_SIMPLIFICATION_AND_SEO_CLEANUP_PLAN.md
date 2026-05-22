@@ -1,5 +1,20 @@
 # Product Simplification & SEO Cleanup Plan (PR 2 Safety Pass)
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 Status: locked for this PR (no deletions, no redirects rollout yet).
 
 Source baseline: `docs/audits/PAGE_CLEANUP_AND_PRODUCT_FOCUS.md`
@@ -26,7 +41,8 @@ Source baseline: `docs/audits/PAGE_CLEANUP_AND_PRODUCT_FOCUS.md`
 ## Merge pages (later PRs, no merge now)
 
 - `learn.html` + `insights.html` toward one knowledge hub.
-- Overlapping karat guides under `content/guides/` + `content/22k-gold-price-guide/` + `content/24k-gold-price-guide/`.
+- Overlapping karat guides under `content/guides/` + `content/22k-gold-price-guide/` +
+  `content/24k-gold-price-guide/`.
 - City `gold-prices/` overlap candidates into city `gold-rate/` in later sequence.
 
 ## Noindex pages (this PR)
@@ -52,9 +68,11 @@ Source baseline: `docs/audits/PAGE_CLEANUP_AND_PRODUCT_FOCUS.md`
 ## Redirect target map for delete-later patterns
 
 - `countries/<country>/<city>/gold-rate/<karat>-karat/` → `countries/<country>/<city>/gold-rate/`
-- `content/tools/investment-return.html` → `tracker.html` (or calculator panel destination in follow-up)
+- `content/tools/investment-return.html` → `tracker.html` (or calculator panel destination in
+  follow-up)
 - `content/guides/invest-in-gold-gcc.html` → `methodology.html` or consolidated knowledge hub target
-- `content/social/x-post-generator.html` (if removed later) → `content/social/` stub or `developer.html` (final target to decide with product owner)
+- `content/social/x-post-generator.html` (if removed later) → `content/social/` stub or
+  `developer.html` (final target to decide with product owner)
 
 ## Sitemap governance in this PR
 

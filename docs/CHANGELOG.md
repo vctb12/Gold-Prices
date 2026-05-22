@@ -4,6 +4,17 @@ All notable changes to the Gold-Prices platform are documented here.
 
 ## [Unreleased]
 
+### 2026-05-22 — Shops deeper mobile UI pass
+
+- Added mobile quick-filter chips to `shops.html` via `src/pages/shops.js` to provide one-tap filter
+  actions without opening the full dropdown panel.
+- Improved touch-target compliance on shops filter tabs, clear controls, and shortlist actions (44px
+  minimum) in `styles/pages/shops.css`.
+- Added tabular-number rendering for shops headline counts and replaced near-me status hardcoded
+  colors with design tokens.
+- Extended Playwright coverage in `tests/e2e/mobile-smoke.spec.js` and
+  `tests/e2e/shops-search.spec.js` for the new mobile quick-filter flow.
+
 ### 2026-04-27 — Multi-batch UX, admin, CSS, and trust improvements
 
 #### Stylelint

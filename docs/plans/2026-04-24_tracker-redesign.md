@@ -1,5 +1,20 @@
 # Tracker.html Redesign Plan — 20-Phase Track
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 **Created:** 2026-04-24  
 **Source reports:** [`reports/tracker-ux-audit.md`](../../reports/tracker-ux-audit.md) (Phase 1
 deliverable), [`reports/token-audit.md`](../../reports/token-audit.md) (Phase 2 deliverable),

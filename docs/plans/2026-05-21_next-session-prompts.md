@@ -3,6 +3,7 @@
 ```yaml plan-status
 status: in-progress
 priority: P1
+class: B
 owner: @vctb12
 last_run_at: "2026-05-22T13:50:00Z"
 last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/331"

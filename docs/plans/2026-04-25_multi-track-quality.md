@@ -1,5 +1,20 @@
 # Multi-track quality, SEO, testing, docs, CI & release plan
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 **Origin:** User prompt · 2026-04-25 **Status:** 🟡 IN PROGRESS — PR 1 (this file + intake row) ✅
 landed. PR 2 (SEO audit · Wave A) ✅ landed → [`reports/seo-audit.md`](../../reports/seo-audit.md).
 PR 3 (a11y + responsive audits · Wave A) ✅ landed →

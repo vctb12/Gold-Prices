@@ -1,5 +1,20 @@
 # 2026-04-24 — Security / Performance / Dependencies audit & remediation
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 **Status:** 🟢 In progress — PR A-1 (security high-severity) landed as commit 81667b3. PR B-1 (async
 stat), PR B-2 partial (admin no-store cache-control), PR C-1 (lowdb removal), and PR A-2
 (shops/rendering.js innerHTML burn-down) landing in the follow-up commit. **2026-04-25:** secret

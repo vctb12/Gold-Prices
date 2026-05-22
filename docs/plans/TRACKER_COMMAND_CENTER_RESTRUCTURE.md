@@ -1,5 +1,20 @@
 # Tracker Command Center Restructure (PR 3)
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 ## Current structure (before this pass)
 
 1. Hero + controls + trust hints

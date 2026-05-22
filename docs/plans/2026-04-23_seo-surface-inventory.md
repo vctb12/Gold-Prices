@@ -1,5 +1,20 @@
 # Plan — Read-only SEO-surface inventory
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 **Date:** 2026-04-23 **Status:** 📥 Proposal (plan-only, awaiting owner approval) **Audit ref:**
 [`docs/REPO_AUDIT.md` §J-P0-2](../REPO_AUDIT.md) **Campaign ref:** PR #3 of the charter-respecting
 multi-PR campaign (plan-first per [`AGENTS.md` §4.3](../../AGENTS.md)) **Depends on:** nothing.

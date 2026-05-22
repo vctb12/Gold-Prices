@@ -1,5 +1,23 @@
 # Full-site UX, content, SEO, and admin revamp
 
+```yaml plan-status
+status: in-progress
+priority: P1
+class: A
+owner: @vctb12
+last_run_at: "2026-05-22T14:31:00Z"
+last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/332"
+last_run_agent: copilot
+slices_remaining_estimate: 2
+next_action: "Execute the tracker deeper UX pass in Batch 4 (`tracker.html`, `src/tracker/*`, `styles/pages/tracker-pro.css`)."
+blocked_on: ""
+guardrails_reviewed: true
+skills_used:
+  - gold-ticker-live-audit
+  - frontend-design-system
+  - mobile-ux-review
+```
+
 ## Origin
 
 User asked for a point-by-point implementation of a broad website upgrade: navbar, admin panel, all
@@ -78,7 +96,7 @@ brand shift toward **Gold Ticker Live**.
       partial: region-tab ARIA labels + below-fold lazy-init for country-search/ad surfaces.)_
 - [ ] `/tracker.html`, `/src/tracker/*`, `/styles/pages/tracker-pro.css` _(2026-05-12 partial:
       planner/karat-table loading + empty strings localized through `translations.js`.)_
-- [ ] `/shops.html`, `/src/pages/shops/*`, `/styles/pages/shops.css` — deeper UI pass _(2026-05-12
+- [x] `/shops.html`, `/src/pages/shops/*`, `/styles/pages/shops.css` — deeper UI pass _(2026-05-12
       partial: query-aware no-result copy in EN/AR.)_
 
 ### Batch 5 — admin command-center workflow
@@ -119,3 +137,29 @@ brand shift toward **Gold Ticker Live**.
 2. Revert Supabase submission queue if RLS policy needs owner adjustment.
 3. Revert nav/footer brand changes independently.
 4. Revert admin workflow polish independently.
+
+## Session log
+
+### 2026-05-22T14:31Z — copilot (PR #332)
+
+- Slice class: CODE
+- Phase/Feature closed: Batch 4 — shops deeper UI pass
+- Skills activated: gold-ticker-live-audit, frontend-design-system, mobile-ux-review
+- Files touched: 4 (excluding plan/docs updates)
+- Completed:
+  - Added mobile quick-filter chips for shops on 390/360 surfaces with accessible pressed-state
+    toggles.
+  - Increased touch targets for filter tabs/clear and shortlist actions to 44px.
+  - Added tabular-number rendering for headline listing counters to improve mobile scanability.
+  - Replaced off-token near-me status colors with existing design tokens.
+  - Extended E2E coverage for quick filters and mobile shops smoke.
+- Added/Split: none
+- Skipped (owner-only / blocked): none
+- Validation: lint=PASS, quality=FAIL (pre-existing — prettier drift in unrelated files, not
+  introduced by this batch), test=FAIL (pre-existing — `tests/analytics.test.js` navigator getter
+  issue, not introduced by this batch), build=PASS, validate=PASS, playwright=FAIL (pre-existing —
+  suite-wide failures across many unrelated specs, none caused by this batch). All failures are
+  pre-existing and were present before this session; no new failures were introduced.
+- Screenshots: not captured in this session
+- Next action: Execute the tracker deeper UX pass in Batch 4 (`tracker.html`, `src/tracker/*`,
+  `styles/pages/tracker-pro.css`).

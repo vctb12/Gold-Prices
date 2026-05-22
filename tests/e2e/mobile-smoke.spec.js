@@ -50,6 +50,10 @@ test.describe('Mobile smoke', () => {
     await expect(page.locator('#shops-filter-toggle')).toBeVisible();
     await expect(page.locator('#shops-search')).toBeVisible();
     await expect(page.locator('#shops-controls-summary')).toBeVisible();
+    await expect(page.locator('#shops-mobile-quick-filters')).toBeVisible();
+    await expect(
+      page.locator('#shops-mobile-quick-filters .shops-quick-filter-chip').first()
+    ).toBeVisible();
     await expect(page.locator('[data-listing-tab="verified_shop"]')).toBeVisible();
     await page.locator('#shops-filter-toggle').click();
     await expect(page.locator('#shops-filter-panel')).toHaveClass(/is-open/);

@@ -1,5 +1,20 @@
 # Repo Cleanup Proposal — Dead Code, Dead Files, Stale Artifacts (captured 2026-04-23)
 
+```yaml plan-status
+status: not-started
+priority: P2
+class: A
+owner: @vctb12
+last_run_at: ""
+last_run_pr: ""
+last_run_agent: copilot
+slices_remaining_estimate: 0
+next_action: ""
+blocked_on: ""
+guardrails_reviewed: true
+skills_used: []
+```
+
 > **Status:** 📥 _Proposal — Phase 0 reconciled. Phase 1 (audit-only) is in progress on branch
 > `copilot/clean-repo-files-dead-code`. Phases 2+ are gated by owner sign-off on
 > `reports/cleanup-audit/CANDIDATES.md`._

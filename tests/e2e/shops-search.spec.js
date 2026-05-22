@@ -155,4 +155,17 @@ test.describe('Shops directory page', () => {
     await expect(disclosure).toBeVisible();
     await expect(disclosure).toContainText(/sponsored|placement|ممول/i);
   });
+
+  test('mobile quick filters render and toggle verified shortcut', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/shops.html', { waitUntil: 'domcontentloaded' });
+
+    const quickFilters = page.locator('#shops-mobile-quick-filters .shops-quick-filter-chip');
+    await expect(quickFilters.first()).toBeVisible();
+
+    const verifiedChip = page.locator('[data-quick-filter="verified-only"]');
+    await expect(verifiedChip).toHaveAttribute('aria-pressed', 'false');
+    await verifiedChip.click();
+    await expect(verifiedChip).toHaveAttribute('aria-pressed', 'true');
+  });
 });
