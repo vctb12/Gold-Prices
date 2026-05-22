@@ -618,7 +618,7 @@ export function renderMiniStrip() {
     ? tx('miniStripSummary', {
         currency: _state.selectedCurrency,
         karat: _state.selectedKarat,
-        unit: _state.selectedUnit,
+        unit: formatUnitLabel(_state.selectedUnit),
         price: selected.toFixed(2),
       })
     : '—';
