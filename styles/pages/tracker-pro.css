@@ -198,6 +198,18 @@ body.tracker-pro-page {
   animation-delay: calc(var(--chip-i, 0) * 100ms);
 }
 
+.tracker-welcome-chip--0 {
+  --chip-i: 0;
+}
+
+.tracker-welcome-chip--1 {
+  --chip-i: 1;
+}
+
+.tracker-welcome-chip--2 {
+  --chip-i: 2;
+}
+
 @keyframes tp-welcome-chip-in {
   from {
     opacity: 0;

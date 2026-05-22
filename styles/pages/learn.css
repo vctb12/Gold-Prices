@@ -242,11 +242,35 @@
   overflow: hidden;
 }
 
-.learn-purity-bar > span {
+.learn-purity-bar-fill {
   display: block;
   height: 100%;
   background: var(--color-gold);
   border-radius: var(--radius-xs);
+}
+
+.learn-purity-bar-fill--24k {
+  width: 99.9%;
+}
+
+.learn-purity-bar-fill--22k {
+  width: 91.7%;
+}
+
+.learn-purity-bar-fill--21k {
+  width: 87.5%;
+}
+
+.learn-purity-bar-fill--18k {
+  width: 75%;
+}
+
+.learn-purity-bar-fill--14k {
+  width: 58.3%;
+}
+
+.learn-purity-bar-fill--9k {
+  width: 37.5%;
 }
 
 /* ── RTL ────────────────────────────────────────────── */
