@@ -5,13 +5,13 @@ status: in-progress
 priority: P1
 owner: @vctb12
 last_run_at: "2026-05-22T14:37:44Z"
-last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/331"
+last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/333"
 last_run_agent: copilot
 slices_remaining_estimate: 8
 next_action: "Execute Phase 2 leaf #1: add a shared learn-hub content model + renderer and migrate learn.html to the model without removing methodology/insights yet."
 blocked_on: ""
 guardrails_reviewed: true
-skills_used: [gold-ticker-live-audit, frontend-design-system, mobile-ux-review]
+skills_used: [gold-ticker-live-audit]
 ```
 
 Use these as copy-paste prompts for upcoming sessions.  
