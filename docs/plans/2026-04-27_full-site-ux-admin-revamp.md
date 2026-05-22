@@ -92,10 +92,14 @@ brand shift toward **Gold Ticker Live**.
 - [x] `/calculator.html` — hero disclaimer simplified with link to spot-vs-retail guide.
 - [x] `/shops.html` — strengthened trust disclaimer to explicitly advise confirming with seller.
 - [x] `/index.html` — FAQ "more questions" link updated to point to `content/faq/`.
-- [ ] `/index.html`, `/src/pages/home.js`, `/styles/pages/home.css` — deeper UX pass _(2026-05-12
-      partial: region-tab ARIA labels + below-fold lazy-init for country-search/ad surfaces.)_
-- [ ] `/tracker.html`, `/src/tracker/*`, `/styles/pages/tracker-pro.css` _(2026-05-12 partial:
-      planner/karat-table loading + empty strings localized through `translations.js`.)_
+- [ ] **Batch 4A — homepage above-the-fold polish** (`/index.html`, `/src/pages/home.js`,
+      `/styles/pages/home.css`, `/tests/home-hero-loading.test.js`) — tighten first-view loading
+      contract + trust surface before data arrives (smallest slice).
+- [ ] **Batch 4B — homepage below-the-fold polish** (`/index.html`, `/src/pages/home.js`,
+      `/styles/pages/home.css`) — continue deeper UX pass for command/snapshot/tools/country blocks.
+- [ ] **Batch 4C — tracker deeper UX pass** (`/tracker.html`, `/src/tracker/*`,
+      `/styles/pages/tracker-pro.css`) _(2026-05-12 partial: planner/karat-table loading + empty
+      strings localized through `translations.js`.)_
 - [x] `/shops.html`, `/src/pages/shops/*`, `/styles/pages/shops.css` — deeper UI pass _(2026-05-12
       partial: query-aware no-result copy in EN/AR.)_
 
