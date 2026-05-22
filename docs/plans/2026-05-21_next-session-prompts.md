@@ -1,5 +1,17 @@
 # Next Session Prompts (Phase-by-Phase)
 
+```yaml plan-status
+status: in-progress
+priority: P1
+owner: @vctb12
+last_run_at: "2026-05-22T13:11:17Z"
+last_run_pr: ""
+last_run_agent: copilot
+next_action: "Complete the Phase 1 parity sweep by auditing remaining shell-style extraction gaps and capturing full lint/test/validate/build evidence."
+blocked_on: ""
+guardrails_reviewed: true
+```
+
 Use these as copy-paste prompts for upcoming sessions.  
 Each prompt assumes previous phases are already merged.
 
@@ -382,3 +394,27 @@ Acceptance:
   - Canonical nav 7-surface contract added to `nav-data` + test coverage.
   - Inline shell-related styles partially extracted to `styles/partials/shell.css`.
 - Remaining Phase 1 items should continue from this state (final parity sweep + CI evidence pack).
+
+## Actionable checklist — current next slice
+
+- [x] Confirm shared shell renderer adoption for major page entry points (`src/components/site-shell.js`).
+- [x] Confirm shell guard is wired into validate (`scripts/node/check-shell-guard.js` via `npm run validate`).
+- [x] Confirm canonical nav 7-surface contract coverage in nav-data + tests.
+- [x] Confirm partial shell-style extraction exists (`styles/partials/shell.css`).
+- [ ] Complete Phase 1 parity sweep and capture fresh validation evidence (`npm run lint`, `npm test`, `npm run validate`, `npm run build`) for the remaining extraction pass.
+
+## Session log
+
+### 2026-05-22T13:11Z — copilot (PR #TBD)
+- Slice: Add required status/session metadata and convert current Phase 1 progress into explicit actionable checklist state.
+- Completed:
+  - Added `plan-status` YAML block with `in-progress` state and a concrete `next_action`.
+  - Added an actionable checkbox list for the active Phase 1 progress state.
+  - Preserved prior progress notes and aligned them with checklist tracking.
+- Added/Split:
+  - Added one explicit pending leaf item to drive the next run (`Complete Phase 1 parity sweep + full validation evidence`).
+- Skipped (owner-only / blocked):
+  - None.
+- Validation:
+  - Docs-only plan-state update; no runtime or build-affecting files changed, so repo test/lint/build commands were not run in this slice.
+- Next action: Complete the Phase 1 parity sweep by auditing remaining shell-style extraction gaps and capturing full lint/test/validate/build evidence.
