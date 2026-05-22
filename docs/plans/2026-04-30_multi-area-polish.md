@@ -106,7 +106,7 @@ one bucket. Reviewer can read top-to-bottom.
 
 ### Bucket 13 — test: regression coverage
 
-- [ ] Add test for X social link URL correctness in `tests/seo-sitewide.test.js`.
+- [x] Add test for X social link URL correctness in `tests/seo-sitewide.test.js`. _(completed: test added in `tests/seo-sitewide.test.js` — "X/Twitter social link URL has no spaces and uses https://x.com/")_
 - [x] Add test for `inputmode` on calculator inputs. _(2026-05-22: added numeric-input inputmode
       guard in `tests/seo-sitewide.test.js` for `calculator.html`.)_
 
