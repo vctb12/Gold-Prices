@@ -269,6 +269,11 @@ export const TRANSLATIONS = {
       'No records match the selected range or search query. The monthly baseline covers 2019–{lastMonth}. For more recent data, try a shorter range (30D or 90D) — those draw on your live session snapshots.',
     'tracker.archive.partialDataWarning':
       'Showing {count} record(s). Longer ranges use monthly LBMA averages which are less granular than recent snapshots.',
+    'tracker.archiveMeta': '{start}–{end} of {total} records · {source} · {from}–{to}',
+    'tracker.archiveSourceMixed': 'session + baseline',
+    'tracker.archiveSourceBaseline': 'baseline',
+    'tracker.present': 'present',
+    'tracker.miniStripSummary': '{currency} {karat}K / {unit}: {price}',
     'tracker.briefWaitingHeadline': 'Waiting for live data',
     'tracker.briefWaitingBody':
       'Gold price data is loading. If this persists, the API may be temporarily unavailable — last cached price will be shown when available.',
@@ -1107,6 +1112,11 @@ export const TRANSLATIONS = {
       'لا توجد سجلات تطابق النطاق أو البحث المحدد. يغطي المرجع الشهري الفترة من 2019 حتى {lastMonth}. جرّب نطاقًا أقصر (30 يومًا أو 90 يومًا) للحصول على بيانات الجلسة الحديثة.',
     'tracker.archive.partialDataWarning':
       'يعرض {count} سجلًا. تستخدم النطاقات الطويلة متوسطات LBMA الشهرية وهي أقل تفصيلًا من اللقطات الحديثة.',
+    'tracker.archiveMeta': '{start}–{end} من {total} سجل · {source} · {from}–{to}',
+    'tracker.archiveSourceMixed': 'جلسة + خط أساس',
+    'tracker.archiveSourceBaseline': 'خط أساس',
+    'tracker.present': 'حاضر',
+    'tracker.miniStripSummary': '{currency} {karat} قيراط / {unit}: {price}',
     'tracker.briefWaitingHeadline': 'بانتظار البيانات المباشرة',
     'tracker.briefWaitingBody':
       'يتم تحميل بيانات الذهب الآن. إذا استمر ذلك فقد تكون الواجهة غير متاحة مؤقتاً — سيتم عرض آخر قيمة مخزنة عند توفرها.',

@@ -42,6 +42,11 @@ const REQUIRED_KEYS = [
   'trackerAddons.compareHints.title',
   'trackerAddons.exportHelp.title',
   'trackerAddons.alertsHelp.title',
+  'tracker.archiveMeta',
+  'tracker.archiveSourceMixed',
+  'tracker.archiveSourceBaseline',
+  'tracker.present',
+  'tracker.miniStripSummary',
 ];
 
 test('new trust-surface keys exist in both EN and AR', async () => {

@@ -615,7 +615,12 @@ export function renderMiniStrip() {
     spot,
   });
   _el.miniStrip.textContent = selected
-    ? `${_state.selectedCurrency} ${_state.selectedKarat}K / ${_state.selectedUnit}: ${selected.toFixed(2)}`
+    ? tx('miniStripSummary', {
+        currency: _state.selectedCurrency,
+        karat: _state.selectedKarat,
+        unit: formatUnitLabel(_state.selectedUnit),
+        price: selected.toFixed(2),
+      })
     : '—';
 }
 
@@ -1908,12 +1913,19 @@ export function renderArchive(resetPage = false) {
 
   if (_el.archiveMeta) {
     const { first: firstMonth, last: lastMonth } = getBaselineRange();
-    const sourceInfo = _state.history.some(
+    const sourceLabel = _state.history.some(
       (r) => r.source === 'live' || r.source === 'session-cache'
     )
-      ? 'session + baseline'
-      : 'baseline';
-    _el.archiveMeta.textContent = `${pageStart + 1}–${pageStart + pageRows.length} of ${totalFiltered} records · ${sourceInfo} · ${firstMonth || '2019'}–${lastMonth || 'present'}`;
+      ? tx('archiveSourceMixed')
+      : tx('archiveSourceBaseline');
+    _el.archiveMeta.textContent = tx('archiveMeta', {
+      start: pageStart + 1,
+      end: pageStart + pageRows.length,
+      total: totalFiltered,
+      source: sourceLabel,
+      from: firstMonth || '2019',
+      to: lastMonth || tx('present'),
+    });
   }
 
   _renderArchivePagination(_archivePage, totalPages, totalFiltered);
@@ -2129,6 +2141,8 @@ export function renderAll() {
 
   // Localize welcome strip chips (bilingual parity — §6 rule 6).
   _localizeWelcomeStrip();
+  // Localize trust banner content and close button aria-label.
+  _localizeTrustBanner();
 
   const spot = _currentSpot();
   updateShellTickerFromState(_state, spot, _priceFor);
@@ -2149,4 +2163,18 @@ function _localizeWelcomeStrip() {
   });
   const closeBtn = document.getElementById('tracker-welcome-close');
   if (closeBtn) setText(closeBtn, tx('welcome.dismiss'));
+}
+
+/** Localize the trust banner content and close-button aria-label (bilingual parity). */
+function _localizeTrustBanner() {
+  const content = document.querySelector('.tracker-trust-content');
+  if (content) {
+    content.replaceChildren(
+      el('strong', {}, tx('referenceBannerTitle')),
+      ` — ${tx('referenceBannerBody')} `,
+      el('a', { href: 'methodology.html', class: 'tracker-inline-link' }, tx('referenceBannerLink'))
+    );
+  }
+  const closeBtn = document.querySelector('.tracker-trust-close');
+  if (closeBtn) closeBtn.setAttribute('aria-label', tx('referenceBannerClose'));
 }
