@@ -6,7 +6,7 @@ priority: P1
 class: A
 owner: @vctb12
 last_run_at: "2026-05-22T14:31:00Z"
-last_run_pr: "pending"
+last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/332"
 last_run_agent: copilot
 slices_remaining_estimate: 2
 next_action: "Execute the tracker deeper UX pass in Batch 4 (`tracker.html`, `src/tracker/*`, `styles/pages/tracker-pro.css`)."
@@ -140,7 +140,7 @@ brand shift toward **Gold Ticker Live**.
 
 ## Session log
 
-### 2026-05-22T14:31Z — copilot (PR #pending)
+### 2026-05-22T14:31Z — copilot (PR #332)
 
 - Slice class: CODE
 - Phase/Feature closed: Batch 4 — shops deeper UI pass
