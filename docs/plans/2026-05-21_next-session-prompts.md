@@ -4,11 +4,11 @@
 status: in-progress
 priority: P1
 owner: @vctb12
-last_run_at: "2026-05-22T13:50:00Z"
+last_run_at: "2026-05-22T14:37:44Z"
 last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/331"
 last_run_agent: copilot
-slices_remaining_estimate: 9
-next_action: "Begin Phase 2 planning by mapping learn/methodology/insights consolidation dependencies and selecting the first leaf implementation slice."
+slices_remaining_estimate: 8
+next_action: "Execute Phase 2 leaf #1: add a shared learn-hub content model + renderer and migrate learn.html to the model without removing methodology/insights yet."
 blocked_on: ""
 guardrails_reviewed: true
 skills_used: [gold-ticker-live-audit, frontend-design-system, mobile-ux-review]
@@ -397,18 +397,60 @@ Acceptance:
   - Inline shell-related styles partially extracted to `styles/partials/shell.css`.
 - Remaining Phase 1 items should continue from this state (final parity sweep + CI evidence pack).
 
+## Phase 2 planning dependency map (2026-05-22)
+
+- Shared shell and navigation injection is already unified across all three entry points via
+  `mountSharedShell()` + `injectBreadcrumbs()` in:
+  - `src/pages/learn.js`
+  - `src/pages/methodology.js`
+  - `src/pages/insights.js`
+- Each surface currently owns page-local copy/state logic:
+  - `learn.js`: large `CONTENT` map + TOC scroll-spy + cache-backed language preference.
+  - `methodology.js`: separate `T` map and independent language toggle flow.
+  - `insights.js`: separate `CONTENT` map plus live mini price bar logic.
+- Each page has standalone SEO/canonical/head metadata in:
+  - `learn.html`
+  - `methodology.html`
+  - `insights.html`
+- Consolidation to a `/learn/` hub will need coordinated updates across:
+  - `_redirects` legacy routing behavior (for removed legacy entry points).
+  - sitemap generation inputs (`scripts/node/generate-sitemap.js`, `build/generateSitemap.js`).
+  - SEO governance/noindex expectations (`scripts/node/seo-governance.js`).
+  - sitewide metadata/link tests (notably `tests/seo-sitewide.test.js`, `tests/sitemap.test.js`).
+- Safe first leaf chosen:
+  - Build a shared learn-hub content model + article renderer module and migrate `learn.html` to use
+    that renderer first, while keeping `methodology.html` and `insights.html` intact for a follow-up
+    redirect/migration slice.
+
 ## Actionable checklist — current next slice
 
-- [x] Confirm shared shell renderer adoption for major page entry points
-      (`src/components/site-shell.js`).
-- [x] Confirm shell guard is wired into validate (`scripts/node/check-shell-guard.js` via
-      `npm run validate`).
-- [x] Confirm canonical nav 7-surface contract coverage in nav-data + tests.
-- [x] Confirm partial shell-style extraction exists (`styles/partials/shell.css`).
 - [x] Complete Phase 1 parity sweep and capture fresh validation evidence (`npm run lint`,
       `npm test`, `npm run validate`, `npm run build`) for the remaining extraction pass.
+- [x] Map learn/methodology/insights consolidation dependencies for Phase 2 planning.
+- [x] Select first Phase 2 leaf implementation slice with low regression risk.
+- [ ] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
+- [ ] Validate Phase 2 leaf #1 with `npm run lint`, `npm test`, `npm run validate`, `npm run build`.
 
 ## Session log
+
+### 2026-05-22T14:37Z — copilot (planning slice)
+
+- Slice class: PLAN
+- Skills activated: gold-ticker-live-audit
+- Completed:
+  - Mapped concrete dependencies for Phase 2 consolidation across learn/methodology/insights
+    HTML+JS+SEO surfaces.
+  - Selected and documented a low-risk first implementation leaf (learn-first renderer migration).
+  - Updated next action metadata and actionable checklist for direct execution in the next run.
+- Added/Split:
+  - Added a dedicated "Phase 2 planning dependency map" section to this plan file.
+- Skipped (owner-only / blocked):
+  - No runtime code edits in this planning slice.
+- Validation:
+  - Docs-only planning update; runtime test/lint/build commands intentionally deferred to the first
+    implementation slice.
+- Next action: Execute Phase 2 leaf #1 by introducing the shared learn-hub content model + renderer
+  and migrating only `learn.html`/`src/pages/learn.js` in the first code PR.
 
 ### 2026-05-22T13:50Z — copilot (PR #331)
 

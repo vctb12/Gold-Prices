@@ -64,6 +64,10 @@ and no long-term roadmap/platform items.
 - [x] Shops empty-state sub-slice: query-aware no-result messaging in both languages.
 - [x] Calculator copy-button sub-slice: bilingual copied-state aria-label feedback on delegated copy
       buttons.
+- [x] Phase 2 planning kickoff completed: learn/methodology/insights consolidation dependencies mapped
+      and first execution leaf selected in
+      [`docs/plans/2026-05-21_next-session-prompts.md`](./plans/2026-05-21_next-session-prompts.md)
+      (learn-first shared renderer migration).
 - [ ] Shared-shell follow-up items (if still needed after verification): nav/footer parity pass.
 - [ ] Final cycle verification and checklist sync.
 
