@@ -195,7 +195,18 @@ body.tracker-pro-page {
   border-radius: var(--radius-sm);
   padding: 0.3rem 0.7rem;
   animation: tp-welcome-chip-in 0.35s var(--ease-out) both;
-  animation-delay: calc(var(--chip-i, 0) * 100ms);
+}
+
+.tracker-welcome-chip--0 {
+  animation-delay: 0ms;
+}
+
+.tracker-welcome-chip--1 {
+  animation-delay: 100ms;
+}
+
+.tracker-welcome-chip--2 {
+  animation-delay: 200ms;
 }
 
 @keyframes tp-welcome-chip-in {

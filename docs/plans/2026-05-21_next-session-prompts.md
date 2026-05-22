@@ -4,12 +4,14 @@
 status: in-progress
 priority: P1
 owner: @vctb12
-last_run_at: "2026-05-22T13:11:17Z"
-last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/330"
+last_run_at: "2026-05-22T13:50:00Z"
+last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/331"
 last_run_agent: copilot
-next_action: "Complete the Phase 1 parity sweep by auditing remaining shell-style extraction gaps and capturing full lint/test/validate/build evidence."
+slices_remaining_estimate: 9
+next_action: "Begin Phase 2 planning by mapping learn/methodology/insights consolidation dependencies and selecting the first leaf implementation slice."
 blocked_on: ""
 guardrails_reviewed: true
+skills_used: [gold-ticker-live-audit, frontend-design-system, mobile-ux-review]
 ```
 
 Use these as copy-paste prompts for upcoming sessions.  
@@ -403,10 +405,35 @@ Acceptance:
       `npm run validate`).
 - [x] Confirm canonical nav 7-surface contract coverage in nav-data + tests.
 - [x] Confirm partial shell-style extraction exists (`styles/partials/shell.css`).
-- [ ] Complete Phase 1 parity sweep and capture fresh validation evidence (`npm run lint`,
+- [x] Complete Phase 1 parity sweep and capture fresh validation evidence (`npm run lint`,
       `npm test`, `npm run validate`, `npm run build`) for the remaining extraction pass.
 
 ## Session log
+
+### 2026-05-22T13:50Z — copilot (PR #331)
+
+- Slice class: CODE
+- Skills activated: gold-ticker-live-audit, frontend-design-system, mobile-ux-review
+- Completed:
+  - Replaced remaining inline style attributes on active Phase 1 parity surfaces in `tracker.html`
+    and `learn.html` with CSS classes.
+  - Added class-driven sequencing and purity fill-width rules in `styles/pages/tracker-pro.css` and
+    `styles/pages/learn.css`.
+  - Captured full required validation evidence for this slice.
+- Added/Split:
+  - None.
+- Skipped (owner-only / blocked):
+  - None.
+- Validation: lint=PASS, quality=FAIL (pre-existing prettier drift in untouched files), test=FAIL
+  (741 run, 1 pre-existing failure in `tests/analytics.test.js`), check-unsafe-dom=PASS, build=PASS,
+  check-links=PASS, validate=PASS, playwright=FAIL (138 passed, 96 failed; missing host libs for
+  WebKit and pre-existing nav/lang smoke failures)
+- Screenshots:
+  - `/tmp/playwright-logs/phase1-inline-cleanup-360-ltr.png`
+  - `/tmp/playwright-logs/phase1-inline-cleanup-360-rtl.png`
+  - `/tmp/playwright-logs/phase1-inline-cleanup-desktop.png`
+- Next action: Begin Phase 2 planning by mapping learn/methodology/insights consolidation
+  dependencies and selecting the first leaf implementation slice.
 
 ### 2026-05-22T13:11Z — copilot (PR #330)
 
