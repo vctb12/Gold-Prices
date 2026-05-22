@@ -64,6 +64,8 @@ const REQUIRED_KEYS = [
   // Country search (Round 10)
   'home.countrySearchPlaceholder',
   'home.countrySearchEmpty',
+  'home.freshnessDismiss',
+  'home.heroLiveStatusAria',
   // Next-step guides section (Round 12)
   'home.nextStepTitle',
   'home.nextStepSub',

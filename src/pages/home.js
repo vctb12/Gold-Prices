@@ -182,8 +182,18 @@ function setTrustChip(id, text, freshnessKey = 'neutral') {
   const target = document.getElementById(id);
   if (!target) return;
   target.textContent = text;
+  target.classList.remove('skeleton-inline', 'home-command-chip--loading');
+  target.removeAttribute('aria-busy');
   target.dataset.tone =
     freshnessKey === 'live' ? 'live' : freshnessKey === 'unavailable' ? 'neutral' : 'warning';
+}
+
+function setCommandMetricValue(id, valueText = '—') {
+  const target = document.getElementById(id);
+  if (!target) return;
+  target.textContent = valueText;
+  target.classList.remove('skeleton-inline', 'shell-skeleton-karat', 'home-command-metric-loading');
+  target.removeAttribute('aria-busy');
 }
 
 function hasRealtimePathFailure() {
@@ -527,10 +537,10 @@ function renderCommandCenter(values = {}) {
     key
   );
 
-  setTextById('home-command-24-value', aed24g ? fmt.formatPrice(aed24g, 'AED', 2) : '—');
-  setTextById('home-command-22-value', aed22g ? fmt.formatPrice(aed22g, 'AED', 2) : '—');
-  setTextById('home-command-21-value', aed21g ? fmt.formatPrice(aed21g, 'AED', 2) : '—');
-  setTextById('home-command-18-value', aed18g ? fmt.formatPrice(aed18g, 'AED', 2) : '—');
+  setCommandMetricValue('home-command-24-value', aed24g ? fmt.formatPrice(aed24g, 'AED', 2) : '—');
+  setCommandMetricValue('home-command-22-value', aed22g ? fmt.formatPrice(aed22g, 'AED', 2) : '—');
+  setCommandMetricValue('home-command-21-value', aed21g ? fmt.formatPrice(aed21g, 'AED', 2) : '—');
+  setCommandMetricValue('home-command-18-value', aed18g ? fmt.formatPrice(aed18g, 'AED', 2) : '—');
 
   setTextById('home-snapshot-uae-value', aed24g ? fmt.formatPrice(aed24g, 'AED', 2) : '—');
   setTextById('home-snapshot-global-value', usd24oz ? fmt.formatPrice(usd24oz, 'USD', 2) : '—');
@@ -811,6 +821,10 @@ function applyLangToPage() {
   setTextById('home-location-guides-title', txGlobal('locationGuides.sectionTitle'));
   setTextById('home-location-guides-sub', txGlobal('locationGuides.sectionSub'));
   setTextById('home-location-guides-link', txGlobal('locationGuides.sectionLink'));
+  document.getElementById('hfb-dismiss')?.setAttribute('aria-label', tx('freshnessDismiss'));
+  document
+    .getElementById('home-command-status')
+    ?.setAttribute('aria-label', tx('heroLiveStatusAria'));
 
   // Next-step guides section
   setTextById('next-step-title', tx('nextStepTitle'));

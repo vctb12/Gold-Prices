@@ -5,11 +5,11 @@ status: in-progress
 priority: P1
 class: A
 owner: @vctb12
-last_run_at: "2026-05-22T14:31:00Z"
-last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/332"
+last_run_at: "2026-05-22T15:48:00Z"
+last_run_pr: "TBD"
 last_run_agent: copilot
 slices_remaining_estimate: 2
-next_action: "Execute the tracker deeper UX pass in Batch 4 (`tracker.html`, `src/tracker/*`, `styles/pages/tracker-pro.css`)."
+next_action: "Implement Batch 4B homepage below-the-fold polish (`index.html`, `src/pages/home.js`, `styles/pages/home.css`)."
 blocked_on: ""
 guardrails_reviewed: true
 skills_used:
@@ -92,9 +92,10 @@ brand shift toward **Gold Ticker Live**.
 - [x] `/calculator.html` — hero disclaimer simplified with link to spot-vs-retail guide.
 - [x] `/shops.html` — strengthened trust disclaimer to explicitly advise confirming with seller.
 - [x] `/index.html` — FAQ "more questions" link updated to point to `content/faq/`.
-- [ ] **Batch 4A — homepage above-the-fold polish** (`/index.html`, `/src/pages/home.js`,
-      `/styles/pages/home.css`, `/tests/home-hero-loading.test.js`) — tighten first-view loading
-      contract + trust surface before data arrives (smallest slice).
+- [x] **Batch 4A — homepage above-the-fold polish** (`/index.html`, `/src/pages/home.js`,
+      `/styles/pages/home.css`, `/src/config/translations.js`, `/tests/home-translations.test.js`,
+      `/tests/home-hero-loading.test.js`) — hero command chips/metrics now ship with skeleton
+      loading states and localized ARIA hooks.
 - [ ] **Batch 4B — homepage below-the-fold polish** (`/index.html`, `/src/pages/home.js`,
       `/styles/pages/home.css`) — continue deeper UX pass for command/snapshot/tools/country blocks.
 - [ ] **Batch 4C — tracker deeper UX pass** (`/tracker.html`, `/src/tracker/*`,
@@ -167,3 +168,27 @@ brand shift toward **Gold Ticker Live**.
 - Screenshots: not captured in this session
 - Next action: Execute the tracker deeper UX pass in Batch 4 (`tracker.html`, `src/tracker/*`,
   `styles/pages/tracker-pro.css`).
+
+### 2026-05-22T15:48Z — copilot (PR TBD)
+
+- Slice class: CODE
+- Phase/Feature closed: Batch 4A — homepage above-the-fold polish
+- Skills activated: gold-ticker-live-audit
+- Files touched: 6 (excluding plan/docs updates)
+- Completed:
+  - Added above-the-fold loading skeleton contract for command-center status chips and 24/22/21/18
+    metric values on homepage.
+  - Added localized ARIA labels for freshness-dismiss and command-status chips (`home.js` +
+    `translations.js`, EN/AR parity).
+  - Added DOM contract test for homepage hero loading placeholders.
+- Added/Split:
+  - Batch 4 split into 4A/4B/4C in this session (plan-only commit before code).
+- Skipped (owner-only / blocked): none
+- Validation: lint=PASS, test=FAIL (pre-existing `tests/analytics.test.js` navigator getter issue),
+  validate=PASS, quality=FAIL (pre-existing prettier drift in unrelated files), build=PASS,
+  playwright=FAIL (pre-existing suite-wide E2E failures in this environment; 237 failed).
+- Screenshots:
+  - LTR 360: https://github.com/user-attachments/assets/8b2226b8-966f-455c-9382-2ee8842079a4
+  - RTL 360: https://github.com/user-attachments/assets/9d982227-151f-4b9a-a4ac-23486d10a8e3
+- Next action: Implement Batch 4B homepage below-the-fold polish (`index.html`, `src/pages/home.js`,
+  `styles/pages/home.css`).

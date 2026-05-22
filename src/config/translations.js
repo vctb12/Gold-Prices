@@ -441,6 +441,8 @@ export const TRANSLATIONS = {
       'Spot-linked reference prices before retail premiums, making charges, and tax.',
     'home.heroTrustShort':
       'Spot-linked reference · shop prices can add making charges, VAT, and margin',
+    'home.freshnessDismiss': 'Dismiss freshness banner',
+    'home.heroLiveStatusAria': 'Live status chips',
     'home.commandKicker': 'Gold command center',
     'home.commandTitle': 'Live price command card',
     'home.commandCopy':
@@ -1277,6 +1279,8 @@ export const TRANSLATIONS = {
     'home.heroTrustLine':
       'أسعار مرجعية مرتبطة بالسعر الفوري قبل الهامش التجاري والمصنعية والضريبة.',
     'home.heroTrustShort': 'مرجع مرتبط بالسعر الفوري · قد تضيف المحلات المصنعية والضريبة والهامش',
+    'home.freshnessDismiss': 'إغلاق شريط حالة التحديث',
+    'home.heroLiveStatusAria': 'شرائح حالة التحديث المباشر',
     'home.commandKicker': 'مركز متابعة الذهب',
     'home.commandTitle': 'بطاقة الأسعار المباشرة',
     'home.commandCopy':

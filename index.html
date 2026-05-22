@@ -152,7 +152,7 @@
       >
         <span class="hfb-icon" aria-hidden="true">⚡</span>
         <span id="hfb-text"></span>
-        <button id="hfb-dismiss" class="hfb-dismiss" aria-label="Dismiss" type="button">×</button>
+        <button id="hfb-dismiss" class="hfb-dismiss" aria-label="Dismiss freshness banner" type="button">×</button>
       </div>
       <section class="hero" aria-labelledby="hero-headline">
         <div class="hero-inner">
@@ -281,9 +281,21 @@
                   view.
                 </p>
               </div>
-              <div class="home-command-card__chips" aria-label="Live status">
-                <span class="trust-chip" data-tone="live" id="home-command-freshness">Loading freshness…</span>
-                <span class="trust-chip" data-tone="info" id="home-command-spot-chip">XAU/USD —</span>
+              <div class="home-command-card__chips" id="home-command-status" aria-label="Live status chips">
+                <span
+                  class="trust-chip skeleton-inline home-command-chip--loading"
+                  data-tone="live"
+                  id="home-command-freshness"
+                  aria-busy="true"
+                  >Loading freshness…</span
+                >
+                <span
+                  class="trust-chip skeleton-inline home-command-chip--loading"
+                  data-tone="info"
+                  id="home-command-spot-chip"
+                  aria-busy="true"
+                  >XAU/USD —</span
+                >
               </div>
             </div>
 
@@ -292,7 +304,12 @@
                 <span class="mobile-command-card__metric-label" id="home-command-24-label"
                   >24K / gram (AED)</span
                 >
-                <strong class="mobile-command-card__metric-value" id="home-command-24-value">—</strong>
+                <strong
+                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
+                  id="home-command-24-value"
+                  aria-busy="true"
+                  ></strong
+                >
                 <span class="mobile-command-card__metric-note" id="home-command-24-note"
                   >Spot-linked reference</span
                 >
@@ -301,7 +318,12 @@
                 <span class="mobile-command-card__metric-label" id="home-command-22-label"
                   >22K / gram (AED)</span
                 >
-                <strong class="mobile-command-card__metric-value" id="home-command-22-value">—</strong>
+                <strong
+                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
+                  id="home-command-22-value"
+                  aria-busy="true"
+                  ></strong
+                >
                 <span class="mobile-command-card__metric-note" id="home-command-22-note"
                   >Most common UAE jewellery benchmark</span
                 >
@@ -310,7 +332,12 @@
                 <span class="mobile-command-card__metric-label" id="home-command-21-label"
                   >21K / gram (AED)</span
                 >
-                <strong class="mobile-command-card__metric-value" id="home-command-21-value">—</strong>
+                <strong
+                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
+                  id="home-command-21-value"
+                  aria-busy="true"
+                  ></strong
+                >
                 <span class="mobile-command-card__metric-note" id="home-command-21-note"
                   >Useful for GCC comparisons</span
                 >
@@ -319,7 +346,12 @@
                 <span class="mobile-command-card__metric-label" id="home-command-18-label"
                   >18K / gram (AED)</span
                 >
-                <strong class="mobile-command-card__metric-value" id="home-command-18-value">—</strong>
+                <strong
+                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
+                  id="home-command-18-value"
+                  aria-busy="true"
+                  ></strong
+                >
                 <span class="mobile-command-card__metric-note" id="home-command-18-note"
                   >Reference before making charges</span
                 >

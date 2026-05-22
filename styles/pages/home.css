@@ -576,6 +576,23 @@
   gap: var(--space-2);
 }
 
+.home-command-chip--loading {
+  color: transparent;
+  min-inline-size: 12rem;
+  min-block-size: 2rem;
+  border-color: transparent;
+}
+
+#home-command-spot-chip.home-command-chip--loading {
+  min-inline-size: 8rem;
+}
+
+.home-command-metric-loading {
+  color: transparent;
+  min-inline-size: 4.4rem;
+  min-block-size: 1.3em;
+}
+
 .home-command-cta-row {
   display: grid;
   gap: var(--space-2);
