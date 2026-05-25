@@ -1,0 +1,29 @@
+# Cursor codebase index exclusions for Gold Ticker Live.
+# Keeps @codebase search focused on hand-edited source, docs, and agent context.
+# Update when new large/generated trees appear (e.g. new build dirs, lockfiles, report outputs).
+# Does not affect git — see .gitignore for version control ignores.
+
+# --- Generated / build output ---
+dist/
+dist-admin/
+.vite/
+coverage/
+
+# --- Dependencies / large binaries ---
+node_modules/
+*.min.js
+*.min.css
+*.map
+
+# --- Lockfiles (large, low signal for code suggestions) ---
+package-lock.json
+
+# --- Test fixtures (snapshots and oversized fixtures) ---
+**/__snapshots__/
+**/fixtures/large-*
+
+# --- Logs and temp files ---
+*.log
+.DS_Store
+tmp/
+.cache/
