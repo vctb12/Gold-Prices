@@ -1,0 +1,28 @@
+# Gold Ticker Live — Cursor Agent Rules
+
+## Project
+- Static site: Vanilla ES6, Vite, GitHub Pages
+- Backend: Supabase (shop data, RLS policies active)
+- Automation: GitHub Actions (8+ workflows, do not break them)
+- API: goldpricez.com (replaces gold-api.com — do not revert)
+- Hosting: goldtickerlive.com via Cloudflare DNS
+
+## Non-negotiables
+- Never mix spot price with retail/jewelry shop prices
+- Always label cached, estimated, or fallback values clearly
+- AED peg = 3.6725 (fixed, do not derive dynamically)
+- Troy ounce = 31.1035g (constant)
+- RTL support must be preserved on every change (Arabic = /ar)
+- Never remove freshness labels or price disclaimers
+
+## Code rules
+- Smallest correct change only — no refactors unless asked
+- Preserve all existing tests (205 tests) — run tests before marking done
+- Do not add new dependencies without asking
+- Output: working code only, no placeholder TODOs
+
+## Before any PR
+- Run: npm test
+- Check: RTL layout not broken
+- Check: price labels are accurate
+- Check: no console errors on goldtickerlive.com equivalent build
