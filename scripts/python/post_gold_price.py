@@ -1394,9 +1394,23 @@ def _is_spend_cap_problem(problem):
     type_url = problem.get("type", "").lower()
     return (
         title == "spendcapreached"
+        or title == "creditsdepleted"
         or "spend cap" in detail
+        or "credits depleted" in detail
         or "/problems/credits" in type_url
     )
+
+
+def _spend_cap_skip_result(problem):
+    reset_date = problem.get("reset_date") or "unknown"
+    print("   SKIP: X API spend cap reached; no post was sent.")
+    print(f"   Billing cycle reset date: {reset_date}")
+    print("   Increase the spend cap in the developer console or wait for the reset date.")
+    return {
+        "posted": False,
+        "skip_reason": "spend_cap_reached",
+        "reset_date": reset_date,
+    }
 
 
 def classify_post_exception(exc, *, post_type, template_used, price, tweet_length, trigger_source, trigger_nonce):
@@ -1460,15 +1474,7 @@ def post_tweet(text, post_type='hourly'):
         _log_tweet_error(exc, text, post_type)
         problem = _parse_x_api_problem(exc)
         if _is_spend_cap_problem(problem):
-            reset_date = problem.get("reset_date") or "unknown"
-            print("   SKIP: X API spend cap reached; no post was sent.")
-            print(f"   Billing cycle reset date: {reset_date}")
-            print("   Increase the spend cap in the developer console or wait for the reset date.")
-            return {
-                "posted": False,
-                "skip_reason": "spend_cap_reached",
-                "reset_date": reset_date,
-            }
+            return _spend_cap_skip_result(problem)
         print("   Likely cause: duplicate/near-duplicate content, or automation-rule violation."
               " Check recent posts from @GoldTickerLive.")
         raise
@@ -1486,6 +1492,12 @@ def post_tweet(text, post_type='hourly'):
         retry_after = getattr(resp, 'headers', {}).get('Retry-After') if resp is not None else None
         if retry_after is not None:
             print(f"   Retry-After: {retry_after}s")
+        raise
+    except tweepy.errors.HTTPException as exc:
+        _log_tweet_error(exc, text, post_type)
+        problem = _parse_x_api_problem(exc)
+        if _is_spend_cap_problem(problem):
+            return _spend_cap_skip_result(problem)
         raise
     except tweepy.errors.TweepyException as exc:
         _log_tweet_error(exc, text, post_type)
