@@ -769,6 +769,17 @@ function applyLangToPage() {
   setTextById('karat-strip-cta', tx('karatStripCta'));
   setTextById('tools-title', tx('toolsTitle'));
   setTextById('tools-sub', tx('toolsSub'));
+  setTextById('home-stats-title', tx('statsTitle'));
+  setTextById('home-stats-sub', tx('statsSub'));
+  setTextById('home-stat-1-value', tx('stat1Value'));
+  setTextById('home-stat-1-label', tx('stat1Label'));
+  setTextById('home-stat-2-value', tx('stat2Value'));
+  setTextById('home-stat-2-label', tx('stat2Label'));
+  setTextById('home-stat-3-value', tx('stat3Value'));
+  setTextById('home-stat-3-label', tx('stat3Label'));
+  setTextById('home-stat-4-value', tx('stat4Value'));
+  setTextById('home-stat-4-label', tx('stat4Label'));
+  setTextById('home-stats-disclaimer', tx('statsDisclaimer'));
   setTextById('tool-tracker-title', tx('toolTrackerTitle'));
   setTextById('tool-tracker-desc', tx('toolTrackerDesc'));
   setTextById('tool-tracker-cta', tx('toolTrackerCta'));

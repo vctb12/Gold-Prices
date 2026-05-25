@@ -27,6 +27,7 @@
     "style:fix": "stylelint '**/*.css' --fix",
     "quality": "npm run lint && npm run format:check && npm run style",
     "check-unsafe-dom": "node scripts/node/check-unsafe-dom.js",
+    "check-freshness": "node scripts/node/check-freshness-metadata.js",
     "check-shell-guard": "node scripts/node/check-shell-guard.js",
     "check:unsafe-dom": "npm run check-unsafe-dom",
     "seo-audit": "node scripts/node/seo-audit.js",

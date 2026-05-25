@@ -21,6 +21,7 @@ import { renderTrackerQuickPresets } from '../components/TrackerQuickPresets.js'
 import { renderTrackerCompareHints } from '../components/TrackerCompareHints.js';
 import { renderExportHelpTips } from '../components/ExportHelpTips.js';
 import { renderAlertsEducationTips } from '../components/AlertsEducationTips.js';
+import { initInlineCalc } from '../tracker/inline-calc.js';
 import {
   createWatchlistItem,
   getMe,
@@ -54,6 +55,7 @@ const ALERT_EMAIL_FOCUS_DELAY_MS = 120;
 let didPrefillAccountAlertEmail = false;
 let realtimeEngine = null;
 let realtimeSnapshot = null;
+let inlineCalc = null;
 
 function trackerTx(key, params = {}) {
   const fullKey = `tracker.${key}`;
@@ -286,6 +288,18 @@ function localizeStaticTrackerCopy() {
   setNodeText('tp-export-command-title', trackerTx('exportCommand.title'));
   setNodeText('tp-export-command-copy', trackerTx('exportCommand.copy'));
   setNodeText('tp-export-readiness-pill', trackerTx('exportReadiness.checking'));
+  setNodeText('tracker-inline-calc-title', trackerTx('inlineCalcTitle'));
+  setNodeText('tracker-inline-calc-sub', trackerTx('inlineCalcSub'));
+  setNodeText('tracker-inline-calc-weight-label', trackerTx('calcWeightLabel'));
+  setNodeText('tracker-inline-calc-karat-label', trackerTx('calcKaratLabel'));
+  setNodeText('tracker-inline-calc-currency-label', trackerTx('calcCurrencyLabel'));
+  setNodeText('tracker-inline-calc-result-label', trackerTx('calcResultLabel'));
+  setNodeText('tracker-inline-calc-disclaimer', trackerTx('calcDisclaimer'));
+  setNodeText('tracker-inline-calc-method-link', trackerTx('calcMethodLink'));
+  const inlineCalcWeight = document.getElementById('tracker-inline-calc-weight');
+  if (inlineCalcWeight) {
+    inlineCalcWeight.placeholder = trackerTx('calcWeightPlaceholder');
+  }
   setButtonCopy(document.getElementById('tp-share-inline'), trackerTx('actions.copyBrief'));
   setButtonCopy(
     document.getElementById('tp-open-exports-inline'),
@@ -319,6 +333,24 @@ function localizeStaticTrackerCopy() {
   el.comparePresetButtons?.forEach((button, index) => {
     if (presetLabels[index]) button.textContent = presetLabels[index];
   });
+}
+
+function syncInlineCalcSourceNote(freshnessKey, freshnessMeta) {
+  inlineCalc?.update({
+    goldPriceUsd: currentSpot(),
+    rates: state.rates,
+    lang: state.lang,
+  });
+  setNodeText(
+    'tracker-inline-calc-source',
+    trackerTx('summary.freshnessCopy', {
+      source: formatProviderLabel(state.live?.providerId || 'primary-provider'),
+      age: freshnessMeta.ageText,
+      time: freshnessMeta.timeText,
+    })
+  );
+  const result = document.getElementById('tracker-inline-calc-result');
+  if (result) result.dataset.freshnessKey = freshnessKey;
 }
 
 function renderTrackerAddonPanels() {
@@ -400,6 +432,7 @@ function renderTrackerAddonPanels() {
   document
     .getElementById('tp-alerts-help-slot')
     ?.replaceChildren(renderAlertsEducationTips({ t: txGlobal }));
+  syncInlineCalcSourceNote(freshnessKey, freshnessMeta);
 }
 
 function ui() {
@@ -1327,6 +1360,11 @@ async function init() {
 
   localizeStaticTrackerCopy();
   populateSelects();
+  inlineCalc = initInlineCalc({
+    goldPriceUsd: currentSpot(),
+    rates: state.rates,
+    lang: state.lang,
+  });
   renderTrackerAddonPanels();
   initRealtimeEngine();
   serverAlertsAvailable = await probeServerAlertsAvailability();

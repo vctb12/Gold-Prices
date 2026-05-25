@@ -54,6 +54,10 @@
     />
     <link rel="preload" as="style" href="styles/global.css" />
     <link rel="preload" as="style" href="styles/pages/tracker-pro.css" />
+    <link rel="modulepreload" href="src/pages/tracker-pro.js" />
+    <link rel="modulepreload" href="src/lib/api.js" />
+    <link rel="modulepreload" href="src/tracker/inline-calc.js" />
+    <link rel="modulepreload" href="src/components/site-shell.js" />
 
     <!-- Resource hints for common navigation paths -->
     <link rel="prefetch" href="index.html" as="document" />
@@ -815,58 +819,6 @@
           </div>
         </section>
 
-        <section class="tracker-panel tracker-command-panel" id="tp-quick-calc-panel">
-          <div class="tracker-panel-head">
-            <div>
-              <h2 id="tp-quick-calc-title">Quick calculator</h2>
-              <p id="tp-quick-calc-copy">
-                Estimate reference value instantly (weight × karat × currency) using the same
-                spot-linked engine as the tracker.
-              </p>
-            </div>
-          </div>
-          <div class="tracker-form-grid tracker-quick-calc-grid">
-            <label class="tracker-field">
-              <span id="tp-quick-calc-weight-label">Weight (grams)</span>
-              <input
-                type="number"
-                id="tp-quick-calc-weight"
-                min="0"
-                step="0.01"
-                inputmode="decimal"
-                value="10"
-                aria-labelledby="tp-quick-calc-weight-label"
-              />
-            </label>
-            <label class="tracker-field">
-              <span id="tp-quick-calc-karat-label">Karat</span>
-              <select id="tp-quick-calc-karat" aria-labelledby="tp-quick-calc-karat-label"></select>
-            </label>
-            <label class="tracker-field">
-              <span id="tp-quick-calc-currency-label">Currency</span>
-              <select
-                id="tp-quick-calc-currency"
-                aria-labelledby="tp-quick-calc-currency-label"
-              ></select>
-            </label>
-          </div>
-          <div class="tracker-result-list tracker-quick-calc-result">
-            <div class="tracker-result-item">
-              <span id="tp-quick-calc-result-label">Estimated reference value</span>
-              <strong id="tp-quick-calc-result">—</strong>
-            </div>
-            <p class="source-note tracker-command-note" id="tp-quick-calc-meta">
-              Reference estimate only — retail prices may differ.
-            </p>
-          </div>
-          <div class="tracker-inline-actions">
-            <a href="calculator.html" class="btn btn-sm btn-outline" id="tp-quick-calc-open-full">Open full calculator</a>
-            <a href="methodology.html#spot-vs-retail" class="tracker-inline-link" id="tp-quick-calc-method-link"
-              >Spot vs retail →</a
-            >
-          </div>
-        </section>
-
         <section class="tracker-panel tracker-command-panel" id="tp-export-command-panel">
           <div class="tracker-panel-head">
             <div>
@@ -906,6 +858,58 @@
             used, files remain labeled as baseline-derived reference data.
             <a href="methodology.html" class="tracker-inline-link">Methodology →</a>
           </p>
+        </section>
+
+        <section class="tracker-panel tracker-inline-calc" id="tracker-inline-calc" aria-labelledby="tracker-inline-calc-title">
+          <div class="tracker-panel-head">
+            <div>
+              <h2 id="tracker-inline-calc-title">Quick Calculator</h2>
+              <p id="tracker-inline-calc-sub">
+                Estimate a spot-linked reference value from the current tracker price, selected karat,
+                and live FX context.
+              </p>
+            </div>
+            <a
+              href="methodology.html#spot-vs-retail"
+              class="tracker-inline-link"
+              id="tracker-inline-calc-method-link"
+              >Methodology →</a
+            >
+          </div>
+          <div class="tracker-calc-form">
+            <label class="tracker-field" for="tracker-inline-calc-weight">
+              <span id="tracker-inline-calc-weight-label">Weight</span>
+              <input
+                type="number"
+                id="tracker-inline-calc-weight"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                placeholder="10.00"
+                value="10"
+              />
+            </label>
+            <label class="tracker-field" for="tracker-inline-calc-karat">
+              <span id="tracker-inline-calc-karat-label">Karat</span>
+              <select id="tracker-inline-calc-karat"></select>
+            </label>
+            <label class="tracker-field" for="tracker-inline-calc-currency">
+              <span id="tracker-inline-calc-currency-label">Currency</span>
+              <select id="tracker-inline-calc-currency"></select>
+            </label>
+          </div>
+          <div class="tracker-calc-result" role="status" aria-live="polite" aria-atomic="true">
+            <span class="tracker-calc-result__label" id="tracker-inline-calc-result-label"
+              >Reference estimate</span
+            >
+            <strong class="tracker-calc-result__value" id="tracker-inline-calc-result">—</strong>
+            <p class="source-note tracker-inline-calc__disclaimer" id="tracker-inline-calc-disclaimer">
+              Reference estimate only — final retail and jewelry quotes can differ.
+            </p>
+            <p class="source-note tracker-inline-calc__source" id="tracker-inline-calc-source">
+              Source and freshness follow the live tracker context above.
+            </p>
+          </div>
         </section>
       </section>
 

@@ -15,6 +15,18 @@ test('freshness translation keys exist in EN and AR', async () => {
   const { TRANSLATIONS } = await loadTranslations();
   const required = [
     'freshness.statusLabel',
+    'freshness.strip.live',
+    'freshness.strip.delayed',
+    'freshness.strip.cached',
+    'freshness.strip.stale',
+    'freshness.strip.fallback',
+    'freshness.strip.closed',
+    'freshness.strip.unavailable',
+    'freshness.strip.source',
+    'freshness.strip.methodology',
+    'freshness.strip.agoMinutes',
+    'freshness.strip.agoHours',
+    'freshness.strip.agoJustNow',
     'freshness.meta.title',
     'freshness.meta.status',
     'freshness.meta.source',

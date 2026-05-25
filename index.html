@@ -71,6 +71,10 @@
     <link rel="preload" as="style" href="styles/global.css" />
     <link rel="preload" as="style" href="styles/pages/home.css" />
     <link rel="preload" as="script" href="src/pages/home.js" type="module" />
+    <link rel="modulepreload" href="src/pages/home.js" />
+    <link rel="modulepreload" href="src/lib/api.js" />
+    <link rel="modulepreload" href="src/lib/realtime-pricing-engine.js" />
+    <link rel="modulepreload" href="src/components/site-shell.js" />
 
     <!-- Resource Hints for Prefetching -->
     <link rel="prefetch" href="countries/index.html" as="document" />
@@ -887,6 +891,47 @@
         </div>
       </section>
 
+      <section
+        class="home-section home-stats-section"
+        id="home-stats-section"
+        aria-labelledby="home-stats-title"
+        data-reveal
+      >
+        <div class="home-section-inner">
+          <div class="section-intro centered">
+            <div>
+              <h2 id="home-stats-title" class="home-section-title">Gold Ticker Live by the numbers</h2>
+              <p class="home-section-sub" id="home-stats-sub">
+                One bilingual command center for spot-linked gold reference prices, market context,
+                and buyer tools across the GCC and beyond.
+              </p>
+            </div>
+          </div>
+          <div class="home-stats-grid" aria-label="Gold Ticker Live stats">
+            <article class="home-stat-card">
+              <strong class="home-stat-value" id="home-stat-1-value">24+</strong>
+              <span class="home-stat-label" id="home-stat-1-label">Countries</span>
+            </article>
+            <article class="home-stat-card">
+              <strong class="home-stat-value" id="home-stat-2-value">7</strong>
+              <span class="home-stat-label" id="home-stat-2-label">Karats</span>
+            </article>
+            <article class="home-stat-card">
+              <strong class="home-stat-value" id="home-stat-3-value">EN / AR</strong>
+              <span class="home-stat-label" id="home-stat-3-label">Bilingual</span>
+            </article>
+            <article class="home-stat-card">
+              <strong class="home-stat-value" id="home-stat-4-value">Free</strong>
+              <span class="home-stat-label" id="home-stat-4-label">Forever</span>
+            </article>
+          </div>
+          <p class="source-note home-stats-disclaimer" id="home-stats-disclaimer">
+            Spot-linked reference estimates only — final retail and jewelry quotes can include
+            making charges, dealer margin, and taxes.
+          </p>
+        </div>
+      </section>
+ 
       <section class="home-section" aria-labelledby="next-step-title" data-reveal>
         <div class="home-section-inner">
           <div class="section-intro centered">

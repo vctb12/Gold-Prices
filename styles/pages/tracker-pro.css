@@ -3722,3 +3722,94 @@ td.tracker-chg-down {
   /* sr-only is defined in global.css; this rule ensures it applies inside tables */
   caption-side: top;
 }
+
+.tracker-inline-calc {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.9fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.tracker-inline-calc .tracker-panel-head {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.tracker-calc-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.tracker-calc-form .tracker-field {
+  gap: var(--space-2);
+}
+
+.tracker-calc-form input,
+.tracker-calc-form select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--tp-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  color: var(--tp-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.tracker-calc-form input:focus,
+.tracker-calc-form select:focus {
+  outline: none;
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-gold-glow);
+}
+
+.tracker-calc-result {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--tp-border);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--surface-secondary), var(--surface-accent));
+  box-shadow: var(--elev-1);
+}
+
+.tracker-calc-result__label {
+  color: var(--tp-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.tracker-calc-result__value {
+  color: var(--tp-accent);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-extrabold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-none);
+}
+
+.tracker-inline-calc__disclaimer,
+.tracker-inline-calc__source {
+  margin: 0;
+  color: var(--tp-text-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (width <= 1024px) {
+  .tracker-inline-calc {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width <= 768px) {
+  .tracker-calc-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 480px) {
+  .tracker-calc-form {
+    grid-template-columns: 1fr;
+  }
+}
