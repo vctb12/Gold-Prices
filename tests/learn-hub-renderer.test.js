@@ -309,7 +309,7 @@ test('learn hub renderer builds structured sections and safe inline links', asyn
   assert.equal(wrapper.dataset.locale, 'en');
   assert.equal(findByTag(wrapper, 'h1').textContent, 'Gold learning coverage');
 
-  const row = findByTag(wrapper, 'tr');
+  const row = findAll(wrapper, (node) => node.tagName === 'TR' && node.dataset.rowId)[0];
   assert.equal(row.dataset.rowId, '24k');
   assert.equal(findByClass(wrapper, 'meter-24k').style.width, '99.9%');
 
