@@ -414,11 +414,22 @@ test('tracker-dom: chart source note is not trivially short', () => {
   );
 });
 
-test('tracker-dom: quick calculator weight input uses decimal inputmode', () => {
-  const weightInputMatch = HTML.match(/id="tp-quick-calc-weight"[^>]*>/);
-  assert.ok(weightInputMatch, '#tp-quick-calc-weight input must exist');
+test('tracker-dom: inline calculator weight input uses decimal inputmode', () => {
+  const weightInputMatch = HTML.match(/id="tracker-inline-calc-weight"[^>]*>/);
+  assert.ok(weightInputMatch, '#tracker-inline-calc-weight input must exist');
   assert.ok(
     /inputmode="decimal"/.test(weightInputMatch[0]),
-    '#tp-quick-calc-weight should set inputmode="decimal" for mobile keyboards'
+    '#tracker-inline-calc-weight should set inputmode="decimal" for mobile keyboards'
+  );
+});
+
+test('tracker-dom: inline calculator includes methodology and source note', () => {
+  assert.ok(
+    /id="tracker-inline-calc-method-link"/.test(HTML),
+    'inline calculator should link to methodology'
+  );
+  assert.ok(
+    /id="tracker-inline-calc-source"/.test(HTML),
+    'inline calculator should expose a source note'
   );
 });

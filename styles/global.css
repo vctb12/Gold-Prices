@@ -7958,3 +7958,105 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
   display: grid;
   gap: var(--space-2);
 }
+
+/* Freshness Strip — shared component */
+.freshness-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--surface-secondary);
+  box-shadow: var(--elev-1);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.freshness-strip__dot {
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  flex: 0 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--text-tertiary);
+}
+
+.freshness-strip__label {
+  font-weight: var(--weight-bold);
+}
+
+.freshness-strip__source,
+.freshness-strip__time {
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.freshness-strip__link {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+  color: var(--text-accent);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.freshness-strip__link:hover,
+.freshness-strip__link:focus-visible {
+  text-decoration: underline;
+}
+
+.freshness-strip[data-freshness-state='live'] .freshness-strip__dot {
+  background: var(--color-live);
+  animation: freshness-strip-pulse var(--duration-xslow) var(--ease-standard) infinite;
+}
+
+.freshness-strip[data-freshness-state='delayed'] .freshness-strip__dot {
+  background: var(--color-warning);
+}
+
+.freshness-strip[data-freshness-state='cached'] .freshness-strip__dot,
+.freshness-strip[data-freshness-state='stale'] .freshness-strip__dot {
+  background: var(--color-daily);
+}
+
+.freshness-strip[data-freshness-state='fallback'] .freshness-strip__dot,
+.freshness-strip[data-freshness-state='unavailable'] .freshness-strip__dot {
+  background: var(--color-error);
+}
+
+.freshness-strip[data-freshness-state='closed'] .freshness-strip__dot {
+  background: var(--text-tertiary);
+}
+
+@keyframes freshness-strip-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.88);
+  }
+}
+
+@media (width <= 640px) {
+  .freshness-strip {
+    align-items: flex-start;
+  }
+
+  .freshness-strip__link {
+    margin-inline-start: 0;
+    inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .freshness-strip__dot {
+    animation: none;
+  }
+}

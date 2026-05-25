@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-19",
+  "generatedAtDate": "2026-05-25",
   "summary": {
-    "totalHtmlFiles": 646,
-    "withCanonical": 644,
+    "totalHtmlFiles": 647,
+    "withCanonical": 645,
     "withoutCanonical": 2,
-    "withOgImage": 493,
+    "withOgImage": 494,
     "withoutOgImage": 153,
-    "withJsonLd": 637,
+    "withJsonLd": 638,
     "withoutJsonLd": 9,
-    "hreflangEnArPairs": 637,
+    "hreflangEnArPairs": 638,
     "noindexCount": 432
   },
   "records": [
@@ -542,6 +542,42 @@
       ],
       "jsonLdTypes": [
         "Article",
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/markets/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Markets — Live Prices Across 24+ Countries | Gold Ticker Live",
+      "metaDescription": "Explore live gold reference prices across GCC, Levant, Africa, and 24+ global markets. Compare karats and currencies with visible freshness labels.",
+      "canonical": "https://goldtickerlive.com/content/markets/",
+      "robots": null,
+      "ogTitle": "Gold Markets — Live Prices Across 24+ Countries | Gold Ticker Live",
+      "ogDescription": "Explore live gold reference prices across GCC, Levant, Africa, and 24+ global markets.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/markets/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/markets/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/markets/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/markets/"
+        }
+      ],
+      "jsonLdTypes": [
         "BreadcrumbList"
       ],
       "hasStructuredData": true,
