@@ -1,0 +1,65 @@
+---
+alwaysApply: true
+---
+
+# Code Style & Change Discipline
+
+> Canonical charter: [`AGENTS.md`](../../AGENTS.md). Path-scoped instructions: `.github/instructions/`.
+
+## Change scope
+
+- **Smallest correct change only** — no unsolicited refactors or drive-by edits.
+- **Static multi-page architecture stays static** — no SPA / framework migration unless explicitly requested (`AGENTS.md` §6).
+- **PR-only workflow** — no direct commits to `main`, no force-push.
+
+## Dependencies & verification
+
+- **Do not add new dependencies without asking** — check GitHub Advisory DB before adding anything new (`AGENTS.md` §7).
+- **Preserve all existing tests** in `tests/` (`docs/ARCHITECTURE.md` lists 205 tests in the architecture doc; run `npm test` before marking done).
+- Before `npm test` / `npm run validate`, delete `playwright-report/` and `test-results/` if present — they can cause false positives.
+- **Honest verification** — state what you ran vs. what you assumed; do not claim tests you did not run.
+
+## Output quality
+
+- **No placeholder TODOs** in shipped output — working code only unless follow-up is documented in the PR.
+
+## JavaScript
+
+- Vanilla ES modules; no new frameworks; `camelCase`; focused modules under `src/lib/`.
+- **Safe DOM:** `src/lib/safe-dom.js` (`escape`, `safeHref`, `safeTel`, `el`, `clear`); prefer `node.replaceChildren()` over `innerHTML = ''`.
+- **DOM-safety baseline must not regress** — CI blocks new `innerHTML` / `outerHTML` / `insertAdjacentHTML` / `document.write` sinks.
+- **Python:** entrypoints add `scripts/python/` to `sys.path`; relative-import `utils.*`.
+
+## CSS
+
+- Use canonical tokens from `styles/global.css` (`--color-*`, `--surface-*`, `--space-*`, `--text-*`, `--radius-*`, `--shadow-*`, `--ease-*`, `--duration-*`). No hand-picked hex/rem where a token exists.
+
+## Strings & motion
+
+- Every user-visible string in `src/config/translations.js` — never hard-code UI text.
+- **Bilingual EN/AR parity** — all user-visible copy ships in both languages.
+- Every animation respects `prefers-reduced-motion: reduce`.
+
+## Arabic / RTL (required on every layout change)
+
+- All user-visible strings go through `src/config/translations.js`.
+- Layouts must work with `dir="rtl"`. Test **360px** minimum.
+- Mirror chevrons, arrows, progress bars; preserve number formatting.
+- Copy must read like natural Arabic, not English-shaped Arabic.
+- **RTL layout must be preserved on every change.**
+
+## Core commands (local)
+
+```bash
+export JWT_SECRET=<random 32+ char string>    # required for server/tests
+export ADMIN_PASSWORD=<any string>            # required
+export ADMIN_ACCESS_PIN=<6+ digit PIN>        # optional PIN gate
+
+npm install
+npm run dev
+npm test
+npm run lint
+npm run validate
+npm run build
+npm start   # Express on :3000
+```

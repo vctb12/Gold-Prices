@@ -183,8 +183,9 @@ Non-negotiables. Each has a one-line _Why:_ so you can make good edge-case decis
   never use `git push` directly.
 - **Claude Code** — prefers `CLAUDE.md`, which points here and adds Claude-only mechanics
   (subagents, skills).
-- **Cursor** — reads `.cursorrules` at project root (auto-loaded every session). MCP config lives in
-  `.cursor/mcp.json`. Full handover reference: `docs/CURSOR_HANDOVER.md`. For domain-specific tasks,
+- **Cursor** — modular rules in `.cursor/rules/*.mdc` (migrated from legacy `.cursorrules`). MCP config
+  lives in `.cursor/mcp.json`. Full handover reference: `docs/CURSOR_HANDOVER.md`. For domain-specific
+  tasks,
   @-mention the relevant `.github/instructions/*.instructions.md` file. Use Composer for multi-file
   changes following the Autonomy Contract (§4 above).
 - **Codex / Windsurf / Aider / Gemini CLI** — read this file directly per the

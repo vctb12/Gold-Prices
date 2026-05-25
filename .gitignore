@@ -23,6 +23,8 @@ node_modules/
 .vscode/mcp.json
 .cursor/*
 !.cursor/mcp.json
+!.cursor/rules/
+!.cursor/rules/*.mdc
 .idea/
 
 # Environment

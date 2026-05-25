@@ -1,0 +1,89 @@
+---
+globs:
+  - ".github/**"
+---
+
+# GitHub Actions
+
+> Full registry: `docs/CURSOR_HANDOVER.md` §5. Path-scoped: `.github/instructions/github-actions.instructions.md`.
+
+Workflows under `.github/workflows/` ship to production. **`post_gold.yml` runs hourly** and posts to `@GoldTickerLive` on X — breakage is public within the hour. Dry-run via `workflow_dispatch` before changing posting logic.
+
+## Rules
+
+- **Do not break existing cron schedules** — document human-readable cadence in a comment next to each `schedule` cron (UTC).
+- **Do not modify goldpricez API fetch logic** without explicit owner instruction. Production fetch path is the provider-adapter chain in `gold-price-fetch.yml` (single production provider-call path; `post_gold.yml` reads committed `data/gold_price.json`).
+- **Never trigger price-fetch / poster workflows on `push`** — schedule and `workflow_dispatch` only.
+- All production workflows with side effects should support **`workflow_dispatch`** with `dry_run` where applicable.
+- Declare `permissions:` explicitly (least privilege).
+- Never log secrets; `${{ github.event.inputs.dry_run }}` is a **string** (`"true"` / `"false"`).
+
+## `GOLD_PROVIDER_ORDER` (production chain)
+
+Set in `gold-price-fetch.yml` and `post_gold.yml`:
+
+```text
+gold_api_com,twelvedata_xauusd,fmp_gcusd
+```
+
+Default in `.env.example` (local / broader adapter list):
+
+```text
+metal_sentinel,finnhub_oanda,fmp_gcusd,goldapi_io,twelvedata_xauusd,goldpricez
+```
+
+Do not switch the production provider in the same PR that adds it — separate PR after bakeoff (`gold-provider-bakeoff.yml`).
+
+## Workflow inventory
+
+### Production-critical (breakage = public impact)
+
+| Workflow | Schedule / trigger | Purpose |
+| -------- | ------------------ | ------- |
+| `post_gold.yml` | Hourly **:09** during market hours; `workflow_dispatch` | Post gold price to X/Twitter |
+| `gold-price-fetch.yml` | Hourly **:02** during market hours; `workflow_dispatch` | Fetch & commit `data/gold_price.json` |
+| `deploy.yml` | Push to `main` | Build & deploy to GitHub Pages |
+
+### CI / quality gates
+
+| Workflow | Trigger | Purpose |
+| -------- | ------- | ------- |
+| `ci.yml` | Pull requests | Tests, validation, build |
+| `codeql.yml` | Push + PR + weekly | CodeQL security scanning |
+| `pr-provider-smoke.yml` | PRs touching provider code | Smoke test providers |
+
+### Monitoring & alerts
+
+| Workflow | Schedule | Purpose |
+| -------- | -------- | ------- |
+| `health_check.yml` | Periodic | Site + API health check |
+| `uptime-monitor.yml` | **Every 30 min** | Ping site, alert if down |
+| `spike_alert.yml` | **Every 15 min** (not hourly) | Alert on >2% price spike |
+| `check-alerts.yml` | Periodic | Process user alert subscriptions |
+
+### Data & sync
+
+| Workflow | Purpose |
+| -------- | ------- |
+| `sync-db-to-git.yml` | Sync Supabase shops → `data/shops.js` |
+| `gold-provider-bakeoff.yml` | Multi-hour provider comparison |
+| `gold-bakeoff-readiness.yml` | Bakeoff pre-merge gate |
+| `test-gold-providers.yml` | Manual one-round provider test |
+
+### Content & reporting
+
+| Workflow | Purpose |
+| -------- | ------- |
+| `daily-newsletter.yml` | Daily newsletter generation |
+| `weekly-newsletter.yml` | Weekly newsletter generation |
+| `lighthouse.yml` | Lighthouse performance audit |
+| `perf-check.yml` | Performance regression check |
+| `phase0-lighthouse-baseline.yml` | Baseline Lighthouse capture |
+
+## X / Twitter secrets naming
+
+GitHub secret names **do not** use the `TWITTER_` prefix:
+
+- `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_TOKEN`, `ACCESS_TOKEN_SECRET`
+
+Workflow YAML maps these to env vars `TWITTER_API_KEY`, `TWITTER_API_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_TOKEN_SECRET` internally.

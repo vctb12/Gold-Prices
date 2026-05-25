@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+
+# Project Identity — Gold Ticker Live
+
+> Read [`AGENTS.md`](../../AGENTS.md) first. It is the canonical cross-agent charter. This file is Cursor-specific orientation only.
+
+| Attribute | Value |
+| --------- | ----- |
+| **Name** | Gold Ticker Live |
+| **Repo** | `vctb12/GoldTickerLive` (legacy: `vctb12/Gold-Prices`) |
+| **Production** | https://goldtickerlive.com/ (GitHub Pages, custom domain via `CNAME`) |
+| **Legacy path** | `/Gold-Prices/` — still relevant for `sw.js`, asset URLs, redirects |
+| **Languages** | English + Arabic (full RTL) |
+| **Audience** | UAE, GCC, Arab world, global reference pricing |
+
+## What it is
+
+Bilingual (EN/AR) gold-price intelligence platform: live XAU/USD spot-linked reference pricing, AED and local-currency conversion, karat tables (24K–9K), flagship **Tracker**, calculator, methodology, learn, insights, invest, shops, and country/city/karat pages.
+
+## Stack (summary)
+
+- **Front-end:** Static multi-page site, vanilla ES modules, Vite 8 build → GitHub Pages
+- **Optional backend:** Node/Express (`server.js`) — JWT, bcrypt, Helmet, rate limiting
+- **Data:** Supabase (Postgres + Auth + RLS); runtime JSON in `data/`
+- **Automation:** GitHub Actions (20 workflows) + Python scripts under `scripts/python/`
+- **Social:** Hourly production X-post (`@GoldTickerLive`) via `post_gold.yml`
+- **PWA:** Service worker (`sw.js`) + `manifest.json`
+
+## Architecture (one line)
+
+Browser → static HTML on GitHub Pages → ES modules fetch spot/FX → optional Express `/api/v1/*` → Supabase; Actions fetch/commit `data/gold_price.json` and run alerts/posting.
+
+## Cursor context
+
+- **Rules:** `.cursor/rules/*.mdc` (modular; replaces legacy `.cursorrules`)
+- **MCP:** `.cursor/mcp.json` (Supabase template — fill project ref)
+- **Handover:** `docs/CURSOR_HANDOVER.md`
+- **Domain work:** @-mention matching `.github/instructions/*.instructions.md`

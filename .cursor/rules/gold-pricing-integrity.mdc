@@ -1,0 +1,71 @@
+---
+alwaysApply: true
+---
+
+# Gold Pricing Integrity
+
+Pricing truth is the single biggest reputational risk for Gold Ticker Live. See also `.github/instructions/gold-pricing.instructions.md` when editing pricing surfaces.
+
+## Canonical formula
+
+```text
+price_per_troy_ounce_USD     = XAU_USD_spot
+price_per_gram_USD           = price_per_troy_ounce_USD / 31.1034768
+price_per_gram_AED (24K)     = price_per_gram_USD × 3.6725
+price_per_gram_AED (karat K) = price_per_gram_AED (24K) × purity_factor[K]
+price_per_gram_LOCAL (cur)   = price_per_gram_USD × current_FX(USD→cur)   # NOT via AED peg
+```
+
+Compact form from project rules:
+
+`price_per_gram_AED = (XAU/USD ÷ 31.1034768) × 3.6725 × karat_purity_factor`
+
+| Constant | Value | Rule |
+| -------- | ----- | ---- |
+| Troy ounce → grams | `31.1034768` | International standard; do not round arbitrarily in new code |
+| AED peg | `3.6725` | `1 USD = 3.6725 AED` — **fixed**; never dynamic; do not change without explicit owner approval |
+| Karat factors (24K baseline) | 24K=`1.000`, 22K=`0.9167`, 21K=`0.875`, 18K=`0.750`, 14K=`0.5833`, 9K=`0.375` | Must align with `src/config/karats.js` — single source of truth; do not inline new factors elsewhere |
+
+> **Note:** Some scripts/tests use `31.1035` as a rounded constant; new pricing logic should follow `31.1034768` / `src/config/constants.js`.
+
+## Local currency
+
+- Country pages: **USD/gram × current FX** to local currency — **not** USD → AED → local.
+- FX must be timestamped in the UI.
+- If FX is unknown, use last known rate and label as `fallback`.
+
+## Reference price ≠ retail / jewelry price
+
+Never blur:
+
+- **Reference / spot-linked / bullion-equivalent** (XAU/USD + peg + purity)
+- **Retail / shop / jewelry** (making charges, premiums, VAT, design markups)
+
+Never label a reference estimate as a shop price. Calculator output is always a reference estimate; disclose VAT, making charges, and that shops may charge differently.
+
+## Freshness — mandatory on every visible price
+
+Always label with **timestamp**, **source**, and **state**. Stale data without a label is a trust violation. Do not strip freshness labels to “look cleaner.”
+
+| State | When | Required label (EN guidance) |
+| ----- | ---- | ----------------------------- |
+| `live` | Fetched within 60s, healthy | Source + timestamp |
+| `cached` | Cache / service worker | `Cached · last updated <time>` |
+| `delayed` | Provider lag > threshold | `Delayed · source <provider>` |
+| `estimated` | Derived from spot | `Reference estimate · methodology` |
+| `fallback` | Provider failed | `Fallback · last known <timestamp>` |
+| `closed` | Market closed | `Market closed · resumes <time>` |
+
+Canonical vocabulary also includes `stale` / `unavailable` on some surfaces — see `docs/CURSOR_HANDOVER.md` §9.
+
+## Price disclaimers
+
+- Methodology link must remain on pages showing estimated/reference prices.
+- Never present cached, fallback, estimated, or delayed values as live without the correct state label.
+- Product-trust guardrails in `AGENTS.md` §6 items 1–3 apply to every pricing change.
+
+## Golden rules (pricing)
+
+1. Reference price is not retail price.
+2. Freshness must be visible.
+3. AED peg is **3.6725** (fixed).
