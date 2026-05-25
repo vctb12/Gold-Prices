@@ -191,3 +191,46 @@ Non-negotiables. Each has a one-line _Why:_ so you can make good edge-case decis
 - **Codex / Windsurf / Aider / Gemini CLI** — read this file directly per the
   [`AGENTS.md`](https://agents.md) convention (stewarded by the Agentic AI Foundation). No
   vendor-specific branches in this file.
+
+## Cursor Cloud specific instructions
+
+### Environment
+
+- Node.js 24 is required (`.nvmrc`). The update script handles `nvm install 24` automatically.
+- No Docker, databases, or external services are needed for local development. The backend uses JSON
+  file persistence in `data/`.
+
+### Required env vars for running tests or the backend
+
+```bash
+export JWT_SECRET="dev-secret-key-for-local-development-32chars"
+export ADMIN_PASSWORD="admin-dev-password"
+export ADMIN_ACCESS_PIN="123456"
+```
+
+These must be set before `npm test` or `npm start`. The Vite dev server (`npm run dev`) does not
+require them.
+
+### Running services
+
+| Service             | Command       | Port | Notes                         |
+| ------------------- | ------------- | ---- | ----------------------------- |
+| Frontend (Vite HMR) | `npm run dev` | 5000 | No env vars needed            |
+| Backend (Express)   | `npm start`   | 3000 | Requires all 3 env vars above |
+
+### Key commands (see §2 above for full list)
+
+- `npm test` — 745 tests; 1 pre-existing failure in `tests/analytics.test.js` (Node 24 `navigator`
+  getter issue)
+- `npm run lint` — ESLint flat config
+- `npm run build` — full production build pipeline
+- `npm run validate` — CI-equivalent integrity checks
+
+### Admin API login for testing
+
+```
+POST http://localhost:3000/api/admin/auth/login
+{"email": "admin@goldprices.com", "password": "<ADMIN_PASSWORD env var value>"}
+```
+
+Returns a JWT token for authenticated endpoints at `/api/admin/*`.
