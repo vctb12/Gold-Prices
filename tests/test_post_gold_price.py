@@ -701,6 +701,39 @@ def test_tweet_403_spend_cap_returns_skip_payload(capsys):
     assert "=== TWEET ERROR ===" in out
 
 
+def test_tweet_402_credits_depleted_returns_skip_payload(capsys):
+    import tweepy
+
+    mock_response = MagicMock()
+    mock_response.status_code = 402
+    mock_response.text = json.dumps(
+        {
+            "title": "CreditsDepleted",
+            "detail": "Your enrolled account does not have any credits to fulfill this request.",
+            "type": "https://api.twitter.com/2/problems/credits",
+        }
+    )
+    mock_response.headers = {}
+
+    exc = tweepy.errors.HTTPException(response=mock_response)
+
+    mock_client = MagicMock()
+    mock_client.create_tweet.side_effect = exc
+
+    with patch('tweepy.Client', return_value=mock_client):
+        result = pg.post_tweet("test tweet text", post_type='hourly')
+
+    out = capsys.readouterr().out
+    assert result == {
+        "posted": False,
+        "skip_reason": "spend_cap_reached",
+        "reset_date": "unknown",
+    }
+    assert "SKIP: X API spend cap reached" in out
+    assert "posting credits depleted" in out
+    assert "=== TWEET ERROR ===" in out
+
+
 def test_tweet_429_logs_retry_after(capsys, monkeypatch):
     import tweepy
 
