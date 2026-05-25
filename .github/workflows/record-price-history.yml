@@ -1,0 +1,56 @@
+# ------------------------------------------------------------------
+# Price History Recorder — scheduled/manual price archival.
+# Fetches the current gold spot price and records per-karat prices
+# (AED + USD) into the Supabase `price_history` table every 30 min.
+# ------------------------------------------------------------------
+name: Record Price History
+
+on:
+  schedule:
+    # Every 30 minutes, offset from the hour to avoid conflict with
+    # the gold-price-fetch workflow (runs at :02).
+    - cron: '5,35 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — fetch price but do not write to DB'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: record-price-history
+  cancel-in-progress: true
+
+jobs:
+  record:
+    name: Record prices to Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install httpx supabase
+
+      - name: Record price history
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GOLDPRICEZ_API_KEY: ${{ secrets.GOLDPRICEZ_API_KEY }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: python scripts/python/record_price_history.py
+
+      - name: Step summary
+        if: always()
+        run: |
+          echo "## Price History Recorder" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dry run: \`${DRY_RUN:-false}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_STEP_SUMMARY"

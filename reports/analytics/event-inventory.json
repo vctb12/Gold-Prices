@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-14T13:53:20.313Z",
+  "generatedAt": "2026-05-25T16:09:18.774Z",
   "totals": {
-    "events": 36,
+    "events": 37,
     "aliases": 1
   },
   "aliases": {
@@ -50,6 +50,10 @@
       "required": ["source"]
     },
     {
+      "event": "compare_action",
+      "required": ["surface", "action"]
+    },
+    {
       "event": "copy_click",
       "required": ["surface", "value_type"]
     },
@@ -70,12 +74,12 @@
       "required": ["type", "where"]
     },
     {
-      "event": "karat_change",
-      "required": ["from", "to"]
+      "event": "export_click",
+      "required": ["surface", "export_type"]
     },
     {
-      "event": "lang_change",
-      "required": ["to"]
+      "event": "karat_change",
+      "required": ["from", "to"]
     },
     {
       "event": "language_switch",

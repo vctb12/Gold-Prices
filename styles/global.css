@@ -1,4 +1,5 @@
 @import url('./partials/shell.css');
+@import url('./partials/market-summary-ticker.css');
 
 /* ═══════════════════════════════════════════════
    CSS Custom Properties — Theme Tokens
@@ -268,6 +269,62 @@
   --color-accent-strong: var(--color-gold-bright);
   --color-surface-raised: var(--color-surface-2);
   --color-text-secondary: var(--color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════
+   Freshness indicator classes
+   ═══════════════════════════════════════════════ */
+
+.price-fresh {
+  --freshness-color: var(--color-live);
+  --freshness-bg: var(--color-live-bg);
+}
+
+.price-stale {
+  --freshness-color: var(--color-warning);
+  --freshness-bg: var(--color-warning-bg);
+}
+
+.price-very-stale {
+  --freshness-color: var(--color-error);
+  --freshness-bg: var(--color-error-bg);
+}
+
+.price-cached {
+  --freshness-color: var(--color-text-faint);
+  --freshness-bg: var(--color-surface-2);
+
+  font-style: italic;
+}
+
+.freshness-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--freshness-color, var(--color-text-faint));
+  margin-inline-end: var(--space-1);
+  vertical-align: middle;
+}
+
+.freshness-dot--pulse {
+  animation: freshness-pulse 2s ease-in-out infinite;
+}
+
+@keyframes freshness-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .freshness-dot--pulse {
+    animation: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════
