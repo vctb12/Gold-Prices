@@ -56,7 +56,7 @@ function createTickerItem(label, value, changeHtml, extraClass = '') {
   valueSpan.textContent = value;
   item.appendChild(labelSpan);
   item.appendChild(valueSpan);
-  if (changeHtml) {
+  if (changeHtml != null) {
     const changeSpan = el('span', { class: 'mst-item__change' });
     changeSpan.textContent = changeHtml;
     item.appendChild(changeSpan);
@@ -105,7 +105,7 @@ export function renderMarketSummaryTicker(container, lang = 'en') {
 
 function createTickerItems(t) {
   return [
-    createTickerItem(t.spotLabel, '—', null, 'mst-item--spot'),
+    createTickerItem(t.spotLabel, '—', '', 'mst-item--spot'),
     createTickerItem(t.aed24kLabel, '—', null, 'mst-item--aed'),
     createTickerItem(t.marketLabel, t.open, null, 'mst-item--market'),
     createTickerItem(t.updatedLabel, t.live, null, 'mst-item--updated'),
