@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="../../assets/analytics.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Revenue — GoldAdmin</title>
+    <link rel="stylesheet" href="../../styles/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+      .revenue-summary-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 20px;
+      }
+      .connect-card {
+        background: linear-gradient(135deg, var(--surface-2), var(--surface));
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+      }
+      .connect-card h2 {
+        color: var(--text);
+        font-size: 1.25rem;
+        margin-bottom: 8px;
+      }
+      .connect-card p,
+      .connect-card li {
+        color: var(--text-muted);
+      }
+      .connect-card ol {
+        list-style: decimal;
+        margin: 14px 0 0 20px;
+      }
+      .money-cell {
+        color: var(--success);
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+      }
+      @media (max-width: 760px) {
+        .revenue-summary-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        try {
+          if (window.location.hash && window.location.hash.includes('access_token')) return;
+          var k = Object.keys(localStorage);
+          if (!k.some(function (x) { return x.startsWith('sb-') && x.endsWith('-auth-token'); })) {
+            window.location.replace('../login/');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="admin-layout">
+      <aside class="sidebar" id="sidebar" aria-label="Admin navigation"></aside>
+      <div class="main-area">
+        <header class="page-header">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" type="button">☰</button>
+          <h1 class="page-title">Revenue</h1>
+          <div class="header-actions">
+            <button class="btn btn-ghost btn-sm" id="refresh-btn" type="button">Refresh</button>
+          </div>
+        </header>
+        <main class="content-area">
+          <div class="revenue-summary-grid" role="list" aria-label="Revenue summary">
+            <div class="stat-card" role="listitem">
+              <div class="stat-label">Impressions</div>
+              <div class="stat-number" id="stat-impressions">—</div>
+            </div>
+            <div class="stat-card" role="listitem">
+              <div class="stat-label">Clicks</div>
+              <div class="stat-number" id="stat-clicks">—</div>
+            </div>
+            <div class="stat-card" role="listitem">
+              <div class="stat-label">Revenue USD</div>
+              <div class="stat-number" id="stat-revenue">—</div>
+            </div>
+          </div>
+
+          <section class="connect-card" id="connect-card" aria-labelledby="connect-title" hidden>
+            <h2 id="connect-title">Connect AdSense API</h2>
+            <p>Revenue rows will appear here after AdSense reporting is connected and synced into the revenue_daily Supabase table.</p>
+            <ol>
+              <li>Create an AdSense reporting API credential in Google Cloud.</li>
+              <li>Store secrets in GitHub Actions or server-only environment variables.</li>
+              <li>Schedule a daily sync job that writes date, impressions, clicks, and revenue_usd.</li>
+            </ol>
+          </section>
+
+          <section class="card" id="revenue-table-card" aria-labelledby="revenue-table-title" hidden>
+            <div class="card-header">
+              <div>
+                <h2 class="card-title" id="revenue-table-title">Daily totals</h2>
+                <p class="text-muted text-sm">Latest synced AdSense revenue rows from Supabase.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table aria-label="Daily revenue totals">
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Impressions</th>
+                    <th scope="col">Clicks</th>
+                    <th scope="col">Revenue USD</th>
+                  </tr>
+                </thead>
+                <tbody id="revenue-tbody">
+                  <tr><td colspan="4"><div class="empty-state">Loading revenue data…</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module">
+      import { logout as supabaseLogout, requireAuth, getSession, getSupabase } from '../supabase-auth.js';
+      import { initAdminShell, renderBreadcrumb } from '../shared/admin-shell.js';
+      import { showToast, formatNumber, formatCurrency } from '../shared/admin-utils.js';
+
+      if (!(await requireAuth('../login/'))) throw new Error('redirect');
+      await initAdminShell({ logout: supabaseLogout, getSession });
+      renderBreadcrumb([{ label: 'Revenue' }]);
+
+      const sb = getSupabase();
+      const tbody = document.getElementById('revenue-tbody');
+      const connectCard = document.getElementById('connect-card');
+      const tableCard = document.getElementById('revenue-table-card');
+
+      function setText(id, value) {
+        const node = document.getElementById(id);
+        if (node) node.textContent = value;
+      }
+
+      function renderEmpty(message) {
+        connectCard.hidden = false;
+        tableCard.hidden = true;
+        setText('stat-impressions', '—');
+        setText('stat-clicks', '—');
+        setText('stat-revenue', '—');
+        if (message) showToast(message, 'info');
+      }
+
+      function td(text, className = '') {
+        const cell = document.createElement('td');
+        cell.textContent = text;
+        if (className) cell.className = className;
+        return cell;
+      }
+
+      function renderRows(rows) {
+        if (!rows.length) {
+          renderEmpty('No revenue rows found yet.');
+          return;
+        }
+        const totals = rows.reduce(
+          (sum, row) => ({
+            impressions: sum.impressions + Number(row.impressions || 0),
+            clicks: sum.clicks + Number(row.clicks || 0),
+            revenue: sum.revenue + Number(row.revenue_usd || 0),
+          }),
+          { impressions: 0, clicks: 0, revenue: 0 }
+        );
+        setText('stat-impressions', formatNumber(totals.impressions));
+        setText('stat-clicks', formatNumber(totals.clicks));
+        setText('stat-revenue', formatCurrency(totals.revenue, 'USD'));
+        connectCard.hidden = true;
+        tableCard.hidden = false;
+        tbody.replaceChildren(
+          ...rows.map((row) => {
+            const tr = document.createElement('tr');
+            tr.append(
+              td(row.date || '—'),
+              td(formatNumber(row.impressions)),
+              td(formatNumber(row.clicks)),
+              td(formatCurrency(Number(row.revenue_usd || 0), 'USD'), 'money-cell')
+            );
+            return tr;
+          })
+        );
+      }
+
+      async function loadRevenue() {
+        if (!sb) {
+          renderEmpty('Supabase is not configured for this admin session.');
+          return;
+        }
+        const { data, error } = await sb
+          .from('revenue_daily')
+          .select('date, impressions, clicks, revenue_usd, source, created_at')
+          .order('date', { ascending: false })
+          .limit(30);
+        if (error) {
+          renderEmpty('Could not load revenue_daily. Confirm the table exists.');
+          return;
+        }
+        renderRows(Array.isArray(data) ? data : []);
+      }
+
+      document.getElementById('refresh-btn').addEventListener('click', loadRevenue);
+      await loadRevenue();
+    </script>
+  </body>
+</html>

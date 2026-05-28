@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-25",
+  "generatedAtDate": "2026-05-28",
   "summary": {
-    "totalHtmlFiles": 647,
-    "withCanonical": 645,
+    "totalHtmlFiles": 673,
+    "withCanonical": 671,
     "withoutCanonical": 2,
-    "withOgImage": 494,
+    "withOgImage": 520,
     "withoutOgImage": 153,
-    "withJsonLd": 638,
+    "withJsonLd": 664,
     "withoutJsonLd": 9,
-    "hreflangEnArPairs": 638,
+    "hreflangEnArPairs": 664,
     "noindexCount": 432
   },
   "records": [
@@ -289,6 +289,44 @@
       "jsonLdParseFailures": null
     },
     {
+      "path": "content/guides/24k-vs-22k-vs-18k-gold/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "24K vs 22K vs 18K Gold — Which Karat Should You Buy? | Gold Ticker Live",
+      "metaDescription": "Compare 24K, 22K, 21K, 18K, and lower karats for jewellery and investment decisions in UAE and GCC markets.",
+      "canonical": "https://goldtickerlive.com/content/guides/24k-vs-22k-vs-18k-gold/",
+      "robots": "index,follow",
+      "ogTitle": "24K vs 22K vs 18K Gold — Which Karat Should You Buy?",
+      "ogDescription": "Compare 24K, 22K, 21K, 18K, and lower karats for jewellery and investment decisions in UAE and GCC markets.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/24k-vs-22k-vs-18k-gold/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/24k-vs-22k-vs-18k-gold/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/24k-vs-22k-vs-18k-gold/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/24k-vs-22k-vs-18k-gold/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
       "path": "content/guides/24k-vs-22k.html",
       "exempt": null,
       "lang": "en",
@@ -358,6 +396,499 @@
       "jsonLdTypes": [
         "Article",
         "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/24k-vs-22k-vs-18k-gold/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "عيارات الذهب 24 و22 و18 — أي عيار تختار؟ | Gold Ticker Live",
+      "metaDescription": "قارن بين عيارات الذهب 24 و22 و21 و18 والعيارات الأقل عند شراء المجوهرات أو الاستثمار في الخليج.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/24k-vs-22k-vs-18k-gold/",
+      "robots": "index,follow",
+      "ogTitle": "عيارات الذهب 24 و22 و18 — أي عيار تختار؟",
+      "ogDescription": "قارن بين عيارات الذهب 24 و22 و21 و18 والعيارات الأقل عند شراء المجوهرات أو الاستثمار في الخليج.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/24k-vs-22k-vs-18k-gold/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/24k-vs-22k-vs-18k-gold/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/24k-vs-22k-vs-18k-gold/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/24k-vs-22k-vs-18k-gold/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/best-time-to-buy-gold/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "أفضل وقت لشراء الذهب — المواسم وتوقيت السوق | Gold Ticker Live",
+      "metaDescription": "راجع العوامل الموسمية وقوة الدولار ومواسم الطلب الخليجي واستراتيجيات الشراء المنضبط.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/best-time-to-buy-gold/",
+      "robots": "index,follow",
+      "ogTitle": "أفضل وقت لشراء الذهب — المواسم وتوقيت السوق",
+      "ogDescription": "راجع العوامل الموسمية وقوة الدولار ومواسم الطلب الخليجي واستراتيجيات الشراء المنضبط.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/best-time-to-buy-gold/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/best-time-to-buy-gold/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/best-time-to-buy-gold/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/best-time-to-buy-gold/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/buying-gold-online-vs-in-store/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "شراء الذهب عبر الإنترنت أم من المتجر — المزايا والمخاطر | Gold Ticker Live",
+      "metaDescription": "قارن الشراء الرقمي والمباشر وخطوات التحقق ومخاطر التسليم وخيارات الذهب الرقمي في الإمارات.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/buying-gold-online-vs-in-store/",
+      "robots": "index,follow",
+      "ogTitle": "شراء الذهب عبر الإنترنت أم من المتجر — المزايا والمخاطر",
+      "ogDescription": "قارن الشراء الرقمي والمباشر وخطوات التحقق ومخاطر التسليم وخيارات الذهب الرقمي في الإمارات.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/buying-gold-online-vs-in-store/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/buying-gold-online-vs-in-store/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/buying-gold-online-vs-in-store/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/buying-gold-online-vs-in-store/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/gold-as-inflation-hedge/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "الذهب كتحوط من التضخم — هل يحمي الثروة فعلاً؟ | Gold Ticker Live",
+      "metaDescription": "قيّم متى يساعد الذهب ضد التضخم ومتى يضعف وكيف يحدد المستثمر الخليجي حجمه داخل المحفظة.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/gold-as-inflation-hedge/",
+      "robots": "index,follow",
+      "ogTitle": "الذهب كتحوط من التضخم — هل يحمي الثروة فعلاً؟",
+      "ogDescription": "قيّم متى يساعد الذهب ضد التضخم ومتى يضعف وكيف يحدد المستثمر الخليجي حجمه داخل المحفظة.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/gold-as-inflation-hedge/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-as-inflation-hedge/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-as-inflation-hedge/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-as-inflation-hedge/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/gold-bars-vs-coins/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "السبائك أم العملات الذهبية — أيهما أفضل للاستثمار؟ | Gold Ticker Live",
+      "metaDescription": "قارن السبائك والعملات حسب العلاوة والسيولة والتخزين والأحجام المناسبة لكل مستثمر.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/gold-bars-vs-coins/",
+      "robots": "index,follow",
+      "ogTitle": "السبائك أم العملات الذهبية — أيهما أفضل للاستثمار؟",
+      "ogDescription": "قارن السبائك والعملات حسب العلاوة والسيولة والتخزين والأحجام المناسبة لكل مستثمر.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/gold-bars-vs-coins/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-bars-vs-coins/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-bars-vs-coins/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-bars-vs-coins/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/gold-hallmarks-explained/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "شرح دمغات الذهب — ماذا تعني الأرقام على قطعتك؟ | Gold Ticker Live",
+      "metaDescription": "افهم أرقام النقاء ودمغات الصانع ومتطلبات الدمغ في الإمارات والخليج وإشارات الخطر.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/gold-hallmarks-explained/",
+      "robots": "index,follow",
+      "ogTitle": "شرح دمغات الذهب — ماذا تعني الأرقام على قطعتك؟",
+      "ogDescription": "افهم أرقام النقاء ودمغات الصانع ومتطلبات الدمغ في الإمارات والخليج وإشارات الخطر.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/gold-hallmarks-explained/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-hallmarks-explained/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-hallmarks-explained/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-hallmarks-explained/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/gold-investment-for-beginners/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "الاستثمار في الذهب للمبتدئين — دليل الإمارات والخليج | Gold Ticker Live",
+      "metaDescription": "دليل مبسط للسبائك والصناديق وحسابات الذهب والتخزين والضريبة وخطوات أول شراء.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/gold-investment-for-beginners/",
+      "robots": "index,follow",
+      "ogTitle": "الاستثمار في الذهب للمبتدئين — دليل الإمارات والخليج",
+      "ogDescription": "دليل مبسط للسبائك والصناديق وحسابات الذهب والتخزين والضريبة وخطوات أول شراء.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/gold-investment-for-beginners/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-investment-for-beginners/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-investment-for-beginners/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-investment-for-beginners/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/gold-savings-plans-gcc/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "خطط الادخار في الذهب في الخليج — البنوك والتطبيقات | Gold Ticker Live",
+      "metaDescription": "افهم حسابات الذهب والتطبيقات والصناديق والرسوم والاسترداد والاستثمار الشهري في الخليج.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/gold-savings-plans-gcc/",
+      "robots": "index,follow",
+      "ogTitle": "خطط الادخار في الذهب في الخليج — البنوك والتطبيقات",
+      "ogDescription": "افهم حسابات الذهب والتطبيقات والصناديق والرسوم والاسترداد والاستثمار الشهري في الخليج.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/gold-savings-plans-gcc/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-savings-plans-gcc/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-savings-plans-gcc/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-savings-plans-gcc/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/how-to-spot-fake-gold/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "كيف تكتشف الذهب المزيف — اختبارات منزلية ومهنية | Gold Ticker Live",
+      "metaDescription": "تعرف إلى فحوص بسيطة ومهنية تساعدك على تقليل خطر الذهب المزيف قبل الشراء أو البيع.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/how-to-spot-fake-gold/",
+      "robots": "index,follow",
+      "ogTitle": "كيف تكتشف الذهب المزيف — اختبارات منزلية ومهنية",
+      "ogDescription": "تعرف إلى فحوص بسيطة ومهنية تساعدك على تقليل خطر الذهب المزيف قبل الشراء أو البيع.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/how-to-spot-fake-gold/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/how-to-spot-fake-gold/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/how-to-spot-fake-gold/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/how-to-spot-fake-gold/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "مركز أدلة الذهب والتعليم | Gold Ticker Live",
+      "metaDescription": "أدلة تعليمية عن عيارات الذهب والاستثمار والشراء الآمن وخطط الادخار في الخليج.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/",
+      "robots": "index,follow",
+      "ogTitle": "مركز أدلة الذهب والتعليم",
+      "ogDescription": "أدلة تعليمية عن عيارات الذهب والاستثمار والشراء الآمن وخطط الادخار في الخليج.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "ItemList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/ar/uae-vs-saudi-vs-kuwait-gold-prices/index.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "أسعار الذهب في الإمارات والسعودية والكويت — مقارنة خليجية | Gold Ticker Live",
+      "metaDescription": "قارن اختلاف الأسعار والضريبة والعملات وهيكل السوق ونصائح الشراء عبر الحدود.",
+      "canonical": "https://goldtickerlive.com/content/guides/ar/uae-vs-saudi-vs-kuwait-gold-prices/",
+      "robots": "index,follow",
+      "ogTitle": "أسعار الذهب في الإمارات والسعودية والكويت — مقارنة خليجية",
+      "ogDescription": "قارن اختلاف الأسعار والضريبة والعملات وهيكل السوق ونصائح الشراء عبر الحدود.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/ar/uae-vs-saudi-vs-kuwait-gold-prices/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/uae-vs-saudi-vs-kuwait-gold-prices/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/best-time-to-buy-gold/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Best Time to Buy Gold — Seasonal Patterns and Market Timing | Gold Ticker Live",
+      "metaDescription": "Review gold timing factors, seasonal demand, dollar strength, GCC wedding cycles, and disciplined buying strategies.",
+      "canonical": "https://goldtickerlive.com/content/guides/best-time-to-buy-gold/",
+      "robots": "index,follow",
+      "ogTitle": "Best Time to Buy Gold — Seasonal Patterns and Market Timing",
+      "ogDescription": "Review gold timing factors, seasonal demand, dollar strength, GCC wedding cycles, and disciplined buying strategies.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/best-time-to-buy-gold/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/best-time-to-buy-gold/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/best-time-to-buy-gold/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/best-time-to-buy-gold/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/buying-gold-online-vs-in-store/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Buying Gold Online vs In-Store — Pros, Cons and Safety Tips | Gold Ticker Live",
+      "metaDescription": "Compare online and in-store gold buying, verification steps, delivery risk, and digital gold options in UAE.",
+      "canonical": "https://goldtickerlive.com/content/guides/buying-gold-online-vs-in-store/",
+      "robots": "index,follow",
+      "ogTitle": "Buying Gold Online vs In-Store — Pros, Cons and Safety Tips",
+      "ogDescription": "Compare online and in-store gold buying, verification steps, delivery risk, and digital gold options in UAE.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/buying-gold-online-vs-in-store/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/buying-gold-online-vs-in-store/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/buying-gold-online-vs-in-store/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/buying-gold-online-vs-in-store/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -437,6 +968,158 @@
       "jsonLdParseFailures": null
     },
     {
+      "path": "content/guides/gold-as-inflation-hedge/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold as an Inflation Hedge — Does It Actually Protect Your Wealth? | Gold Ticker Live",
+      "metaDescription": "Assess when gold can help against inflation, when it fails, and how GCC investors can size it in a portfolio.",
+      "canonical": "https://goldtickerlive.com/content/guides/gold-as-inflation-hedge/",
+      "robots": "index,follow",
+      "ogTitle": "Gold as an Inflation Hedge — Does It Actually Protect Your Wealth?",
+      "ogDescription": "Assess when gold can help against inflation, when it fails, and how GCC investors can size it in a portfolio.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/gold-as-inflation-hedge/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-as-inflation-hedge/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-as-inflation-hedge/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-as-inflation-hedge/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/gold-bars-vs-coins/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Bars vs Coins — Which is Better for Investment? | Gold Ticker Live",
+      "metaDescription": "Compare gold bars and coins by premium, liquidity, storage, fractional sizes, and buyer suitability.",
+      "canonical": "https://goldtickerlive.com/content/guides/gold-bars-vs-coins/",
+      "robots": "index,follow",
+      "ogTitle": "Gold Bars vs Coins — Which is Better for Investment?",
+      "ogDescription": "Compare gold bars and coins by premium, liquidity, storage, fractional sizes, and buyer suitability.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/gold-bars-vs-coins/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-bars-vs-coins/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-bars-vs-coins/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-bars-vs-coins/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/gold-hallmarks-explained/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Hallmarks Explained — What the Stamps on Your Gold Mean | Gold Ticker Live",
+      "metaDescription": "Understand purity stamps, maker marks, UAE and GCC hallmarking practices, and red flags on gold jewellery.",
+      "canonical": "https://goldtickerlive.com/content/guides/gold-hallmarks-explained/",
+      "robots": "index,follow",
+      "ogTitle": "Gold Hallmarks Explained — What the Stamps on Your Gold Mean",
+      "ogDescription": "Understand purity stamps, maker marks, UAE and GCC hallmarking practices, and red flags on gold jewellery.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/gold-hallmarks-explained/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-hallmarks-explained/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-hallmarks-explained/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-hallmarks-explained/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/gold-investment-for-beginners/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Investment for Beginners — Complete UAE & GCC Guide | Gold Ticker Live",
+      "metaDescription": "A beginner-friendly guide to physical gold, ETFs, savings accounts, storage, tax, and first purchase checks.",
+      "canonical": "https://goldtickerlive.com/content/guides/gold-investment-for-beginners/",
+      "robots": "index,follow",
+      "ogTitle": "Gold Investment for Beginners — Complete UAE & GCC Guide",
+      "ogDescription": "A beginner-friendly guide to physical gold, ETFs, savings accounts, storage, tax, and first purchase checks.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/gold-investment-for-beginners/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-investment-for-beginners/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-investment-for-beginners/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-investment-for-beginners/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
       "path": "content/guides/gold-karat-comparison.html",
       "exempt": null,
       "lang": "en",
@@ -474,6 +1157,119 @@
       "jsonLdParseFailures": null
     },
     {
+      "path": "content/guides/gold-savings-plans-gcc/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Savings Plans in GCC — Banks, Apps and Monthly Investment Options | Gold Ticker Live",
+      "metaDescription": "Understand GCC gold savings plans, bank accounts, digital apps, ETFs, fees, redemption, and monthly investing.",
+      "canonical": "https://goldtickerlive.com/content/guides/gold-savings-plans-gcc/",
+      "robots": "index,follow",
+      "ogTitle": "Gold Savings Plans in GCC — Banks, Apps and Monthly Investment Options",
+      "ogDescription": "Understand GCC gold savings plans, bank accounts, digital apps, ETFs, fees, redemption, and monthly investing.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/gold-savings-plans-gcc/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/gold-savings-plans-gcc/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/gold-savings-plans-gcc/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/gold-savings-plans-gcc/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/how-to-spot-fake-gold/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "How to Spot Fake Gold — 8 Tests You Can Do at Home | Gold Ticker Live",
+      "metaDescription": "Learn practical home checks and professional tests to reduce fake gold risk before buying or selling jewellery.",
+      "canonical": "https://goldtickerlive.com/content/guides/how-to-spot-fake-gold/",
+      "robots": "index,follow",
+      "ogTitle": "How to Spot Fake Gold — 8 Tests You Can Do at Home",
+      "ogDescription": "Learn practical home checks and professional tests to reduce fake gold risk before buying or selling jewellery.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/how-to-spot-fake-gold/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/how-to-spot-fake-gold/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/how-to-spot-fake-gold/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/how-to-spot-fake-gold/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Guides & Education Hub | Gold Ticker Live",
+      "metaDescription": "Gold education hub covering karats, safe buying, investment basics, GCC markets, and savings plans.",
+      "canonical": "https://goldtickerlive.com/content/guides/",
+      "robots": "index,follow",
+      "ogTitle": "Gold Guides & Education Hub",
+      "ogDescription": "Gold education hub covering karats, safe buying, investment basics, GCC markets, and savings plans.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "ItemList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
       "path": "content/guides/invest-in-gold-gcc.html",
       "exempt": null,
       "lang": "en",
@@ -506,6 +1302,44 @@
       "jsonLdTypes": [
         "Article",
         "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/guides/uae-vs-saudi-vs-kuwait-gold-prices/index.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "UAE vs Saudi Arabia vs Kuwait Gold Prices — GCC Price Comparison | Gold Ticker Live",
+      "metaDescription": "Compare UAE, Saudi, and Kuwait gold price differences, VAT, currency, market structure, and cross-border checks.",
+      "canonical": "https://goldtickerlive.com/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/",
+      "robots": "index,follow",
+      "ogTitle": "UAE vs Saudi Arabia vs Kuwait Gold Prices — GCC Price Comparison",
+      "ogDescription": "Compare UAE, Saudi, and Kuwait gold price differences, VAT, currency, market structure, and cross-border checks.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/guides/ar/uae-vs-saudi-vs-kuwait-gold-prices/"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -785,6 +1619,120 @@
       "jsonLdParseFailures": null
     },
     {
+      "path": "content/tools/ar/investment-calculator.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "حاسبة الاستثمار في الذهب | Gold Ticker Live",
+      "metaDescription": "احسب القيمة المستقبلية لاستثمار الذهب والمساهمات الشهرية مع افتراضات النمو المرجعية في الخليج.",
+      "canonical": "https://goldtickerlive.com/content/tools/ar/investment-calculator.html",
+      "robots": "index,follow",
+      "ogTitle": "حاسبة الاستثمار في الذهب",
+      "ogDescription": "احسب القيمة المستقبلية لاستثمار الذهب والمساهمات الشهرية مع افتراضات النمو المرجعية في الخليج.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/tools/ar/investment-calculator.html",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/tools/ar/investment-calculator.html"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/tools/investment-calculator.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/tools/investment-calculator.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/tools/ar/scrap-calculator.html",
+      "exempt": null,
+      "lang": "ar",
+      "dir": "rtl",
+      "title": "حاسبة الذهب الكسر | Gold Ticker Live",
+      "metaDescription": "قدّر قيمة الذهب الكسر قبل وبعد هامش التاجر مع السعر المرجعي والوزن والعيار، بالدولار والدرهم.",
+      "canonical": "https://goldtickerlive.com/content/tools/ar/scrap-calculator.html",
+      "robots": "index,follow",
+      "ogTitle": "حاسبة الذهب الكسر",
+      "ogDescription": "قدّر قيمة الذهب الكسر قبل وبعد هامش التاجر مع السعر المرجعي والوزن والعيار، بالدولار والدرهم.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/tools/ar/scrap-calculator.html",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/tools/ar/scrap-calculator.html"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/tools/scrap-calculator.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/tools/scrap-calculator.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/tools/investment-calculator.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Gold Investment Calculator | Gold Ticker Live",
+      "metaDescription": "Project long-term gold investment value with monthly contributions, growth assumptions, AED/USD toggle, and year-by-year estimates.",
+      "canonical": "https://goldtickerlive.com/content/tools/investment-calculator.html",
+      "robots": "index,follow",
+      "ogTitle": "Gold Investment Calculator",
+      "ogDescription": "Project long-term gold investment value with monthly contributions, growth assumptions, AED/USD toggle, and year-by-year estimates.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/tools/investment-calculator.html",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/tools/ar/investment-calculator.html"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/tools/investment-calculator.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/tools/investment-calculator.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
       "path": "content/tools/investment-return.html",
       "exempt": null,
       "lang": "en",
@@ -816,6 +1764,44 @@
       ],
       "jsonLdTypes": [
         "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
+      "path": "content/tools/scrap-calculator.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Scrap Gold Calculator | Gold Ticker Live",
+      "metaDescription": "Estimate scrap gold value before and after dealer margin using weight, karat purity, and editable AED reference price.",
+      "canonical": "https://goldtickerlive.com/content/tools/scrap-calculator.html",
+      "robots": "index,follow",
+      "ogTitle": "Scrap Gold Calculator",
+      "ogDescription": "Estimate scrap gold value before and after dealer margin using weight, karat purity, and editable AED reference price.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/content/tools/scrap-calculator.html",
+      "ogType": "article",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/content/tools/ar/scrap-calculator.html"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/content/tools/scrap-calculator.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/content/tools/scrap-calculator.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "Article",
+        "BreadcrumbList",
+        "FAQPage"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null

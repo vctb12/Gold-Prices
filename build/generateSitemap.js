@@ -97,6 +97,38 @@ const staticPages = [
   { loc: `${SITE_URL}/countries/index.html`, changefreq: 'monthly', priority: '0.60' },
 ];
 
+staticPages.push(
+  // Investment and Scrap Calculators
+  { loc: `${SITE_URL}/content/tools/investment-calculator.html`, changefreq: 'monthly', priority: '0.72' },
+  { loc: `${SITE_URL}/content/tools/ar/investment-calculator.html`, changefreq: 'monthly', priority: '0.65' },
+  { loc: `${SITE_URL}/content/tools/scrap-calculator.html`, changefreq: 'monthly', priority: '0.72' },
+  { loc: `${SITE_URL}/content/tools/ar/scrap-calculator.html`, changefreq: 'monthly', priority: '0.65' },
+  // Guides hub
+  { loc: `${SITE_URL}/content/guides/ar/`, changefreq: 'weekly', priority: '0.60' },
+  // Guide articles (EN)
+  { loc: `${SITE_URL}/content/guides/24k-vs-22k-vs-18k-gold/`, changefreq: 'monthly', priority: '0.70' },
+  { loc: `${SITE_URL}/content/guides/how-to-spot-fake-gold/`, changefreq: 'monthly', priority: '0.70' },
+  { loc: `${SITE_URL}/content/guides/gold-hallmarks-explained/`, changefreq: 'monthly', priority: '0.68' },
+  { loc: `${SITE_URL}/content/guides/best-time-to-buy-gold/`, changefreq: 'monthly', priority: '0.70' },
+  { loc: `${SITE_URL}/content/guides/gold-as-inflation-hedge/`, changefreq: 'monthly', priority: '0.68' },
+  { loc: `${SITE_URL}/content/guides/gold-investment-for-beginners/`, changefreq: 'monthly', priority: '0.72' },
+  { loc: `${SITE_URL}/content/guides/gold-bars-vs-coins/`, changefreq: 'monthly', priority: '0.68' },
+  { loc: `${SITE_URL}/content/guides/buying-gold-online-vs-in-store/`, changefreq: 'monthly', priority: '0.68' },
+  { loc: `${SITE_URL}/content/guides/uae-vs-saudi-vs-kuwait-gold-prices/`, changefreq: 'monthly', priority: '0.72' },
+  { loc: `${SITE_URL}/content/guides/gold-savings-plans-gcc/`, changefreq: 'monthly', priority: '0.70' },
+  // Guide articles (AR)
+  { loc: `${SITE_URL}/content/guides/ar/24k-vs-22k-vs-18k-gold/`, changefreq: 'monthly', priority: '0.65' },
+  { loc: `${SITE_URL}/content/guides/ar/how-to-spot-fake-gold/`, changefreq: 'monthly', priority: '0.65' },
+  { loc: `${SITE_URL}/content/guides/ar/gold-hallmarks-explained/`, changefreq: 'monthly', priority: '0.63' },
+  { loc: `${SITE_URL}/content/guides/ar/best-time-to-buy-gold/`, changefreq: 'monthly', priority: '0.65' },
+  { loc: `${SITE_URL}/content/guides/ar/gold-as-inflation-hedge/`, changefreq: 'monthly', priority: '0.63' },
+  { loc: `${SITE_URL}/content/guides/ar/gold-investment-for-beginners/`, changefreq: 'monthly', priority: '0.67' },
+  { loc: `${SITE_URL}/content/guides/ar/gold-bars-vs-coins/`, changefreq: 'monthly', priority: '0.63' },
+  { loc: `${SITE_URL}/content/guides/ar/buying-gold-online-vs-in-store/`, changefreq: 'monthly', priority: '0.63' },
+  { loc: `${SITE_URL}/content/guides/ar/uae-vs-saudi-vs-kuwait-gold-prices/`, changefreq: 'monthly', priority: '0.67' },
+  { loc: `${SITE_URL}/content/guides/ar/gold-savings-plans-gcc/`, changefreq: 'monthly', priority: '0.65' },
+);
+
 for (const p of staticPages) {
   const filePath = sitemapUrlToFilePath(p.loc);
   if (fs.existsSync(filePath) && isNoindexFile(filePath)) continue;
