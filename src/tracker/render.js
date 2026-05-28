@@ -21,7 +21,7 @@ import { renderHero, renderMiniStrip, renderKaratTable } from './hero.js';
 import { renderAlerts, renderAlertsSummary } from './alerts.js';
 import { renderWatchlist } from './watchlist.js';
 import { renderComparisonWorkspace } from './compare.js';
-import { applyExportReadiness, getExportReadinessState } from './export.js';
+import { applyExportReadiness } from './export.js';
 
 export { getFreshnessModel, applyStatusBadge, buildSourceBadge } from './freshness.js';
 export { renderChart, getVisibleHistoryRows, getSelectedRangeLabel } from './chart.js';
