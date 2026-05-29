@@ -33,7 +33,7 @@ test.describe('Country gold price pages', () => {
     await page.goto('/countries/saudi-arabia/gold-price/');
     await expect(page.locator('#country-page-title')).toContainText(/Saudi Arabia|السعودية/);
     await expect(
-      page.locator('#country-context a[href*="/riyadh/gold-prices/"]').first()
+      page.locator('#country-context a[href*="/riyadh/gold-rate/"]').first()
     ).toBeVisible();
     await expect(page.locator('#country-faq-list details').first()).toBeVisible();
     await expect(

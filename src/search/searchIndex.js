@@ -33,7 +33,7 @@ function buildIndex() {
         country: c.slug,
         label: `${city.nameEn}, ${c.nameEn}`,
         labelAr: `${city.nameAr}, ${c.nameAr}`,
-        url: `/${c.slug}/${city.slug}/gold-prices/`,
+        url: `/${c.slug}/${city.slug}/gold-rate/`,
         icon: '🏙️',
         keywords: [city.nameEn, city.nameAr, c.nameEn, c.nameAr, c.currency],
       });

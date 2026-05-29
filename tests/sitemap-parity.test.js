@@ -115,7 +115,6 @@ test('sitemap-parity invariants — canonical sitemap retains required top-level
     'https://goldtickerlive.com/methodology.html',
     'https://goldtickerlive.com/learn.html',
     'https://goldtickerlive.com/insights.html',
-    'https://goldtickerlive.com/invest.html',
     'https://goldtickerlive.com/privacy.html',
     'https://goldtickerlive.com/terms.html',
   ];

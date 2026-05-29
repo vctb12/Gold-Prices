@@ -6,7 +6,7 @@ priority: P2
 class: A
 owner: @vctb12
 last_run_at: '2026-05-29'
-last_run_pr: ''
+last_run_pr: 'cursor/harsh-cleanup-functional-pass-ebfb'
 last_run_agent: copilot
 slices_remaining_estimate: 0
 next_action: ''

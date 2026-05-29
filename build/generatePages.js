@@ -6,9 +6,8 @@
  *
  * Output structure:
  *   {country}/gold-price/index.html
- *   {country}/{city}/gold-prices/index.html
+ *   {country}/{city}/gold-rate/index.html  (consolidated city hub — all karats)
  *   {country}/{city}/gold-shops/index.html
- *   {country}/{city}/gold-rate/{karat-slug}/index.html
  */
 
 const fs   = require('fs');

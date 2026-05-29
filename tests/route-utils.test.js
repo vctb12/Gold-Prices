@@ -78,8 +78,7 @@ function buildRoute({ country, city, karat, page } = {}) {
     return `${BASE_PATH}${segment}`;
   }
   if (country && !city && !karat) return `${BASE_PATH}${country}/gold-price`;
-  if (country && city && !karat) return `${BASE_PATH}${country}/${city}/gold-prices`;
-  if (country && city && karat) return `${BASE_PATH}${country}/${city}/gold-rate/${karat}-karat`;
+  if (country && city) return `${BASE_PATH}${country}/${city}/gold-rate`;
   return null;
 }
 
@@ -175,14 +174,14 @@ describe('buildRoute', () => {
     assert.equal(buildRoute({ country: 'saudi-arabia' }), '/saudi-arabia/gold-price');
   });
 
-  test('city gold prices page', () => {
-    assert.equal(buildRoute({ country: 'uae', city: 'dubai' }), '/uae/dubai/gold-prices');
+  test('city gold rate hub', () => {
+    assert.equal(buildRoute({ country: 'uae', city: 'dubai' }), '/uae/dubai/gold-rate');
   });
 
-  test('karat-specific page', () => {
+  test('karat param resolves to consolidated city gold-rate hub', () => {
     assert.equal(
       buildRoute({ country: 'uae', city: 'dubai', karat: '22' }),
-      '/uae/dubai/gold-rate/22-karat'
+      '/uae/dubai/gold-rate'
     );
   });
 
@@ -201,7 +200,7 @@ describe('buildShopsRoute', () => {
 describe('buildCanonicalURL', () => {
   test('generates full canonical URL', () => {
     const path = buildRoute({ country: 'uae', city: 'dubai' });
-    assert.equal(buildCanonicalURL(path), 'https://goldtickerlive.com/uae/dubai/gold-prices');
+    assert.equal(buildCanonicalURL(path), 'https://goldtickerlive.com/uae/dubai/gold-rate');
   });
 
   test('returns null for null path', () => {

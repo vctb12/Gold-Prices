@@ -529,7 +529,7 @@ function renderCountryContext({ country, lang }) {
           'a',
           {
             class: 'country-inline-link',
-            href: safeHref(withBase(`countries/${country.slug}/${city.slug}/gold-prices/`)),
+            href: safeHref(withBase(`countries/${country.slug}/${city.slug}/gold-rate/`)),
           },
           getCountryName(city, lang)
         )

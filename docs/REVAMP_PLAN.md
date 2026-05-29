@@ -13,7 +13,11 @@ them into the right section here before execution. Agent operating rules are in
 - Keep completed items as `[x]` with enough context to serve as a record. Don't re-open closed items
   to pad status; don't invent new phases to look ambitious.
 
-**Last updated:** 2026-04-30 (Round 16 — 404 page redesigned with live freshness pill, bilingual
+**Last updated:** 2026-05-29 (Harsh country URL consolidation — removed ~345 thin city pages
+(per-karat + duplicate `gold-prices`), consolidated live pricing on `/countries/{c}/{city}/gold-rate/`,
+301 redirects, sitemap regen to ~252 indexable URLs, `invest.html` noindex).
+
+Previous: 2026-04-30 (Round 16 — 404 page redesigned with live freshness pill, bilingual
 EN/AR, search pre-fill, primary-intent card links, and analytics error logging; `_redirects`
 extended with clean-URL aliases, country shorthands, and legacy guide slug redirects; `not-found.js`
 fully rewritten; `translations.js` extended with `notfound.*` key family in both locales).

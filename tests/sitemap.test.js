@@ -89,6 +89,8 @@ test('core static pages are in the sitemap', () => {
     const filePath =
       p === '/' ? path.join(REPO_ROOT, 'index.html') : path.join(REPO_ROOT, p.replace(/^\//, ''));
     if (!fs.existsSync(filePath)) continue;
+    const html = fs.readFileSync(filePath, 'utf8');
+    if (/<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html)) continue;
     assert.ok(
       all.has(expected),
       `Expected sitemap to include ${expected} (file exists at ${filePath})`

@@ -13,7 +13,7 @@ const STRICT = process.argv.includes('--strict');
 const STDOUT_ONLY = process.argv.includes('--stdout');
 const THIN_CONTENT_THRESHOLD = 140;
 const REQUIRED_NOINDEX_PATTERNS = [
-  /^countries\/[^/]+\/[^/]+\/gold-rate\/(?:18|21|22|24)-karat\/index\.html$/,
+  /^invest\.html$/,
   /^content\/tools\/investment-return\.html$/,
   /^content\/guides\/invest-in-gold-gcc\.html$/,
   /^content\/social\/.+\.html$/,

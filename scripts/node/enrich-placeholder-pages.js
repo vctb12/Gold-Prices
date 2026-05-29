@@ -160,14 +160,6 @@ function buildCityHub(country, city, relFile) {
       blurb: `Directory of gold jewellers and dealers listed for ${cityEn}. Directory data, not verified store endorsements.`,
     });
   }
-  if (existing('gold-rate/index.html') || existing('gold-rate/24-karat/index.html')) {
-    links.push({
-      href: `/countries/${country.slug}/${city.slug}/gold-rate/`,
-      title: `Gold Rate by Karat in ${cityEn}`,
-      blurb: 'Dedicated pages for 24-karat, 22-karat, 21-karat and 18-karat gold rates.',
-    });
-  }
-
   const breadcrumbs = [
     { name: 'Home', url: BASE_URL + '/' },
     { name: countryEn, url: `${BASE_URL}/countries/${country.slug}/` },

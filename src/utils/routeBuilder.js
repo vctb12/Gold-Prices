@@ -46,15 +46,9 @@ export function buildRoute({ country, city, karat, page } = {}) {
     return `${BASE_PATH}${country}/gold-price`;
   }
 
-  // City gold prices page
-  if (country && city && !karat) {
-    return `${BASE_PATH}${country}/${city}/gold-prices`;
-  }
-
-  // City gold shops page — use buildShopsRoute instead
-  // City karat-specific page
-  if (country && city && karat) {
-    return `${BASE_PATH}${country}/${city}/gold-rate/${karat}-karat`;
+  // City gold-rate hub (all karats on one page)
+  if (country && city) {
+    return `${BASE_PATH}${country}/${city}/gold-rate`;
   }
 
   return null;

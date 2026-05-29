@@ -154,16 +154,16 @@ for (const country of COUNTRIES) {
   }
 
   for (const city of (country.cities || [])) {
-    const cityGoldPricesFile = path.join(
+    const cityGoldRateFile = path.join(
       ROOT,
       'countries',
       country.slug,
       city.slug,
-      'gold-prices',
+      'gold-rate',
       'index.html'
     );
-    if (!(fs.existsSync(cityGoldPricesFile) && isNoindexFile(cityGoldPricesFile))) {
-      urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-prices/`, 'hourly', '0.85'));
+    if (fs.existsSync(cityGoldRateFile) && !isNoindexFile(cityGoldRateFile)) {
+      urls.push(url(`${SITE_URL}/countries/${country.slug}/${city.slug}/gold-rate/`, 'hourly', '0.85'));
     }
 
     const cityGoldShopsFile = path.join(
@@ -174,22 +174,8 @@ for (const country of COUNTRIES) {
       'gold-shops',
       'index.html'
     );
-    if (!(fs.existsSync(cityGoldShopsFile) && isNoindexFile(cityGoldShopsFile))) {
-      urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-shops/`,  'weekly', '0.70'));
-    }
-
-    for (const karat of KARATS.filter(k => ['24', '22', '21', '18'].includes(k.code))) {
-      const karatFile = path.join(
-        ROOT,
-        'countries',
-        country.slug,
-        city.slug,
-        'gold-rate',
-        `${karat.code}-karat`,
-        'index.html'
-      );
-      if (fs.existsSync(karatFile) && isNoindexFile(karatFile)) continue;
-      urls.push(url(`${SITE_URL}/${country.slug}/${city.slug}/gold-rate/${karat.code}-karat/`, 'hourly', '0.75'));
+    if (fs.existsSync(cityGoldShopsFile) && !isNoindexFile(cityGoldShopsFile)) {
+      urls.push(url(`${SITE_URL}/countries/${country.slug}/${city.slug}/gold-shops/`, 'weekly', '0.70'));
     }
   }
 }

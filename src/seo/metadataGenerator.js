@@ -49,13 +49,13 @@ export function generateMetadata(routeType, params = {}) {
       break;
 
     case 'city-prices':
-      title = `Gold Price in ${cityObj?.nameEn || city}, ${countryObj?.nameEn || ''} Today | ${countryObj?.currency} per Gram | ${SITE_NAME}`;
-      description = `Live 24K, 22K, 21K and 18K gold prices in ${cityObj?.nameEn || city}, ${countryObj?.nameEn || ''}. Compare ${countryObj?.currency} rates per gram. Auto-refresh with a visible freshness label.`;
-      canonical = `${SITE_URL}/${country}/${city}/gold-prices/`;
+      title = `Gold Rate in ${cityObj?.nameEn || city}, ${countryObj?.nameEn || ''} Today | ${countryObj?.currency} per Gram | ${SITE_NAME}`;
+      description = `Live 24K, 22K, 21K and 18K gold rates in ${cityObj?.nameEn || city}, ${countryObj?.nameEn || ''}. Compare ${countryObj?.currency} reference rates per gram. Auto-refresh with a visible freshness label.`;
+      canonical = `${SITE_URL}/${country}/${city}/gold-rate/`;
       breadcrumbs = [
         { name: 'Home', url: `${SITE_URL}/` },
         { name: `${countryObj?.nameEn} Gold`, url: `${SITE_URL}/${country}/gold-price/` },
-        { name: `${cityObj?.nameEn} Gold Prices`, url: canonical },
+        { name: `${cityObj?.nameEn} Gold rate`, url: canonical },
       ];
       break;
 
