@@ -3,11 +3,11 @@ import { clear, el } from '../lib/safe-dom.js';
 import { tx, _el, _priceFor, _state } from './_ctx.js';
 
 const ARCHIVE_PAGE_SIZE = 50;
-let archivePage = 0;
+let _archivePage = 0;
 
 export function renderArchive(resetPage = false) {
   if (!_el.archiveBody) return;
-  if (resetPage) archivePage = 0;
+  if (resetPage) _archivePage = 0;
 
   const archiveSourceNote = document.getElementById('tp-archive-source-note');
   if (archiveSourceNote) {
@@ -47,8 +47,8 @@ export function renderArchive(resetPage = false) {
 
   const totalFiltered = rows.length;
   const totalPages = Math.max(1, Math.ceil(totalFiltered / ARCHIVE_PAGE_SIZE));
-  archivePage = Math.min(archivePage, totalPages - 1);
-  const pageStart = archivePage * ARCHIVE_PAGE_SIZE;
+  _archivePage = Math.min(_archivePage, totalPages - 1);
+  const pageStart = _archivePage * ARCHIVE_PAGE_SIZE;
   const pageRows = rows.slice(pageStart, pageStart + ARCHIVE_PAGE_SIZE);
 
   clear(_el.archiveBody);
@@ -58,7 +58,7 @@ export function renderArchive(resetPage = false) {
     const noDataMsg = tx('archive.noDataDetailed', { lastMonth: lastMonth || '—' });
     _el.archiveBody.append(el('tr', null, [el('td', { colspan: '5' }, noDataMsg)]));
     if (_el.archiveMeta) _el.archiveMeta.textContent = '';
-    renderArchivePagination(0, 1, 0);
+    _renderArchivePagination(0, 1, 0);
     return;
   }
 
@@ -108,11 +108,11 @@ export function renderArchive(resetPage = false) {
     });
   }
 
-  renderArchivePagination(archivePage, totalPages, totalFiltered);
+  _renderArchivePagination(_archivePage, totalPages, totalFiltered);
   renderSeasonal();
 }
 
-function renderArchivePagination(page, totalPages, total) {
+function _renderArchivePagination(page, totalPages, total) {
   let paginationEl = document.getElementById('tp-archive-pagination');
   if (!paginationEl) {
     const tableFooter = _el.archiveMeta?.parentElement;
@@ -138,7 +138,7 @@ function renderArchivePagination(page, totalPages, total) {
     tx('pagination.prev')
   );
   prevBtn.addEventListener('click', () => {
-    archivePage--;
+    _archivePage--;
     renderArchive();
   });
 
@@ -159,7 +159,7 @@ function renderArchivePagination(page, totalPages, total) {
     tx('pagination.next')
   );
   nextBtn.addEventListener('click', () => {
-    archivePage++;
+    _archivePage++;
     renderArchive();
   });
 
