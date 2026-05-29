@@ -5,14 +5,14 @@ status: in-progress
 priority: P1
 class: B
 owner: @vctb12
-last_run_at: "2026-05-22T14:37:44Z"
-last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/333"
+last_run_at: "2026-05-29T15:24:00Z"
+last_run_pr: "pending"
 last_run_agent: copilot
-slices_remaining_estimate: 8
-next_action: "Execute Phase 2 leaf #1: add a shared learn-hub content model + renderer and migrate learn.html to the model without removing methodology/insights yet."
+slices_remaining_estimate: 5
+next_action: "Phase 2 leaf #2: migrate methodology.html to the shared learn-hub article model and renderer while keeping insights isolated."
 blocked_on: ""
 guardrails_reviewed: true
-skills_used: [gold-ticker-live-audit]
+skills_used: [gold-ticker-live-audit, frontend-design-system]
 ```
 
 Use these as copy-paste prompts for upcoming sessions.  
@@ -429,10 +429,30 @@ Acceptance:
       `npm test`, `npm run validate`, `npm run build`) for the remaining extraction pass.
 - [x] Map learn/methodology/insights consolidation dependencies for Phase 2 planning.
 - [x] Select first Phase 2 leaf implementation slice with low regression risk.
-- [ ] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
-- [ ] Validate Phase 2 leaf #1 with `npm run lint`, `npm test`, `npm run validate`, `npm run build`.
+- [x] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
+- [x] Validate Phase 2 leaf #1 with `npm run lint`, `npm test`, `npm run validate`, `npm run build`.
 
 ## Session log
+
+### 2026-05-29T15:24Z — copilot (Phase 2 leaf #1 execution)
+
+- Slice class: CODE
+- Skills activated: gold-ticker-live-audit
+- Completed:
+  - Replaced static `learn.html` longform content with lean renderer mount points (`#learn-toc-root`
+    - `#learn-article-root`) while preserving related-tools links and hash-friendly section IDs.
+  - Refactored `src/pages/learn.js` to consume the shared learn-hub model/registry + renderer,
+    remove duplicated bilingual copy maps, and keep shell language toggle integration intact.
+  - Updated `styles/pages/learn.css` for renderer-first structure (article header/meta pills, mobile
+    TOC toggle, shared inline/callout styles) while retaining existing section/table visual
+    language.
+- Added/Split:
+  - None.
+- Skipped (owner-only / blocked):
+  - Methodology/insights content migration intentionally deferred to Phase 2 leaf #2.
+- Validation: lint=PASS, test=908/908 PASS, validate=PASS, build=PASS.
+- Next action: execute Phase 2 leaf #2 (`methodology.html` + `src/pages/methodology.js`) on the same
+  shared learn-hub renderer contract.
 
 ### 2026-05-22T14:37Z — copilot (planning slice)
 
@@ -496,3 +516,26 @@ Acceptance:
     test/lint/build commands were not run in this slice.
 - Next action: Complete the Phase 1 parity sweep by auditing remaining shell-style extraction gaps
   and capturing full lint/test/validate/build evidence.
+
+### 2026-05-28T09:30Z — copilot (PR — multi-track A–E)
+
+- Slice class: CODE
+- Phase/Feature closed: Phase 3a (Tracker Modularization)
+- Skills activated: gold-ticker-live-audit, frontend-design-system
+- Completed:
+  - Extracted `src/tracker/render.js` (2,180 lines) into 7 focused modules: `_ctx.js`,
+    `freshness.js`, `chart.js`, `hero.js`, `alerts.js`, `watchlist.js`, `compare.js`, `export.js`.
+    `render.js` shrank to ~884 lines of orchestration
+    - re-exports; public API preserved for all callers (wire.js, ui-shell.js, events.js, tracker.js,
+      tracker-pro.js).
+  - Added 7 new test files under `tests/tracker-*.test.js` (21 new tests, all passing). Canonical
+    freshness vocabulary preserved (verified by `tests/tracker-freshness.test.js`).
+  - Added `/learn/`, `/learn/methodology`, `/learn/insights` clean-URL 301 redirects in `_redirects`
+    as a precursor to Phase 2 consolidation.
+- Added/Split: none
+- Skipped (owner-only / blocked): Phase 2 methodology/insights migration to content-model deferred —
+  needs dedicated PR to avoid mixing concerns with the tracker extraction.
+- Validation: lint=PASS, validate=PASS, build=PASS, test=907/908 (only the pre-existing
+  analytics.test.js navigator getter failure).
+- Next action: Phase 3b orchestration teardown + Phase 2 leaf #1 (methodology → learn-hub content
+  model).

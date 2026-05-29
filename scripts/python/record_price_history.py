@@ -36,12 +36,41 @@ KARATS = {
 }
 
 # ── Path setup (match repo convention: scripts/python/ on sys.path) ───────
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT / "scripts" / "python"))
 
 from utils.logger import get_logger  # noqa: E402
 
 log = get_logger("record_price_history")
+
+
+def _coerce_positive_float(value: object) -> float | None:
+    """Return a positive float from provider/file payload values."""
+    try:
+        price = float(value)
+    except (TypeError, ValueError):
+        return None
+
+    return price if price > 0 else None
+
+
+def _extract_spot_price(data: dict) -> float | None:
+    """Extract XAU/USD per troy ounce from current and legacy snapshot schemas."""
+    gold = data.get("gold") if isinstance(data.get("gold"), dict) else {}
+    candidates = (
+        data.get("xau_usd_per_oz"),
+        data.get("spot_usd"),
+        data.get("price_usd"),
+        data.get("price"),
+        gold.get("ounce_usd"),
+    )
+
+    for candidate in candidates:
+        price = _coerce_positive_float(candidate)
+        if price is not None:
+            return price
+
+    return None
 
 
 def get_spot_price() -> float | None:
@@ -57,10 +86,10 @@ def get_spot_price() -> float | None:
     if gold_json.exists():
         try:
             data = json.loads(gold_json.read_text())
-            price = data.get("price_usd") or data.get("spot_usd") or data.get("price")
-            if price and float(price) > 0:
-                log.info("Spot price from local JSON: $%.2f", float(price))
-                return float(price)
+            price = _extract_spot_price(data)
+            if price is not None:
+                log.info("Spot price from local JSON: $%.2f", price)
+                return price
         except (json.JSONDecodeError, ValueError, TypeError) as exc:
             log.warning("Failed to read local gold_price.json: %s", exc)
 
@@ -77,10 +106,10 @@ def get_spot_price() -> float | None:
         resp = httpx.get(url, headers=headers, timeout=15)
         if resp.status_code == 200:
             data = resp.json()
-            price = data.get("price") or data.get("gold_price")
-            if price and float(price) > 0:
-                log.info("Spot price from goldpricez API: $%.2f", float(price))
-                return float(price)
+            price = _coerce_positive_float(data.get("price") or data.get("gold_price"))
+            if price is not None:
+                log.info("Spot price from goldpricez API: $%.2f", price)
+                return price
     except Exception as exc:
         log.warning("Failed to fetch from goldpricez: %s", exc)
 

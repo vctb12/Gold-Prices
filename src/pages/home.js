@@ -26,6 +26,7 @@ import { renderMethodologySection } from '../components/MethodologySection.js';
 import { renderLocationGuideSection } from '../components/LocationGuideSection.js';
 import '../lib/reveal.js';
 import { countUp } from '../lib/count-up.js';
+import { initSwUpdateToast } from '../lib/sw-update-toast.js';
 import { clear, el, safeHref } from '../lib/safe-dom.js';
 import { track, EVENTS } from '../lib/analytics.js';
 import { enforceCanonicalOnDocument } from '../seo/canonical.js';
