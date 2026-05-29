@@ -1,19 +1,24 @@
 # Revenue-Focused Growth Plan — 6-Month Roadmap to 100K Visitors & $100/mo
 
 ```yaml plan-status
-status: not-started
+status: in-progress
 priority: P2
 class: A
 owner: @vctb12
-last_run_at: ""
+last_run_at: "2026-05-29"
 last_run_pr: ""
 last_run_agent: copilot
 slices_remaining_estimate: 0
-next_action: ""
+next_action: "Continue city coverage expansion + admin content management (Month 1-2)"
 blocked_on: ""
 guardrails_reviewed: true
 skills_used: []
 ```
+
+> **2026-05-29 run:** Shipped the first geographic-coverage slice — 27 new cities (69 → 96) plus a
+> reusable, idempotent `scripts/node/generate-city-pages.js` generator so coverage now expands from
+> `countries.js` + curated content instead of hand-authored HTML. 216 new static pages, sitemap +
+> SEO reports regenerated. See `CHANGELOG.md`.
 
 **Created:** 2026-04-24 **Owner:** Revenue-first hybrid approach **Status:** Proposed **Timeline:**
 6 months (April - October 2026) **Development Capacity:** 20 hrs/week (solo dev) **Budget:**
