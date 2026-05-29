@@ -22,7 +22,8 @@
 
 ## ✅ Recently Completed
 
-- [x] Autonomous cleanup: gold-prices ref sweep, city stub rebuild, invest.js extraction, dead-code trim — completed: 2026-05-29 — PR: (pending)
+- [x] Deep clean session 3: broken links, invest safe-dom, learn/insights split, cache.getPreference — completed: 2026-05-29 — PR: (pending)
+- [x] Autonomous cleanup: gold-prices ref sweep, city stub rebuild, invest.js extraction, dead-code trim — completed: 2026-05-29 — PR: #371
 - [x] Country URL consolidation (~345 pages removed, gold-rate hubs) — completed: 2026-05-29 — PR: #370
 
 <!-- Last 10 completed items — older ones get archived -->

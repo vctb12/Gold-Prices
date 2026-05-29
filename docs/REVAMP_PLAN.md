@@ -13,7 +13,12 @@ them into the right section here before execution. Agent operating rules are in
 - Keep completed items as `[x]` with enough context to serve as a record. Don't re-open closed items
   to pad status; don't invent new phases to look ambitious.
 
-**Last updated:** 2026-05-29 (Autonomous cleanup pass — stale `gold-prices` refs removed from live
+**Last updated:** 2026-05-29 (Deep clean session 3 — 22 broken content links fixed; `invest.js`
+migrated off `innerHTML` (11→0 DOM baseline); learn vs insights differentiated (no merge);
+`cache.getPreference()` added for learn page lang restore; SEO reports regenerated. See
+[`docs/plans/2026-05-29_deep-clean-session3.md`](./plans/2026-05-29_deep-clean-session3.md).)
+
+Previous: 2026-05-29 (Autonomous cleanup pass — stale `gold-prices` refs removed from live
 code/generators; 69 city hub stubs rebuilt with shared CSS + deduped links; `invest.html` inline JS
 extracted to `src/pages/invest.js`; orphan `search.js` + unused exports trimmed; SEO reports
 regenerated. See [`docs/plans/2026-05-29_autonomous-cleanup-consolidation.md`](./plans/2026-05-29_autonomous-cleanup-consolidation.md).)

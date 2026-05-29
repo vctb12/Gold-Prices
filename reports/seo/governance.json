@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-29T22:27:53.011Z",
+  "generatedAt": "2026-05-29T23:00:01.022Z",
   "summary": {
     "groups": {
       "core": 60,
@@ -691,7 +691,7 @@
         },
         {
           "path": "learn.html",
-          "words": 43
+          "words": 44
         },
         {
           "path": "methodology/index.html",
@@ -7230,7 +7230,7 @@
       "group": "core",
       "noindex": false,
       "title": "Gold Market Insights &amp; Analysis | Gold Ticker Live",
-      "description": "Gold market insights, price analysis, and educational content for UAE, GCC and Arab world gold buyers.",
+      "description": "Gold market insights and GCC price context — live mini ticker, featured analysis, and buyer guides. Evergreen karat education lives on Learn.",
       "canonical": "https://goldtickerlive.com/insights.html",
       "hreflangs": [
         "x-default",
@@ -7268,7 +7268,7 @@
       "group": "core",
       "noindex": false,
       "title": "Learn About Gold — Karats, Pricing, Zakat | Gold Ticker Live",
-      "description": "Understand gold karats, purity grades, the AED peg, and why spot prices differ from shop prices — a bilingual EN/AR guide for UAE, GCC, and Arab market buyers.",
+      "description": "Gold education hub: karats, purity, AED peg, Zakat, and spot vs retail — evergreen bilingual EN/AR guides for UAE and GCC buyers. For market analysis see Insights.",
       "canonical": "https://goldtickerlive.com/learn.html",
       "hreflangs": [
         "x-default",
@@ -7276,7 +7276,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 43,
+      "wordCount": 44,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
