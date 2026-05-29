@@ -47,6 +47,19 @@ function scrollToHashTarget() {
   });
 }
 
+function renderMissingArticle() {
+  const root = document.getElementById('learn-article-root');
+  if (!root) return;
+  root.textContent = '';
+  const message = document.createElement('p');
+  message.className = 'learn-hub-missing-article';
+  message.textContent =
+    STATE.lang === 'ar'
+      ? 'تعذّر تحميل محتوى مركز التعلّم حالياً. يرجى إعادة المحاولة بعد قليل.'
+      : 'Learn Hub content is temporarily unavailable. Please try again shortly.';
+  root.appendChild(message);
+}
+
 function init() {
   cache.loadState(STATE);
 
@@ -62,19 +75,22 @@ function init() {
   injectBreadcrumbs('learn');
 
   const article = getArticle('learn');
-  const renderer =
-    article &&
-    renderArticle({
-      article,
-      language: STATE.lang,
-      articleContainer: '#learn-article-root',
-      tocContainer: '#learn-toc-root',
-    });
+  if (!article) {
+    applyLang(null);
+    renderMissingArticle();
+    console.error('[learn] Missing learn article model in learn-hub registry');
+    return;
+  }
+  const renderer = renderArticle({
+    article,
+    language: STATE.lang,
+    articleContainer: '#learn-article-root',
+    tocContainer: '#learn-toc-root',
+  });
 
   navCtrl.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {
       STATE.lang = STATE.lang === 'en' ? 'ar' : 'en';
-      STATE.lang = normalizeLang(STATE.lang);
       cache.savePreference('lang', STATE.lang);
       shell.updateLang(STATE.lang);
       applyLang(renderer);

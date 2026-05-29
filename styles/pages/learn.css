@@ -255,6 +255,14 @@
   text-decoration: underline;
 }
 
+.learn-hub-missing-article {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface-2);
+}
+
 .learn-callout--info strong {
   color: #93c5fd;
 }
@@ -390,7 +398,6 @@
   .learn-toc-inner {
     align-items: flex-start;
     flex-direction: column;
-    overflow-x: visible;
   }
 
   .learn-hub-toc-header {
