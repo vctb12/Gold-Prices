@@ -23,8 +23,8 @@ jobs:
   sitemap:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '24'
       - run: node scripts/generate-sitemap.js
@@ -34,6 +34,6 @@ jobs:
         run: |
           git config user.email "action@github.com"
           git config user.name "GitHub Actions"
-          git add public/sitemap.xml
+          git add -f public/sitemap.xml
           git diff --staged --quiet || git commit -m "chore: regenerate sitemap"
           git push

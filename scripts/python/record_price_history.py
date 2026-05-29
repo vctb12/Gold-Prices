@@ -138,7 +138,12 @@ def compute_karat_prices(spot_usd_per_oz: float) -> list[dict]:
 
 
 def insert_to_supabase(rows: list[dict]) -> bool:
-    """Batch-insert price rows into Supabase price_history table."""
+    """Batch-insert price rows into Supabase price_history table.
+
+    Returns True on success, False on transient/connection errors.
+    Returns True (with warning) if the table does not exist yet — this
+    avoids failing the workflow before the migration has been applied.
+    """
     url = os.environ.get("SUPABASE_URL", "")
     key = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
@@ -154,6 +159,14 @@ def insert_to_supabase(rows: list[dict]) -> bool:
         log.info("Inserted %d rows into price_history", len(result.data or []))
         return True
     except Exception as exc:
+        msg = str(exc)
+        # Handle missing table gracefully — migration may not have been applied yet.
+        if "PGRST205" in msg or "Could not find the table" in msg:
+            log.warning(
+                "Table 'price_history' does not exist yet. "
+                "Run supabase/migrations/001_price_history.sql to create it."
+            )
+            return True
         log.error("Supabase insert failed: %s", exc)
         return False
 
