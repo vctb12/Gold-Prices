@@ -21,6 +21,7 @@ export const ROUTE_TYPES = {
 
 export const ROUTE_PATTERNS = [
   { pattern: '/:country/gold-price', type: ROUTE_TYPES.COUNTRY_LANDING },
+  { pattern: '/:country/:city/gold-rate', type: ROUTE_TYPES.CITY_PRICES },
   { pattern: '/:country/:city/gold-prices', type: ROUTE_TYPES.CITY_PRICES },
   { pattern: '/:country/:city/gold-shops', type: ROUTE_TYPES.CITY_SHOPS },
   { pattern: '/:country/:city/gold-rate/:karat', type: ROUTE_TYPES.CITY_KARAT },
@@ -51,7 +52,7 @@ export function getKaratSlugs() {
 
 /**
  * Resolve a URL path to route metadata.
- * @param {string} path  e.g. '/uae/dubai/gold-prices'
+ * @param {string} path  e.g. '/uae/dubai/gold-rate'
  * @returns {{ type, country, city, karat, countryObj, cityObj } | null}
  */
 export function resolveRoute(path) {
@@ -66,8 +67,8 @@ export function resolveRoute(path) {
     return { type: ROUTE_TYPES.COUNTRY_LANDING, country: parts[0], countryObj };
   }
 
-  // /:country/:city/gold-prices
-  if (parts.length === 3 && parts[2] === 'gold-prices') {
+  // /:country/:city/gold-rate | gold-prices (legacy alias, 301 → gold-rate)
+  if (parts.length === 3 && (parts[2] === 'gold-rate' || parts[2] === 'gold-prices')) {
     const countryObj = COUNTRIES.find((c) => c.slug === parts[0]);
     if (!countryObj) return null;
     const cityObj = (countryObj.cities || []).find((ci) => ci.slug === parts[1]);

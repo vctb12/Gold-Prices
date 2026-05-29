@@ -181,7 +181,6 @@ function patchGoldRateStub(goldRateFile, country, city) {
   let html = fs.readFileSync(goldRateFile, 'utf8');
   if (!html.includes('stub-links')) return;
 
-  const goldRateUrl = `/countries/${country.slug}/${city.slug}/gold-rate/`;
   let changed = false;
 
   for (const slug of KARAT_SLUGS) {

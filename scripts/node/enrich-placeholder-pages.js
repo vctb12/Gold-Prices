@@ -146,11 +146,11 @@ function buildCityHub(country, city, relFile) {
   const dir = path.join(ROOT, path.dirname(relFile));
   const existing = (p) => fs.existsSync(path.join(dir, p));
   const links = [];
-  if (existing('gold-prices/index.html')) {
+  if (existing('gold-rate/index.html')) {
     links.push({
-      href: `/countries/${country.slug}/${city.slug}/gold-prices/`,
-      title: `Live Gold Price in ${cityEn}`,
-      blurb: `24K, 22K, 21K and 18K rates per gram in ${ccy}, refreshed every 90 seconds.`,
+      href: `/countries/${country.slug}/${city.slug}/gold-rate/`,
+      title: `Live gold rate in ${cityEn}`,
+      blurb: `24K, 22K, 21K and 18K reference rates per gram in ${ccy}, refreshed from spot.`,
     });
   }
   if (existing('gold-shops/index.html')) {

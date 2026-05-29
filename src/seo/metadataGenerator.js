@@ -77,7 +77,7 @@ export function generateMetadata(routeType, params = {}) {
       breadcrumbs = [
         { name: 'Home', url: `${SITE_URL}/` },
         { name: `${countryObj?.nameEn} Gold`, url: `${SITE_URL}/${country}/gold-price/` },
-        { name: `${cityObj?.nameEn} Prices`, url: `${SITE_URL}/${country}/${city}/gold-prices/` },
+        { name: `${cityObj?.nameEn} Gold rate`, url: `${SITE_URL}/${country}/${city}/gold-rate/` },
         { name: `${karatObj?.code}K Gold`, url: canonical },
       ];
       break;

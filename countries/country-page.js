@@ -270,7 +270,7 @@ function renderRelatedCities(cfg) {
   const cards = cities
     .map(
       (city) => `
-    <a href="../${city.slug}/gold-prices/" class="cp-related-card">
+    <a href="../${city.slug}/gold-rate/" class="cp-related-card">
       <span class="cp-related-name">Gold price in ${city.nameEn}</span>
     </a>`
     )

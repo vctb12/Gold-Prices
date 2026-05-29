@@ -175,7 +175,7 @@ for (const country of COUNTRIES) {
 
   // Related: links to all cities
   const cityLinks = (country.cities || [])
-    .map(city => `<a href="${SITE_URL}/${country.slug}/${city.slug}/gold-prices/" style="padding:0.4rem 0.75rem;background:#f1f5f9;border-radius:6px;font-size:0.875rem;text-decoration:none;color:#1e293b;">${city.nameEn} Gold Price</a>`)
+    .map(city => `<a href="${SITE_URL}/${country.slug}/${city.slug}/gold-rate/" style="padding:0.4rem 0.75rem;background:#f1f5f9;border-radius:6px;font-size:0.875rem;text-decoration:none;color:#1e293b;">${city.nameEn} Gold Rate</a>`)
     .join('\n    ');
 
   writeFile(file, buildPage({
@@ -188,10 +188,10 @@ for (const country of COUNTRIES) {
   // ── City price pages ─────────────────────────────────────────────────────
 
   for (const city of (country.cities || [])) {
-    // City gold prices
-    const cityPricesDir  = path.join(ROOT, country.slug, city.slug, 'gold-prices');
+    // City gold rate hub (hydrated via page-hydrator when regenerated)
+    const cityPricesDir  = path.join(ROOT, country.slug, city.slug, 'gold-rate');
     const cityPricesFile = path.join(cityPricesDir, 'index.html');
-    const cityCanonical  = `${SITE_URL}/${country.slug}/${city.slug}/gold-prices`;
+    const cityCanonical  = `${SITE_URL}/${country.slug}/${city.slug}/gold-rate`;
 
     const cityTitle       = `Gold Price in ${city.nameEn} Today — 24K, 22K, 21K, 18K in ${country.currency} | Gold Ticker Live`;
     const cityDescription = `Live 24K, 22K, 21K, 18K gold prices in ${city.nameEn}, ${country.nameEn} today. Compare rates in ${country.currency} per gram. Updated every 90 seconds.`;
@@ -210,7 +210,7 @@ for (const country of COUNTRIES) {
     const siblingLinks = (country.cities || [])
       .filter(c => c.slug !== city.slug)
       .slice(0, 4)
-      .map(c => `<a href="${SITE_URL}/${country.slug}/${c.slug}/gold-prices/" style="padding:0.4rem 0.75rem;background:#f1f5f9;border-radius:6px;font-size:0.875rem;text-decoration:none;color:#1e293b;">${c.nameEn}</a>`)
+      .map(c => `<a href="${SITE_URL}/${country.slug}/${c.slug}/gold-rate/" style="padding:0.4rem 0.75rem;background:#f1f5f9;border-radius:6px;font-size:0.875rem;text-decoration:none;color:#1e293b;">${c.nameEn}</a>`)
       .join('\n    ');
 
     writeFile(cityPricesFile, buildPage({
