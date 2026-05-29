@@ -7,6 +7,7 @@ import { updateTicker } from '../components/ticker.js';
 import { mountSharedShell } from '../components/site-shell.js';
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { initSwUpdateToast } from '../lib/sw-update-toast.js';
+import { el, clear } from '../lib/safe-dom.js';
 
 const LANG_KEY = 'user_prefs';
 let shellCtrl = null;
@@ -684,9 +685,9 @@ function renderStaticText() {
   document.documentElement.lang = state.lang;
   document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
 
-  document.querySelectorAll('[data-i18n]').forEach((el) => {
-    const key = el.getAttribute('data-i18n');
-    el.textContent = tx(key);
+  document.querySelectorAll('[data-i18n]').forEach((node) => {
+    const key = node.getAttribute('data-i18n');
+    node.textContent = tx(key);
   });
 
   document.getElementById('budget-label').textContent =
@@ -698,61 +699,82 @@ function renderStaticText() {
       : 'Gold Investing Guide | Rational Gold Plan for UAE, Saudi & Egypt';
 }
 
+function renderChipButtons(root, entries, { active, dataKey, baseClass, onSelect }) {
+  clear(root);
+  for (const [code, label] of entries) {
+    const btn = el(
+      'button',
+      {
+        type: 'button',
+        class: `${baseClass}${active === code ? ' is-active' : ''}`,
+        dataset: { [dataKey]: code },
+      },
+      [label]
+    );
+    btn.addEventListener('click', () => onSelect(code));
+    root.append(btn);
+  }
+}
+
 function renderPurposeCards() {
   const root = document.getElementById('purpose-cards');
   const items = PURPOSES[state.lang];
 
-  root.innerHTML = Object.entries(items)
-    .map(
-      ([key, item]) => `
-  <button class="invest-goal-card${state.purpose === key ? ' is-active' : ''}" type="button" data-purpose="${key}">
-    <span class="invest-goal-icon" aria-hidden="true">${item.icon}</span>
-    <div class="invest-goal-title">${item.title}</div>
-    <div class="invest-goal-sub">${item.sub}</div>
-  </button>
-`
-    )
-    .join('');
-
-  root.querySelectorAll('[data-purpose]').forEach((btn) => {
+  clear(root);
+  for (const [key, item] of Object.entries(items)) {
+    const btn = el(
+      'button',
+      {
+        type: 'button',
+        class: `invest-goal-card${state.purpose === key ? ' is-active' : ''}`,
+        dataset: { purpose: key },
+      },
+      [
+        el('span', { class: 'invest-goal-icon', 'aria-hidden': 'true' }, [item.icon]),
+        el('div', { class: 'invest-goal-title' }, [item.title]),
+        el('div', { class: 'invest-goal-sub' }, [item.sub]),
+      ]
+    );
     btn.addEventListener('click', () => {
-      state.purpose = btn.dataset.purpose;
+      state.purpose = key;
       renderPurposeCards();
       renderPlanner();
     });
-  });
+    root.append(btn);
+  }
 
   const active = items[state.purpose];
-  document.getElementById('purpose-output').innerHTML = `
-  <h3 class="invest-advice-title">${active.adviceTitle}</h3>
-  <p class="invest-advice-body">${active.body}</p>
-  <ul class="invest-bullets">
-    ${active.bullets.map((item) => `<li>${item}</li>`).join('')}
-  </ul>
-`;
+  const output = document.getElementById('purpose-output');
+  clear(output);
+  output.append(
+    el('h3', { class: 'invest-advice-title' }, [active.adviceTitle]),
+    el('p', { class: 'invest-advice-body' }, [active.body]),
+    el(
+      'ul',
+      { class: 'invest-bullets' },
+      active.bullets.map((text) => el('li', null, [text]))
+    )
+  );
 }
 
 function renderMarketChips() {
   const root = document.getElementById('market-chips');
-  root.innerHTML = Object.entries(MARKET_META)
-    .map(
-      ([code, meta]) => `
-  <button class="invest-chip${state.market === code ? ' is-active' : ''}" type="button" data-market="${code}">
-    ${meta.name[state.lang]}
-  </button>
-`
-    )
-    .join('');
-
-  root.querySelectorAll('[data-market]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.market = btn.dataset.market;
-      renderMarketChips();
-      renderMarketGuide();
-      renderPlanner();
-      renderStaticText();
-    });
-  });
+  renderChipButtons(
+    root,
+    Object.entries(MARKET_META).map(([code, meta]) => [code, meta.name[state.lang]]),
+    {
+      active: state.market,
+      dataKey: 'market',
+      baseClass: 'invest-chip',
+      onSelect: (code) => {
+        state.market = code;
+        renderMarketChips();
+        renderMarketGuide();
+        renderPlanner();
+        renderStaticText();
+      },
+    }
+  );
 }
 
 function renderTypeChips() {
@@ -763,22 +785,15 @@ function renderTypeChips() {
   };
 
   const root = document.getElementById('type-chips');
-  root.innerHTML = Object.entries(map)
-    .map(
-      ([code, label]) => `
-  <button class="invest-chip${state.type === code ? ' is-active' : ''}" type="button" data-type="${code}">
-    ${label}
-  </button>
-`
-    )
-    .join('');
-
-  root.querySelectorAll('[data-type]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.type = btn.dataset.type;
+  renderChipButtons(root, Object.entries(map), {
+    active: state.type,
+    dataKey: 'type',
+    baseClass: 'invest-chip',
+    onSelect: (code) => {
+      state.type = code;
       renderTypeChips();
       renderPlanner();
-    });
+    },
   });
 }
 
@@ -789,22 +804,15 @@ function renderFrequencyChips() {
   };
 
   const root = document.getElementById('frequency-chips');
-  root.innerHTML = Object.entries(map)
-    .map(
-      ([code, label]) => `
-  <button class="invest-chip${state.frequency === code ? ' is-active' : ''}" type="button" data-frequency="${code}">
-    ${label}
-  </button>
-`
-    )
-    .join('');
-
-  root.querySelectorAll('[data-frequency]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.frequency = btn.dataset.frequency;
+  renderChipButtons(root, Object.entries(map), {
+    active: state.frequency,
+    dataKey: 'frequency',
+    baseClass: 'invest-chip',
+    onSelect: (code) => {
+      state.frequency = code;
       renderFrequencyChips();
       renderPlanner();
-    });
+    },
   });
 }
 
@@ -912,106 +920,104 @@ function renderPlanner() {
 
   const planner = getPlannerSummary(pricePerGram);
   document.getElementById('planner-summary').textContent = planner.summary;
-  document.getElementById('planner-meta').innerHTML = planner.meta
-    .map((item) => `<span class="invest-mini-chip">${item}</span>`)
-    .join('');
+  const metaRoot = document.getElementById('planner-meta');
+  clear(metaRoot);
+  for (const item of planner.meta) {
+    metaRoot.append(el('span', { class: 'invest-mini-chip' }, [item]));
+  }
 }
 
 function renderCompare() {
   const root = document.getElementById('compare-grid');
-  root.innerHTML = COMPARE[state.lang]
-    .map(
-      (item) => `
-  <article class="invest-compare-card">
-    <div class="invest-compare-top">
-      <h3 class="invest-compare-title">${item.title}</h3>
-      <span class="invest-compare-tag">${item.tag}</span>
-    </div>
-    <p class="invest-compare-copy">${item.copy}</p>
-    <ul class="invest-compare-list">
-      ${item.bullets.map((b) => `<li>${b}</li>`).join('')}
-    </ul>
-  </article>
-`
-    )
-    .join('');
+  clear(root);
+  for (const item of COMPARE[state.lang]) {
+    root.append(
+      el('article', { class: 'invest-compare-card' }, [
+        el('div', { class: 'invest-compare-top' }, [
+          el('h3', { class: 'invest-compare-title' }, [item.title]),
+          el('span', { class: 'invest-compare-tag' }, [item.tag]),
+        ]),
+        el('p', { class: 'invest-compare-copy' }, [item.copy]),
+        el(
+          'ul',
+          { class: 'invest-compare-list' },
+          item.bullets.map((b) => el('li', null, [b]))
+        ),
+      ])
+    );
+  }
 }
 
 function renderMarketTabs() {
   const root = document.getElementById('market-tabs');
-  root.innerHTML = Object.entries(MARKET_META)
-    .map(
-      ([code, meta]) => `
-  <button class="invest-tab${state.market === code ? ' is-active' : ''}" type="button" data-market-tab="${code}">
-    ${meta.name[state.lang]}
-  </button>
-`
-    )
-    .join('');
-
-  root.querySelectorAll('[data-market-tab]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.market = btn.dataset.marketTab;
-      renderMarketTabs();
-      renderMarketChips();
-      renderMarketGuide();
-      renderPlanner();
-      renderStaticText();
-    });
-  });
+  renderChipButtons(
+    root,
+    Object.entries(MARKET_META).map(([code, meta]) => [code, meta.name[state.lang]]),
+    {
+      active: state.market,
+      dataKey: 'marketTab',
+      baseClass: 'invest-tab',
+      onSelect: (code) => {
+        state.market = code;
+        renderMarketTabs();
+        renderMarketChips();
+        renderMarketGuide();
+        renderPlanner();
+        renderStaticText();
+      },
+    }
+  );
 }
 
 function renderMarketGuide() {
   const guide = MARKET_GUIDES[state.lang][state.market];
-  document.getElementById('market-guide').innerHTML = `
-  <div class="invest-guide-head">
-    <h3 class="invest-guide-title">${guide.title}</h3>
-    <span class="invest-guide-pill">${guide.pill}</span>
-  </div>
-  <div class="invest-guide-grid">
-    ${guide.blocks
-      .map(
-        (block) => `
-      <div class="invest-guide-block">
-        <h4>${block.title}</h4>
-        ${
+  const root = document.getElementById('market-guide');
+  clear(root);
+  root.append(
+    el('div', { class: 'invest-guide-head' }, [
+      el('h3', { class: 'invest-guide-title' }, [guide.title]),
+      el('span', { class: 'invest-guide-pill' }, [guide.pill]),
+    ]),
+    el(
+      'div',
+      { class: 'invest-guide-grid' },
+      guide.blocks.map((block) =>
+        el('div', { class: 'invest-guide-block' }, [
+          el('h4', null, [block.title]),
           block.list
-            ? `<ul>${block.list.map((item) => `<li>${item}</li>`).join('')}</ul>`
-            : `<p>${block.body}</p>`
-        }
-      </div>
-    `
+            ? el('ul', null, block.list.map((item) => el('li', null, [item])))
+            : el('p', null, [block.body]),
+        ])
       )
-      .join('')}
-  </div>
-`;
+    )
+  );
 }
 
 function renderMistakes() {
-  document.getElementById('mistakes-grid').innerHTML = MISTAKES[state.lang]
-    .map(
-      (item, index) => `
-  <article class="invest-mistake-card">
-    <span class="invest-mistake-index">${index + 1}</span>
-    <h3 class="invest-mistake-title">${item.title}</h3>
-    <p class="invest-mistake-copy">${item.copy}</p>
-  </article>
-`
-    )
-    .join('');
+  const root = document.getElementById('mistakes-grid');
+  clear(root);
+  MISTAKES[state.lang].forEach((item, index) => {
+    root.append(
+      el('article', { class: 'invest-mistake-card' }, [
+        el('span', { class: 'invest-mistake-index' }, [String(index + 1)]),
+        el('h3', { class: 'invest-mistake-title' }, [item.title]),
+        el('p', { class: 'invest-mistake-copy' }, [item.copy]),
+      ])
+    );
+  });
 }
 
 function renderFaq() {
-  document.getElementById('faq-list').innerHTML = FAQ[state.lang]
-    .map(
-      (item) => `
-  <details class="invest-faq-item">
-    <summary>${item.q}</summary>
-    <div class="invest-faq-answer">${item.a}</div>
-  </details>
-`
-    )
-    .join('');
+  const root = document.getElementById('faq-list');
+  clear(root);
+  for (const item of FAQ[state.lang]) {
+    root.append(
+      el('details', { class: 'invest-faq-item' }, [
+        el('summary', null, [item.q]),
+        el('div', { class: 'invest-faq-answer' }, [item.a]),
+      ])
+    );
+  }
 }
 
 function renderLiveCard() {

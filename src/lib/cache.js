@@ -218,6 +218,11 @@ export function getFallbackFXRates() {
  * @param {string} key    Preference key (e.g. `'lang'`, `'selectedKarat'`).
  * @param {*}      value  Serialisable value.
  */
+export function getPreference(key) {
+  const prefs = safeGet(CACHE_KEYS.userPrefs) || {};
+  return prefs[key];
+}
+
 export function savePreference(key, value) {
   const prefs = safeGet(CACHE_KEYS.userPrefs) || {};
   prefs[key] = value;

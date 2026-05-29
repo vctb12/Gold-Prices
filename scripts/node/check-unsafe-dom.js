@@ -70,7 +70,7 @@ const BASELINE = {
   'src/lib/cache.js': 0, // showStorageQuotaWarning migrated to DOM construction on 2026-04-28 (was 1 sink, all hardcoded strings).
   'src/lib/page-hydrator.js': 0, // W-1: migrated renderKaratCards/renderFreshnessBadge/renderDisclaimer to safe-dom el() + replaceChildren().
   'src/pages/home.js': 0, // Homepage revamp migrated GCC grid + PWA banner rendering to el()/DocumentFragment on 2026-04-25.
-  'src/pages/invest.js': 11, // Extracted from invest.html inline module (2026-05-29); static I18N templates only, no user input.
+  'src/pages/invest.js': 0, // Migrated all render paths to safe-dom el()/clear() on 2026-05-29 (was 11 static I18N sinks).
   'src/pages/shops.js': 13,
   'src/pages/shops/filters.js': 0, // buildFilterDropdowns removed 2026-05-29; filter logic uses no sinks.
   'src/pages/shops/modal.js': 1, // Extracted from shops.js: modal HTML with esc() wrappers
