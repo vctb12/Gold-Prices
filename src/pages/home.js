@@ -602,6 +602,24 @@ function renderKaratStrip(k18Ref) {
   setTextById('karat-strip-label', tx(labelKey));
 }
 
+// ── Localize FAQ items ──────────────────────────────────────────────────────
+function localizeFaqItems() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  const FAQ_COUNT = 7;
+  faqItems.forEach((item, i) => {
+    if (i >= FAQ_COUNT) return;
+    const idx = i + 1;
+    const summary = item.querySelector('.faq-q');
+    if (summary) summary.textContent = tx(`faqQ${idx}`);
+    // Answers contain links — only localize if language is Arabic
+    // to avoid losing link structure for the default EN (already in HTML)
+    if (lang === 'ar') {
+      const answer = item.querySelector('.faq-a [itemprop="text"]');
+      if (answer) answer.textContent = tx(`faqA${idx}`);
+    }
+  });
+}
+
 // ── Render GCC grid ────────────────────────────────────────────────────────
 function renderGCCGrid() {
   const grid = document.getElementById('gcc-quick-grid');
@@ -827,6 +845,7 @@ function applyLangToPage() {
   setTextById('explainer-local-desc', tx('explainerLocalDesc'));
   setTextById('faq-title', tx('faqTitle'));
   setTextById('faq-more-link', tx('faqMore'));
+  localizeFaqItems();
   setTextById('home-methodology-title', txGlobal('methodology.sectionTitle'));
   setTextById('home-methodology-sub', txGlobal('methodology.sectionSub'));
   setTextById('home-methodology-page-link', txGlobal('methodology.fullPageLink'));
