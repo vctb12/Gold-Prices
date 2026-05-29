@@ -121,7 +121,6 @@ const AUDIT_EXEMPTIONS = {
     "'live' references are mode-name checks; now forwards hasLiveFailure into updateSpotBar, which owns the freshness label.",
   'src/utils/inputValidation.js':
     'Input validators (regex); tokens like "karat" appear in validator names/messages, not prices.',
-  'src/utils/slugify.js': 'String utility; currency-agnostic.',
   'src/pages/learn.js': 'Static educational content page; no live prices.',
   'src/pages/methodology.js': 'Static methodology page; no live prices.',
   'src/pages/shops.js':
