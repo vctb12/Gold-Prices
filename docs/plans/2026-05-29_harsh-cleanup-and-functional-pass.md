@@ -41,17 +41,24 @@ change, no new dependency.
 
 Each below has **zero static imports, zero test references**, and is only mentioned in stale docs
 (`REFACTORING_SUMMARY.md`, agent-prompt archives). They are extracted-but-never-wired leftovers from
-a prior refactor.
+a prior refactor. `dom-builders.js` / `dropdown-builders.js` are dead **duplicates** — the live code
+(`tracker/hero.js`, `components/nav.js`) re-defines those helpers inline.
 
 - [x] `src/components/MarketSummaryTicker.js` (215 lines)
 - [x] `src/components/internalLinks.js` (86)
 - [x] `src/components/nav/dropdown-builders.js` (80)
 - [x] `src/lib/freshness-manager.js` (206)
-- [x] `src/lib/sw-update-toast.js` (160)
 - [x] `src/pages/calculator/value-calculator.js` (54)
 - [x] `src/tracker/dom-builders.js` (164)
 - [x] `REFACTORING_SUMMARY.md` (root) — stale one-off summary, unreferenced, describes the
-      now-removed modules. Move/remove.
+      now-removed modules.
+
+### Feature fix — make an existing-but-broken feature functional
+
+- [x] `initSwUpdateToast()` was **called** in `src/pages/home.js` after SW registration but **never
+      imported**, so the PWA "Update available — refresh" toast was a silent `ReferenceError`
+      swallowed by `.catch()`. The SW already broadcasts `SW_UPDATED` (`sw.js`). Added the missing
+      import and a regression suite (`tests/sw-update-toast.test.js`, 6 tests).
 
 ### Bucket B — report hygiene
 
