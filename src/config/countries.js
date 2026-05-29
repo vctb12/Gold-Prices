@@ -19,6 +19,7 @@ export const COUNTRIES = [
       { slug: 'ras-al-khaimah', nameEn: 'Ras Al Khaimah', nameAr: 'رأس الخيمة' },
       { slug: 'fujairah', nameEn: 'Fujairah', nameAr: 'الفجيرة' },
       { slug: 'umm-al-quwain', nameEn: 'Umm Al Quwain', nameAr: 'أم القيوين' },
+      { slug: 'al-ain', nameEn: 'Al Ain', nameAr: 'العين' },
     ],
   },
   {
@@ -38,6 +39,10 @@ export const COUNTRIES = [
       { slug: 'mecca', nameEn: 'Mecca', nameAr: 'مكة المكرمة' },
       { slug: 'medina', nameEn: 'Medina', nameAr: 'المدينة المنورة' },
       { slug: 'dammam', nameEn: 'Dammam', nameAr: 'الدمام' },
+      { slug: 'khobar', nameEn: 'Al Khobar', nameAr: 'الخبر' },
+      { slug: 'taif', nameEn: 'Taif', nameAr: 'الطائف' },
+      { slug: 'tabuk', nameEn: 'Tabuk', nameAr: 'تبوك' },
+      { slug: 'buraidah', nameEn: 'Buraidah', nameAr: 'بريدة' },
     ],
   },
   {
@@ -55,6 +60,7 @@ export const COUNTRIES = [
       { slug: 'kuwait-city', nameEn: 'Kuwait City', nameAr: 'مدينة الكويت' },
       { slug: 'hawalli', nameEn: 'Hawalli', nameAr: 'حولي' },
       { slug: 'salmiya', nameEn: 'Salmiya', nameAr: 'السالمية' },
+      { slug: 'jahra', nameEn: 'Al Jahra', nameAr: 'الجهراء' },
     ],
   },
   {
@@ -72,6 +78,7 @@ export const COUNTRIES = [
       { slug: 'doha', nameEn: 'Doha', nameAr: 'الدوحة' },
       { slug: 'al-wakrah', nameEn: 'Al Wakrah', nameAr: 'الوكرة' },
       { slug: 'al-rayyan', nameEn: 'Al Rayyan', nameAr: 'الريان' },
+      { slug: 'al-khor', nameEn: 'Al Khor', nameAr: 'الخور' },
     ],
   },
   {
@@ -106,6 +113,8 @@ export const COUNTRIES = [
       { slug: 'muscat', nameEn: 'Muscat', nameAr: 'مسقط' },
       { slug: 'salalah', nameEn: 'Salalah', nameAr: 'صلالة' },
       { slug: 'sohar', nameEn: 'Sohar', nameAr: 'صحار' },
+      { slug: 'nizwa', nameEn: 'Nizwa', nameAr: 'نزوى' },
+      { slug: 'sur', nameEn: 'Sur', nameAr: 'صور' },
     ],
   },
   // Levant
@@ -124,6 +133,7 @@ export const COUNTRIES = [
       { slug: 'amman', nameEn: 'Amman', nameAr: 'عمّان' },
       { slug: 'zarqa', nameEn: 'Zarqa', nameAr: 'الزرقاء' },
       { slug: 'irbid', nameEn: 'Irbid', nameAr: 'إربد' },
+      { slug: 'aqaba', nameEn: 'Aqaba', nameAr: 'العقبة' },
     ],
   },
   {
@@ -158,6 +168,8 @@ export const COUNTRIES = [
       { slug: 'baghdad', nameEn: 'Baghdad', nameAr: 'بغداد' },
       { slug: 'erbil', nameEn: 'Erbil', nameAr: 'أربيل' },
       { slug: 'basra', nameEn: 'Basra', nameAr: 'البصرة' },
+      { slug: 'najaf', nameEn: 'Najaf', nameAr: 'النجف' },
+      { slug: 'karbala', nameEn: 'Karbala', nameAr: 'كربلاء' },
     ],
   },
   {
@@ -227,6 +239,10 @@ export const COUNTRIES = [
       { slug: 'cairo', nameEn: 'Cairo', nameAr: 'القاهرة' },
       { slug: 'alexandria', nameEn: 'Alexandria', nameAr: 'الإسكندرية' },
       { slug: 'giza', nameEn: 'Giza', nameAr: 'الجيزة' },
+      { slug: 'luxor', nameEn: 'Luxor', nameAr: 'الأقصر' },
+      { slug: 'aswan', nameEn: 'Aswan', nameAr: 'أسوان' },
+      { slug: 'port-said', nameEn: 'Port Said', nameAr: 'بورسعيد' },
+      { slug: 'mansoura', nameEn: 'Mansoura', nameAr: 'المنصورة' },
     ],
   },
   {
@@ -295,6 +311,8 @@ export const COUNTRIES = [
       { slug: 'casablanca', nameEn: 'Casablanca', nameAr: 'الدار البيضاء' },
       { slug: 'rabat', nameEn: 'Rabat', nameAr: 'الرباط' },
       { slug: 'marrakech', nameEn: 'Marrakech', nameAr: 'مراكش' },
+      { slug: 'fes', nameEn: 'Fes', nameAr: 'فاس' },
+      { slug: 'tangier', nameEn: 'Tangier', nameAr: 'طنجة' },
     ],
   },
   {
@@ -374,6 +392,9 @@ export const COUNTRIES = [
       { slug: 'istanbul', nameEn: 'Istanbul', nameAr: 'إسطنبول' },
       { slug: 'ankara', nameEn: 'Ankara', nameAr: 'أنقرة' },
       { slug: 'izmir', nameEn: 'Izmir', nameAr: 'إزمير' },
+      { slug: 'bursa', nameEn: 'Bursa', nameAr: 'بورصة' },
+      { slug: 'antalya', nameEn: 'Antalya', nameAr: 'أنطاليا' },
+      { slug: 'gaziantep', nameEn: 'Gaziantep', nameAr: 'غازي عنتاب' },
     ],
   },
   {
@@ -391,6 +412,9 @@ export const COUNTRIES = [
       { slug: 'karachi', nameEn: 'Karachi', nameAr: 'كراتشي' },
       { slug: 'lahore', nameEn: 'Lahore', nameAr: 'لاهور' },
       { slug: 'islamabad', nameEn: 'Islamabad', nameAr: 'إسلام آباد' },
+      { slug: 'rawalpindi', nameEn: 'Rawalpindi', nameAr: 'روالبندي' },
+      { slug: 'faisalabad', nameEn: 'Faisalabad', nameAr: 'فيصل آباد' },
+      { slug: 'peshawar', nameEn: 'Peshawar', nameAr: 'بيشاور' },
     ],
   },
   {
@@ -441,6 +465,9 @@ export const COUNTRIES = [
       { slug: 'mumbai', nameEn: 'Mumbai', nameAr: 'مومباي' },
       { slug: 'delhi', nameEn: 'Delhi', nameAr: 'دلهي' },
       { slug: 'chennai', nameEn: 'Chennai', nameAr: 'تشيناي' },
+      { slug: 'kolkata', nameEn: 'Kolkata', nameAr: 'كولكاتا' },
+      { slug: 'hyderabad', nameEn: 'Hyderabad', nameAr: 'حيدر آباد' },
+      { slug: 'jaipur', nameEn: 'Jaipur', nameAr: 'جايبور' },
     ],
   },
 ];

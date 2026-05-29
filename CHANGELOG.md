@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### City coverage expansion + page generator — 2026-05-29 session
+
+**Geographic SEO coverage (Revenue Growth Plan):**
+
+- feat(countries): add 27 new cities with real gold markets across 13 countries (UAE Al Ain; Saudi
+  Al Khobar/Taif/Tabuk/Buraidah; Kuwait Al Jahra; Qatar Al Khor; Oman Nizwa/Sur; Jordan Aqaba; Egypt
+  Luxor/Aswan/Port Said/Mansoura; Turkey Bursa/Antalya/Gaziantep; Pakistan
+  Rawalpindi/Faisalabad/Peshawar; India Kolkata/Hyderabad/Jaipur; Morocco Fes/Tangier; Iraq
+  Najaf/Karbala) to `src/config/countries.js` — 69 → 96 cities.
+- feat(scripts): add `scripts/node/generate-city-pages.js`, a data-driven, idempotent generator that
+  materializes the rich per-city pages (gold-prices, gold-shops, per-karat) from country config +
+  curated `scripts/node/city-content.js`. Hub stubs continue to be produced by the existing
+  `enrich-placeholder-pages.js`. The generator is create-if-missing by default and never overwrites
+  existing curated pages (use `--force` to rewrite, `--check` for CI).
+- feat(content): generate 216 new static pages (8 per city) with locally relevant, bilingual-aware
+  FAQ content, BreadcrumbList/Product/Dataset JSON-LD, and shared `page-hydrator.js` live pricing.
+  Per-karat pages stay `noindex,follow`; city gold-prices/gold-shops pages are indexable.
+- chore(seo): regenerate `sitemap.xml`, `reports/seo/inventory.json` (+216 records),
+  `reports/seo/governance.json`, and `reports/analytics/event-inventory.json` for the new pages.
+- chore(validate): wire `generate-city-pages.js --check` into `npm run validate`; add
+  `generate-city-pages` script alias.
+- test: add `tests/generate-city-pages.test.js` covering config/content parity, indexability,
+  noindex of karat pages, currency correctness, and AED-peg copy safety for non-pegged currencies.
+
 ### Phase 0 stabilization hotfixes — 2026-05-18
 
 - chore(scripts): add script aliases required by the Phase 0 baseline sweep (`lint:css`,
