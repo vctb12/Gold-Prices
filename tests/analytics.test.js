@@ -153,12 +153,19 @@ test('track() skips dispatch for invalid payloads', async () => {
   const gtagCalls = [];
   const prevWindow = global.window;
   const prevLocation = global.location;
-  const prevNavigator = global.navigator;
+  // On Node 18+, `globalThis.navigator` is a read-only getter, so a plain
+  // assignment throws. Capture the original descriptor and reinstate it via
+  // Object.defineProperty so the mock works across Node versions.
+  const prevNavigatorDescriptor = Object.getOwnPropertyDescriptor(global, 'navigator');
   const prevLocalStorage = global.localStorage;
 
   try {
     global.location = { search: '', hostname: 'localhost', pathname: '/pricing.html' };
-    global.navigator = { doNotTrack: '0' };
+    Object.defineProperty(global, 'navigator', {
+      value: { doNotTrack: '0' },
+      configurable: true,
+      writable: true,
+    });
     global.localStorage = { getItem: () => null };
     global.window = {
       doNotTrack: '0',
@@ -170,7 +177,11 @@ test('track() skips dispatch for invalid payloads', async () => {
   } finally {
     global.window = prevWindow;
     global.location = prevLocation;
-    global.navigator = prevNavigator;
+    if (prevNavigatorDescriptor) {
+      Object.defineProperty(global, 'navigator', prevNavigatorDescriptor);
+    } else {
+      delete global.navigator;
+    }
     global.localStorage = prevLocalStorage;
   }
 });
