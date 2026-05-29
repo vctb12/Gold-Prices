@@ -5,11 +5,11 @@ status: in-progress
 priority: P1
 class: B
 owner: @vctb12
-last_run_at: "2026-05-29T13:25:00Z"
-last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/362"
+last_run_at: "2026-05-29T15:24:00Z"
+last_run_pr: "pending"
 last_run_agent: copilot
 slices_remaining_estimate: 5
-next_action: "Phase 2 leaf #1: migrate methodology.html to learn-hub content model and wire redirects/link updates once content parity is complete."
+next_action: "Phase 2 leaf #2: migrate methodology.html to the shared learn-hub article model and renderer while keeping insights isolated."
 blocked_on: ""
 guardrails_reviewed: true
 skills_used: [gold-ticker-live-audit, frontend-design-system]
@@ -429,10 +429,30 @@ Acceptance:
       `npm test`, `npm run validate`, `npm run build`) for the remaining extraction pass.
 - [x] Map learn/methodology/insights consolidation dependencies for Phase 2 planning.
 - [x] Select first Phase 2 leaf implementation slice with low regression risk.
-- [ ] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
-- [ ] Validate Phase 2 leaf #1 with `npm run lint`, `npm test`, `npm run validate`, `npm run build`.
+- [x] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
+- [x] Validate Phase 2 leaf #1 with `npm run lint`, `npm test`, `npm run validate`, `npm run build`.
 
 ## Session log
+
+### 2026-05-29T15:24Z — copilot (Phase 2 leaf #1 execution)
+
+- Slice class: CODE
+- Skills activated: gold-ticker-live-audit
+- Completed:
+  - Replaced static `learn.html` longform content with lean renderer mount points (`#learn-toc-root`
+    - `#learn-article-root`) while preserving related-tools links and hash-friendly section IDs.
+  - Refactored `src/pages/learn.js` to consume the shared learn-hub model/registry + renderer,
+    remove duplicated bilingual copy maps, and keep shell language toggle integration intact.
+  - Updated `styles/pages/learn.css` for renderer-first structure (article header/meta pills, mobile
+    TOC toggle, shared inline/callout styles) while retaining existing section/table visual
+    language.
+- Added/Split:
+  - None.
+- Skipped (owner-only / blocked):
+  - Methodology/insights content migration intentionally deferred to Phase 2 leaf #2.
+- Validation: lint=PASS, test=908/908 PASS, validate=PASS, build=PASS.
+- Next action: execute Phase 2 leaf #2 (`methodology.html` + `src/pages/methodology.js`) on the same
+  shared learn-hub renderer contract.
 
 ### 2026-05-22T14:37Z — copilot (planning slice)
 
