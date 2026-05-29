@@ -36,12 +36,6 @@ export function detailsAvailabilityRank(value) {
   return 1;
 }
 
-export function detailsConfidenceTier(value, t) {
-  if (value === 'full') return t('rankFull');
-  if (value === 'partial') return t('rankPartial');
-  return t('rankLimited');
-}
-
 export function contactQualityScore(shop) {
   if (shop.contactQuality === 'high') return 3;
   if (shop.contactQuality === 'medium') return 2;
@@ -80,12 +74,6 @@ export function isMarketArea(shop) {
   );
 }
 
-export function isDirectShop(shop) {
-  if (shop.type === 'direct') return true;
-  if (shop.type === 'market') return false;
-  return !!(shop.phone || shop.website);
-}
-
 export function listingTypeLabel(shop, t) {
   if (isMarketArea(shop)) return t('marketAreaListing');
   return t('storeProfile');
@@ -106,15 +94,6 @@ export function sortedShops(shops, lang) {
     if (featuredDiff !== 0) return featuredDiff;
     return a.name.localeCompare(b.name, lang);
   });
-}
-
-export function loadShortlistFromStorage() {
-  try {
-    const stored = localStorage.getItem('shops_shortlist');
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
 }
 
 export function saveShortlistToStorage(shortlist) {

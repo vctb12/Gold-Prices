@@ -45,5 +45,4 @@ export function pulseFreshness(el, { minIntervalMs = DEFAULT_MIN_INTERVAL_MS } =
   return true;
 }
 
-export const FRESHNESS_PULSE_MIN_INTERVAL_MS = DEFAULT_MIN_INTERVAL_MS;
 export const FRESHNESS_PULSE_DURATION_MS = PULSE_DURATION_MS;

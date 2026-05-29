@@ -426,55 +426,6 @@ export function exportWatchlistCSV({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CURRENT VIEW CSV — all markets at current prices (compare-board snapshot)
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function exportCurrentViewCSV({
-  countries,
-  karatCode,
-  priceFor,
-  spot,
-  selectedUnit,
-  selectedCurrency,
-  lang = 'en',
-}) {
-  if (!spot) return;
-
-  const karat = KARATS.find((k) => k.code === String(karatCode));
-  const karatLabel = lang === 'ar' ? karat?.labelAr : karat?.labelEn;
-
-  const lines = [
-    `# Gold Ticker Live — Current View Snapshot (${karatCode}K, ${selectedUnit})`,
-    `# Exported: ${new Date().toISOString()}`,
-    `# XAU/USD at export time: ${spot.toFixed(2)}`,
-    `# Karat: ${karatLabel || karatCode + 'K'} · Unit: ${selectedUnit}`,
-    '# Note: Spot-linked estimates only. Not financial advice.',
-    '',
-    csvRow(['Country', 'Currency', 'Price', 'Unit', 'Is selected currency']),
-  ];
-
-  for (const c of countries) {
-    const p = priceFor({ currency: c.currency, karat: karatCode, unit: selectedUnit, spot });
-    const name = lang === 'ar' ? c.nameAr || c.nameEn : c.nameEn;
-    lines.push(
-      csvRow([
-        name,
-        c.currency,
-        p ? p.toFixed(c.decimals ?? 2) : '—',
-        selectedUnit,
-        c.currency === selectedCurrency ? 'yes' : 'no',
-      ])
-    );
-  }
-
-  downloadFile(
-    lines.join('\n'),
-    `goldtickerlive-current-snapshot-${dateStamp()}.csv`,
-    'text/csv;charset=utf-8;'
-  );
-}
-
 export function exportComparisonCSV({
   countries,
   karatCodes,

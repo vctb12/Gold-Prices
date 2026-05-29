@@ -1,5 +1,3 @@
-import { getMarketStatus } from './live-status.js';
-
 export const FRESHNESS_CONFIG = {
   live: { tone: 'live', translationKey: 'freshness.badge.live' },
   cached: { tone: 'cached', translationKey: 'freshness.badge.cached' },
@@ -48,8 +46,4 @@ export function formatUtcTimestamp(value, lang = 'en') {
     hour12: false,
     timeZone: 'UTC',
   }).format(date);
-}
-
-export function deriveMarketState(now = new Date()) {
-  return getMarketStatus(now).isOpen ? 'live' : 'closed';
 }
