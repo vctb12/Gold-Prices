@@ -1182,11 +1182,14 @@ async function init() {
       ?.writeText(text)
       .then(() => {
         const orig = btn.textContent;
+        const origAria = btn.getAttribute('aria-label') || '';
         btn.textContent = '✓';
+        btn.setAttribute('aria-label', txGlobal('card.copied'));
         const surface = btn.classList.contains('kstrip-copy-btn') ? 'karat_strip' : 'gcc_grid';
         track(EVENTS.COPY_CLICK, { surface, value_type: 'price' });
         setTimeout(() => {
           btn.textContent = orig;
+          if (origAria) btn.setAttribute('aria-label', origAria);
         }, 1500);
       })
       .catch(() => {});

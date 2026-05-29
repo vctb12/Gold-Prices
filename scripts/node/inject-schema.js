@@ -258,6 +258,7 @@ function detectPageType(filePath, _content) {
   const relativePath = path.relative(ROOT, filePath);
 
   if (relativePath === 'index.html') return 'homepage';
+  if (relativePath === 'insights.html') return 'article';
   if (relativePath.includes('/gold-price') || relativePath.includes('/gold-rate')) return 'price';
   if (relativePath.includes('/countries/')) return 'country';
   if (relativePath.includes('/guides/') || relativePath.includes('/content/')) return 'article';

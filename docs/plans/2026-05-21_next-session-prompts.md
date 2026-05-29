@@ -5,11 +5,11 @@ status: in-progress
 priority: P1
 class: B
 owner: @vctb12
-last_run_at: "2026-05-28T09:30:00Z"
+last_run_at: "2026-05-29T11:39:00Z"
 last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/362"
 last_run_agent: copilot
-slices_remaining_estimate: 6
-next_action: "Phase 3b: finish render.js teardown (move remaining orchestration helpers into hero/chart/compare modules so render.js becomes a pure re-export barrel), then begin Phase 2 leaf #1 (migrate methodology.html to learn-hub content model)."
+slices_remaining_estimate: 5
+next_action: "Validate Phase 2 leaf #1 and start the next learn-hub migration leaf for methodology/insights."
 blocked_on: ""
 guardrails_reviewed: true
 skills_used: [gold-ticker-live-audit, frontend-design-system]
@@ -429,10 +429,30 @@ Acceptance:
       `npm test`, `npm run validate`, `npm run build`) for the remaining extraction pass.
 - [x] Map learn/methodology/insights consolidation dependencies for Phase 2 planning.
 - [x] Select first Phase 2 leaf implementation slice with low regression risk.
-- [ ] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
+- [x] Implement Phase 2 leaf #1: shared learn-hub content model + renderer (learn surface only).
 - [ ] Validate Phase 2 leaf #1 with `npm run lint`, `npm test`, `npm run validate`, `npm run build`.
 
 ## Session log
+
+### 2026-05-29T11:39Z — copilot (Phase 2 leaf #1)
+
+- Slice class: CODE
+- Skills activated: gold-ticker-live-audit
+- Completed:
+  - Added a shared learn-hub content model (`src/pages/learn-hub/content-model.js`) with the full
+    EN/AR learn article copy.
+  - Added a dedicated learn-hub renderer (`src/pages/learn-hub/renderer.js`) to centralize language
+    normalization, content projection, and `lang/dir` synchronization.
+  - Slimmed `src/pages/learn.js` to use the shared renderer and removed unrelated dormant state
+    fields.
+- Added/Split:
+  - Added one independent SEO cleanup slice: `insights.html` now ships both `Article` and
+    `BreadcrumbList` JSON-LD blocks.
+- Skipped (owner-only / blocked):
+  - Methodology/insights runtime renderer migration deferred to the next leaf for controlled scope.
+- Validation:
+  - Pending in this slice (`npm run lint`, `npm test`, `npm run validate`, `npm run build`).
+- Next action: run full verification and then continue the next learn-hub migration leaf.
 
 ### 2026-05-22T14:37Z — copilot (planning slice)
 

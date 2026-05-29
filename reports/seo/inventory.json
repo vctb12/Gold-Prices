@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-28",
+  "generatedAtDate": "2026-05-29",
   "summary": {
     "totalHtmlFiles": 673,
     "withCanonical": 671,
@@ -24577,6 +24577,7 @@
         }
       ],
       "jsonLdTypes": [
+        "Article",
         "BreadcrumbList"
       ],
       "hasStructuredData": true,

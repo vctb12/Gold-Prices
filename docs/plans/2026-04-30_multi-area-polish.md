@@ -79,7 +79,8 @@ one bucket. Reviewer can read top-to-bottom.
 ### Bucket 8 — chore: SEO metadata + JSON-LD
 
 - [ ] Verify all top-level pages have `og:image:alt` (shops/learn/methodology).
-- [ ] Ensure `insights.html` JSON-LD uses `Article` type, not just BreadcrumbList.
+- [x] Ensure `insights.html` JSON-LD uses `Article` type, not just BreadcrumbList. _(2026-05-29:
+      added `Article` JSON-LD alongside existing `BreadcrumbList` block.)_
 - [ ] Check methodology `og:type` is `article` (already is, confirm).
 
 ### Bucket 9 — perf: lazy-load + CLS
@@ -106,7 +107,9 @@ one bucket. Reviewer can read top-to-bottom.
 
 ### Bucket 13 — test: regression coverage
 
-- [x] Add test for X social link URL correctness in `tests/seo-sitewide.test.js`. _(completed: test added in `tests/seo-sitewide.test.js` — "X/Twitter social link URL has no spaces and uses https://x.com/")_
+- [x] Add test for X social link URL correctness in `tests/seo-sitewide.test.js`. _(completed: test
+      added in `tests/seo-sitewide.test.js` — "X/Twitter social link URL has no spaces and uses
+      https://x.com/")_
 - [x] Add test for `inputmode` on calculator inputs. _(2026-05-22: added numeric-input inputmode
       guard in `tests/seo-sitewide.test.js` for `calculator.html`.)_
 
