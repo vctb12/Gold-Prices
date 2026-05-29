@@ -22,6 +22,11 @@
 /learn           /learn.html          301
 /methodology     /methodology.html    301
 /insights        /insights.html       301
+# Learn-hub clean URLs — point at the consolidated learn surface; canonical
+# remains the .html files until the unified renderer fully owns the surface.
+/learn/methodology   /methodology.html  301
+/learn/insights      /insights.html     301
+/learn/              /learn.html        301
 /invest          /invest.html         301
 /pricing         /pricing.html        301
 /privacy         /privacy.html        301

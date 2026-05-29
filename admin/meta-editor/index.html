@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="../../assets/analytics.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Meta Editor — GoldAdmin</title>
+    <link rel="stylesheet" href="../../styles/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+      .meta-editor-grid {
+        display: grid;
+        gap: 18px;
+      }
+      .meta-page-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+      }
+      .meta-page-header {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .meta-page-path {
+        color: var(--gold);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+      .meta-page-title {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        margin-top: 3px;
+      }
+      .meta-fields {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .meta-fields .form-group--wide {
+        grid-column: 1 / -1;
+      }
+      .toggle-inline {
+        align-items: center;
+        color: var(--text-muted);
+        display: inline-flex;
+        gap: 8px;
+        font-size: 0.875rem;
+      }
+      @media (max-width: 760px) {
+        .meta-fields {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        try {
+          if (window.location.hash && window.location.hash.includes('access_token')) return;
+          var k = Object.keys(localStorage);
+          if (!k.some(function (x) { return x.startsWith('sb-') && x.endsWith('-auth-token'); })) {
+            window.location.replace('../login/');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="admin-layout">
+      <aside class="sidebar" id="sidebar" aria-label="Admin navigation"></aside>
+      <div class="main-area">
+        <header class="page-header">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" type="button">☰</button>
+          <h1 class="page-title">Meta Editor</h1>
+          <div class="header-actions">
+            <button class="btn btn-ghost btn-sm" id="refresh-btn" type="button">Refresh</button>
+          </div>
+        </header>
+        <main class="content-area">
+          <section class="card" aria-labelledby="meta-editor-title">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title" id="meta-editor-title">Static page overrides</h2>
+                <p class="text-muted text-sm">Edit SEO titles, descriptions, canonicals, and noindex flags without changing static HTML.</p>
+              </div>
+            </div>
+            <div id="meta-editor-status" class="empty-state" aria-live="polite">Loading meta overrides…</div>
+            <div class="meta-editor-grid" id="meta-editor-grid"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module">
+      import { logout as supabaseLogout, requireAuth, getSession, getSupabase } from '../supabase-auth.js';
+      import { initAdminShell, renderBreadcrumb } from '../shared/admin-shell.js';
+      import { showToast } from '../shared/admin-utils.js';
+
+      if (!(await requireAuth('../login/'))) throw new Error('redirect');
+      await initAdminShell({ logout: supabaseLogout, getSession });
+      renderBreadcrumb([{ label: 'Meta Editor' }]);
+
+      const STATIC_PAGES = [
+        { path: '/', label: 'Homepage' },
+        { path: '/tracker.html', label: 'Tracker' },
+        { path: '/calculator.html', label: 'Gold calculator' },
+        { path: '/shops.html', label: 'Shops directory' },
+        { path: '/learn.html', label: 'Learn hub' },
+        { path: '/insights.html', label: 'Insights' },
+        { path: '/methodology.html', label: 'Methodology' },
+        { path: '/invest.html', label: 'Invest' },
+        { path: '/content/guides/', label: 'Guides hub' },
+        { path: '/content/tools/investment-calculator.html', label: 'Investment calculator' },
+        { path: '/content/tools/scrap-calculator.html', label: 'Scrap calculator' },
+        { path: '/content/faq/', label: 'FAQ' },
+        { path: '/content/order-gold/', label: 'Order gold' },
+        { path: '/countries/index.html', label: 'Countries index' },
+      ];
+
+      const sb = getSupabase();
+      const grid = document.getElementById('meta-editor-grid');
+      const status = document.getElementById('meta-editor-status');
+      let overrides = new Map();
+
+      function input(id, label, value, attrs = {}) {
+        const group = document.createElement('div');
+        group.className = attrs.wide ? 'form-group form-group--wide' : 'form-group';
+        const labelEl = document.createElement('label');
+        labelEl.className = 'form-label';
+        labelEl.setAttribute('for', id);
+        labelEl.textContent = label;
+        const control = document.createElement(attrs.multiline ? 'textarea' : 'input');
+        control.className = 'form-input';
+        control.id = id;
+        if (!attrs.multiline) control.type = attrs.type || 'text';
+        if (attrs.placeholder) control.placeholder = attrs.placeholder;
+        if (attrs.multiline) control.rows = attrs.rows || 3;
+        control.value = value || '';
+        group.append(labelEl, control);
+        return { group, control };
+      }
+
+      function renderPageCard(page) {
+        const override = overrides.get(page.path) || {};
+        const card = document.createElement('article');
+        card.className = 'meta-page-card';
+
+        const header = document.createElement('div');
+        header.className = 'meta-page-header';
+        const titleWrap = document.createElement('div');
+        const pathEl = document.createElement('div');
+        pathEl.className = 'meta-page-path';
+        pathEl.textContent = page.path;
+        const labelEl = document.createElement('div');
+        labelEl.className = 'meta-page-title';
+        labelEl.textContent = page.label;
+        titleWrap.append(pathEl, labelEl);
+        const save = document.createElement('button');
+        save.className = 'btn btn-gold btn-sm';
+        save.type = 'button';
+        save.textContent = 'Save';
+        header.append(titleWrap, save);
+
+        const fields = document.createElement('div');
+        fields.className = 'meta-fields';
+        const title = input(`title-${page.path}`, 'Title override', override.title_override, { wide: true });
+        const description = input(`desc-${page.path}`, 'Description override', override.description_override, { multiline: true, wide: true });
+        const canonical = input(`canonical-${page.path}`, 'Canonical override', override.canonical_override, { placeholder: 'https://goldtickerlive.com/...' });
+        const toggleGroup = document.createElement('div');
+        toggleGroup.className = 'form-group';
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'toggle-inline';
+        const noindex = document.createElement('input');
+        noindex.type = 'checkbox';
+        noindex.checked = Boolean(override.noindex);
+        const toggleText = document.createElement('span');
+        toggleText.textContent = 'Noindex this page';
+        toggleLabel.append(noindex, toggleText);
+        toggleGroup.appendChild(toggleLabel);
+        fields.append(title.group, description.group, canonical.group, toggleGroup);
+
+        save.addEventListener('click', async () => {
+          await saveOverride(page.path, {
+            page_path: page.path,
+            title_override: title.control.value.trim() || null,
+            description_override: description.control.value.trim() || null,
+            canonical_override: canonical.control.value.trim() || null,
+            noindex: noindex.checked,
+          });
+        });
+
+        card.append(header, fields);
+        return card;
+      }
+
+      function renderEditor() {
+        status.hidden = true;
+        grid.replaceChildren(...STATIC_PAGES.map(renderPageCard));
+      }
+
+      async function loadOverrides() {
+        grid.replaceChildren();
+        status.hidden = false;
+        status.textContent = 'Loading meta overrides…';
+        if (!sb) {
+          status.textContent = 'Supabase is not configured for this admin session.';
+          return;
+        }
+        const { data, error } = await sb
+          .from('page_meta_overrides')
+          .select('page_path, title_override, description_override, canonical_override, noindex, updated_at');
+        if (error) {
+          status.textContent = 'Could not load page_meta_overrides. Confirm the table exists.';
+          showToast('Could not load meta overrides.', 'error');
+          return;
+        }
+        overrides = new Map((data || []).map((row) => [row.page_path, row]));
+        renderEditor();
+      }
+
+      async function saveOverride(pagePath, payload) {
+        if (!sb) return;
+        const { error } = await sb.from('page_meta_overrides').upsert(payload, { onConflict: 'page_path' });
+        if (error) {
+          showToast(`Could not save ${pagePath}.`, 'error');
+          return;
+        }
+        showToast(`Saved ${pagePath}.`, 'success');
+        await loadOverrides();
+      }
+
+      document.getElementById('refresh-btn').addEventListener('click', loadOverrides);
+      await loadOverrides();
+    </script>
+  </body>
+</html>

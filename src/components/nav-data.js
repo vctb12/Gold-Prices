@@ -228,6 +228,18 @@ const RAW_NAV_DATA = {
                 description: 'Model gold performance',
                 icon: 'ROI',
               },
+              {
+                href: '/content/tools/investment-calculator.html',
+                label: 'Investment calculator',
+                description: 'Compound gold return projections',
+                icon: 'INV',
+              },
+              {
+                href: '/content/tools/scrap-calculator.html',
+                label: 'Scrap calculator',
+                description: 'Estimate sell-back value',
+                icon: 'SCP',
+              },
             ],
           },
           {
@@ -717,6 +729,18 @@ const RAW_NAV_DATA = {
                 label: 'نموذج العائد',
                 description: 'نمذجة أداء الذهب',
                 icon: 'ROI',
+              },
+              {
+                href: '/content/tools/ar/investment-calculator.html',
+                label: 'حاسبة الاستثمار',
+                description: 'توقعات عائد الذهب المركب',
+                icon: 'INV',
+              },
+              {
+                href: '/content/tools/ar/scrap-calculator.html',
+                label: 'حاسبة الخردة',
+                description: 'تقدير قيمة إعادة البيع',
+                icon: 'SCP',
               },
             ],
           },

@@ -2,7 +2,8 @@
  * components/adSlot.js
  * Lazy-loading Google AdSense ad slot component.
  * - Reads publisher ID and slot IDs from src/config/constants.js (AD_CONFIG)
- * - Renders nothing silently if publisher ID is empty (no broken ad frames)
+ * - Falls back to window.__GTL_ADSENSE__ for publisher ID wiring
+ * - Renders a stable hidden placeholder if publisher ID is empty
  * - Reserves fixed space before ad loads (prevents CLS)
  * - Uses IntersectionObserver for lazy load
  * - Skips on admin pages
@@ -51,8 +52,19 @@ function resolveSlotFromConfig(adFormat, slotKey = '') {
  * @param {string} [slotKey]    Key in AD_CONFIG.AD_SLOTS to look up the slot ID
  */
 export function renderAdSlot(containerId, adFormat = 'rectangle', adSlotId = '', slotKey = '') {
-  // Silently skip if no publisher ID configured
-  if (!AD_CONFIG.ADSENSE_PUBLISHER_ID) return;
+  const publisherId = AD_CONFIG.ADSENSE_PUBLISHER_ID || window.__GTL_ADSENSE__ || '';
+  if (!publisherId) {
+    const container = document.getElementById(containerId);
+    if (container && !container.dataset.adPlaceholder) {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'ad-slot ad-slot--unconfigured';
+      placeholder.hidden = true;
+      placeholder.setAttribute('aria-hidden', 'true');
+      container.replaceChildren(placeholder);
+      container.dataset.adPlaceholder = 'true';
+    }
+    return;
+  }
   if (isAdminPage()) return;
   if (typeof IntersectionObserver === 'undefined') return;
   const hasRenderedContainer = renderedAdContainers.has(containerId);
@@ -118,7 +130,7 @@ export function renderAdSlot(containerId, adFormat = 'rectangle', adSlotId = '',
 }
 
 function _loadAd(container, slotId, _adFormat) {
-  const publisherId = AD_CONFIG.ADSENSE_PUBLISHER_ID;
+  const publisherId = AD_CONFIG.ADSENSE_PUBLISHER_ID || window.__GTL_ADSENSE__ || '';
   if (!publisherId) return;
 
   // Ensure AdSense script is loaded
