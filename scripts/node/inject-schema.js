@@ -229,11 +229,25 @@ function generateBreadcrumbs(urlPath, canonicalUrl = null) {
     const part = parts[i];
     currentPath += `/${part}`;
 
-    // Humanize the part (replace hyphens, capitalize)
-    const name = part
-      .split('-')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Humanize the part (replace hyphens, capitalize) with locale-aware fixes.
+    const prevPart = i > 0 ? parts[i - 1] : '';
+    const arabicSectionLabels = {
+      tools: 'أدوات',
+      guides: 'أدلة',
+      content: 'المحتوى',
+      countries: 'الدول',
+      learn: 'تعلّم',
+      insights: 'رؤى',
+      markets: 'الأسواق',
+      faq: 'الأسئلة الشائعة',
+    };
+    const name =
+      part === 'ar'
+        ? arabicSectionLabels[prevPart] || 'العربية'
+        : part
+            .split('-')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
 
     // For the last crumb, prefer the canonical URL so the item URL matches
     // the page's own canonical (e.g. "…/tracker.html" not "…/tracker").

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-25T16:50:00.000Z",
+  "generatedAt": "2026-05-29T21:19:44.793Z",
   "totals": {
     "events": 37,
     "aliases": 1
@@ -11,99 +11,169 @@
   "events": [
     {
       "event": "alert_clear",
-      "required": ["karat"]
+      "required": [
+        "karat"
+      ]
     },
     {
       "event": "alert_create_start",
-      "required": ["surface", "delivery", "currency"]
+      "required": [
+        "surface",
+        "delivery",
+        "currency"
+      ]
     },
     {
       "event": "alert_create_success",
-      "required": ["surface", "delivery", "currency", "direction"]
+      "required": [
+        "surface",
+        "delivery",
+        "currency",
+        "direction"
+      ]
     },
     {
       "event": "alert_set",
-      "required": ["karat", "threshold", "direction", "currency"]
+      "required": [
+        "karat",
+        "threshold",
+        "direction",
+        "currency"
+      ]
     },
     {
       "event": "api_key_create",
-      "required": ["surface"]
+      "required": [
+        "surface"
+      ]
     },
     {
       "event": "calculator_share",
-      "required": ["tool", "channel"]
+      "required": [
+        "tool",
+        "channel"
+      ]
     },
     {
       "event": "calculator_submit",
-      "required": ["tool"]
+      "required": [
+        "tool"
+      ]
     },
     {
       "event": "calculator_use",
-      "required": ["karat", "currency"]
+      "required": [
+        "karat",
+        "currency"
+      ]
     },
     {
       "event": "checkout_start",
-      "required": ["tier", "interval"]
+      "required": [
+        "tier",
+        "interval"
+      ]
     },
     {
       "event": "checkout_success",
-      "required": ["source"]
+      "required": [
+        "source"
+      ]
     },
     {
       "event": "compare_action",
-      "required": ["surface", "action"]
+      "required": [
+        "surface",
+        "action"
+      ]
     },
     {
       "event": "copy_click",
-      "required": ["surface", "value_type"]
+      "required": [
+        "surface",
+        "value_type"
+      ]
     },
     {
       "event": "country_change",
-      "required": ["from", "to"]
+      "required": [
+        "from",
+        "to"
+      ]
     },
     {
       "event": "country_page_view",
-      "required": ["country_slug", "currency"]
+      "required": [
+        "country_slug",
+        "currency"
+      ]
     },
     {
       "event": "currency_change",
-      "required": ["from", "to"]
+      "required": [
+        "from",
+        "to"
+      ]
     },
     {
       "event": "error",
-      "required": ["type", "where"]
+      "required": [
+        "type",
+        "where"
+      ]
     },
     {
       "event": "export_click",
-      "required": ["surface", "export_type"]
+      "required": [
+        "surface",
+        "export_type"
+      ]
     },
     {
       "event": "karat_change",
-      "required": ["from", "to"]
+      "required": [
+        "from",
+        "to"
+      ]
     },
     {
       "event": "language_switch",
-      "required": ["to"]
+      "required": [
+        "to"
+      ]
     },
     {
       "event": "newsletter_subscribe",
-      "required": ["source"]
+      "required": [
+        "source"
+      ]
     },
     {
       "event": "outbound_click",
-      "required": ["url_host"]
+      "required": [
+        "url_host"
+      ]
     },
     {
       "event": "page_view",
-      "required": ["path", "locale"]
+      "required": [
+        "path",
+        "locale"
+      ]
     },
     {
       "event": "price_view",
-      "required": ["path", "surface"]
+      "required": [
+        "path",
+        "surface"
+      ]
     },
     {
       "event": "pricing_plan_click",
-      "required": ["tier", "interval"]
+      "required": [
+        "tier",
+        "interval"
+      ]
     },
     {
       "event": "search_open",
@@ -111,51 +181,84 @@
     },
     {
       "event": "search_query",
-      "required": ["length"]
+      "required": [
+        "length"
+      ]
     },
     {
       "event": "share_click",
-      "required": ["surface", "channel"]
+      "required": [
+        "surface",
+        "channel"
+      ]
     },
     {
       "event": "shop_call_click",
-      "required": ["shop_id"]
+      "required": [
+        "shop_id"
+      ]
     },
     {
       "event": "shop_card_open",
-      "required": ["shop_id", "listing_type", "surface"]
+      "required": [
+        "shop_id",
+        "listing_type",
+        "surface"
+      ]
     },
     {
       "event": "shop_claim_start",
-      "required": ["shop_id", "surface"]
+      "required": [
+        "shop_id",
+        "surface"
+      ]
     },
     {
       "event": "shop_filter_apply",
-      "required": ["listing_tab", "region", "country"]
+      "required": [
+        "listing_tab",
+        "region",
+        "country"
+      ]
     },
     {
       "event": "shop_whatsapp_click",
-      "required": ["shop_id"]
+      "required": [
+        "shop_id"
+      ]
     },
     {
       "event": "theme_change",
-      "required": ["to"]
+      "required": [
+        "to"
+      ]
     },
     {
       "event": "tool_use",
-      "required": ["tool"]
+      "required": [
+        "tool"
+      ]
     },
     {
       "event": "tracker_mode_change",
-      "required": ["from_mode", "to_mode"]
+      "required": [
+        "from_mode",
+        "to_mode"
+      ]
     },
     {
       "event": "tracker_view",
-      "required": ["karat", "currency"]
+      "required": [
+        "karat",
+        "currency"
+      ]
     },
     {
       "event": "unit_change",
-      "required": ["from", "to"]
+      "required": [
+        "from",
+        "to"
+      ]
     }
   ]
 }

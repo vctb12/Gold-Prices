@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="../../assets/analytics.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>SEO Articles — GoldAdmin</title>
+    <link rel="stylesheet" href="../../styles/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+      .admin-page-note {
+        color: var(--text-muted);
+        margin-bottom: 18px;
+      }
+      .status-badge {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 3px 9px;
+        text-transform: uppercase;
+      }
+      .status-badge--draft {
+        background: rgb(139, 163, 199, 0.12);
+        color: var(--text-muted);
+      }
+      .status-badge--published {
+        background: var(--success-glow);
+        color: var(--success);
+      }
+      .status-badge--archived {
+        background: rgb(239, 68, 68, 0.12);
+        color: var(--danger);
+      }
+      .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .modal-form-grid {
+        display: grid;
+        gap: 14px;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        try {
+          if (window.location.hash && window.location.hash.includes('access_token')) return;
+          var k = Object.keys(localStorage);
+          if (!k.some(function (x) { return x.startsWith('sb-') && x.endsWith('-auth-token'); })) {
+            window.location.replace('../login/');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="admin-layout">
+      <aside class="sidebar" id="sidebar" aria-label="Admin navigation"></aside>
+      <div class="main-area">
+        <header class="page-header">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" type="button">☰</button>
+          <h1 class="page-title">SEO Articles</h1>
+          <div class="header-actions">
+            <button class="btn btn-gold btn-sm" id="new-article-btn" type="button">New Article</button>
+          </div>
+        </header>
+        <main class="content-area">
+          <section class="card" aria-labelledby="seo-articles-title">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title" id="seo-articles-title">Article workflow</h2>
+                <p class="admin-page-note">Manage draft, published, and archived SEO articles stored in Supabase.</p>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="refresh-btn" type="button">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table aria-label="SEO articles">
+                <thead>
+                  <tr>
+                    <th scope="col">Slug</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Last Edited</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="articles-tbody">
+                  <tr><td colspan="5"><div class="empty-state">Loading SEO articles…</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="article-modal" role="dialog" aria-modal="true" aria-labelledby="article-modal-title">
+      <div class="modal" style="max-width: 560px">
+        <div class="modal-header">
+          <h2 id="article-modal-title">New Article</h2>
+          <button class="modal-close" id="modal-close" aria-label="Close modal" type="button">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="article-form" novalidate>
+            <input type="hidden" id="article-id" />
+            <div class="modal-form-grid">
+              <div class="form-group">
+                <label class="form-label" for="article-slug">Slug <span aria-hidden="true">*</span></label>
+                <input class="form-input" id="article-slug" type="text" autocomplete="off" required minlength="2" maxlength="120" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="article-title">Title <span aria-hidden="true">*</span></label>
+                <input class="form-input" id="article-title" type="text" autocomplete="off" required minlength="2" maxlength="200" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="article-description">Description</label>
+                <textarea class="form-input" id="article-description" rows="4" maxlength="500"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="article-status">Status</label>
+                <select class="form-select" id="article-status">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" id="modal-cancel" type="button">Cancel</button>
+              <button class="btn btn-gold" type="submit">Save article</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module">
+      import { logout as supabaseLogout, requireAuth, getSession, getSupabase } from '../supabase-auth.js';
+      import { initAdminShell, renderBreadcrumb } from '../shared/admin-shell.js';
+      import { showToast, relativeTime, trapFocus } from '../shared/admin-utils.js';
+
+      if (!(await requireAuth('../login/'))) throw new Error('redirect');
+      await initAdminShell({ logout: supabaseLogout, getSession });
+      renderBreadcrumb([{ label: 'SEO Articles' }]);
+
+      const sb = getSupabase();
+      const tbody = document.getElementById('articles-tbody');
+      const modal = document.getElementById('article-modal');
+      const form = document.getElementById('article-form');
+      const fields = {
+        id: document.getElementById('article-id'),
+        slug: document.getElementById('article-slug'),
+        title: document.getElementById('article-title'),
+        description: document.getElementById('article-description'),
+        status: document.getElementById('article-status'),
+      };
+      let articles = [];
+      let releaseFocus = null;
+
+      function cell(text) {
+        const td = document.createElement('td');
+        td.textContent = text || '—';
+        return td;
+      }
+
+      function setLoading(message) {
+        const row = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = message;
+        td.appendChild(empty);
+        row.appendChild(td);
+        tbody.replaceChildren(row);
+      }
+
+      function statusBadge(status) {
+        const span = document.createElement('span');
+        span.className = `status-badge status-badge--${status || 'draft'}`;
+        span.textContent = status || 'draft';
+        return span;
+      }
+
+      function actionButton(label, onClick, variant = 'btn-ghost') {
+        const button = document.createElement('button');
+        button.className = `btn ${variant} btn-sm`;
+        button.type = 'button';
+        button.textContent = label;
+        button.addEventListener('click', onClick);
+        return button;
+      }
+
+      function renderRows() {
+        if (!articles.length) {
+          setLoading('No SEO articles found. Create the first article to start the workflow.');
+          return;
+        }
+        const rows = articles.map((article) => {
+          const row = document.createElement('tr');
+          row.appendChild(cell(article.slug));
+          row.appendChild(cell(article.title));
+          const statusTd = document.createElement('td');
+          statusTd.appendChild(statusBadge(article.status));
+          row.appendChild(statusTd);
+          row.appendChild(cell(relativeTime(article.updated_at || article.created_at)));
+          const actionsTd = document.createElement('td');
+          const actions = document.createElement('div');
+          actions.className = 'row-actions';
+          actions.appendChild(actionButton('Edit', () => openModal(article)));
+          actions.appendChild(actionButton(article.status === 'published' ? 'Archive' : 'Publish', () => updateStatus(article, article.status === 'published' ? 'archived' : 'published')));
+          actions.appendChild(actionButton('Delete', () => deleteArticle(article), 'btn-danger'));
+          actionsTd.appendChild(actions);
+          row.appendChild(actionsTd);
+          return row;
+        });
+        tbody.replaceChildren(...rows);
+      }
+
+      async function loadArticles() {
+        if (!sb) {
+          setLoading('Supabase is not configured for this admin session.');
+          return;
+        }
+        setLoading('Loading SEO articles…');
+        const { data, error } = await sb
+          .from('seo_articles')
+          .select('id, slug, title, description, status, created_at, updated_at')
+          .order('updated_at', { ascending: false });
+        if (error) {
+          setLoading('Could not load SEO articles. Confirm the seo_articles table exists.');
+          showToast('Could not load SEO articles.', 'error');
+          return;
+        }
+        articles = Array.isArray(data) ? data : [];
+        renderRows();
+      }
+
+      function openModal(article = null) {
+        fields.id.value = article?.id || '';
+        fields.slug.value = article?.slug || '';
+        fields.title.value = article?.title || '';
+        fields.description.value = article?.description || '';
+        fields.status.value = article?.status || 'draft';
+        document.getElementById('article-modal-title').textContent = article ? 'Edit Article' : 'New Article';
+        modal.classList.remove('hidden');
+        releaseFocus = trapFocus(modal);
+        fields.slug.focus();
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        if (releaseFocus) releaseFocus();
+        releaseFocus = null;
+      }
+
+      async function saveArticle(event) {
+        event.preventDefault();
+        if (!fields.slug.value.trim() || !fields.title.value.trim()) {
+          showToast('Slug and title are required.', 'warning');
+          return;
+        }
+        const payload = {
+          slug: fields.slug.value.trim(),
+          title: fields.title.value.trim(),
+          description: fields.description.value.trim() || null,
+          status: fields.status.value,
+        };
+        const query = fields.id.value
+          ? sb.from('seo_articles').update(payload).eq('id', fields.id.value)
+          : sb.from('seo_articles').insert(payload);
+        const { error } = await query;
+        if (error) {
+          showToast('Could not save article.', 'error');
+          return;
+        }
+        showToast('Article saved.', 'success');
+        closeModal();
+        await loadArticles();
+      }
+
+      async function updateStatus(article, status) {
+        const { error } = await sb.from('seo_articles').update({ status }).eq('id', article.id);
+        if (error) {
+          showToast('Could not update article status.', 'error');
+          return;
+        }
+        showToast('Article status updated.', 'success');
+        await loadArticles();
+      }
+
+      async function deleteArticle(article) {
+        if (!window.confirm(`Delete ${article.slug}?`)) return;
+        const { error } = await sb.from('seo_articles').delete().eq('id', article.id);
+        if (error) {
+          showToast('Could not delete article.', 'error');
+          return;
+        }
+        showToast('Article deleted.', 'success');
+        await loadArticles();
+      }
+
+      document.getElementById('new-article-btn').addEventListener('click', () => openModal());
+      document.getElementById('refresh-btn').addEventListener('click', loadArticles);
+      document.getElementById('modal-close').addEventListener('click', closeModal);
+      document.getElementById('modal-cancel').addEventListener('click', closeModal);
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+      form.addEventListener('submit', saveArticle);
+
+      await loadArticles();
+    </script>
+  </body>
+</html>

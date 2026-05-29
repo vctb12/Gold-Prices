@@ -2221,3 +2221,87 @@ create policy "Admin manage developer apps"
 create trigger developer_apps_set_updated_at
     before update on public.developer_apps
     for each row execute procedure public.set_updated_at();
+
+-- ============================================================
+-- REVENUE WAVE A: SEO Articles, Meta Overrides, Revenue Tracking
+-- ============================================================
+
+create table if not exists public.seo_articles (
+    id              uuid primary key default uuid_generate_v4(),
+    slug            text unique not null check (char_length(slug) between 2 and 120),
+    title           text not null check (char_length(title) between 2 and 200),
+    description     text,
+    status          text not null default 'draft' check (status in ('draft','published','archived')),
+    author          text,
+    created_at      timestamptz not null default now(),
+    updated_at      timestamptz not null default now()
+);
+
+create index if not exists idx_seo_articles_status
+    on public.seo_articles(status, updated_at desc);
+
+alter table public.seo_articles enable row level security;
+
+create policy "Admin read seo_articles"
+    on public.seo_articles for select
+    to authenticated
+    using (true);
+
+create policy "Admin insert seo_articles"
+    on public.seo_articles for insert
+    to authenticated
+    with check (true);
+
+create policy "Admin update seo_articles"
+    on public.seo_articles for update
+    to authenticated
+    using (true);
+
+create policy "Admin delete seo_articles"
+    on public.seo_articles for delete
+    to authenticated
+    using (true);
+
+create trigger seo_articles_set_updated_at
+    before update on public.seo_articles
+    for each row execute procedure public.set_updated_at();
+
+create table if not exists public.page_meta_overrides (
+    id              uuid primary key default uuid_generate_v4(),
+    page_path       text unique not null,
+    title_override  text,
+    description_override text,
+    canonical_override   text,
+    noindex         boolean not null default false,
+    updated_at      timestamptz not null default now()
+);
+
+alter table public.page_meta_overrides enable row level security;
+
+create policy "Admin manage page_meta_overrides"
+    on public.page_meta_overrides for all
+    to authenticated
+    using (true)
+    with check (true);
+
+create trigger page_meta_overrides_set_updated_at
+    before update on public.page_meta_overrides
+    for each row execute procedure public.set_updated_at();
+
+create table if not exists public.revenue_daily (
+    id          uuid primary key default uuid_generate_v4(),
+    date        date unique not null,
+    impressions integer not null default 0,
+    clicks      integer not null default 0,
+    revenue_usd numeric(10,4) not null default 0,
+    source      text not null default 'adsense',
+    created_at  timestamptz not null default now()
+);
+
+alter table public.revenue_daily enable row level security;
+
+create policy "Admin manage revenue_daily"
+    on public.revenue_daily for all
+    to authenticated
+    using (true)
+    with check (true);

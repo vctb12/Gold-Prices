@@ -2,28 +2,66 @@
    Learn Page Styles
    ═══════════════════════════════════════════════════ */
 
-/* ── Hero ─────────────────────────────────────────── */
-.learn-hero {
+/* ── Article header ───────────────────────────────── */
+.learn-hub-shell {
+  display: block;
+}
+
+.learn-hub-article {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.learn-hub-article-header {
   background: linear-gradient(135deg, #0f0d07 0%, var(--color-gold-deep) 50%, #0f0d07 100%);
-  padding: var(--space-7) var(--space-5) 2.5rem;
-  text-align: center;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.2rem, 2.5vw, 1.8rem);
+  margin-bottom: 1.25rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
 }
 
-.learn-hero-inner {
-  max-width: 640px;
-  margin-inline: auto;
+.learn-hub-article-icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
 }
 
-.learn-hero h1 {
-  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+.learn-hub-article-title {
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
   font-weight: var(--weight-extrabold);
   color: var(--color-gold-light);
+  margin-bottom: var(--space-1);
+}
+
+.learn-hub-article-subtitle {
+  font-size: 0.95rem;
+  color: rgb(255 255 255 / 70%);
   margin-bottom: var(--space-2);
 }
 
-.learn-hero p {
-  font-size: 0.95rem;
-  color: rgb(255 255 255 / 50%);
+.learn-hub-article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.learn-hub-meta-pill {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  border: 1px solid rgb(255 255 255 / 18%);
+  color: rgb(255 255 255 / 85%);
+  border-radius: 999px;
+  padding: 0.28rem 0.58rem;
 }
 
 /* ── Table of contents ─────────────────────────────── */
@@ -58,6 +96,21 @@
   color: var(--color-text-muted);
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.learn-hub-toc-header {
+  display: contents;
+}
+
+.learn-hub-toc-toggle {
+  display: none;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.34rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: var(--weight-semibold);
 }
 
 .learn-toc-list {
@@ -99,6 +152,10 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.learn-hub-body {
+  padding-top: 1.25rem;
 }
 
 /* ── Section ────────────────────────────────────────── */
@@ -183,6 +240,27 @@
   font-size: 0.88rem;
   margin-bottom: 0;
   font-family: var(--font-mono, monospace);
+}
+
+.learn-hub-callout-title {
+  display: block;
+}
+
+.learn-hub-callout-body {
+  margin-bottom: 0;
+}
+
+.learn-hub-inline-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.learn-hub-missing-article {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface-2);
 }
 
 .learn-callout--info strong {
@@ -301,10 +379,6 @@
 
 /* ── Mobile Responsive Fixes ── */
 @media (width <= 768px) {
-  .learn-hero {
-    padding: 2.5rem 1.1rem 2rem;
-  }
-
   .learn-body {
     padding: 1.5rem 1rem 3rem;
   }
@@ -320,13 +394,34 @@
   .learn-toc {
     padding: var(--space-2) var(--space-3);
   }
+
+  .learn-toc-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .learn-hub-toc-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .learn-hub-toc-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .learn-toc-list {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.9rem;
+  }
 }
 
 @media (width <= 480px) {
-  .learn-hero h1 {
-    font-size: 1.7rem;
-  }
-
   .learn-section h2 {
     font-size: 1.2rem;
   }
@@ -345,10 +440,6 @@
 }
 
 @media (width <= 380px) {
-  .learn-hero {
-    padding: 1.75rem 0.85rem 1.5rem;
-  }
-
   .learn-callout {
     padding: 0.85rem 1rem;
   }

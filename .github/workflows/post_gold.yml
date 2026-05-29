@@ -71,6 +71,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      - name: Configure git push retry helper
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/git-push-with-retry" <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          retry=0
+          delay=4
+          while true; do
+            if git push "$@"; then
+              exit 0
+            fi
+
+            retry=$((retry + 1))
+            if [ "$retry" -gt 4 ]; then
+              echo "git push failed after $retry attempts."
+              exit 1
+            fi
+
+            echo "git push failed; retrying in ${delay}s (retry ${retry}/4)."
+            sleep "$delay"
+            delay=$((delay * 2))
+          done
+          BASH
+          chmod +x "$RUNNER_TEMP/git-push-with-retry"
+
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
@@ -108,7 +135,7 @@ jobs:
           if [ -f data/gold_price.json ]; then
             git add data/gold_price.json || true
             git diff --cached --quiet || git commit -m "chore(data): refresh gold price before post"
-            git push || true
+            "$RUNNER_TEMP/git-push-with-retry" || true
           fi
 
       - name: Run posting script
@@ -174,7 +201,7 @@ jobs:
           if [ -f data/last_gold_price.json ] || [ -f data/last_tweet_state.json ]; then
             git add data/last_gold_price.json data/last_tweet_state.json || true
             git diff --cached --quiet || git commit -m "chore: update gold tweet state [skip ci]"
-            git push || {
+            "$RUNNER_TEMP/git-push-with-retry" || {
               echo "ERROR: git push failed after successful X post!"
               echo "Recovery: The tweet was posted to X but the state file could not be committed."
               echo "  Run ID:  ${GITHUB_RUN_ID:-unknown}"
@@ -216,7 +243,7 @@ jobs:
             exit 0
           fi
           git commit -m "chore(data): update x automation observability logs [skip ci]"
-          git push || {
+          "$RUNNER_TEMP/git-push-with-retry" || {
             echo "ERROR: git push failed after observability file update."
             echo "  Run ID:  ${GITHUB_RUN_ID:-unknown}"
             echo "  Run URL: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

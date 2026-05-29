@@ -83,9 +83,41 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit data/gold_price.json if changed
-        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7
-        with:
-          commit_message: 'chore(data): update gold price'
-          file_pattern: data/gold_price.json
-          commit_user_name: github-actions[bot]
-          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          price_snapshot="$(mktemp)"
+          trap 'rm -f "$price_snapshot"' EXIT
+          cp data/gold_price.json "$price_snapshot"
+
+          for attempt in 1 2 3 4; do
+            # Other scheduled state writers can advance the branch while this
+            # job fetches providers; reset first so the data commit fast-forwards.
+            git fetch origin "$TARGET_BRANCH"
+            git reset --hard "origin/$TARGET_BRANCH"
+            cp "$price_snapshot" data/gold_price.json
+            git add data/gold_price.json
+
+            if git diff --cached --quiet; then
+              echo "data/gold_price.json unchanged; skipping commit."
+              exit 0
+            fi
+
+            git commit -m 'chore(data): update gold price'
+            if git push origin "HEAD:$TARGET_BRANCH"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 4 ]; then
+              echo "ERROR: failed to push data/gold_price.json after 4 attempts."
+              exit 1
+            fi
+
+            sleep_for=$((4 * 2 ** (attempt - 1)))
+            echo "Push failed; retrying after ${sleep_for}s."
+            sleep "$sleep_for"
+          done

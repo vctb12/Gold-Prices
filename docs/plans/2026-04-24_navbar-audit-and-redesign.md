@@ -1,18 +1,18 @@
 # Navbar Audit & Redesign Plan
 
 ```yaml plan-status
-status: not-started
+status: phase-1-complete
 priority: P2
 class: A
 owner: @vctb12
-last_run_at: ""
-last_run_pr: ""
+last_run_at: "2026-05-28T09:30:00Z"
+last_run_pr: "https://github.com/vctb12/GoldTickerLive/pull/362"
 last_run_agent: copilot
-slices_remaining_estimate: 0
-next_action: ""
-blocked_on: ""
+slices_remaining_estimate: 6
+next_action: "Phase 3 (IA): start P3-1 drawer groups default-collapsed except Prices — owner approval needed before content reshuffles (P3-3..P3-6)."
+blocked_on: "Phase 3 awaits owner sign-off on IA content moves (P3-3 icon dedupe, P3-4 Prices trim, P3-5 Learn move, P3-6 Privacy/Terms to footer)"
 guardrails_reviewed: true
-skills_used: []
+skills_used: [frontend-design-system, accessibility]
 ```
 
 **Created:** 2026-04-24  
