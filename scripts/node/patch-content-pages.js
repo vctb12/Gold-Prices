@@ -46,8 +46,8 @@ function buildCrumbs(rel) {
   if (rel.startsWith('content/guides/ar/')) {
     crumbs[0] = { label: 'الرئيسية', url: up || './' };
     crumbs.push({ label: 'الأدلة', url: `${up}content/guides/ar/` });
-    const slug = rel.replace(/^content\/guides\/ar\//, '').replace(/\/index\.html$/, '');
-    if (slug && slug !== 'index.html') {
+    const slug = rel.replace(/^content\/guides\/ar\//, '').replace(/(^|\/)index\.html$/, '').replace(/\.html$/, '');
+    if (slug) {
       const title = slug
         .split('/')[0]
         .replace(/-/g, ' ')
