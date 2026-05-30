@@ -114,17 +114,21 @@ function renderFormulaPipeline(spotUsd, lang) {
   root.replaceChildren(list, units);
 }
 
-function renderUnitTable(spotUsd) {
+function renderUnitTable(spotUsd, lang = 'en') {
   const tbody = document.getElementById('method-unit-tbody');
   if (!tbody || !(spotUsd > 0)) return;
 
   const g24 = spotUsd / TROY;
+  const unitLabels = lang === 'ar'
+    ? ['1 أونصة تروي', '1 جرام', '1 جرام', '1 تولة (11.664 جم)', '1 كجم']
+    : ['1 troy oz', '1 gram', '1 gram', '1 tola (11.664 g)', '1 kg'];
+
   const rows = [
-    ['1 troy oz', '24K', spotUsd, 'USD', spotUsd],
-    ['1 gram', '24K', g24, 'USD', g24],
-    ['1 gram', '22K', g24 * K22, 'USD', g24 * K22],
-    ['1 tola (11.664 g)', '22K', null, 'AED', g24 * K22 * AED_PEG * TOLA_GRAMS],
-    ['1 kg', '24K', null, 'AED', g24 * AED_PEG * 1000],
+    [unitLabels[0], '24K', spotUsd, 'USD', spotUsd],
+    [unitLabels[1], '24K', g24, 'USD', g24],
+    [unitLabels[2], '22K', g24 * K22, 'USD', g24 * K22],
+    [unitLabels[3], '22K', null, 'AED', g24 * K22 * AED_PEG * TOLA_GRAMS],
+    [unitLabels[4], '24K', null, 'AED', g24 * AED_PEG * 1000],
   ];
 
   tbody.replaceChildren(

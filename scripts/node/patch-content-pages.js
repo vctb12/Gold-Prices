@@ -44,13 +44,16 @@ function buildCrumbs(rel) {
   const crumbs = [{ label: 'Home', url: up || './' }];
 
   if (rel.startsWith('content/guides/ar/')) {
-    crumbs.push({ label: 'Guides', url: `${up}content/guides/ar/` });
+    crumbs[0] = { label: 'الرئيسية', url: up || './' };
+    crumbs.push({ label: 'الأدلة', url: `${up}content/guides/ar/` });
     const slug = rel.replace(/^content\/guides\/ar\//, '').replace(/\/index\.html$/, '');
-    const title = slug
-      .split('/')[0]
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-    crumbs.push({ label: title, url: '#' });
+    if (slug && slug !== 'index.html') {
+      const title = slug
+        .split('/')[0]
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      crumbs.push({ label: title, url: '#' });
+    }
     return crumbs;
   }
 
@@ -85,11 +88,11 @@ function buildCrumbs(rel) {
 
 function webPageSchema(rel, html) {
   const canon =
-    (html.match(/rel=["']canonical["'][^>]*href=["']([^"']+)"/i) || [])[1] ||
+    (html.match(/rel=["']canonical["'][^>]*href=["']([^"']+)["']/i) || [])[1] ||
     `https://goldtickerlive.com/${rel.replace(/index\.html$/, '').replace(/\.html$/, '')}`;
   const title = (html.match(/<title>([^<]+)<\/title>/i) || [])[1] || 'Gold Ticker Live';
   const desc =
-    (html.match(/name=["']description["'][^>]*content=["']([^"']+)"/i) || [])[1] || '';
+    (html.match(/name=["']description["'][^>]*content=["']([^"']+)["']/i) || [])[1] || '';
   return `  <script type="application/ld+json">
 {
   "@context": "https://schema.org",

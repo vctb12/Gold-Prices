@@ -56,8 +56,8 @@ function walkHtml(dir, acc = []) {
 
 function countWords(html) {
   const text = html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script[\s>][^>]*>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style[\s>][^>]*>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -99,8 +99,8 @@ function main() {
       }
     }
 
-    const canon = (html.match(/rel=["']canonical["'][^>]*href=["']([^"']+)"/i) || [])[1];
-    const ogUrl = (html.match(/property=["']og:url["'][^>]*content=["']([^"']+)"/i) || [])[1];
+    const canon = (html.match(/rel=["']canonical["'][^>]*href=["']([^"']+)["']/i) || [])[1];
+    const ogUrl = (html.match(/property=["']og:url["'][^>]*content=["']([^"']+)["']/i) || [])[1];
     if (canon && ogUrl && canon !== ogUrl) {
       failures.push({ rel, check: 'canonical-og-url-match', words });
     }
