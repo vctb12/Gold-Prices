@@ -22,6 +22,8 @@ import { renderTrackerCompareHints } from '../components/TrackerCompareHints.js'
 import { renderExportHelpTips } from '../components/ExportHelpTips.js';
 import { renderAlertsEducationTips } from '../components/AlertsEducationTips.js';
 import { initInlineCalc } from '../tracker/inline-calc.js';
+import { bindControlShortcuts } from '../tracker/control-shortcuts.js';
+import { initPageEnter } from '../lib/page-enter.js';
 import {
   createWatchlistItem,
   getMe,
@@ -731,6 +733,9 @@ function currentSpot() {
   return state.live?.price ?? null;
 }
 
+const TOLA_GRAMS = 11.6638;
+const KG_GRAMS = 1000;
+
 function priceFor({ currency, karat, unit, spot }) {
   const s = spot ?? currentSpot();
   if (!s) return null;
@@ -746,7 +751,14 @@ function priceFor({ currency, karat, unit, spot }) {
     local = usdPerGram * rate;
   }
   if (unit === 'oz') return local * CONSTANTS.TROY_OZ_GRAMS;
+  if (unit === 'tola') return local * TOLA_GRAMS;
+  if (unit === 'kg') return local * KG_GRAMS;
   return local;
+}
+
+function flagForCurrency(code) {
+  const country = COUNTRIES.find((c) => c.currency === code);
+  return country?.flag ? `${country.flag} ` : '';
 }
 
 function getSelectedComparisonCountries() {
@@ -1037,7 +1049,7 @@ function populateSelects() {
     const currencies = [...new Set(COUNTRIES.map((c) => c.currency))].sort();
     const frag = document.createDocumentFragment();
     currencies.forEach((c) => {
-      const opt = safeEl('option', { value: c }, [c]);
+      const opt = safeEl('option', { value: c }, [`${flagForCurrency(c)}${c}`]);
       if (c === state.selectedCurrency) opt.selected = true;
       frag.appendChild(opt);
     });
@@ -1056,10 +1068,10 @@ function populateSelects() {
   }
   if (el.unit) {
     const frag = document.createDocumentFragment();
-    ['gram', 'oz'].forEach((u) => {
-      const opt = safeEl('option', { value: u }, [
-        trackerTx(`controls.unit${u === 'gram' ? 'Gram' : 'Oz'}`),
-      ]);
+    ['gram', 'oz', 'tola', 'kg'].forEach((u) => {
+      const unitKey =
+        u === 'gram' ? 'Gram' : u === 'oz' ? 'Oz' : u === 'tola' ? 'Tola' : 'Kg';
+      const opt = safeEl('option', { value: u }, [trackerTx(`controls.unit${unitKey}`)]);
       if (u === state.selectedUnit) opt.selected = true;
       frag.appendChild(opt);
     });
@@ -1370,6 +1382,16 @@ async function init() {
   serverAlertsAvailable = await probeServerAlertsAvailability();
   updateServerAlertUiState();
   bindCoreEvents();
+  bindControlShortcuts({
+    state,
+    el,
+    currentSpot,
+    priceFor,
+    persistState: () => persistState(state),
+    renderAll,
+    tx: trackerTx,
+  });
+  initPageEnter('#tracker-app');
   await prefillServerAlertEmailFromAccount();
   el.createServerAlertLink?.addEventListener('click', (event) => {
     event.preventDefault();

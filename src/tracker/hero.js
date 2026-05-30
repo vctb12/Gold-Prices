@@ -15,12 +15,31 @@ import {
   getFreshnessModel,
 } from './freshness.js';
 
-function buildHeroStatCard(label, value, sub) {
-  return el('div', { class: 'tracker-hero-stat' }, [
-    el('div', { class: 'tracker-hero-k' }, label),
-    el('div', { class: 'tracker-hero-v' }, value),
-    el('div', { class: 'tracker-hero-s' }, sub),
-  ]);
+function renderPriceChangeStrip(spot, dayOpenSpot) {
+  const strip = document.getElementById('tp-price-change-strip');
+  if (!strip) return;
+  if (!spot || !dayOpenSpot || dayOpenSpot <= 0) {
+    strip.hidden = true;
+    strip.textContent = '';
+    return;
+  }
+  const delta = spot - dayOpenSpot;
+  const pct = (delta / dayOpenSpot) * 100;
+  const isUp = delta >= 0;
+  strip.hidden = false;
+  strip.classList.remove('tracker-price-change--up', 'tracker-price-change--down');
+  strip.classList.add(isUp ? 'tracker-price-change--up' : 'tracker-price-change--down');
+  strip.setAttribute('role', 'status');
+  strip.setAttribute('aria-live', 'polite');
+  const sign = isUp ? '+' : '−';
+  setText(
+    strip,
+    tx('heroChangeStrip', {
+      sign: isUp ? '▲' : '▼',
+      amount: `${sign}$${Math.abs(delta).toFixed(2)}`,
+      pct: Math.abs(pct).toFixed(2),
+    })
+  );
 }
 
 function buildStackItem(title, copy, badge = null) {
@@ -151,8 +170,10 @@ export function renderHero() {
     }
   }
 
+  const dayOpenSpot = getDayOpenPrice();
+  renderPriceChangeStrip(spot, dayOpenSpot);
+
   if (_el.heroStats) {
-    clear(_el.heroStats);
     _el.heroStats.removeAttribute('aria-busy');
   }
 
@@ -161,9 +182,7 @@ export function renderHero() {
     const aed22 = _priceFor({ currency: 'AED', karat: '22', unit: 'gram', spot });
     const usd24g =
       (spot / CONSTANTS.TROY_OZ_GRAMS) * (KARATS.find((k) => k.code === '24')?.purity ?? 1);
-    const dayOpenSpot = getDayOpenPrice();
 
-    // Build day-change suffix for the XAU/USD stat card
     let spotSubText = tx('heroStatSpotSub', { source: freshness.sourceLabel });
     if (dayOpenSpot && dayOpenSpot > 0) {
       const pct = ((spot - dayOpenSpot) / dayOpenSpot) * 100;
@@ -171,13 +190,61 @@ export function renderHero() {
       spotSubText = `${tx('heroStatSpotSub', { source: freshness.sourceLabel })} ${tx('heroStatDayChange', { sign, pct: Math.abs(pct).toFixed(2) })}`;
     }
 
-    const stats = [
-      buildHeroStatCard('XAU/USD', formatUsd(spot), spotSubText),
-      buildHeroStatCard('UAE 24K', aed24 ? `AED ${aed24.toFixed(2)}` : '—', tx('heroStatGramSub')),
-      buildHeroStatCard('UAE 22K', aed22 ? `AED ${aed22.toFixed(2)}` : '—', tx('heroStatGramSub')),
-      buildHeroStatCard('USD/g 24K', usd24g ? formatUsd(usd24g, 3) : '—', tx('heroStatGramSub')),
+    const statDefs = [
+      { key: 'xau', label: 'XAU/USD', value: spot, sub: spotSubText, format: (n) => formatUsd(n) },
+      {
+        key: 'aed24',
+        label: 'UAE 24K',
+        value: aed24,
+        sub: tx('heroStatGramSub'),
+        format: (n) => `AED ${n.toFixed(2)}`,
+      },
+      {
+        key: 'aed22',
+        label: 'UAE 22K',
+        value: aed22,
+        sub: tx('heroStatGramSub'),
+        format: (n) => `AED ${n.toFixed(2)}`,
+      },
+      {
+        key: 'usd24g',
+        label: 'USD/g 24K',
+        value: usd24g,
+        sub: tx('heroStatGramSub'),
+        format: (n) => formatUsd(n, 3),
+      },
     ];
-    _el.heroStats.append(...stats);
+
+    const isFirst = !_el.heroStats.querySelector('[data-stat-key]');
+    if (isFirst) {
+      clear(_el.heroStats);
+      statDefs.forEach((def) => {
+        const card = el('div', { class: 'tracker-hero-stat', 'data-stat-key': def.key }, [
+          el('div', { class: 'tracker-hero-k' }, def.label),
+          el('div', { class: 'tracker-hero-v tracker-tabular-nums', 'data-stat-value': def.key }, '—'),
+          el('div', { class: 'tracker-hero-s', 'data-stat-sub': def.key }, def.sub),
+        ]);
+        _el.heroStats.append(card);
+      });
+    } else {
+      statDefs.forEach((def) => {
+        const subEl = _el.heroStats.querySelector(`[data-stat-sub="${def.key}"]`);
+        if (subEl) setText(subEl, def.sub);
+      });
+    }
+
+    statDefs.forEach((def) => {
+      const valueEl = _el.heroStats.querySelector(`[data-stat-value="${def.key}"]`);
+      if (!valueEl) return;
+      if (!Number.isFinite(def.value)) {
+        setText(valueEl, '—');
+        return;
+      }
+      countUp(valueEl, def.value, { decimals: def.key === 'usd24g' ? 3 : 2, format: def.format });
+    });
+  } else if (_el.heroStats && !spot) {
+    clear(_el.heroStats);
+    _el.heroStats.setAttribute('aria-busy', 'true');
   }
 
   if (_el.summaryList) {
@@ -240,15 +307,18 @@ export function renderHero() {
     document.getElementById('tp-mobile-selected-note'),
     `${_state.selectedCurrency} · ${_state.selectedKarat}K / ${formatUnitLabel(_state.selectedUnit)}`
   );
-  setText(
-    document.getElementById('tp-mobile-price-value'),
-    selectedPrice
-      ? selectedPrice.toLocaleString('en', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
-      : '—'
-  );
+  const mobilePriceEl = document.getElementById('tp-mobile-price-value');
+  if (mobilePriceEl) {
+    if (selectedPrice) {
+      countUp(mobilePriceEl, selectedPrice, {
+        decimals: 2,
+        format: (n) =>
+          n.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      });
+    } else {
+      setText(mobilePriceEl, '—');
+    }
+  }
   setText(document.getElementById('tp-mobile-price-note'), tx('marketTrust'));
   setText(document.getElementById('tp-mobile-spot-value'), spot ? formatUsd(spot) : '—');
   setText(document.getElementById('tp-mobile-spot-note'), tx('mobileSpotNote'));

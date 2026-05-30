@@ -71,7 +71,7 @@ const BASELINE = {
   'src/lib/page-hydrator.js': 0, // W-1: migrated renderKaratCards/renderFreshnessBadge/renderDisclaimer to safe-dom el() + replaceChildren().
   'src/pages/home.js': 0, // Homepage revamp migrated GCC grid + PWA banner rendering to el()/DocumentFragment on 2026-04-25.
   'src/pages/invest.js': 0, // Migrated all render paths to safe-dom el()/clear() on 2026-05-29 (was 11 static I18N sinks).
-  'src/pages/shops.js': 13,
+  'src/pages/shops.js': 14, // City-grouped results view adds one grid.innerHTML branch
   'src/pages/shops/filters.js': 0, // buildFilterDropdowns removed 2026-05-29; filter logic uses no sinks.
   'src/pages/shops/modal.js': 1, // Extracted from shops.js: modal HTML with esc() wrappers
   'src/pages/shops/rendering.js': 0, // Migrated to el()/DocumentFragment on 2026-04-24 (PR A-2). Kept in baseline as 0-ceiling regression guard.

@@ -245,6 +245,24 @@
               <span id="shops-specialty-label">Specialty</span>
               <select id="shops-specialty-filter"></select>
             </label>
+
+            <label class="shops-control" for="shops-sort">
+              <span id="shops-sort-label">Sort</span>
+              <select id="shops-sort">
+                <option value="relevance">Best match</option>
+                <option value="alpha">A–Z</option>
+                <option value="city">By city</option>
+                <option value="specialty">Most specialties</option>
+              </select>
+            </label>
+
+            <label
+              class="shops-control shops-control--checkbox"
+              for="shops-group-by-city"
+            >
+              <span id="shops-group-label">Group by city</span>
+              <input id="shops-group-by-city" type="checkbox" />
+            </label>
             <label
               class="shops-control shops-control--wide shops-control--checkbox"
               for="shops-verified-only"

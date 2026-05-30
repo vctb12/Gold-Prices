@@ -2415,3 +2415,46 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* Session 5 — sticky filters (all viewports), city groups */
+@media (width >= 641px) {
+  .shops-controls {
+    position: sticky;
+    top: calc(var(--nav-height, 64px) + var(--spot-bar-height, 0px));
+    z-index: 35;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgb(255 255 255 / 92%);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  html[data-theme='dark'] .shops-controls {
+    background: rgb(18 18 20 / 92%);
+  }
+}
+
+.shops-city-group {
+  margin-bottom: var(--space-6);
+}
+
+.shops-city-group__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shops-city-group__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+}
+
+.shop-action-btn--copy:focus-visible,
+.shop-action-btn--rates:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}

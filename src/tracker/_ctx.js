@@ -40,6 +40,7 @@ export function formatUnitLabel(unit) {
   if (unit === 'gram') return 'غرام';
   if (unit === 'oz') return 'أوقية';
   if (unit === 'tola') return 'تولة';
+  if (unit === 'kg') return 'كيلوغرام';
   return unit;
 }
 

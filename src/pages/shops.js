@@ -10,6 +10,8 @@ import { CONSTANTS } from '../config/index.js';
 import { KARATS } from '../config/index.js';
 import { escape as esc, safeHref as safeUrl, safeTel } from '../lib/safe-dom.js';
 import { track, EVENTS } from '../lib/analytics.js';
+import { copyWithToast } from '../lib/copy-toast.js';
+import { initPageEnter } from '../lib/page-enter.js';
 import {
   createSavedShop,
   isAuthenticated as isAccountAuthenticated,
@@ -32,6 +34,8 @@ const STATE = {
   city: 'all',
   specialty: 'all',
   verifiedOnly: false,
+  groupByCity: false,
+  sortBy: 'relevance',
   shortlist: [], // IDs of saved shops for quick comparison
 };
 
@@ -146,6 +150,15 @@ const TXT = {
     shortlistReview: 'Review saved',
     shareShop: 'Share',
     linkCopied: 'Link copied to clipboard',
+    copyDetails: 'Copy details',
+    detailsCopied: 'Shop details copied',
+    sortLabel: 'Sort',
+    sortRelevance: 'Best match',
+    sortAlpha: 'A–Z',
+    sortCity: 'By city',
+    sortSpecialty: 'Most specialties',
+    groupByCity: 'Group by city',
+    viewGoldRate: 'City gold rates',
     directions: 'Directions',
     callShop: 'Call',
     closeDetails: 'Close details',
@@ -286,6 +299,15 @@ const TXT = {
     shortlistReview: 'مراجعة المحفوظ',
     shareShop: 'مشاركة',
     linkCopied: 'تم نسخ الرابط',
+    copyDetails: 'نسخ التفاصيل',
+    detailsCopied: 'تم نسخ تفاصيل المحل',
+    sortLabel: 'ترتيب',
+    sortRelevance: 'الأنسب',
+    sortAlpha: 'أ–ي',
+    sortCity: 'حسب المدينة',
+    sortSpecialty: 'أكثر تخصصات',
+    groupByCity: 'تجميع حسب المدينة',
+    viewGoldRate: 'أسعار المدينة',
     directions: 'الاتجاهات',
     callShop: 'اتصال',
     closeDetails: 'إغلاق التفاصيل',
@@ -585,12 +607,56 @@ function listingSortScore(shop) {
 }
 
 function sortedShops(shops) {
-  return [...shops].sort((a, b) => {
+  const list = [...shops];
+  if (STATE.sortBy === 'alpha') {
+    return list.sort((a, b) => a.name.localeCompare(b.name, STATE.lang));
+  }
+  if (STATE.sortBy === 'city') {
+    return list.sort((a, b) => {
+      const byCity = a.city.localeCompare(b.city, STATE.lang);
+      return byCity || a.name.localeCompare(b.name, STATE.lang);
+    });
+  }
+  if (STATE.sortBy === 'specialty') {
+    return list.sort((a, b) => {
+      const specDiff = (b.specialties?.length || 0) - (a.specialties?.length || 0);
+      if (specDiff !== 0) return specDiff;
+      return a.name.localeCompare(b.name, STATE.lang);
+    });
+  }
+  return list.sort((a, b) => {
     const scoreDiff = listingSortScore(b) - listingSortScore(a);
     if (scoreDiff !== 0) return scoreDiff;
     const featuredDiff = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
     if (featuredDiff !== 0) return featuredDiff;
     return a.name.localeCompare(b.name, STATE.lang);
+  });
+}
+
+function cityGoldRateUrl(shop) {
+  const country = countryByCode(shop.countryCode);
+  if (!country?.slug) return '';
+  const cityMatch = (country.cities || []).find(
+    (c) => c.nameEn === shop.city || c.nameAr === shop.city
+  );
+  if (cityMatch?.slug) {
+    return `countries/${country.slug}/${cityMatch.slug}/gold-rate/`;
+  }
+  return `countries/${country.slug}/gold-price/`;
+}
+
+async function copyShopDetails(shop) {
+  const country = countryByCode(shop.countryCode);
+  const lines = [
+    shop.name,
+    `${shop.city}, ${countryName(country)} · ${shop.market}`,
+    ...(shop.specialties?.length ? [`${t('specialties')}: ${shop.specialties.join(', ')}`] : []),
+    shop.phone ? `${t('phone')}: ${shop.phone}` : null,
+    safeUrl(shop.website) ? `${t('website')}: ${shop.website}` : null,
+  ].filter(Boolean);
+  await copyWithToast(lines.join('\n'), {
+    successMessage: t('detailsCopied'),
+    errorMessage: t('genericError'),
   });
 }
 
@@ -907,6 +973,18 @@ function applyStaticText() {
   document.getElementById('shops-country-label').textContent = t('country');
   document.getElementById('shops-city-label').textContent = t('city');
   document.getElementById('shops-specialty-label').textContent = t('specialtyFilter');
+  const sortLabel = document.getElementById('shops-sort-label');
+  if (sortLabel) sortLabel.textContent = t('sortLabel');
+  const sortSelect = document.getElementById('shops-sort');
+  if (sortSelect) {
+    const opts = sortSelect.querySelectorAll('option');
+    const keys = ['sortRelevance', 'sortAlpha', 'sortCity', 'sortSpecialty'];
+    opts.forEach((opt, i) => {
+      if (keys[i]) opt.textContent = t(keys[i]);
+    });
+  }
+  const groupLabel = document.getElementById('shops-group-label');
+  if (groupLabel) groupLabel.textContent = t('groupByCity');
   document.getElementById('shops-verified-label').textContent = t('verifiedOnly');
   document.getElementById('shops-verified-help').textContent = t('verifiedHelp');
   document.getElementById('shops-results-title').textContent = t('listed');
@@ -1011,8 +1089,18 @@ function buildFilters() {
     throw new Error(errorMsg);
   }
 
-  regionSelect.innerHTML = `<option value="all">${t('allRegions')}</option>${Object.entries(REGIONS)
-    .map(([code, labels]) => `<option value="${code}">${labels[STATE.lang]}</option>`)
+  const countByRegion = (code) =>
+    code === 'all'
+      ? SHOPS.length
+      : SHOPS.filter((s) => countryByCode(s.countryCode)?.group === code).length;
+
+  regionSelect.innerHTML = `<option value="all">${t('allRegions')} (${countByRegion('all')})</option>${Object.entries(
+    REGIONS
+  )
+    .map(
+      ([code, labels]) =>
+        `<option value="${code}">${labels[STATE.lang]} (${countByRegion(code)})</option>`
+    )
     .join('')}`;
 
   const countryCodes = [...new Set(shopsMatchingPrimaryFilters().map((shop) => shop.countryCode))];
@@ -1023,11 +1111,6 @@ function buildFilters() {
     .filter((country) => STATE.region === 'all' || country.group === STATE.region)
     .sort((a, b) => countryName(a).localeCompare(countryName(b), STATE.lang));
 
-  countrySelect.innerHTML = `<option value="all">${t('allCountries')}</option>${allCountries
-    .filter((country) => countryCodes.includes(country.code) || STATE.country === 'all')
-    .map((country) => `<option value="${country.code}">${countryName(country)}</option>`)
-    .join('')}`;
-
   const cityPool = SHOPS.filter((shop) => {
     const country = countryByCode(shop.countryCode);
     if (!country) return false;
@@ -1036,18 +1119,39 @@ function buildFilters() {
     return true;
   });
 
-  const cities = [...new Set(cityPool.map((shop) => shop.city))].sort((a, b) => a.localeCompare(b));
+  const countByCountry = (code) =>
+    code === 'all'
+      ? cityPool.length
+      : cityPool.filter((s) => s.countryCode === code).length;
 
-  citySelect.innerHTML = `<option value="all">${t('allCities')}</option>${cities
-    .map((city) => `<option value="${esc(city)}">${esc(city)}</option>`)
+  countrySelect.innerHTML = `<option value="all">${t('allCountries')} (${countByCountry('all')})</option>${allCountries
+    .filter((country) => countryCodes.includes(country.code) || STATE.country === 'all')
+    .map(
+      (country) =>
+        `<option value="${country.code}">${countryName(country)} (${countByCountry(country.code)})</option>`
+    )
+    .join('')}`;
+
+  const cities = [...new Set(cityPool.map((shop) => shop.city))].sort((a, b) => a.localeCompare(b));
+  const countByCity = (city) =>
+    city === 'all' ? cityPool.length : cityPool.filter((s) => s.city === city).length;
+
+  citySelect.innerHTML = `<option value="all">${t('allCities')} (${countByCity('all')})</option>${cities
+    .map((city) => `<option value="${esc(city)}">${esc(city)} (${countByCity(city)})</option>`)
     .join('')}`;
 
   const specialties = [
     ...new Set(shopsMatchingPrimaryFilters().flatMap((shop) => shop.specialties || [])),
   ].sort((a, b) => a.localeCompare(b));
 
-  specialtySelect.innerHTML = `<option value="all">${t('allSpecialties')}</option>${specialties
-    .map((item) => `<option value="${esc(item)}">${esc(item)}</option>`)
+  const matching = shopsMatchingPrimaryFilters();
+  const countBySpecialty = (item) =>
+    item === 'all'
+      ? matching.length
+      : matching.filter((s) => (s.specialties || []).includes(item)).length;
+
+  specialtySelect.innerHTML = `<option value="all">${t('allSpecialties')} (${countBySpecialty('all')})</option>${specialties
+    .map((item) => `<option value="${esc(item)}">${esc(item)} (${countBySpecialty(item)})</option>`)
     .join('')}`;
 
   regionSelect.value = STATE.region;
@@ -1174,15 +1278,7 @@ function activeFilterSummary() {
   }
 }
 
-function renderCards(shops) {
-  const grid = document.getElementById('shops-grid');
-  if (!grid) {
-    console.warn('[shops] Element #shops-grid not found');
-    return;
-  }
-
-  grid.innerHTML = shops
-    .map((shop, _idx) => {
+function buildShopCardMarkup(shop) {
       const country = countryByCode(shop.countryCode);
       const specialties = (shop.specialties || [])
         .map((item) => `<span class="shop-tag">${esc(item)}</span>`)
@@ -1195,6 +1291,7 @@ function renderCards(shops) {
       const listingTypeBadge = `<span class="shop-listing-type ${isCluster ? 'shop-listing-type--market' : 'shop-listing-type--store'}">${listingTypeLabel(shop)}</span>`;
       const inShortlist = isInShortlist(shop.id);
       const countryUrl = country?.slug ? `countries/${country.slug}/gold-price/` : '';
+      const goldRateUrl = cityGoldRateUrl(shop);
       const areaGuideUrl = `${location.pathname}?country=${encodeURIComponent(shop.countryCode)}&search=${encodeURIComponent(shop.market)}`;
       const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shop.name}, ${shop.market}, ${shop.city}`)}`;
       const nextActionLabel = isCluster ? t('nextActionsMarket') : t('nextActionsStore');
@@ -1322,6 +1419,14 @@ function renderCards(shops) {
           </a>`
               : ''
           }
+          ${
+            goldRateUrl
+              ? `<a href="${esc(goldRateUrl)}" class="shop-action-btn shop-action-btn--rates" aria-label="${t('viewGoldRate')}: ${esc(shop.city)}">
+            <span class="shop-action-icon">📈</span>
+            <span class="shop-action-label">${t('viewGoldRate')}</span>
+          </a>`
+              : ''
+          }
         </div>
 
         <div class="shop-actions-row shop-actions-row--secondary">
@@ -1329,6 +1434,10 @@ function renderCards(shops) {
                   type="button" data-shop-id="${esc(shop.id)}" aria-label="${inShortlist ? t('removeFromShortlist') : t('saveToShortlist')}">
             <span class="shop-action-icon">${inShortlist ? '✓' : '+'}</span>
             <span class="shop-action-label">${inShortlist ? t('saved') : t('saveToShortlist')}</span>
+          </button>
+          <button class="shop-action-btn shop-action-btn--copy" type="button" data-copy-shop-id="${esc(shop.id)}" aria-label="${t('copyDetails')}">
+            <span class="shop-action-icon">⎘</span>
+            <span class="shop-action-label">${t('copyDetails')}</span>
           </button>
           <button class="shop-action-btn shop-action-btn--share" type="button" data-shop-id="${esc(shop.id)}" aria-label="${t('shareShop')}">
             <span class="shop-action-icon">↗</span>
@@ -1347,10 +1456,41 @@ function renderCards(shops) {
         <p class="shop-contact">${contactParts.join(' · ') || t('noContact')}</p>
       </article>
     `;
-    })
-    .join('');
+}
 
-  // Bind click handlers after rendering
+function renderCards(shops) {
+  const grid = document.getElementById('shops-grid');
+  if (!grid) {
+    console.warn('[shops] Element #shops-grid not found');
+    return;
+  }
+
+  if (STATE.groupByCity) {
+    const groups = new Map();
+    shops.forEach((shop) => {
+      const key = shop.city || '—';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(shop);
+    });
+    const cities = [...groups.keys()].sort((a, b) => a.localeCompare(b, STATE.lang));
+    grid.innerHTML = cities
+      .map(
+        (city) => `
+      <section class="shops-city-group" aria-labelledby="shops-city-${esc(city).replace(/\s+/g, '-')}">
+        <h2 class="shops-city-group__title" id="shops-city-${esc(city).replace(/\s+/g, '-')}">
+          ${esc(city)}
+          <span class="badge badge--karat">${groups.get(city).length}</span>
+        </h2>
+        <div class="shops-city-group__grid">
+          ${groups.get(city).map((shop) => buildShopCardMarkup(shop)).join('')}
+        </div>
+      </section>`
+      )
+      .join('');
+  } else {
+    grid.innerHTML = shops.map((shop) => buildShopCardMarkup(shop)).join('');
+  }
+
   bindShopCardHandlers();
 }
 
@@ -1380,6 +1520,14 @@ function bindShopCardHandlers() {
       e.stopPropagation();
       const shopId = btn.dataset.shopId;
       toggleShortlist(shopId);
+    });
+  });
+
+  grid.querySelectorAll('[data-copy-shop-id]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const shop = SHOPS.find((s) => s.id === btn.dataset.copyShopId);
+      if (shop) copyShopDetails(shop);
     });
   });
 
@@ -1747,6 +1895,11 @@ function render() {
 
   empty.hidden = true;
   renderCards(shops);
+
+  const groupToggle = document.getElementById('shops-group-by-city');
+  if (groupToggle) groupToggle.checked = STATE.groupByCity;
+  const sortSelect = document.getElementById('shops-sort');
+  if (sortSelect) sortSelect.value = STATE.sortBy;
 }
 
 function resetFilters() {
@@ -1825,6 +1978,18 @@ function bindEvents() {
     trackShopFilterApply('verified_only');
     render();
     collapseMobileFilters();
+  });
+
+  document.getElementById('shops-sort')?.addEventListener('change', (event) => {
+    STATE.sortBy = event.target.value || 'relevance';
+    trackShopFilterApply('sort');
+    render();
+  });
+
+  document.getElementById('shops-group-by-city')?.addEventListener('change', (event) => {
+    STATE.groupByCity = event.target.checked;
+    trackShopFilterApply('group_city');
+    render();
   });
 
   document.getElementById('shops-clear-filters').addEventListener('click', () => {
@@ -1943,6 +2108,7 @@ function init() {
   if (_pLang === 'ar' || _pLang === 'en') STATE.lang = _pLang;
 
   const shell = mountSharedShell({ lang: STATE.lang, depth: 0, withSpotBar: true });
+  initPageEnter('#main-content');
   const navResult = shell.navCtrl;
   injectBreadcrumbs('shops');
   renderAdSlot('ad-top', 'leaderboard');
