@@ -801,8 +801,8 @@
   max-width: 220px;
   padding: 0.35rem 0.55rem;
   border-radius: var(--radius-sm);
-  background: var(--color-text);
-  color: var(--color-white);
+  background: var(--color-gray-900, #1a1a1a);
+  color: #fff;
   font-size: var(--text-2xs);
   font-weight: var(--weight-semibold);
   opacity: 0;
@@ -2045,7 +2045,8 @@
   pointer-events: none;
 }
 
-.gcc-card:hover .gcc-card-cta {
+.gcc-card:hover .gcc-card-cta,
+.gcc-card:focus-visible .gcc-card-cta {
   opacity: 1;
   transform: none;
 }

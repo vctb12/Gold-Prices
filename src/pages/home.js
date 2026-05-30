@@ -1332,6 +1332,7 @@ async function init() {
         b.setAttribute('aria-pressed', b.dataset.unit === unit ? 'true' : 'false');
       });
       renderKaratStrip();
+      syncTrackerLinks();
     });
   });
 
