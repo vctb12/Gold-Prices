@@ -28,6 +28,8 @@
  *   engine.destroy()
  */
 
+import { KARATS } from '../config/karats.js';
+
 const STORAGE_KEY = 'gtl_alerts_v2';
 const LEGACY_KEY = 'gold_price_alerts';
 const MAX_ALERTS = 10;
@@ -131,15 +133,8 @@ function generateId() {
 }
 
 function getPriceForScope(scope, spotUsd, aed24kPerGram, karat) {
-  const karatMultipliers = {
-    24: 1,
-    22: 22 / 24,
-    21: 21 / 24,
-    18: 18 / 24,
-    14: 14 / 24,
-    10: 10 / 24,
-  };
-  const mult = karatMultipliers[karat] || 1;
+  const karatObj = KARATS.find((k) => k.code === String(karat));
+  const purity = karatObj ? karatObj.purity : 1;
 
   switch (scope) {
     case 'spot':
@@ -148,8 +143,8 @@ function getPriceForScope(scope, spotUsd, aed24kPerGram, karat) {
       return aed24kPerGram;
     case 'selected':
     default:
-      // For selected scope, apply karat multiplier to AED price
-      return aed24kPerGram * mult;
+      // For selected scope, apply karat purity to AED price
+      return aed24kPerGram * purity;
   }
 }
 

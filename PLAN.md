@@ -13,6 +13,8 @@
 
 ## 🟡 Up Next
 
+- [ ] BUILD 1: Live Price Ticker Marquee Bar (partially done via MarketSummaryTicker, needs sticky
+      header strip behavior) — priority: high
 - [ ] Replace hardcoded hex colors in CSS with design tokens (565 instances across styles/) —
       priority: medium — context: improves maintainability and dark mode consistency
 - [ ] Add visibilitychange cleanup to insights.js sparkline/charts if added — priority: low —
@@ -24,6 +26,8 @@
 
 ## ✅ Recently Completed
 
+- [x] BUILD 10: Price Alert System — full feature build (alert engine, manager drawer, trigger
+      dialog, sound, import/export, WhatsApp share, 18 tests) — completed: 2026-05-30 — PR: (draft)
 - [x] Audit session 8 — memory leak fixes, alert() removal, lint cleanup, SEO h1 — completed:
       2026-05-30 — PR: (draft open)
 - [x] Visual excellence session 7 (global interactions + homepage polish) — completed: 2026-05-30 —
@@ -85,6 +89,28 @@
 ### ⚠️ Pre-existing (Not Fixed)
 
 - 44 content pages missing webpage-schema (pre-existing test failures)
-- 1 provider-failover test failure (pre-existing)
+- 3 pre-existing test failures (provider-failover, cache-revalidation, audit-content-pages)
 - 565 hardcoded hex colors in CSS (large effort — tracked in backlog)
 - `window.confirm()` used in developer.js for destructive actions (acceptable UX)
+
+## 🏆 Big Build Catalog Status
+
+- [x] BUILD 1: Ticker Strip — done (existing `src/components/ticker.js` + `MarketSummaryTicker.js`)
+- [ ] BUILD 2: Country Pages — partial (pages exist, needs Market Intelligence Panel)
+- [x] BUILD 3: Price Chart — done (existing `src/components/chart.js` with 24H–ALL ranges)
+- [x] BUILD 4: Calculator Tabs — done (5 tabs: value, scrap, zakat, buying power, converter)
+- [x] BUILD 5: PWA — done (sw.js, manifest.json, offline.html, install prompt)
+- [ ] BUILD 6: Compare Tool — partial (tracker compare mode exists, no standalone page)
+- [ ] BUILD 7: Shops Directory — partial (list + filter, needs map, card redesign)
+- [ ] BUILD 8: Insights Feed — partial (exists, needs category filter, masonry, search)
+- [ ] BUILD 9: Homepage Overhaul — partial (recent polish sessions improved it significantly)
+- [x] BUILD 10: Alert System — **done this session** (engine + drawer + dialog + sound + tests)
+
+## Notes for Next Agent
+
+- Alert engine is wired into tracker-pro.js `applyRealtimeSnapshot` — fires on every 90s price tick
+- Alert manager drawer CSS is at `styles/components/alert-manager.css` — imported only in
+  tracker.html
+- New localStorage key `gtl_alerts_v2` — migrates from legacy `gold_price_alerts` automatically
+- 18 new tests in `tests/alert-engine.test.js` — all pass
+- Next recommended build: BUILD 2 (Country Pages) or BUILD 6 (Compare Tool)

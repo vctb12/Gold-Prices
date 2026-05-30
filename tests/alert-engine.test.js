@@ -29,9 +29,7 @@ globalThis.window = globalThis.window || {};
 globalThis.window.AudioContext = undefined;
 globalThis.window.webkitAudioContext = undefined;
 
-// Avoid importin ESM — re-implement test with the module functions inlined
-// Since the engine is ESM, we test the logic with a CJS-compatible version
-// We'll test via a child process or inline the logic. For simplicity, use dynamic import:
+// Avoid importing ESM directly — use dynamic import for testing.
 
 let createAlertEngine;
 
