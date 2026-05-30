@@ -2,6 +2,16 @@
    Learn Page Styles
    ═══════════════════════════════════════════════════ */
 
+/* ── Page heading ────────────────────────────────── */
+.learn-page-heading {
+  max-width: var(--content-max-width, 1100px);
+  margin: var(--space-5) auto var(--space-3);
+  padding: 0 var(--space-4);
+  font-size: var(--text-2xl, 1.75rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
 /* ── Article header ───────────────────────────────── */
 .learn-catalog-wrap {
   max-width: var(--content-max-width, 1100px);

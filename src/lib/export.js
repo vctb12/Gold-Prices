@@ -10,6 +10,7 @@
 
 import { CONSTANTS } from '../config/index.js';
 import { KARATS } from '../config/index.js';
+import { showCopyToast } from './copy-toast.js';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ export function exportJSON(STATE, prices) {
 
 /**
  * Export the user's locally-cached daily price history (up to 90 days) as a
- * CSV file. Calls `alert()` and returns early if no history exists.
+ * CSV file. Shows a toast and returns early if no history exists.
  *
  * @param {Array<{ date: string, price: number }>} history  Daily snapshot array from `STATE.history`.
  * @param {string} [karatCode='24']            Karat to compute prices for.
@@ -169,8 +170,9 @@ export function exportJSON(STATE, prices) {
  */
 export function exportArchiveCSV(history, karatCode = '24', aedPeg = CONSTANTS.AED_PEG) {
   if (!history?.length) {
-    alert(
-      'No cached history available yet. Visit the tracker daily to build a price archive, or export the full historical baseline instead.'
+    showCopyToast(
+      'No cached history available yet. Visit the tracker daily to build a price archive.',
+      { durationMs: 4500 }
     );
     return;
   }

@@ -17,6 +17,7 @@ import {
   redirectToAccount,
 } from '../lib/public-account-client.js';
 import { escape as esc, el as safeEl, clear as clearEl } from '../lib/safe-dom.js';
+import { showCopyToast } from '../lib/copy-toast.js';
 
 const API_BASE = '/api/v1';
 
@@ -244,7 +245,7 @@ async function handleRevoke(keyId) {
 
   const result = await apiFetch(`/me/api-keys/${encodeURIComponent(keyId)}`, { method: 'DELETE' });
   if (!result || !result.ok) {
-    alert(result?.error?.message || 'Could not revoke key.');
+    showCopyToast(result?.error?.message || 'Could not revoke key.', { durationMs: 4000 });
     return;
   }
   await loadKeys();
@@ -267,7 +268,7 @@ async function handleRegenerate(keyId) {
     method: 'POST',
   });
   if (!result || !result.ok) {
-    alert(result?.error?.message || 'Could not rotate key.');
+    showCopyToast(result?.error?.message || 'Could not rotate key.', { durationMs: 4000 });
     return;
   }
 
