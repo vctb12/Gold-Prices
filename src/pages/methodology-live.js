@@ -95,7 +95,7 @@ function renderFormulaPipeline(spotUsd, lang) {
     'ol',
     { class: 'method-formula-pipeline' },
     steps.map((step, i) =>
-      el('li', { class: 'method-formula-step' }, [
+      el('li', { class: 'method-formula-step', 'data-reveal': '', 'data-reveal-delay': String(i + 1) }, [
         el('span', { class: 'method-formula-step-num' }, String(i + 1)),
         el('span', { class: 'method-formula-step-label' }, step.label),
         el('strong', { class: 'method-formula-step-value' }, step.value),

@@ -10,6 +10,7 @@ import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { CONSTANTS } from '../config/index.js';
 import { getBaselineHistory, getHistoryStats } from '../lib/historical-data.js';
 import { initPageEnter } from '../lib/page-enter.js';
+import { countUp } from '../lib/count-up.js';
 import { mountRelatedGuides } from '../components/RelatedGuides.js';
 
 const AED_PEG = CONSTANTS.AED_PEG; // 3.6725
@@ -174,10 +175,18 @@ function formatPct(pct) {
 function setPulseValue(id, pct) {
   const node = document.getElementById(id);
   if (!node) return;
-  node.textContent = formatPct(pct);
   node.classList.remove('insights-pulse-value--up', 'insights-pulse-value--down');
-  if (pct == null || Number.isNaN(pct)) return;
+  if (pct == null || Number.isNaN(pct)) {
+    node.textContent = '—';
+    return;
+  }
   node.classList.add(pct >= 0 ? 'insights-pulse-value--up' : 'insights-pulse-value--down');
+  countUp(node, pct, {
+    decimals: 2,
+    format: (n) => formatPct(n),
+    pulse: true,
+    pulseTarget: node.closest('.insights-pulse-card'),
+  });
 }
 
 function updateMarketPulse(spotUsd) {
