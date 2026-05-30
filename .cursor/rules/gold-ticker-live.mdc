@@ -1,0 +1,39 @@
+# .cursor/rules/gold-ticker-live.mdc
+
+## Project Identity
+GoldTickerLive — bilingual (EN/AR) static gold pricing platform for GCC/Arab markets.
+Vanilla ES6, zero external JS dependencies, GitHub Pages hosted.
+
+## Sacred Invariants (NEVER change these values)
+- AED peg: 3.6725
+- Troy ounce: 31.1035g
+- Karat purity values in src/config/karats.js
+- Pricing formula in src/lib/price-calculator.js
+
+## Architecture Rules
+- All user-visible text: src/config/translations.js (EN + AR keys)
+- RTL must work on everything
+- CSS custom properties for all colors/spacing/typography
+- New components: src/components/
+- Shared utilities: src/lib/
+- No external JS dependencies — ever
+- CSS animations only (no JS animation libraries)
+- npm test must pass at every commit
+
+## Session Protocol
+- Read @docs/plans/README.md and @REVAMP_PLAN.md before planning
+- Write session plan in docs/plans/ if scope > 5 files
+- Commit after each logical change (max 3 files between commits)
+- git checkpoint before multi-file refactors
+- At end: npm test + npm run validate + npm run build — all green
+- Update REVAMP_PLAN.md with new section
+- Open PR with clear summary
+
+## Quality Standards
+- No placeholder comments — complete or skip
+- No "Loading..." text — use .skeleton CSS
+- Every animation: prefers-reduced-motion media query
+- All interactive elements: min 44px touch targets
+- All prices: tabular-nums, freshness labels visible
+- Focus states on every interactive element
+- Zero broken internal links
