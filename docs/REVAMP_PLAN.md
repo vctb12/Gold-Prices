@@ -71,6 +71,13 @@ order.css, global.css).
 
 ### 2026-05-30 session 7 — visual excellence (interaction foundation)
 
+- [x] Global interaction system (cards, buttons, inputs, tables, price pulse, page-enter)
+- [x] Homepage hero/GCC polish, quick-convert, karat tooltips, countUp pulses
+- [x] Tracker / calculator / country CSS hooks; `initPageEnter` on flagship pages
+- [x] Tracker deep links from homepage with karat + unit preference
+
+### 2026-05-30 session 6 — launch push (content + trust surfaces)
+
 - [x] Content: `content-page-boot.js`, WebPage schema + RelatedGuides + page-enter on 46 pages
 - [x] CI: `audit-content-pages.js`, `check-sw-precache.js` in `npm run validate`
 - [x] Methodology: live formula pipeline, source freshness badges, FAQ + FAQPage schema
