@@ -8,7 +8,7 @@
 
 ## 🔴 In Progress
 
-- [ ] Visual excellence session 7 (global interactions + homepage polish) — assigned to: Cursor — started: 2026-05-30
+<!-- Active tasks go here -->
 
 ---
 
@@ -21,6 +21,7 @@
 
 ## ✅ Recently Completed
 
+- [x] Visual excellence session 7 (global interactions + homepage polish) — completed: 2026-05-30 — PR: (draft open)
 - [x] Launch push session 6 (content standardization, learn/insights) — completed: 2026-05-30 — PR: #375
 
 - [x] Deep clean session 3: broken links, invest safe-dom, learn/insights split, cache.getPreference — completed: 2026-05-29 — PR: (pending)
