@@ -1835,6 +1835,21 @@
     grid-template-columns: 1fr;
   }
 
+  .gcc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-quick-convert-mount .calc-input,
+  .home-quick-convert-mount .calc-select {
+    width: 100%;
+  }
+
+  .hero-cta-primary,
+  .hero-cta-secondary,
+  .hero-secondary-link {
+    min-height: 44px;
+  }
+
   .hero-badge {
     font-size: 0.7rem;
   }
