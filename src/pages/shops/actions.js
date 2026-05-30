@@ -29,7 +29,7 @@ export function shareShop(shop, STATE) {
     navigator.clipboard
       ?.writeText(url)
       .then(() => {
-        showCopyToast(STATE?.lang === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+        showCopyToast(STATE.lang === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
       })
       .catch(() => {});
   }
