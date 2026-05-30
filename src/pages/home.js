@@ -25,6 +25,7 @@ import { renderRealtimeSlaPanel } from '../components/RealtimeSlaPanel.js';
 import { renderMethodologySection } from '../components/MethodologySection.js';
 import { renderLocationGuideSection } from '../components/LocationGuideSection.js';
 import '../lib/reveal.js';
+import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
 import { copyWithToast } from '../lib/copy-toast.js';
 import { mountQuickConvertWidget } from '../components/QuickConvertWidget.js';
@@ -192,6 +193,21 @@ function setTrustChip(id, text, freshnessKey = 'neutral') {
     freshnessKey === 'live' ? 'live' : freshnessKey === 'unavailable' ? 'neutral' : 'warning';
 }
 
+/** Deep-link to tracker with current karat strip unit preference. */
+function buildTrackerHref(overrides = {}) {
+  const unit =
+    karatStripUnit === 'tola' ? 'tola' : karatStripUnit === 'oz' ? 'oz' : 'gram';
+  const params = new URLSearchParams({
+    mode: 'live',
+    cur: 'AED',
+    k: '24',
+    u: unit,
+    lang,
+    ...overrides,
+  });
+  return `tracker.html#${params.toString()}`;
+}
+
 function setCommandMetricValue(id, valueText = '—', numericTarget = null) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -199,6 +215,8 @@ function setCommandMetricValue(id, valueText = '—', numericTarget = null) {
     countUp(target, numericTarget, {
       decimals: 2,
       format: () => valueText,
+      pulse: true,
+      pulseTarget: target.closest('.mobile-command-card__metric'),
     });
   } else {
     target.textContent = valueText;
@@ -324,8 +342,21 @@ function renderHeroCard() {
     countUp(priceEl, usd24oz, {
       decimals: 2,
       format: (n) => fmt.formatPrice(n, 'USD', 2),
+      pulse: true,
+      pulseTarget: priceEl,
     });
     priceEl.classList.remove('hlc-price--loading');
+  }
+
+  const directionEl = document.getElementById('hlc-direction');
+  if (directionEl && dayOpenPrice && goldPrice) {
+    const chg = goldPrice - dayOpenPrice;
+    directionEl.hidden = false;
+    directionEl.textContent = chg >= 0 ? '▲' : '▼';
+    directionEl.className =
+      'hlc-direction ' + (chg >= 0 ? 'hlc-direction--up' : 'hlc-direction--down');
+  } else if (directionEl) {
+    directionEl.hidden = true;
   }
   document.getElementById('hero-live-card')?.removeAttribute('aria-busy');
   for (const [id, val] of [
@@ -336,7 +367,12 @@ function renderHeroCard() {
   ]) {
     const cell = document.getElementById(id);
     if (cell && val) {
-      countUp(cell, val, { decimals: 2, format: (n) => fmt.formatPrice(n, 'AED', 2) });
+      countUp(cell, val, {
+        decimals: 2,
+        format: (n) => fmt.formatPrice(n, 'AED', 2),
+        pulse: true,
+        pulseTarget: cell.closest('.hlc-item'),
+      });
     } else if (cell) {
       cell.textContent = '—';
     }
@@ -628,6 +664,8 @@ function renderKaratStrip(k18Ref) {
       countUp(valueElement, v, {
         decimals: 2,
         format: (n) => fmt.formatPrice(n, 'AED', 2),
+        pulse: true,
+        pulseTarget: valueElement.closest('.karat-strip-item'),
       });
     }
     // Update copy button's data-copy attribute so clipboard gets the current value.
@@ -647,6 +685,11 @@ function renderKaratStrip(k18Ref) {
         ? 'karatStripLabelOz'
         : 'karatStripLabelGram';
   setTextById('karat-strip-label', tx(labelKey));
+
+  const tooltip = tx('karatHoverTooltip');
+  document.querySelectorAll('.karat-strip-item').forEach((item) => {
+    item.dataset.tooltip = tooltip;
+  });
 }
 
 // ── Render GCC grid ────────────────────────────────────────────────────────
@@ -662,7 +705,7 @@ function renderGCCGrid() {
   const fragment = document.createDocumentFragment();
 
   clear(grid);
-  countries.forEach((c) => {
+  countries.forEach((c, index) => {
     let price = '—';
     if (c.currency === 'AED') {
       price = fmt.formatPrice(calc.usdPerGram(goldPrice, k22.purity) * CONSTANTS.AED_PEG, 'AED', 2);
@@ -698,31 +741,54 @@ function renderGCCGrid() {
       el('div', { class: 'gcc-unit' }, `${tx('perGram')} · 22K`),
       el('div', { class: 'gcc-source' }, sourceText),
     ];
+    if (slug) {
+      cardChildren.push(el('span', { class: 'gcc-card-cta' }, tx('gccCardCta')));
+    }
     const card = slug
       ? el(
           'a',
-          { href: safeHref(`./countries/${slug}/gold-price/`), class: 'gcc-card' },
+          { href: safeHref(`./countries/${slug}/gold-price/`), class: 'gcc-card card-interactive' },
           cardChildren
         )
-      : el('div', { class: 'gcc-card gcc-card--no-link' }, cardChildren);
+      : el('div', { class: 'gcc-card gcc-card--no-link card-interactive' }, cardChildren);
 
     fragment.append(
-      el('div', { class: 'gcc-card-wrapper' }, [
-        card,
-        el(
-          'button',
-          {
-            class: 'gcc-copy-btn',
-            dataset: { copy: price },
-            'aria-label': `${tx('copyPrice')} ${name}`,
-            type: 'button',
-          },
-          '⎘'
-        ),
-      ])
+      el(
+        'div',
+        {
+          class: 'gcc-card-wrapper is-entering',
+          style: `--stagger-index: ${index}`,
+        },
+        [
+          card,
+          el(
+            'button',
+            {
+              class: 'gcc-copy-btn',
+              dataset: { copy: price },
+              'aria-label': `${tx('copyPrice')} ${name}`,
+              type: 'button',
+            },
+            '⎘'
+          ),
+        ]
+      )
     );
   });
   grid.append(fragment);
+}
+
+function syncTrackerLinks() {
+  const href = buildTrackerHref();
+  for (const id of [
+    'hero-cta-tracker',
+    'hlc-tracker-link',
+    'karat-strip-cta',
+    'home-command-cta-tracker',
+  ]) {
+    const node = document.getElementById(id);
+    if (node) node.setAttribute('href', href);
+  }
 }
 
 // ── Apply full page language ───────────────────────────────────────────────
@@ -815,6 +881,7 @@ function applyLangToPage() {
   setTextById('karat-strip-title', tx('karatStripTitle'));
   setTextById('karat-strip-sub', tx('karatStripSub'));
   setTextById('karat-strip-cta', tx('karatStripCta'));
+  syncTrackerLinks();
   setTextById('tools-title', tx('toolsTitle'));
   setTextById('tools-sub', tx('toolsSub'));
   setTextById('home-stats-title', tx('statsTitle'));
@@ -1177,6 +1244,7 @@ async function init() {
 
   // Nav + footer + spot bar
   const shell = mountSharedShell({ lang, depth: 0, withSpotBar: true });
+  initPageEnter('main');
   const navCtrl = shell.navCtrl;
   navCtrl.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {

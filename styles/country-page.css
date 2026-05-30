@@ -445,6 +445,17 @@
   overflow: hidden;
   margin-bottom: 0.6rem;
   background: var(--color-surface);
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.cp-faq-item:hover {
+  border-color: rgb(196 153 62 / 35%);
+}
+
+.cp-faq-item[open] {
+  box-shadow: var(--elev-2);
 }
 
 .cp-faq-item > summary {
@@ -465,7 +476,7 @@
   font-weight: var(--weight-normal);
   color: var(--color-gold);
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-normal);
 }
 
 .cp-faq-item[open] > summary::after {

@@ -31,6 +31,8 @@ const REQUIRED_KEYS = [
   'home.karatStripLabelGram',
   'home.karatStripLabelTola',
   'home.karatStripLabelOz',
+  'home.karatHoverTooltip',
+  'home.gccCardCta',
   'home.karatCopyAriaLabel',
   'home.quickConvertTitle',
   'home.quickConvertSub',

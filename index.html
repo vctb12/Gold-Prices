@@ -217,8 +217,11 @@
               <span class="hlc-title" id="hlc-title">Gold Spot Price</span>
               <span class="hlc-badge" id="hlc-badge">XAU/USD</span>
             </div>
-            <div class="hlc-price hlc-price--loading" id="hlc-price" data-testid="gold-price">
-              <span class="skeleton-inline shell-skeleton-price-lg"></span>
+            <div class="hlc-price-wrap">
+              <span class="hlc-direction" id="hlc-direction" hidden aria-hidden="true"></span>
+              <div class="hlc-price hlc-price--loading" id="hlc-price" data-testid="gold-price">
+                <span class="skeleton-inline shell-skeleton-price-lg"></span>
+              </div>
             </div>
             <div class="hlc-sub" id="hlc-sub">per troy ounce</div>
             <div class="hlc-indicators">
@@ -366,7 +369,10 @@
                 Spot-linked reference, before making charges and VAT.
               </p>
               <div class="home-command-cta-row">
-                <a href="tracker.html" class="btn btn-primary" id="home-command-cta-tracker"
+                <a
+                  href="tracker.html#mode=live&amp;cur=AED&amp;k=24&amp;u=gram"
+                  class="btn btn-primary btn--shimmer"
+                  id="home-command-cta-tracker"
                   >Open Tracker</a
                 >
                 <a href="calculator.html" class="btn btn-outline" id="home-command-cta-calculator"

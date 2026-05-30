@@ -24,6 +24,8 @@ import {
   redirectToAccount,
 } from '../lib/public-account-client.js';
 import { parseCalculatorUrlState, serializeCalculatorUrlState } from './calculator/url-state.js';
+import '../lib/reveal.js';
+import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
 import { copyWithToast } from '../lib/copy-toast.js';
 import {
@@ -536,7 +538,11 @@ function calcValue() {
       countUp(resultEl, totalLocal, {
         decimals: decimalsResult,
         format: (n) => formatPrice(n, currency, decimalsResult),
+        pulse: true,
+        pulseTarget: resultEl.closest('.calc-result-card, .calc-result, .calc-panel'),
       });
+      resultEl.classList.add('calc-result--animating');
+      window.setTimeout(() => resultEl.classList.remove('calc-result--animating'), 450);
     }
   }
 
@@ -1550,6 +1556,7 @@ async function init() {
   document.documentElement.dir = STATE.lang === 'ar' ? 'rtl' : 'ltr';
 
   const shell = mountSharedShell({ lang: STATE.lang, depth: 0, withSpotBar: true });
+  initPageEnter('#main-content');
   const navResult = shell.navCtrl;
   injectBreadcrumbs('calculator');
   renderAdSlot('ad-bottom', 'rectangle');

@@ -227,6 +227,12 @@
   --duration-slow: 350ms;
   --duration-xslow: 500ms;
 
+  /* Interaction aliases (session 7 visual system) */
+  --transition-fast: 150ms var(--ease-out);
+  --transition-normal: 250ms var(--ease-out);
+  --transition-slow: 400ms var(--ease-out);
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* Breakpoint tokens (for reference — use in @media queries) */
   --bp-xs: 380px;
   --bp-sm: 480px;
@@ -547,11 +553,27 @@
 .action-rail-link:focus-visible,
 .action-rail-button:hover,
 .action-rail-button:focus-visible {
-  transform: translateY(-1px);
-  border-color: rgb(196 153 62 / 45%);
-  box-shadow: var(--elev-3);
+  transform: translateY(-3px);
+  border-color: rgb(196 153 62 / 55%);
+  box-shadow: var(--shadow-card-hover);
   text-decoration: none;
-  outline: none;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (hover: hover) {
+  .action-rail-link:hover .action-rail-link__kicker,
+  .action-rail-link:focus-visible .action-rail-link__kicker {
+    transform: scale(1.04);
+    color: var(--color-gold-dark);
+  }
+}
+
+.action-rail-link__kicker {
+  transition:
+    transform var(--transition-fast),
+    color var(--transition-fast);
+  transform-origin: inline-start;
 }
 
 .action-rail-link__kicker {
@@ -3629,6 +3651,14 @@ main {
   box-shadow: var(--shadow-gold-lg);
 }
 
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primary:active:not(:disabled) {
+  box-shadow: var(--shadow-gold);
+}
+
 .btn-outline {
   background: transparent;
   border-color: var(--color-gold);
@@ -3708,13 +3738,13 @@ main {
 
 /* Page enter fade */
 main.page-enter-active {
-  animation: page-enter-fade 0.45s var(--ease-out) both;
+  animation: page-enter-fade 0.4s var(--ease-premium, var(--ease-out)) both;
 }
 
 @keyframes page-enter-fade {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
 
   to {
@@ -6567,6 +6597,188 @@ body > * {
 }
 
 /* ═══════════════════════════════════════════════
+   Global Interaction System — cards, links, forms, tables
+   ═══════════════════════════════════════════════ */
+
+.card-interactive,
+a.gcc-card,
+.tool-card,
+.shop-card,
+.learn-card,
+.country-karat-card,
+.country-price-card,
+.related-guides-link {
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    border-color var(--transition-normal),
+    background-color var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .card-interactive:hover,
+  a.gcc-card:hover,
+  .tool-card:hover,
+  .shop-card:hover,
+  .learn-card:hover,
+  .country-karat-card:hover,
+  .country-price-card:hover,
+  .related-guides-link:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--border-accent);
+  }
+}
+
+.card-interactive:active,
+a.gcc-card:active,
+.tool-card:active {
+  transform: translateY(-1px);
+}
+
+.card-interactive:focus-visible,
+a.gcc-card:focus-visible,
+.tool-card:focus-visible,
+.shop-card:focus-visible,
+.learn-card:focus-visible,
+.related-guides-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.link-accent,
+a.link-accent {
+  color: var(--color-gold-dark);
+  text-decoration: none;
+  position: relative;
+}
+
+.link-accent::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.12em;
+  height: 1px;
+  background: currentcolor;
+  transform: scaleX(0);
+  transform-origin: inline-start;
+  transition: transform var(--transition-fast);
+}
+
+.link-accent:hover::after,
+.link-accent:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.link-accent:visited {
+  color: var(--color-gold-deep);
+}
+
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+select,
+textarea,
+.input-control {
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+input:not([type='checkbox']):not([type='radio']):not([type='range']):hover:not(:focus):not(:disabled),
+select:hover:not(:focus):not(:disabled),
+textarea:hover:not(:focus):not(:disabled),
+.input-control:hover:not(:focus):not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+input:not([type='checkbox']):not([type='radio']):not([type='range']):focus,
+select:focus,
+textarea:focus,
+.input-control:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px var(--color-gold-glow);
+  outline: none;
+}
+
+.table-interactive tbody tr {
+  transition: background-color 100ms var(--ease-out);
+}
+
+.table-interactive tbody tr:hover {
+  background: var(--color-gold-tint);
+}
+
+@keyframes price-pulse-gold {
+  0% {
+    box-shadow: 0 0 0 0 rgb(196 153 62 / 45%);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgb(196 153 62 / 0%);
+  }
+}
+
+.price-pulse,
+[data-price-pulse] {
+  animation: price-pulse-gold 0.3s var(--ease-out);
+}
+
+@keyframes btn-shimmer {
+  0% {
+    background-position: -120% 0;
+  }
+
+  100% {
+    background-position: 220% 0;
+  }
+}
+
+.btn--shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+@media (hover: hover) {
+  .btn--shimmer:hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgb(255 255 255 / 28%) 50%,
+      transparent 65%
+    );
+    background-size: 200% 100%;
+    animation: btn-shimmer 0.75s var(--ease-out);
+    pointer-events: none;
+  }
+}
+
+.tab-panels--crossfade {
+  display: grid;
+}
+
+.tab-panels--crossfade > .tab-panel {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--transition-normal),
+    visibility var(--transition-normal);
+}
+
+.tab-panels--crossfade > .tab-panel.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.badge:hover {
+  filter: brightness(1.06);
+}
+
+/* ═══════════════════════════════════════════════
    Motion Primitives — shared by nav, home, tracker
    Every @keyframes has a reduced-motion no-op.
    ═══════════════════════════════════════════════ */
@@ -6576,9 +6788,33 @@ body > * {
   opacity: 0;
   transform: translateY(8px);
   transition:
-    opacity var(--duration-slow) var(--ease-out),
-    transform var(--duration-slow) var(--ease-out);
+    opacity var(--transition-slow),
+    transform var(--transition-slow);
   will-change: opacity, transform;
+}
+
+[data-reveal][data-reveal-delay='1'] {
+  transition-delay: 60ms;
+}
+
+[data-reveal][data-reveal-delay='2'] {
+  transition-delay: 120ms;
+}
+
+[data-reveal][data-reveal-delay='3'] {
+  transition-delay: 180ms;
+}
+
+[data-reveal][data-reveal-delay='4'] {
+  transition-delay: 240ms;
+}
+
+[data-reveal][data-reveal-delay='5'] {
+  transition-delay: 300ms;
+}
+
+[data-reveal][data-reveal-delay='6'] {
+  transition-delay: 360ms;
 }
 
 [data-reveal].is-in-view {
@@ -6688,18 +6924,17 @@ body > * {
 
 @media (hover: hover) {
   .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 10px 24px rgb(0 0 0 / 10%),
-      0 2px 6px rgb(0 0 0 / 6%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--border-accent, var(--color-gold));
   }
 }
 
 .hover-lift:focus-visible {
-  transform: translateY(-2px);
-  box-shadow:
-    0 10px 24px rgb(0 0 0 / 10%),
-    0 2px 6px rgb(0 0 0 / 6%);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 /* Freshness pulse: single-shot attention pulse for a just-refreshed
@@ -6756,6 +6991,16 @@ body > * {
 
   [data-freshness-pulse] {
     animation: none;
+  }
+
+  .price-pulse,
+  [data-price-pulse] {
+    animation: none;
+  }
+
+  .btn--shimmer:hover::after {
+    animation: none;
+    content: none;
   }
 
   *,
@@ -8477,6 +8722,16 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
   border: 1px solid var(--border-subtle);
   background: var(--gradient-surface);
   box-shadow: var(--elev-2);
+  transition:
+    box-shadow var(--transition-normal),
+    border-color var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.quick-convert-widget:focus-within {
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgb(196 153 62 / 40%);
+  transform: translateY(-2px);
 }
 
 .quick-convert-widget__title {

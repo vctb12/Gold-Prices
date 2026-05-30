@@ -109,7 +109,12 @@ export function renderHero() {
 
   if (_el.xauUsdValue) {
     if (spot) {
-      countUp(_el.xauUsdValue, spot, { decimals: 2, format: (n) => formatUsd(n) });
+      countUp(_el.xauUsdValue, spot, {
+        decimals: 2,
+        format: (n) => formatUsd(n),
+        pulse: true,
+        pulseTarget: _el.xauUsdValue?.closest('.tracker-hero-price, .tracker-metric'),
+      });
       pulseFreshness(_el.xauUsdValue);
     } else {
       setText(_el.xauUsdValue, '—');

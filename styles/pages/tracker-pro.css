@@ -3886,4 +3886,32 @@ td.tracker-chg-down {
 .tracker-range-pills .tracker-pill {
   min-height: 44px;
   font-variant-numeric: tabular-nums;
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    transform var(--transition-fast);
+}
+
+.tracker-range-pills .tracker-pill.is-active,
+.tracker-range-pills .tracker-pill[aria-pressed='true'] {
+  background: var(--color-gold);
+  border-color: var(--color-gold-light);
+  color: #1a0c02;
+}
+
+.tracker-karat-table tbody tr {
+  transition: background-color 100ms var(--ease-out);
+}
+
+.tracker-karat-table tbody tr:hover {
+  background: var(--color-gold-tint);
+}
+
+.tracker-karat-table tbody tr.is-selected {
+  box-shadow: inset 3px 0 0 var(--color-gold);
+}
+
+[dir='rtl'] .tracker-karat-table tbody tr.is-selected {
+  box-shadow: inset -3px 0 0 var(--color-gold);
 }

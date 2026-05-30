@@ -16,6 +16,8 @@ import { injectSpotBar, updateSpotBar, updateSpotBarLang } from '../components/s
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { el, safeHref, clear, setText } from './safe-dom.js';
 import { track, EVENTS } from './analytics.js';
+import '../lib/reveal.js';
+import { initPageEnter } from './page-enter.js';
 
 const _modUrl = new URL(import.meta.url);
 const _pageUrl = new URL(location.href);
@@ -780,6 +782,7 @@ async function hydrateLegacyPage({ country, karatSlug }) {
 
 async function hydrate() {
   const lang = getLang();
+  initPageEnter('main');
   injectSpotBar(lang, depth);
   updateSpotBarLang(lang);
   const navCtrl = injectNav(lang, depth);

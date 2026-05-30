@@ -48,6 +48,8 @@ function parseCurrentValue(text) {
  *   - pxPerMs: speed heuristic in "numeric units per ms" (default 1.5)
  *   - flash:  'auto' | 'up' | 'down' | null — toggle `data-flash` attribute
  *             for 1s to tint the element green/red. Defaults to 'auto'.
+ *   - pulse:  boolean — brief gold border pulse on container (default false)
+ *   - pulseTarget: Element — container to pulse (default: el.parentElement)
  */
 export function countUp(el, target, options = {}) {
   if (!el || !Number.isFinite(target)) return;
@@ -68,6 +70,17 @@ export function countUp(el, target, options = {}) {
     el.setAttribute('data-flash', dir);
     // Let the animation complete once, then clear.
     window.setTimeout(() => el.removeAttribute('data-flash'), FLASH_DURATION_MS);
+  }
+
+  if (options.pulse && diff !== 0 && !prefersReducedMotion()) {
+    const pulseEl = options.pulseTarget || el.parentElement;
+    if (pulseEl) {
+      pulseEl.classList.remove('price-pulse');
+      // Force reflow so repeated updates retrigger the animation.
+      void pulseEl.offsetWidth;
+      pulseEl.classList.add('price-pulse');
+      window.setTimeout(() => pulseEl.classList.remove('price-pulse'), 320);
+    }
   }
 
   if (prefersReducedMotion() || start === target) {
