@@ -4936,6 +4936,53 @@ body.has-ticker {
   }
 }
 
+/* Data fetch status banner (offline / error / partial) */
+.data-status-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: max(14px, var(--text-sm));
+  margin-bottom: var(--space-3);
+}
+
+.data-status-banner[hidden] {
+  display: none !important;
+}
+
+.data-status-banner--offline {
+  background: var(--color-warning-bg, #fef3c7);
+  color: var(--color-warning-text, #92400e);
+}
+
+.data-status-banner--error {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.data-status-banner__text {
+  flex: 1 1 12rem;
+  text-align: center;
+}
+
+/* Mobile overflow guard — fix root cause per-page where possible */
+@media (width <= 480px) {
+  body {
+    overflow-x: clip;
+  }
+
+  .btn,
+  .filter-chip,
+  .related-tool-link,
+  button,
+  a.card {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
 .skeleton-inline {
   display: inline-block;
   background: linear-gradient(

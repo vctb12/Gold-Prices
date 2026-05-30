@@ -4,6 +4,8 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search Gold Prices — Countries, Cities & Tools | Gold Ticker Live</title>
@@ -34,6 +36,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#d4a017" />
     <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/pages/content-landing.css" />
     <style>
       .search-page {
         max-width: 720px;
@@ -296,9 +299,9 @@
   </script>
   </head>
   <body>
-    <div id="nav-root"></div>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    <main class="search-page" role="main">
+    <main id="main-content" class="search-page" role="main">
       <div class="search-hero">
         <h1 id="hero-title">Search Gold Prices</h1>
         <p id="hero-subtitle">Find prices by country, city, karat, or gold shop</p>
@@ -346,14 +349,24 @@
         <div class="suggestions-title" id="suggestions-title">Popular searches</div>
         <div class="suggestion-pills" id="suggestion-pills"></div>
       </div>
+      <section class="content-section" aria-label="Search tips">
+        <p>
+          Use this search to jump to country and city gold-rate pages, karat explainers, calculators,
+          and shops. Results are curated site links — not a live metals feed. For current XAU/USD
+          spot-linked reference prices with freshness labels, open the
+          <a href="/tracker.html">live tracker</a> or
+          <a href="/calculator.html">gold calculator</a>. Popular GCC destinations include
+          <a href="/countries/uae/gold-price/">UAE</a>,
+          <a href="/countries/saudi-arabia/gold-price/">Saudi Arabia</a>, and
+          <a href="/countries/kuwait/gold-price/">Kuwait</a>.
+        </p>
+      </section>
+      <div id="related-guides-slot"></div>
     </main>
-
-    <div id="footer-root"></div>
 
     <script type="module">
       import { search } from '../../src/search/searchEngine.js';
-      import { injectNav, updateNavLang } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
 
       const BASE = 'https://goldtickerlive.com';
 
@@ -372,8 +385,13 @@
       document.documentElement.lang = lang;
       document.documentElement.dir = isAr ? 'rtl' : 'ltr';
 
-      injectNav(lang, 2);
-      injectFooter(lang, 2);
+      bootContentPage({
+        depth: 2,
+        crumbs: [
+          { label: 'Home', url: '../../' },
+          { label: 'Search', url: '#' },
+        ],
+      });
 
       if (isAr) {
         document.getElementById('hero-title').textContent = 'ابحث عن أسعار الذهب';

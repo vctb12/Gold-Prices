@@ -4,6 +4,8 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gold Price History &amp; Charts — 30 Days to 5 Years | Gold Ticker Live</title>
@@ -46,6 +48,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/pages/content-landing.css" />
 
     <style>
       /* ── Page layout ── */
@@ -434,9 +437,9 @@
   </script>
   </head>
   <body>
-    <div id="nav-root"></div>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    <main class="hist-page">
+    <main id="main-content" class="hist-page">
       <section class="hist-hero">
         <h1 class="hist-hero-title" data-i18n="hist_title">Gold Price History &amp; Charts</h1>
         <p class="hist-hero-sub" data-i18n="hist_sub">
@@ -558,14 +561,24 @@
         averages in USD/troy oz and are for informational purposes only.
         <a href="/methodology.html" data-i18n="hist_methodology_link">Methodology</a>
       </p>
+      <section class="content-section" aria-label="About this chart">
+        <p>
+          This workspace combines embedded LBMA-style monthly baselines with your browser session
+          snapshots when available. Longer ranges are labelled as monthly reference history — not
+          tick-by-tick trading data. Use the
+          <a href="/tracker.html">live tracker</a> for intraday spot-linked reference prices and the
+          <a href="/methodology.html">methodology page</a> for freshness states, AED peg rules, and
+          karat conversion math. Retail shop quotes can still differ because of making charges, VAT,
+          and dealer margins.
+        </p>
+      </section>
+      <div id="related-guides-slot"></div>
     </main>
-
-    <div id="footer-root"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script type="module">
-      import { injectNav, updateNavLang } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      import { updateNavLang } from '../../src/components/nav.js';
       import { fetchGold } from '../../src/lib/api.js';
       import {
         getBaselineHistory,
@@ -635,8 +648,14 @@
       let chartInstance = null;
 
       // ── Init ──────────────────────────────────────────────────────────────────
-      const navCtrl = injectNav(lang, 2);
-      injectFooter(lang, 2);
+      const shell = bootContentPage({
+        depth: 2,
+        crumbs: [
+          { label: 'Home', url: '../../' },
+          { label: 'Gold Price History', url: '#' },
+        ],
+      });
+      const navCtrl = shell?.navCtrl;
       applyLang();
       loadData();
       setupTimeframeBtns();

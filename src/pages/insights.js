@@ -8,6 +8,9 @@ import * as api from '../lib/api.js';
 import { mountSharedShell } from '../components/site-shell.js';
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { CONSTANTS } from '../config/index.js';
+import { getBaselineHistory, getHistoryStats } from '../lib/historical-data.js';
+import { initPageEnter } from '../lib/page-enter.js';
+import { mountRelatedGuides } from '../components/RelatedGuides.js';
 
 const AED_PEG = CONSTANTS.AED_PEG; // 3.6725
 const TROY_GRAMS = CONSTANTS.TROY_OZ_GRAMS; // 31.1035
@@ -60,6 +63,12 @@ const CONTENT = {
 
     // Related tools
     'related-tools-title': 'Related Tools',
+
+    'insights.pulseTitle': 'Market pulse',
+    'insights.pulseDay': 'Today vs day open',
+    'insights.pulseYtd': 'Year to date',
+    'insights.pulse52w': 'vs 12-month average',
+    'insights.pageUpdated': 'Page data updated',
   },
   ar: {
     // Hero
@@ -85,6 +94,12 @@ const CONTENT = {
 
     // Related tools
     'related-tools-title': 'أدوات ذات صلة',
+
+    'insights.pulseTitle': 'نبض السوق',
+    'insights.pulseDay': 'اليوم مقابل افتتاح اليوم',
+    'insights.pulseYtd': 'منذ بداية العام',
+    'insights.pulse52w': 'مقارنة بمتوسط 12 شهراً',
+    'insights.pageUpdated': 'تحديث بيانات الصفحة',
   },
 };
 
@@ -95,8 +110,12 @@ const CONTENT = {
 function applyLang(lang) {
   const content = CONTENT[lang] ?? CONTENT.en;
   Object.entries(content).forEach(([id, text]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
+    const node = document.getElementById(id);
+    if (node) node.textContent = text;
+  });
+  document.querySelectorAll('[data-i18n]').forEach((node) => {
+    const key = node.getAttribute('data-i18n');
+    if (content[key]) node.textContent = content[key];
   });
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -146,6 +165,46 @@ function updatePriceBar(priceUsd, stale) {
   }
 }
 
+function formatPct(pct) {
+  if (pct == null || Number.isNaN(pct)) return '—';
+  const sign = pct >= 0 ? '+' : '';
+  return `${sign}${pct.toFixed(2)}%`;
+}
+
+function setPulseValue(id, pct) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  node.textContent = formatPct(pct);
+  node.classList.remove('insights-pulse-value--up', 'insights-pulse-value--down');
+  if (pct == null || Number.isNaN(pct)) return;
+  node.classList.add(pct >= 0 ? 'insights-pulse-value--up' : 'insights-pulse-value--down');
+}
+
+function updateMarketPulse(spotUsd) {
+  const records = getBaselineHistory();
+  const stats = getHistoryStats(records);
+  if (stats.ytdChange != null) setPulseValue('pulse-ytd-value', stats.ytdChange);
+  if (stats.yoyChange != null) setPulseValue('pulse-52w-value', stats.yoyChange);
+
+  const last12 = records.slice(-12);
+  if (last12.length && spotUsd > 0) {
+    const avg = last12.reduce((s, r) => s + r.price, 0) / last12.length;
+    setPulseValue('pulse-52w-value', ((spotUsd - avg) / avg) * 100);
+  }
+
+  const open = STATE.dayOpenGoldPriceUsdPerOz;
+  if (open > 0 && spotUsd > 0) {
+    setPulseValue('pulse-day-value', ((spotUsd - open) / open) * 100);
+  }
+
+  const updated = document.getElementById('insights-page-updated');
+  if (updated) {
+    const hhmm = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const label = STATE.lang === 'ar' ? 'تحديث بيانات الصفحة' : 'Page data updated';
+    updated.textContent = `${label}: ${hhmm}`;
+  }
+}
+
 async function fetchAndUpdatePriceBar() {
   try {
     const data = await api.fetchGold();
@@ -153,6 +212,7 @@ async function fetchAndUpdatePriceBar() {
     STATE.status.goldStale = false;
     cache.saveGoldPrice(data.price, data.updatedAt);
     updatePriceBar(data.price, false);
+    updateMarketPulse(data.price);
   } catch {
     STATE.status.goldStale = true;
     if (STATE.goldPriceUsdPerOz > 0) {
@@ -180,6 +240,8 @@ async function init() {
   const shell = mountSharedShell({ lang: STATE.lang, depth: 0 });
   const navResult = shell.navCtrl;
   injectBreadcrumbs('insights');
+  initPageEnter('#main-content');
+  mountRelatedGuides({ lang: STATE.lang });
 
   navResult.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -199,6 +261,7 @@ async function init() {
   // Show cached price immediately, then fetch fresh
   if (STATE.goldPriceUsdPerOz > 0) {
     updatePriceBar(STATE.goldPriceUsdPerOz, STATE.status.goldStale);
+    updateMarketPulse(STATE.goldPriceUsdPerOz);
   }
 
   // Fetch fresh price

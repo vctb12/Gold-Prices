@@ -37,6 +37,8 @@
     />
     <meta name="twitter:image" content="https://goldtickerlive.com/assets/og-image.png" />
     <meta property="og:image:alt" content="Gold Ticker Live — live gold price tracker for GCC and Arab world" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
     <link rel="preload" as="style" href="./styles/critical.css" />
     <link rel="stylesheet" href="./styles/critical.css" />
     <link rel="stylesheet" href="./styles/global.css" />
@@ -91,12 +93,15 @@
           <span class="method-toc-label" id="method-toc-label">Sections</span>
           <ul class="method-toc-list">
             <li><a href="#overview" id="toc-overview">Overview</a></li>
+            <li><a href="#live-formula" id="toc-live-formula">Live formula</a></li>
             <li><a href="#gold-data" id="toc-gold-data">Gold Price Data</a></li>
             <li><a href="#fx-rates" id="toc-fx-rates">FX Rates</a></li>
             <li><a href="#aed-peg" id="toc-aed-peg">AED Peg</a></li>
             <li><a href="#karat-conversion" id="toc-karat">Karat Conversion</a></li>
             <li><a href="#not-included" id="toc-not-included">What We Don't Include</a></li>
             <li><a href="#fallback" id="toc-fallback">Fallback &amp; Reliability</a></li>
+            <li><a href="#freshness-states" id="toc-freshness-states">Freshness states</a></li>
+            <li><a href="#method-faq" id="toc-method-faq">FAQ</a></li>
             <li><a href="#disclaimer" id="toc-disclaimer">Disclaimer</a></li>
           </ul>
         </div>
@@ -151,6 +156,7 @@
                 class="method-source-card-link"
                 >↗ gold-api.com</a
               >
+              <div class="method-source-freshness" id="method-gold-freshness" aria-live="polite"></div>
             </div>
             <div class="method-source-card">
               <div class="method-source-card-name">open.er-api.com</div>
@@ -165,8 +171,32 @@
                 class="method-source-card-link"
                 >↗ open.er-api.com</a
               >
+              <div class="method-source-freshness" id="method-fx-freshness" aria-live="polite"></div>
             </div>
           </div>
+        </section>
+
+        <section class="method-section" id="live-formula">
+          <h2>Live price pipeline</h2>
+          <p id="method-52w-context" class="method-context-line" aria-live="polite">
+            Loading live reference values…
+          </p>
+          <div id="method-formula-pipeline" class="method-formula-host" aria-live="polite"></div>
+          <table class="method-unit-table" aria-label="Unit conversion reference">
+            <thead>
+              <tr>
+                <th scope="col">Unit</th>
+                <th scope="col">Karat</th>
+                <th scope="col">USD</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody id="method-unit-tbody">
+              <tr>
+                <td colspan="4">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
         <!-- Section 2: Gold Price Data -->
@@ -545,6 +575,42 @@
           </p>
         </section>
 
+        <section class="method-section" id="freshness-states">
+          <h2>Freshness states</h2>
+          <p>Every visible price carries a state label so cached or delayed data is never mistaken for live trading quotes.</p>
+          <ul class="method-freshness-legend">
+            <li><span class="badge badge--live">Live</span> Fetched within the healthy window</li>
+            <li><span class="badge badge--cached">Cached</span> Browser or service-worker cache</li>
+            <li><span class="badge badge--delayed">Delayed</span> Provider lag (often FX)</li>
+            <li><span class="badge badge--stale">Stale</span> Older than our stale threshold</li>
+            <li><span class="badge badge--fallback">Fallback</span> Last known value after failure</li>
+          </ul>
+        </section>
+
+        <section class="method-section" id="method-faq">
+          <h2>Frequently asked questions</h2>
+          <dl class="method-faq-list">
+            <dt>Why does my shop quote differ?</dt>
+            <dd>
+              Retail prices add making charges, VAT, design premiums, and dealer margins. Our numbers are
+              spot-linked reference metal value — use the
+              <a href="content/spot-vs-retail-gold-price/">spot vs retail guide</a> and
+              <a href="calculator.html">calculator</a> to compare transparently.
+            </dd>
+            <dt>How fresh is the data?</dt>
+            <dd>
+              Gold spot is committed hourly during market hours to <code>data/gold_price.json</code>; the
+              browser re-fetches about every 90 seconds. FX updates roughly daily. Check the freshness chip
+              on each surface.
+            </dd>
+            <dt>Why is AED pricing special?</dt>
+            <dd>
+              We hardcode the official <strong>3.6725</strong> AED/USD peg — never a floating FX quote — so
+              UAE gram prices move deterministically with XAU/USD.
+            </dd>
+          </dl>
+        </section>
+
         <!-- Section 8: Disclaimer -->
         <section class="method-section" id="disclaimer">
           <h2 id="disclaimer-h2">Disclaimer</h2>
@@ -573,6 +639,8 @@
         </section>
       </div>
       <!-- end .method-body -->
+
+      <div id="related-guides-slot"></div>
 
       <section class="method-section method-section--tools">
         <div class="related-tools-row">

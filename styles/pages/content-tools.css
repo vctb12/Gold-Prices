@@ -1,0 +1,33 @@
+/* Shared layout for /content/tools/ calculator pages */
+.tool-page {
+  max-width: var(--content-max, 720px);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-10);
+}
+
+.tool-page h1 {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.tool-page .tool-lead {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  margin-bottom: var(--space-6);
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .tool-page {
+    padding-inline: var(--space-3);
+  }
+
+  .tool-page input,
+  .tool-page select,
+  .tool-page button {
+    min-height: 44px;
+    font-size: max(14px, 1rem);
+  }
+}

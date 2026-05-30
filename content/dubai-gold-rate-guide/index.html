@@ -2,6 +2,9 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
@@ -111,15 +114,14 @@
         </div>
         <div class="content-cta-grid"><a class="content-cta-card" href="/tracker.html"><span>Open live tracker</span><small>Check current spot-linked prices</small></a><a class="content-cta-card" href="/calculator.html"><span>Use calculator</span><small>Estimate value by weight and karat</small></a><a class="content-cta-card" href="/methodology.html"><span>Read methodology</span><small>Understand sources and limits</small></a><a class="content-cta-card" href="/countries/uae/cities/dubai.html"><span>Dubai rates</span><small>Open Dubai page</small></a><a class="content-cta-card" href="/countries/uae/markets/dubai-gold-souk.html"><span>Gold Souk guide</span><small>Open souk page</small></a></div>
       </section>
+          <div id="related-guides-slot"></div>
     </main>
     <script type="module">
-      import { injectNav } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
-      const urlLang = new URLSearchParams(location.search).get('lang');
-      const lang = urlLang === 'ar' ? 'ar' : 'en';
-      if (lang === 'ar') { document.documentElement.lang = 'ar'; document.documentElement.dir = 'rtl'; }
-      injectNav(lang, 2);
-      injectFooter(lang, 2);
-    </script>
-  </body>
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 2,
+        crumbs: [{"label":"Home","url":"../../"},{"label":"Dubai Gold Rate Guide","url":"#"}],
+        
+      });
+    </script></body>
 </html>

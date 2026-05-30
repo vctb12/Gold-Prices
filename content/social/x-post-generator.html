@@ -4,6 +4,9 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex,follow" />
@@ -257,8 +260,24 @@
   ]
 }
   </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "X/Twitter Gold Price Post Generator | Gold Ticker Live",
+  "description": "Generate ready-to-post X/Twitter updates with live gold prices. Choose from daily, alert, weekly, and ATH templates.",
+  "url": "https://goldtickerlive.com/content/social/x-post-generator.html",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Gold Ticker Live",
+    "url": "https://goldtickerlive.com/"
+  }
+}
+  </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div id="nav-root"></div>
 
     <div style="max-width: 700px; margin: 0 auto; padding: 1.5rem 1rem">
@@ -704,10 +723,11 @@
     <!-- /max-width wrapper -->
     <div id="footer-root"></div>
     <script type="module">
-      import { injectNav } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
-      injectNav('en', 2);
-      injectFooter('en', 2);
-    </script>
-  </body>
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 2,
+        crumbs: [{"label":"Home","url":"../../"},{"label":"Social","url":"#"}],
+        
+      });
+    </script></body>
 </html>

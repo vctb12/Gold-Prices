@@ -8,6 +8,9 @@ import { mountSharedShell } from '../components/site-shell.js';
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { getArticle } from '../learn-hub/content-registry.js';
 import { renderArticle } from '../learn-hub/article-renderer.js';
+import { mountLearnHubCatalog } from './learn-hub-ui.js';
+import { initPageEnter } from '../lib/page-enter.js';
+import { mountRelatedGuides } from '../components/RelatedGuides.js';
 
 const STATE = {
   lang: 'en',
@@ -74,6 +77,9 @@ function init() {
   const navCtrl = shell.navCtrl;
   injectBreadcrumbs('learn');
 
+  mountLearnHubCatalog({ lang: STATE.lang, container: '#learn-catalog-root' });
+  initPageEnter('#main-content');
+
   const article = getArticle('learn');
   if (!article) {
     applyLang(null);
@@ -100,6 +106,7 @@ function init() {
 
   applyLang(renderer);
   scrollToHashTarget();
+  mountRelatedGuides({ lang: STATE.lang });
 }
 
 init();

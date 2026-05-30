@@ -33,6 +33,8 @@
     />
     <meta name="twitter:image" content="https://goldtickerlive.com/assets/og-image.png" />
     <meta property="og:image:alt" content="Gold Ticker Live — live gold price tracker for GCC and Arab world" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
     <link rel="preload" as="style" href="./styles/critical.css" />
     <link rel="stylesheet" href="./styles/critical.css" />
     <link rel="stylesheet" href="./styles/global.css" />
@@ -104,6 +106,31 @@
           <span class="price-bar-freshness" id="price-bar-freshness">Loading…</span>
         </div>
       </div>
+
+      <section class="insights-market-pulse" id="insights-market-pulse" aria-live="polite">
+        <div class="insights-inner insights-market-pulse-inner">
+          <h2 class="insights-market-pulse-title" id="market-pulse-title" data-i18n="insights.pulseTitle">
+            Market pulse
+          </h2>
+          <div class="insights-market-pulse-grid">
+            <div class="insights-pulse-card" id="pulse-day">
+              <span class="insights-pulse-label" data-i18n="insights.pulseDay">Today vs day open</span>
+              <span class="insights-pulse-value" id="pulse-day-value">—</span>
+            </div>
+            <div class="insights-pulse-card" id="pulse-ytd">
+              <span class="insights-pulse-label" data-i18n="insights.pulseYtd">Year to date</span>
+              <span class="insights-pulse-value" id="pulse-ytd-value">—</span>
+            </div>
+            <div class="insights-pulse-card" id="pulse-52w">
+              <span class="insights-pulse-label" data-i18n="insights.pulse52w">vs 12-month average</span>
+              <span class="insights-pulse-value" id="pulse-52w-value">—</span>
+            </div>
+          </div>
+          <p class="insights-market-updated" id="insights-page-updated" data-i18n="insights.pageUpdated">
+            Page data updated: —
+          </p>
+        </div>
+      </section>
 
       <!-- Section 2: Featured Article -->
       <section id="why-gold-moved" class="insights-section">
@@ -293,6 +320,7 @@
           </div>
         </div>
       </section>
+      <div id="related-guides-slot"></div>
     </main>
 
     <script type="module" src="./src/pages/insights.js"></script>

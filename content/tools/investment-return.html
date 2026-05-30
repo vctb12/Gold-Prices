@@ -4,6 +4,9 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex,follow" />
@@ -53,6 +56,7 @@
     />
 
     <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/pages/content-tools.css" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
@@ -537,6 +541,21 @@
   ]
 }
   </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Gold Investment Return Calculator — Historical ROI | Gold Ticker Live",
+  "description": "Calculate your gold investment returns over time. See historical ROI, annualized gains, and total profit based on real gold price data from 2006 to today.",
+  "url": "https://goldtickerlive.com/content/tools/investment-return.html",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Gold Ticker Live",
+    "url": "https://goldtickerlive.com/"
+  }
+}
+  </script>
   </head>
 
   <body>
@@ -720,251 +739,15 @@
           </a>
         </div>
       </section>
+          <div id="related-guides-slot"></div>
     </main>
 
     <script type="module">
-      import { injectNav, updateNavLang } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
-
-      const lang = new URLSearchParams(location.search).get('lang') === 'ar' ? 'ar' : 'en';
-      if (lang === 'ar') document.documentElement.setAttribute('dir', 'rtl');
-      document.documentElement.lang = lang;
-      injectNav(lang, 2);
-      injectFooter(lang, 2);
-
-      /* ── Historical gold prices (approximate USD/oz) ── */
-      const TROY_OZ_G = 31.1035;
-      // Approximate spot price as of early 2026. Update periodically or
-      // replace with a live API fetch for more accurate current valuations.
-      const CURRENT_PRICE_OZ = 3200;
-
-      const PRICE_HISTORY = [
-        { year: 2004, month: 1, price: 415 },
-        { year: 2005, month: 1, price: 445 },
-        { year: 2006, month: 1, price: 600 },
-        { year: 2007, month: 1, price: 650 },
-        { year: 2008, month: 1, price: 870 },
-        { year: 2009, month: 1, price: 860 },
-        { year: 2010, month: 1, price: 1120 },
-        { year: 2011, month: 1, price: 1370 },
-        { year: 2011, month: 9, price: 1800 },
-        { year: 2012, month: 1, price: 1650 },
-        { year: 2013, month: 1, price: 1670 },
-        { year: 2014, month: 1, price: 1240 },
-        { year: 2015, month: 1, price: 1200 },
-        { year: 2016, month: 1, price: 1100 },
-        { year: 2017, month: 1, price: 1200 },
-        { year: 2018, month: 1, price: 1310 },
-        { year: 2019, month: 1, price: 1290 },
-        { year: 2019, month: 7, price: 1500 },
-        { year: 2020, month: 1, price: 1570 },
-        { year: 2020, month: 8, price: 1970 },
-        { year: 2020, month: 12, price: 1770 },
-        { year: 2021, month: 1, price: 1860 },
-        { year: 2021, month: 6, price: 1770 },
-        { year: 2021, month: 12, price: 1800 },
-        { year: 2022, month: 1, price: 1800 },
-        { year: 2022, month: 3, price: 1950 },
-        { year: 2022, month: 10, price: 1640 },
-        { year: 2023, month: 1, price: 1930 },
-        { year: 2023, month: 5, price: 2000 },
-        { year: 2023, month: 10, price: 1980 },
-        { year: 2024, month: 1, price: 2060 },
-        { year: 2024, month: 4, price: 2340 },
-        { year: 2024, month: 10, price: 2750 },
-        { year: 2024, month: 12, price: 2400 },
-        { year: 2025, month: 1, price: 2770 },
-        { year: 2025, month: 3, price: 2900 },
-        { year: 2025, month: 6, price: 3100 },
-        { year: 2026, month: 1, price: 3200 },
-      ];
-
-      /**
-       * Look up the approximate gold price (USD/oz) for a given date
-       * by interpolating between the nearest historical data points.
-       */
-      function getPriceForDate(date) {
-        const target = date.getFullYear() + date.getMonth() / 12;
-        let before = PRICE_HISTORY[0];
-        let after = PRICE_HISTORY[PRICE_HISTORY.length - 1];
-
-        for (let i = 0; i < PRICE_HISTORY.length; i++) {
-          const pt = PRICE_HISTORY[i];
-          const ptVal = pt.year + (pt.month - 1) / 12;
-          if (ptVal <= target) before = pt;
-          if (ptVal >= target) {
-            after = pt;
-            break;
-          }
-        }
-
-        const bVal = before.year + (before.month - 1) / 12;
-        const aVal = after.year + (after.month - 1) / 12;
-
-        if (aVal === bVal) return before.price;
-
-        const t = (target - bVal) / (aVal - bVal);
-        return before.price + t * (after.price - before.price);
-      }
-
-      /* ── DOM refs ────────────────────────────────── */
-      const amountInput = document.getElementById('ir-amount');
-      const periodSelect = document.getElementById('ir-period');
-      const dateField = document.getElementById('ir-date-field');
-      const dateInput = document.getElementById('ir-date');
-      const karatSelect = document.getElementById('ir-karat');
-      const computeBtn = document.getElementById('ir-compute');
-      const resultPanel = document.getElementById('ir-result');
-      const gramsEl = document.getElementById('ir-grams');
-      const currentValEl = document.getElementById('ir-current-value');
-      const totalRetEl = document.getElementById('ir-total-return');
-      const totalPctEl = document.getElementById('ir-total-pct');
-      const annualPctEl = document.getElementById('ir-annual-pct');
-      const verdictEl = document.getElementById('ir-verdict');
-
-      /* ── Set date input bounds ───────────────────── */
-      const today = new Date();
-      const minDate = new Date(2004, 0, 1);
-      dateInput.max = today.toISOString().split('T')[0];
-      dateInput.min = minDate.toISOString().split('T')[0];
-
-      /* ── Show/hide custom date ───────────────────── */
-      periodSelect.addEventListener('change', () => {
-        dateField.style.display = periodSelect.value === 'custom' ? '' : 'none';
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 2,
+        crumbs: [{"label":"Home","url":"../../"},{"label":"Tools","url":"../../content/tools/"},{"label":"investment return","url":"#"}],
+        
       });
-
-      /* ── Format helpers ──────────────────────────── */
-      function fmtNum(n, decimals = 2) {
-        return n.toLocaleString('en-US', {
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
-        });
-      }
-      function fmtUSD(n) {
-        return '$' + fmtNum(n);
-      }
-
-      /* ── Calculate ───────────────────────────────── */
-      function calculate() {
-        const amount = parseFloat(amountInput.value);
-        const purity = parseFloat(karatSelect.value);
-
-        if (!amount || amount <= 0) {
-          resultPanel.classList.remove('visible');
-          return;
-        }
-
-        /* Determine purchase date */
-        let purchaseDate;
-        if (periodSelect.value === 'custom') {
-          if (!dateInput.value) {
-            resultPanel.classList.remove('visible');
-            return;
-          }
-          purchaseDate = new Date(dateInput.value + 'T00:00:00');
-        } else {
-          const months = parseInt(periodSelect.value, 10);
-          purchaseDate = new Date(today.getFullYear(), today.getMonth() - months, today.getDate());
-        }
-
-        if (purchaseDate > today || purchaseDate < minDate) {
-          resultPanel.classList.remove('visible');
-          return;
-        }
-
-        /* Years elapsed */
-        const msElapsed = today.getTime() - purchaseDate.getTime();
-        const yearsElapsed = msElapsed / (365.25 * 24 * 60 * 60 * 1000);
-        if (yearsElapsed <= 0) {
-          resultPanel.classList.remove('visible');
-          return;
-        }
-
-        /* Historical price at purchase date */
-        const priceAtPurchaseOz = getPriceForDate(purchaseDate);
-        const priceAtPurchaseGram = (priceAtPurchaseOz / TROY_OZ_G) * purity;
-
-        /* Current price per gram for this karat */
-        const currentPriceGram = (CURRENT_PRICE_OZ / TROY_OZ_G) * purity;
-
-        /* Grams purchased */
-        const grams = amount / priceAtPurchaseGram;
-
-        /* Current value */
-        const currentValue = grams * currentPriceGram;
-
-        /* Returns */
-        const totalReturn = currentValue - amount;
-        const totalPct = (totalReturn / amount) * 100;
-
-        /* Annualized return: (endValue/startValue)^(1/years) - 1 */
-        const annualPct = (Math.pow(currentValue / amount, 1 / yearsElapsed) - 1) * 100;
-
-        /* Populate stats */
-        gramsEl.textContent = fmtNum(grams, 2) + ' g';
-        currentValEl.textContent = fmtUSD(currentValue);
-        totalRetEl.textContent = (totalReturn >= 0 ? '+' : '') + fmtUSD(totalReturn);
-        totalPctEl.textContent = (totalPct >= 0 ? '+' : '') + fmtNum(totalPct, 1) + '%';
-        annualPctEl.textContent = (annualPct >= 0 ? '+' : '') + fmtNum(annualPct, 1) + '% / year';
-
-        /* Color the return values */
-        const gainColor = '#1a6b1a';
-        const lossColor = '#c81e1e';
-        const color = totalReturn >= 0 ? gainColor : lossColor;
-        totalRetEl.style.color = color;
-        totalPctEl.style.color = color;
-        annualPctEl.style.color = color;
-
-        /* Verdict */
-        const isGain = totalReturn >= 0;
-        const purchaseDateStr = purchaseDate.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        });
-        const karatLabel = ['24K', '22K', '21K', '18K'][karatSelect.selectedIndex] || '24K';
-        verdictEl.className = 'ir-verdict ' + (isGain ? 'gain' : 'loss');
-        verdictEl.textContent = '';
-        const strong = document.createElement('strong');
-        strong.textContent = isGain
-          ? `📈 Your investment gained ${fmtNum(totalPct, 1)}%`
-          : `📉 Your investment declined ${fmtNum(Math.abs(totalPct), 1)}%`;
-        verdictEl.appendChild(strong);
-        verdictEl.appendChild(
-          document.createTextNode(
-            ` A ${fmtUSD(amount)} investment on ${purchaseDateStr} at ~$${fmtNum(priceAtPurchaseOz, 0)}/oz` +
-              ` would have bought ${fmtNum(grams, 2)} g of ${karatLabel} gold.` +
-              ` At today's ~$${fmtNum(CURRENT_PRICE_OZ, 0)}/oz, that gold is worth approximately ${fmtUSD(currentValue)}.`
-          )
-        );
-
-        resultPanel.classList.add('visible');
-        resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      /* ── Events ──────────────────────────────────── */
-      computeBtn.addEventListener('click', calculate);
-
-      amountInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') calculate();
-      });
-      dateInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') calculate();
-      });
-
-      /* Live recalculate when inputs change if result is already visible */
-      amountInput.addEventListener('input', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-      periodSelect.addEventListener('change', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-      dateInput.addEventListener('change', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-      karatSelect.addEventListener('change', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-    </script>
-  </body>
+    </script></body>
 </html>

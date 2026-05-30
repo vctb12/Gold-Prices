@@ -5,6 +5,9 @@
 
 import { mountSharedShell } from '../components/site-shell.js';
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
+import { initMethodologyLive } from './methodology-live.js';
+import { initPageEnter } from '../lib/page-enter.js';
+import { mountRelatedGuides } from '../components/RelatedGuides.js';
 
 const STATE = { lang: 'en' };
 
@@ -79,10 +82,14 @@ function init() {
       localStorage.setItem('gp_pref_lang', STATE.lang);
       shell.updateLang(STATE.lang);
       applyLanguage();
+      initMethodologyLive(STATE.lang);
     });
   });
 
   applyLanguage();
+  initPageEnter('#main-content');
+  mountRelatedGuides({ lang: STATE.lang });
+  initMethodologyLive(STATE.lang);
 }
 
 document.addEventListener('DOMContentLoaded', init);

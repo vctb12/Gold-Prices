@@ -13,7 +13,11 @@ them into the right section here before execution. Agent operating rules are in
 - Keep completed items as `[x]` with enough context to serve as a record. Don't re-open closed items
   to pad status; don't invent new phases to look ambitious.
 
-**Last updated:** 2026-05-30 (Session 5 terminal polish — tracker K/U/⇧C shortcuts, tola/kg units,
+**Last updated:** 2026-05-30 (Session 6 launch push — content page audit + `content-page-boot`,
+methodology live formula, learn hub catalog, insights market pulse, CI content/SW audits. See
+[`docs/plans/2026-05-30_session6-launch-push.md`](./plans/2026-05-30_session6-launch-push.md).)
+
+Previous: 2026-05-30 (Session 5 terminal polish — tracker K/U/⇧C shortcuts, tola/kg units,
 currency flags, hero count-up + day-change strip; shops copy/group/sort/filter counts + city gold-rate
 links; badge system, page-enter fade, related guides. See
 [`docs/plans/2026-05-30_session5-terminal-polish.md`](./plans/2026-05-30_session5-terminal-polish.md).)
@@ -48,6 +52,16 @@ global.css, shops.css, calculator.css, tracker-pro.css, invest.css; complete can
 removing all legacy `--color-surface` / `--color-border-subtle` / `--color-text` /
 `--color-text-muted` fallback overrides across home.css, shops.css, calculator.css, stub.css,
 order.css, global.css).
+
+### 2026-05-30 session 6 — launch push (content + trust surfaces)
+
+- [x] Content: `content-page-boot.js`, WebPage schema + RelatedGuides + page-enter on 46 pages
+- [x] CI: `audit-content-pages.js`, `check-sw-precache.js` in `npm run validate`
+- [x] Methodology: live formula pipeline, source freshness badges, FAQ + FAQPage schema
+- [x] Learn: categorized guide cards, filter, read progress (localStorage), EN/AR catalog keys
+- [x] Insights: market pulse (day / YTD / 12m avg), page-updated timestamp
+- [x] Shared: `data-status-banner.js`, mobile 44px / overflow-x guard in global.css
+- [x] SW: cache version v17
 
 ### 2026-05-30 session 5 — terminal & directory polish
 

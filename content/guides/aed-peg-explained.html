@@ -4,6 +4,9 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The AED–USD Fixed Peg Explained — Why UAE Gold Prices Are Stable | Gold Ticker Live</title>
@@ -116,9 +119,10 @@
   </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div id="nav-root"></div>
 
-    <main>
+    <main id="main-content">
       <!-- Hero -->
       <section class="guide-hero">
         <div class="guide-hero-inner">
@@ -413,34 +417,18 @@
           </div>
         </section>
       </section>
+          <div id="related-guides-slot"></div>
     </main>
 
     <div id="footer-root"></div>
     <div id="ticker-root"></div>
 
     <script type="module">
-      import { injectNav } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
-      import { injectTicker } from '../../src/components/ticker.js';
-      import { renderBreadcrumbs } from '../../src/components/breadcrumbs.js';
-
-      const lang = new URLSearchParams(location.search).get('lang') === 'ar' ? 'ar' : 'en';
-      document.documentElement.lang = lang;
-      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-      injectNav(lang, 2);
-
-      const bc = document.createElement('div');
-      bc.className = 'page-breadcrumbs';
-      document.body.insertBefore(bc, document.querySelector('main'));
-      renderBreadcrumbs(bc, [
-        { label: 'Home', url: '../../' },
-        { label: 'Guides', url: './' },
-        { label: 'AED Peg Explained', url: '#' },
-      ]);
-
-      injectFooter(lang, 2);
-      injectTicker(lang, 2);
-    </script>
-  </body>
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 2,
+        crumbs: [{"label":"Home","url":"../../"},{"label":"Guides","url":"../../content/guides/"},{"label":"Aed Peg Explained","url":"#"}],
+        
+      });
+    </script></body>
 </html>

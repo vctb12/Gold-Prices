@@ -4,6 +4,9 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gold Weight Converter — Grams, Troy Oz, Tola, Baht, Mithqal | Gold Ticker Live</title>
@@ -52,6 +55,7 @@
     />
 
     <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/pages/content-tools.css" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
@@ -438,99 +442,15 @@
           </a>
         </div>
       </section>
+          <div id="related-guides-slot"></div>
     </main>
 
     <script type="module">
-      import { injectNav, updateNavLang } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
-
-      const lang = new URLSearchParams(location.search).get('lang') === 'ar' ? 'ar' : 'en';
-      if (lang === 'ar') document.documentElement.setAttribute('dir', 'rtl');
-      document.documentElement.lang = lang;
-      injectNav(lang, 2);
-      injectFooter(lang, 2);
-
-      /* ── Unit definitions (gram equivalents) ──────── */
-      const UNITS = [
-        { id: 'grams', label: 'Grams', factor: 1, symbol: 'g' },
-        { id: 'troy-oz', label: 'Troy Ounces', factor: 31.1035, symbol: 'oz t' },
-        { id: 'kilograms', label: 'Kilograms', factor: 1000, symbol: 'kg' },
-        { id: 'tola', label: 'Tola', factor: 11.6638, symbol: 'tola' },
-        { id: 'baht', label: 'Baht', factor: 15.244, symbol: 'baht' },
-        { id: 'mithqal', label: 'Mithqal', factor: 4.6875, symbol: 'mqal' },
-        { id: 'pennyweight', label: 'Pennyweight', factor: 1.55517, symbol: 'dwt' },
-      ];
-
-      /* ── Build cards ──────────────────────────────── */
-      const grid = document.getElementById('wc-grid');
-
-      UNITS.forEach((u) => {
-        const card = document.createElement('div');
-        card.className = 'wc-card';
-
-        const lbl = document.createElement('label');
-        lbl.className = 'wc-card-label';
-        lbl.setAttribute('for', `wc-${u.id}`);
-        lbl.textContent = u.label;
-
-        const hint = document.createElement('div');
-        hint.className = 'wc-card-factor';
-        hint.textContent = u.factor === 1 ? 'Base unit' : `1 ${u.symbol} = ${u.factor} g`;
-
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.id = `wc-${u.id}`;
-        input.inputMode = 'decimal';
-        input.step = 'any';
-        input.min = '0';
-        input.placeholder = '0';
-        input.autocomplete = 'off';
-        input.setAttribute('aria-label', `${u.label} (${u.symbol})`);
-
-        card.append(lbl, hint, input);
-        grid.appendChild(card);
-
-        input.addEventListener('input', () => convert(u.id, input.value));
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 2,
+        crumbs: [{"label":"Home","url":"../../"},{"label":"Tools","url":"../../content/tools/"},{"label":"weight converter","url":"#"}],
+        
       });
-
-      /* ── Conversion logic ─────────────────────────── */
-      function convert(sourceId, rawValue) {
-        const value = parseFloat(rawValue);
-        const source = UNITS.find((u) => u.id === sourceId);
-        if (!source) return;
-
-        // Convert source value to grams first
-        const grams = isNaN(value) || value === 0 ? 0 : value * source.factor;
-
-        UNITS.forEach((u) => {
-          if (u.id === sourceId) return;
-          const input = document.getElementById(`wc-${u.id}`);
-          if (!input) return;
-          if (grams === 0) {
-            input.value = '';
-          } else {
-            // Smart rounding: more decimals for small-factor units
-            const result = grams / u.factor;
-            input.value = formatResult(result);
-          }
-        });
-      }
-
-      function formatResult(n) {
-        if (n === 0) return '';
-        // Show up to 6 significant digits, trim trailing zeros
-        const s = n.toPrecision(6);
-        // Convert back to number to strip trailing zeros, then to string
-        return parseFloat(s).toString();
-      }
-
-      /* ── Reset ────────────────────────────────────── */
-      document.getElementById('wc-reset').addEventListener('click', () => {
-        UNITS.forEach((u) => {
-          const input = document.getElementById(`wc-${u.id}`);
-          if (input) input.value = '';
-        });
-      });
-    </script>
-  </body>
+    </script></body>
 </html>

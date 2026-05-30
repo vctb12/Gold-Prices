@@ -4,6 +4,9 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8578581906562588"
          crossorigin="anonymous"></script>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://www.gold-api.com" crossorigin />
+    <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+
     <script src="../../assets/analytics.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gold Zakat Calculator — Nisab Threshold &amp; 2.5% Obligation | Gold Ticker Live</title>
@@ -52,6 +55,7 @@
     />
 
     <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/pages/content-tools.css" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
@@ -687,162 +691,15 @@
           </a>
         </div>
       </section>
+          <div id="related-guides-slot"></div>
     </main>
 
     <script type="module">
-      import { injectNav, updateNavLang } from '../../src/components/nav.js';
-      import { injectFooter } from '../../src/components/footer.js';
-
-      const lang = new URLSearchParams(location.search).get('lang') === 'ar' ? 'ar' : 'en';
-      if (lang === 'ar') document.documentElement.setAttribute('dir', 'rtl');
-      document.documentElement.lang = lang;
-      injectNav(lang, 2);
-      injectFooter(lang, 2);
-
-      /* ── Constants ────────────────────────────────── */
-      const NISAB_GRAMS = 85;
-      const ZAKAT_RATE = 0.025;
-      const AED_PEG = 3.6725;
-      const TROY_OZ_G = 31.1035;
-      const DEFAULT_SPOT_USD_OZ = 2400;
-
-      /* ── DOM refs ────────────────────────────────── */
-      const weightInput = document.getElementById('zc-weight');
-      const karatSelect = document.getElementById('zc-karat');
-      const priceInput = document.getElementById('zc-price');
-      const priceHint = document.getElementById('zc-price-hint');
-      const computeBtn = document.getElementById('zc-compute');
-      const resultPanel = document.getElementById('zc-result');
-      const pureGoldEl = document.getElementById('zc-pure-gold');
-      const nisabEl = document.getElementById('zc-nisab-status');
-      const valueUsdEl = document.getElementById('zc-value-usd');
-      const valueAedEl = document.getElementById('zc-value-aed');
-      const verdictEl = document.getElementById('zc-verdict');
-
-      /* ── Try to fetch live price ─────────────────── */
-      let fetchedPrice = null;
-
-      async function fetchLivePrice() {
-        try {
-          const res = await fetch('/data/gold_price.json', {
-            signal: AbortSignal.timeout(6000),
-            cache: 'no-store',
-          });
-          if (!res.ok) return;
-          const data = await res.json();
-          const price = data?.gold?.ounce_usd;
-          if (typeof price === 'number' && price > 0) {
-            fetchedPrice = price / TROY_OZ_G;
-            if (!priceInput.value) {
-              priceInput.value = fetchedPrice.toFixed(2);
-              priceHint.textContent = `Live price loaded: $${fetchedPrice.toFixed(2)}/g (24K). You can override this.`;
-            }
-          }
-        } catch {
-          /* Silently fall back to default */
-        }
-      }
-      fetchLivePrice();
-
-      /* ── Format helpers ──────────────────────────── */
-      function fmtNum(n, decimals = 2) {
-        return n.toLocaleString('en-US', {
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
-        });
-      }
-      function fmtUSD(n) {
-        return '$' + fmtNum(n);
-      }
-      function fmtAED(n) {
-        return fmtNum(n) + ' AED';
-      }
-
-      /* ── Calculate ───────────────────────────────── */
-      function calculate() {
-        const weight = parseFloat(weightInput.value);
-        const purity = parseFloat(karatSelect.value);
-        let pricePerGram = parseFloat(priceInput.value);
-
-        if (!weight || weight <= 0) {
-          resultPanel.classList.remove('visible');
-          return;
-        }
-
-        if (!pricePerGram || pricePerGram <= 0) {
-          pricePerGram = DEFAULT_SPOT_USD_OZ / TROY_OZ_G;
-          priceInput.value = pricePerGram.toFixed(2);
-        }
-
-        const pureGold = weight * purity;
-        const totalValueUSD = weight * purity * pricePerGram;
-        const totalValueAED = totalValueUSD * AED_PEG;
-        const meetsNisab = pureGold >= NISAB_GRAMS;
-
-        pureGoldEl.textContent = fmtNum(pureGold, 2) + ' g';
-        nisabEl.textContent = meetsNisab ? '✅ Met' : '❌ Below';
-        valueUsdEl.textContent = fmtUSD(totalValueUSD);
-        valueAedEl.textContent = fmtAED(totalValueAED);
-
-        if (meetsNisab) {
-          const zakatUSD = totalValueUSD * ZAKAT_RATE;
-          const zakatAED = zakatUSD * AED_PEG;
-          verdictEl.className = 'zc-verdict obligatory';
-          verdictEl.textContent = '';
-          const s1 = document.createElement('strong');
-          s1.textContent = '✅ Zakat is obligatory';
-          verdictEl.appendChild(s1);
-          verdictEl.appendChild(
-            document.createTextNode(
-              ` Your pure gold (${fmtNum(pureGold)} g) meets the 85 g nisab threshold. `
-            )
-          );
-          const s2 = document.createElement('strong');
-          s2.textContent = `Zakat due (2.5%): ${fmtUSD(zakatUSD)} / ${fmtAED(zakatAED)}`;
-          verdictEl.appendChild(s2);
-        } else {
-          const deficit = NISAB_GRAMS - pureGold;
-          const deficitActual = deficit / purity;
-          const karatLabel = ['24K', '22K', '21K', '18K'][karatSelect.selectedIndex] || '24K';
-          verdictEl.className = 'zc-verdict below';
-          verdictEl.textContent = '';
-          const strong = document.createElement('strong');
-          strong.textContent = 'ℹ️ Below nisab — zakat not required';
-          verdictEl.appendChild(strong);
-          verdictEl.appendChild(
-            document.createTextNode(
-              ` Your pure gold equivalent (${fmtNum(pureGold)} g) is below the 85 g threshold. ` +
-                `You need ${fmtNum(deficit)} g more pure gold` +
-                ` (~${fmtNum(deficitActual)} g at ${karatLabel}) to reach nisab.`
-            )
-          );
-        }
-
-        resultPanel.classList.add('visible');
-        resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      /* ── Events ──────────────────────────────────── */
-      computeBtn.addEventListener('click', calculate);
-
-      /* Also recalculate on Enter in any input */
-      weightInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') calculate();
+      import { bootContentPage } from '../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 2,
+        crumbs: [{"label":"Home","url":"../../"},{"label":"Tools","url":"../../content/tools/"},{"label":"zakat calculator","url":"#"}],
+        
       });
-      priceInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') calculate();
-      });
-
-      /* Auto-calculate when inputs change (live feedback) */
-      weightInput.addEventListener('input', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-      karatSelect.addEventListener('change', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-      priceInput.addEventListener('input', () => {
-        if (resultPanel.classList.contains('visible')) calculate();
-      });
-    </script>
-  </body>
+    </script></body>
 </html>
