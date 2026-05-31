@@ -12,10 +12,20 @@ import { getBaselineHistory, getHistoryStats } from '../lib/historical-data.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
 import { mountRelatedGuides } from '../components/RelatedGuides.js';
+import { initInsightsFeed } from './insights/feed.js';
+import { weeklyChangePct } from './insights/feed-core.js';
 
 const AED_PEG = CONSTANTS.AED_PEG; // 3.6725
 const TROY_GRAMS = CONSTANTS.TROY_OZ_GRAMS; // 31.1035
 const KARAT_22_PURITY = 22 / 24;
+
+let feedCtrl = null;
+
+function updateFeedCallout() {
+  if (!feedCtrl) return;
+  const pct = weeklyChangePct(STATE.history, STATE.goldPriceUsdPerOz);
+  feedCtrl.setPriceChange(pct);
+}
 
 const STATE = {
   lang: 'en',
@@ -222,6 +232,7 @@ async function fetchAndUpdatePriceBar() {
     cache.saveGoldPrice(data.price, data.updatedAt);
     updatePriceBar(data.price, false);
     updateMarketPulse(data.price);
+    updateFeedCallout();
   } catch {
     STATE.status.goldStale = true;
     if (STATE.goldPriceUsdPerOz > 0) {
@@ -252,12 +263,22 @@ async function init() {
   initPageEnter('#main-content');
   mountRelatedGuides({ lang: STATE.lang });
 
+  const feedRoot = document.getElementById('insights-feed');
+  if (feedRoot) {
+    feedCtrl = initInsightsFeed({ root: feedRoot, lang: STATE.lang });
+    updateFeedCallout();
+  }
+
   navResult.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {
       STATE.lang = STATE.lang === 'en' ? 'ar' : 'en';
       cache.savePreference('lang', STATE.lang);
       shell.updateLang(STATE.lang);
       applyLang(STATE.lang);
+      if (feedCtrl) {
+        feedCtrl.setLang(STATE.lang);
+        updateFeedCallout();
+      }
       // Refresh freshness label in new language
       if (STATE.goldPriceUsdPerOz > 0) {
         updatePriceBar(STATE.goldPriceUsdPerOz, STATE.status.goldStale);

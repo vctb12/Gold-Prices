@@ -206,58 +206,20 @@
         </div>
       </section>
 
-      <!-- Section 3: Insight Cards Grid -->
-      <section id="weekly-brief" class="insights-section insights-section--alt">
+      <!-- Section 3: Insight Feed (category filter + search + masonry grid) -->
+      <section
+        id="weekly-brief"
+        class="insights-section insights-section--alt"
+        aria-label="Gold market insights feed"
+      >
         <div class="insights-inner">
-          <div class="insights-section-header">
-            <h2 class="insights-section-title" id="insights-grid-h2" data-i18n="insights-grid-h2">
-              Gold Market Guides
-            </h2>
-            <p class="insights-section-sub" data-i18n="insights-grid-sub">
-              Essential reading for GCC gold buyers
-            </p>
-          </div>
-          <div class="insights-cards-grid">
-            <article class="insights-card card-interactive">
-              <div class="insights-card-tag">Pricing</div>
-              <h3 class="insights-card-title">Understanding the AED Gold Peg</h3>
-              <p class="insights-card-body">
-                The UAE Central Bank has pegged 1 USD = 3.6725 AED since 1997. This means AED gold
-                prices move exactly with USD prices — with zero FX noise. It makes UAE one of the
-                most price-stable gold markets globally.
-              </p>
-              <div class="insights-card-footer">
-                <a href="content/guides/aed-peg-explained.html" class="insights-card-link"
-                  >Full AED peg guide →</a
-                >
-              </div>
-            </article>
-            <article class="insights-card card-interactive">
-              <div class="insights-card-tag">Education</div>
-              <h3 class="insights-card-title">24K vs 22K: Which is the Better Buy?</h3>
-              <p class="insights-card-body">
-                24K is 99.9% pure gold — ideal for bars and coins. 22K (91.7%) is Gulf jewelry
-                standard. The price scales with purity, but retail premiums don't always. For
-                investment, bars beat jewelry. For gifts, 22K has better durability.
-              </p>
-              <div class="insights-card-footer">
-                <a href="content/guides/24k-vs-22k.html" class="insights-card-link">24K vs 22K guide →</a>
-              </div>
-            </article>
-            <article class="insights-card card-interactive">
-              <div class="insights-card-tag">Market Hours</div>
-              <h3 class="insights-card-title">When Do Gold Markets Open? A GCC Guide</h3>
-              <p class="insights-card-body">
-                Gold trades 23.5 hours/day, Sun 22:00 – Fri 21:00 UTC. Best liquidity: London open
-                (07:00 UTC). Most volatile: when London and New York overlap. Weekend: closed Friday
-                evening through Sunday night.
-              </p>
-              <div class="insights-card-footer">
-                <a href="content/guides/gcc-market-hours.html" class="insights-card-link"
-                  >GCC market hours guide →</a
-                >
-              </div>
-            </article>
+          <div class="insights-feed" id="insights-feed">
+            <!-- Rendered by src/pages/insights/feed.js -->
+            <div class="insights-feed-loading" aria-hidden="true">
+              <span class="insights-feed-skeleton"></span>
+              <span class="insights-feed-skeleton"></span>
+              <span class="insights-feed-skeleton"></span>
+            </div>
           </div>
         </div>
       </section>
