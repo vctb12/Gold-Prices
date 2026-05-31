@@ -135,7 +135,7 @@
       <!-- Section 2: Featured Article -->
       <section id="why-gold-moved" class="insights-section">
         <div class="insights-inner">
-          <article class="insights-featured-card" id="featured-article">
+          <article class="insights-featured-card" id="featured-article" data-reveal>
             <div
               class="insights-featured-label"
               id="featured-tag-label"
@@ -208,13 +208,21 @@
 
       <!-- Section 3: Insight Feed (filterable, searchable masonry) -->
       <section id="weekly-brief" class="insights-section insights-section--alt">
+      <!-- Section 3: Search + Category Filter + Insight Cards Grid -->
+      <section id="insights-feed" class="insights-section insights-section--alt">
+      <!-- Section 3: Insight Feed (filter · search · masonry grid · live context) -->
+      <section
+        id="weekly-brief"
+        class="insights-section insights-section--alt insights-feed-section"
+        aria-label="Gold market insights feed"
+      >
         <div class="insights-inner">
           <div class="insights-section-header">
             <h2 class="insights-section-title" id="insights-grid-h2" data-i18n="insights-grid-h2">
               Gold Market Guides
             </h2>
             <p class="insights-section-sub" data-i18n="insights-grid-sub">
-              Essential reading for GCC gold buyers
+              Filter, search and read essential analysis for GCC gold buyers
             </p>
           </div>
 
@@ -239,6 +247,114 @@
               role="tablist"
               aria-label="Filter insights by category"
             ></div>
+          <!-- Search input -->
+          <div class="insights-search-wrap" role="search" aria-label="Search insights">
+            <label for="insights-search" class="sr-only" id="insights-search-label" data-i18n="insights.searchLabel">Search articles</label>
+            <input
+              type="search"
+              id="insights-search"
+              class="insights-search-input"
+              placeholder="Search articles…"
+              data-i18n-placeholder="insights.searchPlaceholder"
+              autocomplete="off"
+              aria-describedby="insights-search-hint"
+            />
+            <span class="insights-search-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </span>
+            <span id="insights-search-hint" class="sr-only">Filter articles by title and content</span>
+          </div>
+
+          <!-- Category filter chips -->
+          <div class="insights-category-strip" role="tablist" aria-label="Filter by category" id="insights-categories">
+            <button class="insights-category-chip is-active" role="tab" aria-selected="true" data-category="all" id="cat-all">
+              <span data-i18n="insights.catAll">All</span>
+              <span class="insights-cat-count" id="cat-count-all"></span>
+            </button>
+            <button class="insights-category-chip" role="tab" aria-selected="false" data-category="price-analysis">
+              <span data-i18n="insights.catPrice">Price Analysis</span>
+              <span class="insights-cat-count" id="cat-count-price-analysis"></span>
+            </button>
+            <button class="insights-category-chip" role="tab" aria-selected="false" data-category="market-news">
+              <span data-i18n="insights.catNews">Market News</span>
+              <span class="insights-cat-count" id="cat-count-market-news"></span>
+            </button>
+            <button class="insights-category-chip" role="tab" aria-selected="false" data-category="buying-guide">
+              <span data-i18n="insights.catGuide">Buying Guides</span>
+              <span class="insights-cat-count" id="cat-count-buying-guide"></span>
+            </button>
+            <button class="insights-category-chip" role="tab" aria-selected="false" data-category="islamic-finance">
+              <span data-i18n="insights.catIslamic">Zakat &amp; Islamic Finance</span>
+              <span class="insights-cat-count" id="cat-count-islamic-finance"></span>
+            </button>
+            <button class="insights-category-chip" role="tab" aria-selected="false" data-category="investment">
+              <span data-i18n="insights.catInvest">Investment</span>
+              <span class="insights-cat-count" id="cat-count-investment"></span>
+            </button>
+            <button class="insights-category-chip" role="tab" aria-selected="false" data-category="education">
+              <span data-i18n="insights.catEducation">Education</span>
+              <span class="insights-cat-count" id="cat-count-education"></span>
+            </button>
+          </div>
+
+          <!-- Result count + no-results message -->
+          <div class="insights-results-meta" id="insights-results-meta" aria-live="polite" aria-atomic="true">
+            <span id="insights-result-count"></span>
+          </div>
+          <div class="insights-no-results" id="insights-no-results" hidden aria-live="polite">
+            <p id="insights-no-results-msg">No insights match your search. Try 'karat' or 'Dubai'.</p>
+          </div>
+
+          <!-- Dynamic contextual callout (injected by JS at position 3) -->
+
+          <!-- Masonry insight cards grid -->
+          <div class="insights-masonry-grid" id="insights-masonry-grid" role="tabpanel">
+            <!-- Cards rendered by insights.js from INSIGHTS_ARTICLES config -->
+          <!-- Feed mount: JS (src/components/insights-feed.js) replaces the static
+               fallback below with the interactive filter strip, search and grid. The
+               static cards remain for no-JS crawlers and progressive enhancement. -->
+          <div class="insights-feed-mount" id="insights-feed-mount">
+            <div class="insights-cards-grid">
+              <article class="insights-card card-interactive">
+                <div class="insights-card-tag">Pricing</div>
+                <h3 class="insights-card-title">Understanding the AED Gold Peg</h3>
+                <p class="insights-card-body">
+                  The UAE Central Bank has pegged 1 USD = 3.6725 AED since 1997, so AED gold prices
+                  move exactly with USD prices — with zero FX noise.
+                </p>
+                <div class="insights-card-footer">
+                  <a href="content/guides/aed-peg-explained.html" class="insights-card-link"
+                    >Full AED peg guide →</a
+                  >
+                </div>
+              </article>
+              <article class="insights-card card-interactive">
+                <div class="insights-card-tag">Education</div>
+                <h3 class="insights-card-title">24K vs 22K vs 18K: Which Karat to Buy?</h3>
+                <p class="insights-card-body">
+                  24K is 99.9% pure — best for bars and coins. 22K (91.7%) is the Gulf jewellery
+                  standard. Price scales with purity.
+                </p>
+                <div class="insights-card-footer">
+                  <a href="content/guides/24k-vs-22k-vs-18k-gold/" class="insights-card-link"
+                    >24K vs 22K guide →</a
+                  >
+                </div>
+              </article>
+              <article class="insights-card card-interactive">
+                <div class="insights-card-tag">Market Hours</div>
+                <h3 class="insights-card-title">When Do Gold Markets Open? A GCC Guide</h3>
+                <p class="insights-card-body">
+                  Gold trades almost 24 hours a day, Sun 22:00 – Fri 21:00 UTC. Liquidity peaks at
+                  the London open and the London–New York overlap.
+                </p>
+                <div class="insights-card-footer">
+                  <a href="content/guides/gcc-market-hours.html" class="insights-card-link"
+                    >GCC market hours guide →</a
+                  >
+                </div>
+              </article>
+            </div>
           </div>
 
           <!-- JS-rendered masonry feed -->

@@ -12,6 +12,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: true,
+    lat: 25.2881,
+    lng: 55.3021,
     notes:
       'Cluster listing for independent stores in the traditional gold souk district in Deira. One of the highest concentrations of gold retail in the world.',
   },
@@ -27,6 +29,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 25.2721,
+    lng: 55.311,
     notes:
       'Specialist bullion and investment-grade gold outlets concentrated around the traditional souk. Primarily serves wholesale and serious retail buyers.',
   },
@@ -42,6 +46,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 25.3545,
+    lng: 55.3875,
     notes:
       "Sharjah's Central Souq (Blue Souk) houses a large concentration of gold and jewellery retailers across two towers. Known for competitive pricing and variety.",
   },
@@ -57,6 +63,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: true,
+    lat: 24.4869,
+    lng: 54.3644,
     notes:
       'Major Abu Dhabi destination with multiple brands and independent retailers across several floors. Popular for bridal and occasion sets.',
   },
@@ -72,6 +80,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 24.4908,
+    lng: 54.3693,
     notes:
       'Mid-city retail strip with standalone jewellery boutiques and chain outlets. Good variety of contemporary and traditional designs.',
   },
@@ -89,6 +99,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: true,
+    lat: 24.697,
+    lng: 46.7206,
     notes:
       'Market-area cluster near the city center. One of the busiest jewellery shopping destinations in Riyadh, with dozens of shops in close proximity.',
   },
@@ -104,6 +116,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 24.7136,
+    lng: 46.6753,
     notes:
       'Upscale commercial district with high-end jewellery boutiques and international brand outlets alongside local designers.',
   },
@@ -119,6 +133,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 21.4858,
+    lng: 39.1925,
     notes:
       'Historic district with UNESCO World Heritage status, home to long-established jewellery stores. Known for heritage and traditional Gulf designs.',
   },
@@ -134,6 +150,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 26.4344,
+    lng: 50.1033,
     notes:
       'Eastern Province hub with a concentration of jewellery shops and bullion dealers serving Dammam and Al-Khobar residents.',
   },
@@ -151,6 +169,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 29.3697,
+    lng: 47.9783,
     notes:
       'Traditional souk area with both jewellery counters and bullion-focused shops. Near the historic Mubarakiya market.',
   },
@@ -166,6 +186,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: false,
+    lat: 29.3125,
+    lng: 47.9267,
     notes:
       "Mall-based luxury and mid-range jewellery retailers at one of Kuwait's largest shopping destinations. Includes international and regional brands.",
   },
@@ -183,6 +205,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: true,
+    lat: 25.2854,
+    lng: 51.531,
     notes:
       'Central market listing with mixed brand and independent storefronts. The souq is adjacent to Souq Waqif and sees heavy tourist and local traffic.',
   },
@@ -198,6 +222,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 25.2631,
+    lng: 51.4425,
     notes:
       'Upmarket mall retail cluster covering international jewellery chains and regional brands. Catered toward higher-end buyers.',
   },
@@ -215,6 +241,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 26.2175,
+    lng: 50.5905,
     notes:
       'Well-known destination for wedding and occasion jewellery with multiple floors of shops and competitive pricing.',
   },
@@ -230,6 +258,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 26.225,
+    lng: 50.581,
     notes:
       'Traditional souk area in the heart of Manama with jewellery and bullion dealers. Popular with Saudi visitors crossing the King Fahd Causeway.',
   },
@@ -247,6 +277,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 23.6166,
+    lng: 58.5922,
     notes:
       'Historic souq cluster with stores focused on traditional Omani design styles and regional jewellery craftsmanship.',
   },
@@ -262,6 +294,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 23.6731,
+    lng: 58.185,
     notes:
       'Residential-commercial area near Muscat International Airport. Practical shopping destination for everyday and investment gold.',
   },
@@ -279,6 +313,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: true,
+    lat: 30.0478,
+    lng: 31.2625,
     notes:
       'Historic Cairo market dating to the 14th century with many multi-generation jewellery stores. Known globally for Egyptian-style gold craftsmanship.',
   },
@@ -294,6 +330,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 30.0536,
+    lng: 31.2387,
     notes:
       'Downtown Cairo area known as a wholesale and retail hub for plain-weight gold. Primarily serves both trade buyers and individual customers.',
   },
@@ -309,6 +347,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 31.2001,
+    lng: 29.8951,
     notes:
       "Alexandria's main jewellery market district with a mix of traditional craftsmen and modern retail boutiques.",
   },
@@ -326,6 +366,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 31.9519,
+    lng: 35.93,
     notes:
       'City-center listing used by local buyers comparing multiple nearby shops. Concentrated on Gold Street in downtown Amman.',
   },
@@ -341,6 +383,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: false,
+    lat: 31.9769,
+    lng: 35.8525,
     notes:
       'West Amman mall cluster with a dedicated jewellery wing. Mix of local Jordanian brands and regional chains serving the middle and upper-income market.',
   },
@@ -358,6 +402,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 33.5731,
+    lng: -7.5898,
     notes:
       'Urban retail area with boutique and mid-size jewellery businesses. Popular for bridal sets and modern designs.',
   },
@@ -373,6 +419,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 31.6295,
+    lng: -7.9811,
     notes:
       'Marrakech medina area with jewellery artisans and traders. Known for Berber-influenced and traditional Moroccan designs. Mix of silver and gold.',
   },
@@ -390,6 +438,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: true,
+    lat: 18.9477,
+    lng: 72.832,
     notes:
       "India's largest gold market, handling an estimated 20% of national gold trade. A key hub for wholesale and retail gold across all purities.",
   },
@@ -405,6 +455,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'limited',
     featured: false,
+    lat: 28.6519,
+    lng: 77.1905,
     notes:
       'Major jewellery destination in Delhi NCR. Known for bridal and wedding jewellery, intricate craftsmanship, and competitive pricing.',
   },
@@ -420,6 +472,8 @@ export const SHOPS = [
     website: '',
     detailsAvailability: 'partial',
     featured: false,
+    lat: 13.0418,
+    lng: 80.2341,
     notes:
       "T. Nagar is one of the world's highest-density gold retail areas. Chennai is famous for 22K jewellery, and T. Nagar is its commercial epicenter.",
   },
