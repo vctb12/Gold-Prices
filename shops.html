@@ -45,6 +45,7 @@
     <link rel="stylesheet" href="./styles/critical.css" />
     <link rel="stylesheet" href="./styles/global.css" />
     <link rel="stylesheet" href="./styles/pages/shops.css" />
+    <link rel="stylesheet" href="./styles/components/shops-map.css" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
 
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
@@ -322,6 +323,32 @@
 
       <section class="shops-results" aria-labelledby="shops-results-title">
         <div class="shops-results-inner">
+          <!-- Map/List View Toggle -->
+          <div class="shops-view-toggle" role="group" aria-label="View mode">
+            <button
+              type="button"
+              class="shops-view-toggle-btn is-active"
+              id="shops-view-list-btn"
+              aria-pressed="true"
+            >
+              <span class="shops-view-toggle-icon" aria-hidden="true">☰</span>
+              <span id="shops-view-list-label">List</span>
+            </button>
+            <button
+              type="button"
+              class="shops-view-toggle-btn"
+              id="shops-view-map-btn"
+              aria-pressed="false"
+            >
+              <span class="shops-view-toggle-icon" aria-hidden="true">🗺️</span>
+              <span id="shops-view-map-label">Map</span>
+            </button>
+          </div>
+
+          <!-- Map Container (hidden by default) -->
+          <div id="shops-map" class="shops-map-container" hidden aria-label="Gold shops map"></div>
+          <p class="shops-map-swipe-hint" id="shops-map-hint" hidden>← Pinch &amp; drag to explore →</p>
+
           <div class="shops-results-head">
             <div class="shops-results-head-left">
               <h2 id="shops-results-title">Listings</h2>
@@ -456,6 +483,14 @@
         </div>
       </section>
     </main>
+
+    <!-- Compare Shops Sticky Bar -->
+    <section
+      id="shops-compare-bar"
+      class="shops-compare-bar"
+      hidden
+      aria-label="Compare shops selection"
+    ></section>
 
     <div
       id="shops-modal"

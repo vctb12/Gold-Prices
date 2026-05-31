@@ -18,6 +18,15 @@ import {
   isAuthenticated as isAccountAuthenticated,
   redirectToAccount,
 } from '../lib/public-account-client.js';
+import { initShopsMap, updateMapMarkers, invalidateMapSize } from '../components/shops-map.js';
+import {
+  initCompare,
+  setCompareLang,
+  setCompareShops,
+  isInCompareList,
+  toggleCompare,
+  renderCompareBar,
+} from '../components/shops-compare.js';
 
 /**
  * Mutable shops array — starts with hardcoded fallback data,
@@ -38,6 +47,8 @@ const STATE = {
   groupByCity: false,
   sortBy: 'relevance',
   shortlist: [], // IDs of saved shops for quick comparison
+  viewMode: 'list', // 'list' or 'map'
+  mapInitialized: false,
 };
 
 const SHOPS_LAST_REVIEWED_ISO = '2026-04-05';
@@ -224,6 +235,12 @@ const TXT = {
     loadErrorTitle: 'Could not refresh live listings',
     loadErrorBody: 'Showing local fallback data for now. Please try again shortly.',
     genericError: 'Something went wrong. Please try again.',
+    viewList: 'List',
+    viewMap: 'Map',
+    mapHint: '← Pinch & drag to explore →',
+    compareAdd: 'Compare',
+    compareRemove: 'Remove',
+    compareMaxReached: 'Maximum 3 shops for comparison',
   },
   ar: {
     kicker: 'محلات حسب المنطقة',
@@ -369,6 +386,12 @@ const TXT = {
     loadErrorTitle: 'تعذّر تحديث الإدراجات المباشرة',
     loadErrorBody: 'يتم عرض بيانات احتياطية حالياً. يرجى المحاولة لاحقاً.',
     genericError: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+    viewList: 'قائمة',
+    viewMap: 'خريطة',
+    mapHint: '← اسحب وقرّب لاستكشاف →',
+    compareAdd: 'مقارنة',
+    compareRemove: 'إزالة',
+    compareMaxReached: 'أقصى حد 3 محلات للمقارنة',
   },
 };
 
@@ -1129,9 +1152,7 @@ function buildFilters() {
   });
 
   const countByCountry = (code) =>
-    code === 'all'
-      ? cityPool.length
-      : cityPool.filter((s) => s.countryCode === code).length;
+    code === 'all' ? cityPool.length : cityPool.filter((s) => s.countryCode === code).length;
 
   countrySelect.innerHTML = `<option value="all">${t('allCountries')} (${countByCountry('all')})</option>${allCountries
     .filter((country) => countryCodes.includes(country.code) || STATE.country === 'all')
@@ -1288,64 +1309,64 @@ function activeFilterSummary() {
 }
 
 function buildShopCardMarkup(shop) {
-      const country = countryByCode(shop.countryCode);
-      const specialties = (shop.specialties || [])
-        .map((item) => `<span class="shop-tag">${esc(item)}</span>`)
-        .join('');
-      const isCluster = isMarketArea(shop);
-      const confidenceBadge = calculateConfidenceBadge(shop);
-      const clusterBadge = isCluster
-        ? `<span class="shop-cluster-badge">${t('marketCluster')}</span>`
-        : '';
-      const listingTypeBadge = `<span class="shop-listing-type ${isCluster ? 'shop-listing-type--market' : 'shop-listing-type--store'}">${listingTypeLabel(shop)}</span>`;
-      const inShortlist = isInShortlist(shop.id);
-      const countryUrl = country?.slug ? `countries/${country.slug}/gold-price/` : '';
-      const goldRateUrl = cityGoldRateUrl(shop);
-      const areaGuideUrl = `${location.pathname}?country=${encodeURIComponent(shop.countryCode)}&search=${encodeURIComponent(shop.market)}`;
-      const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shop.name}, ${shop.market}, ${shop.city}`)}`;
-      const nextActionLabel = isCluster ? t('nextActionsMarket') : t('nextActionsStore');
-      const qualityLabel = contactQualityLabel(shop);
-      const statusLabel = profileStatusLabel(shop);
-      const shopListingType = listingType(shop);
-      const whatsappNumber = formatPhoneForWhatsApp(shop.phone);
-      const phoneAction = shop.phone
-        ? `<a href="tel:${esc(safeTel(shop.phone))}" class="shop-action-btn shop-action-btn--call" aria-label="${t('callShop')}">
+  const country = countryByCode(shop.countryCode);
+  const specialties = (shop.specialties || [])
+    .map((item) => `<span class="shop-tag">${esc(item)}</span>`)
+    .join('');
+  const isCluster = isMarketArea(shop);
+  const confidenceBadge = calculateConfidenceBadge(shop);
+  const clusterBadge = isCluster
+    ? `<span class="shop-cluster-badge">${t('marketCluster')}</span>`
+    : '';
+  const listingTypeBadge = `<span class="shop-listing-type ${isCluster ? 'shop-listing-type--market' : 'shop-listing-type--store'}">${listingTypeLabel(shop)}</span>`;
+  const inShortlist = isInShortlist(shop.id);
+  const countryUrl = country?.slug ? `countries/${country.slug}/gold-price/` : '';
+  const goldRateUrl = cityGoldRateUrl(shop);
+  const areaGuideUrl = `${location.pathname}?country=${encodeURIComponent(shop.countryCode)}&search=${encodeURIComponent(shop.market)}`;
+  const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shop.name}, ${shop.market}, ${shop.city}`)}`;
+  const nextActionLabel = isCluster ? t('nextActionsMarket') : t('nextActionsStore');
+  const qualityLabel = contactQualityLabel(shop);
+  const statusLabel = profileStatusLabel(shop);
+  const shopListingType = listingType(shop);
+  const whatsappNumber = formatPhoneForWhatsApp(shop.phone);
+  const phoneAction = shop.phone
+    ? `<a href="tel:${esc(safeTel(shop.phone))}" class="shop-action-btn shop-action-btn--call" aria-label="${t('callShop')}">
             <span class="shop-action-icon">📞</span>
             <span class="shop-action-label">${t('callShop')}</span>
           </a>`
-        : `<button class="shop-action-btn shop-action-btn--disabled" type="button" disabled aria-label="${t('phone')}: ${t('notAvailable')}">
+    : `<button class="shop-action-btn shop-action-btn--disabled" type="button" disabled aria-label="${t('phone')}: ${t('notAvailable')}">
             <span class="shop-action-icon">📞</span>
             <span class="shop-action-label">${t('notAvailable')}</span>
           </button>`;
-      const websiteAction = safeUrl(shop.website)
-        ? `<a href="${esc(safeUrl(shop.website))}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--website" aria-label="${t('visitWebsite')}">
+  const websiteAction = safeUrl(shop.website)
+    ? `<a href="${esc(safeUrl(shop.website))}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--website" aria-label="${t('visitWebsite')}">
             <span class="shop-action-icon">🌐</span>
             <span class="shop-action-label">${t('visitWebsite')}</span>
           </a>`
-        : `<button class="shop-action-btn shop-action-btn--disabled" type="button" disabled aria-label="${t('website')}: ${t('notAvailable')}">
+    : `<button class="shop-action-btn shop-action-btn--disabled" type="button" disabled aria-label="${t('website')}: ${t('notAvailable')}">
             <span class="shop-action-icon">🌐</span>
             <span class="shop-action-label">${t('notAvailable')}</span>
           </button>`;
-      const whatsappAction = whatsappNumber
-        ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
+  const whatsappAction = whatsappNumber
+    ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" rel="noopener" class="shop-action-btn shop-action-btn--whatsapp" aria-label="${t('whatsApp')}">
             <span class="shop-action-icon">💬</span>
             <span class="shop-action-label">${t('whatsApp')}</span>
           </a>`
-        : '';
+    : '';
 
-      const contactParts = [];
-      contactParts.push(
-        shop.phone ? `${t('phone')}: ${esc(shop.phone)}` : `${t('phone')}: ${t('notAvailable')}`
-      );
-      if (safeUrl(shop.website)) {
-        contactParts.push(
-          `<a href="${esc(safeUrl(shop.website))}" target="_blank" rel="noopener" class="shop-site-link">${t('visitWebsite')}</a>`
-        );
-      } else {
-        contactParts.push(`${t('website')}: ${t('notAvailable')}`);
-      }
+  const contactParts = [];
+  contactParts.push(
+    shop.phone ? `${t('phone')}: ${esc(shop.phone)}` : `${t('phone')}: ${t('notAvailable')}`
+  );
+  if (safeUrl(shop.website)) {
+    contactParts.push(
+      `<a href="${esc(safeUrl(shop.website))}" target="_blank" rel="noopener" class="shop-site-link">${t('visitWebsite')}</a>`
+    );
+  } else {
+    contactParts.push(`${t('website')}: ${t('notAvailable')}`);
+  }
 
-      return `
+  return `
       <article class="shop-card card-interactive${shop.featured ? ' shop-card--featured' : ''}${isCluster ? ' shop-card--cluster' : ''}" data-shop-id="${esc(shop.id)}">
         <header class="shop-card-head">
           <div>
@@ -1444,6 +1465,11 @@ function buildShopCardMarkup(shop) {
             <span class="shop-action-icon">${inShortlist ? '✓' : '+'}</span>
             <span class="shop-action-label">${inShortlist ? t('saved') : t('saveToShortlist')}</span>
           </button>
+          <button class="shop-compare-toggle ${isInCompareList(shop.id) ? 'is-compared' : ''}" 
+                  type="button" data-compare-shop-id="${esc(shop.id)}" aria-label="${isInCompareList(shop.id) ? t('compareRemove') : t('compareAdd')}: ${esc(shop.name)}" aria-pressed="${isInCompareList(shop.id) ? 'true' : 'false'}">
+            <span class="shop-action-icon">${isInCompareList(shop.id) ? '✓' : '⇌'}</span>
+            <span class="shop-action-label">${isInCompareList(shop.id) ? t('compareRemove') : t('compareAdd')}</span>
+          </button>
           <button class="shop-action-btn shop-action-btn--copy" type="button" data-copy-shop-id="${esc(shop.id)}" aria-label="${t('copyDetails')}">
             <span class="shop-action-icon">⎘</span>
             <span class="shop-action-label">${t('copyDetails')}</span>
@@ -1491,7 +1517,10 @@ function renderCards(shops) {
           <span class="badge badge--karat">${groups.get(city).length}</span>
         </h2>
         <div class="shops-city-group__grid">
-          ${groups.get(city).map((shop) => buildShopCardMarkup(shop)).join('')}
+          ${groups
+            .get(city)
+            .map((shop) => buildShopCardMarkup(shop))
+            .join('')}
         </div>
       </section>`
       )
@@ -1592,6 +1621,26 @@ function bindShopCardHandlers() {
     btn.addEventListener('click', () => {
       const shopId = btn.closest('.shop-card')?.dataset.shopId;
       postShopEvent(shopId, 'directions');
+    });
+  });
+
+  // Compare toggle buttons
+  grid.querySelectorAll('[data-compare-shop-id]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const shopId = btn.dataset.compareShopId;
+      const result = toggleCompare(shopId);
+      if (result.maxReached && !result.added) {
+        announceShopStatus(t('compareMaxReached'));
+      }
+      renderCompareBar(document.getElementById('shops-compare-bar'));
+      // Update just this button's state
+      btn.classList.toggle('is-compared', isInCompareList(shopId));
+      const icon = btn.querySelector('.shop-action-icon');
+      const label = btn.querySelector('.shop-action-label');
+      if (icon) icon.textContent = isInCompareList(shopId) ? '✓' : '⇌';
+      if (label) label.textContent = isInCompareList(shopId) ? t('compareRemove') : t('compareAdd');
+      btn.setAttribute('aria-pressed', String(isInCompareList(shopId)));
     });
   });
 
@@ -1894,6 +1943,30 @@ function render() {
   const sponsoredDisclosure = document.getElementById('shops-sponsored-disclosure');
   if (sponsoredDisclosure) sponsoredDisclosure.hidden = STATE.listingTab !== 'sponsor';
 
+  // Update map markers if map is active
+  if (STATE.viewMode === 'map' && STATE.mapInitialized) {
+    updateMapMarkers(shops);
+  }
+
+  // Update view toggle button states
+  const listBtn = document.getElementById('shops-view-list-btn');
+  const mapBtn = document.getElementById('shops-view-map-btn');
+  if (listBtn) {
+    listBtn.classList.toggle('is-active', STATE.viewMode === 'list');
+    listBtn.setAttribute('aria-pressed', String(STATE.viewMode === 'list'));
+  }
+  if (mapBtn) {
+    mapBtn.classList.toggle('is-active', STATE.viewMode === 'map');
+    mapBtn.setAttribute('aria-pressed', String(STATE.viewMode === 'map'));
+  }
+
+  // Show/hide map vs grid
+  const mapContainer = document.getElementById('shops-map');
+  const mapHint = document.getElementById('shops-map-hint');
+  if (mapContainer) mapContainer.hidden = STATE.viewMode !== 'map';
+  if (mapHint) mapHint.hidden = STATE.viewMode !== 'map';
+  if (grid) grid.hidden = STATE.viewMode === 'map';
+
   if (!shops.length) {
     if (grid) grid.replaceChildren();
     const emptyTextEl = document.getElementById('shops-empty-text');
@@ -1909,14 +1982,16 @@ function render() {
   }
 
   if (empty) empty.hidden = true;
-  if (grid) {
-    grid.classList.add('shops-grid--updating');
-    renderCards(shops);
-    window.requestAnimationFrame(() => {
-      grid.classList.remove('shops-grid--updating');
-    });
-  } else {
-    renderCards(shops);
+  if (STATE.viewMode === 'list') {
+    if (grid) {
+      grid.classList.add('shops-grid--updating');
+      renderCards(shops);
+      window.requestAnimationFrame(() => {
+        grid.classList.remove('shops-grid--updating');
+      });
+    } else {
+      renderCards(shops);
+    }
   }
 
   const groupToggle = document.getElementById('shops-group-by-city');
@@ -2047,6 +2122,12 @@ function updateLanguage() {
   buildFilters();
   updateHeaderStats();
   populatePopularChips();
+  setCompareLang(STATE.lang);
+  // Update view toggle labels
+  const listLabel = document.getElementById('shops-view-list-label');
+  const mapLabel = document.getElementById('shops-view-map-label');
+  if (listLabel) listLabel.textContent = t('viewList');
+  if (mapLabel) mapLabel.textContent = t('viewMap');
   render();
 }
 
@@ -2221,6 +2302,41 @@ function init() {
       render();
     });
   }
+
+  // ── Map/List view toggle ──────────────────────────────────────────────────
+  const listBtn = document.getElementById('shops-view-list-btn');
+  const mapBtn = document.getElementById('shops-view-map-btn');
+  if (listBtn && mapBtn) {
+    listBtn.addEventListener('click', () => {
+      STATE.viewMode = 'list';
+      render();
+    });
+    mapBtn.addEventListener('click', async () => {
+      STATE.viewMode = 'map';
+      if (!STATE.mapInitialized) {
+        const ok = await initShopsMap('shops-map', {
+          onMarkerClick: (shop) => openModal(shop),
+        });
+        STATE.mapInitialized = ok;
+      }
+      render();
+      // Leaflet needs a size invalidation after container becomes visible
+      window.requestAnimationFrame(() => invalidateMapSize());
+    });
+  }
+
+  // ── Compare module initialization ─────────────────────────────────────────
+  initCompare({
+    lang: STATE.lang,
+    shops: SHOPS,
+    countryNameFn: (code) => {
+      const country = countryByCode(code);
+      return country ? countryName(country) : code;
+    },
+    onCompareChange: () => {
+      renderCompareBar(document.getElementById('shops-compare-bar'));
+    },
+  });
 }
 
 init();
@@ -2240,6 +2356,7 @@ init();
     const remote = await fetchSupabaseShops();
     if (remote && Array.isArray(remote) && remote.length > 0) {
       SHOPS = remote;
+      setCompareShops(SHOPS);
       buildFilters();
       updateHeaderStats();
       populatePopularChips();
