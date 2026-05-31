@@ -20,10 +20,20 @@ import {
   CATEGORY_TAG_CLASS,
   getReadTime,
 } from '../config/insights-articles.js';
+import { mountInsightsFeed } from '../components/insights-feed.js';
+import { INSIGHTS, INSIGHT_CATEGORIES } from '../config/insights-data.js';
 
 const AED_PEG = CONSTANTS.AED_PEG; // 3.6725
 const TROY_GRAMS = CONSTANTS.TROY_OZ_GRAMS; // 31.1035
 const KARAT_22_PURITY = 22 / 24;
+
+let feedCtrl = null;
+
+function updateFeedCallout() {
+  if (!feedCtrl) return;
+  const pct = weeklyChangePct(STATE.history, STATE.goldPriceUsdPerOz);
+  feedCtrl.setPriceChange(pct);
+}
 
 const STATE = {
   lang: 'en',
@@ -34,6 +44,7 @@ const STATE = {
   freshness: { goldUpdatedAt: null },
   favorites: [],
   history: [],
+  feed: null,
   activeTab: 'gcc',
   sortOrder: 'default',
   searchQuery: '',
@@ -263,6 +274,8 @@ function updateMarketPulse(spotUsd) {
     const label = STATE.lang === 'ar' ? 'تحديث بيانات الصفحة' : 'Page data updated';
     updated.textContent = `${label}: ${hhmm}`;
   }
+
+  refreshFeedContext();
 }
 
 async function fetchAndUpdatePriceBar() {
@@ -274,6 +287,7 @@ async function fetchAndUpdatePriceBar() {
     updatePriceBar(data.price, false);
     updateMarketPulse(data.price);
     refreshContextCallout();
+    updateFeedCallout();
   } catch {
     STATE.status.goldStale = true;
     if (STATE.goldPriceUsdPerOz > 0) {
@@ -540,6 +554,64 @@ function initFeed() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// INSIGHTS FEED (BUILD 8)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Find a XAU/USD reference price from roughly one week ago using the cached
+ * daily snapshots. Returns 0 when no snapshot in the 4–14 day window exists, so
+ * the contextual callout stays hidden until honest week-over-week data is
+ * available. No extra network requests are made.
+ * @returns {number}
+ */
+function getWeekAgoUsd() {
+  const history = Array.isArray(STATE.history) ? STATE.history : [];
+  if (history.length === 0) return 0;
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  // Accept any cached snapshot 4–14 days old, preferring the one closest to 7.
+  const MIN_WEEK_AGO_DAYS = 4;
+  const MAX_WEEK_AGO_DAYS = 14;
+  const TARGET_DAYS = 7;
+  let best = null;
+  let bestDist = Infinity;
+  for (const entry of history) {
+    if (!entry || !entry.price || !entry.date) continue;
+    const ts = entry.timestamp || Date.parse(`${entry.date}T00:00:00Z`);
+    if (!ts) continue;
+    const ageDays = (now - ts) / DAY_MS;
+    if (ageDays < MIN_WEEK_AGO_DAYS || ageDays > MAX_WEEK_AGO_DAYS) continue;
+    const dist = Math.abs(ageDays - TARGET_DAYS);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = entry.price;
+    }
+  }
+  return best || 0;
+}
+
+/** Refresh the live "Related to current gold price" context card in the feed. */
+function refreshFeedContext() {
+  if (!STATE.feed || STATE.goldPriceUsdPerOz <= 0) return;
+  STATE.feed.setPriceContext({
+    currentUsd: STATE.goldPriceUsdPerOz,
+    weekAgoUsd: getWeekAgoUsd(),
+  });
+}
+
+function mountFeed() {
+  const mount = document.getElementById('insights-feed-mount');
+  if (!mount) return;
+  STATE.feed = mountInsightsFeed({
+    mount,
+    insights: INSIGHTS,
+    categories: INSIGHT_CATEGORIES,
+    lang: STATE.lang,
+  });
+  refreshFeedContext();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -558,6 +630,12 @@ async function init() {
   initPageEnter('#main-content');
   mountRelatedGuides({ lang: STATE.lang });
 
+  const feedRoot = document.getElementById('insights-feed');
+  if (feedRoot) {
+    feedCtrl = initInsightsFeed({ root: feedRoot, lang: STATE.lang });
+    updateFeedCallout();
+  }
+
   navResult.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {
       STATE.lang = STATE.lang === 'en' ? 'ar' : 'en';
@@ -571,6 +649,10 @@ async function init() {
       if (searchInput) {
         const content = CONTENT[STATE.lang] ?? CONTENT.en;
         searchInput.placeholder = content['insights.searchPlaceholder'];
+      if (STATE.feed) STATE.feed.setLang(STATE.lang);
+      if (feedCtrl) {
+        feedCtrl.setLang(STATE.lang);
+        updateFeedCallout();
       }
       // Refresh freshness label in new language
       if (STATE.goldPriceUsdPerOz > 0) {
@@ -583,6 +665,8 @@ async function init() {
 
   // Initialize the insights feed (category filter, search, cards)
   initFeed();
+  // Mount the interactive insights feed (filter · search · masonry · context)
+  mountFeed();
 
   // Show cached price immediately, then fetch fresh
   if (STATE.goldPriceUsdPerOz > 0) {

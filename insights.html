@@ -208,13 +208,19 @@
 
       <!-- Section 3: Search + Category Filter + Insight Cards Grid -->
       <section id="insights-feed" class="insights-section insights-section--alt">
+      <!-- Section 3: Insight Feed (filter · search · masonry grid · live context) -->
+      <section
+        id="weekly-brief"
+        class="insights-section insights-section--alt insights-feed-section"
+        aria-label="Gold market insights feed"
+      >
         <div class="insights-inner">
           <div class="insights-section-header">
             <h2 class="insights-section-title" id="insights-grid-h2" data-i18n="insights-grid-h2">
               Gold Market Guides
             </h2>
             <p class="insights-section-sub" data-i18n="insights-grid-sub">
-              Essential reading for GCC gold buyers
+              Filter, search and read essential analysis for GCC gold buyers
             </p>
           </div>
 
@@ -281,6 +287,51 @@
           <!-- Masonry insight cards grid -->
           <div class="insights-masonry-grid" id="insights-masonry-grid" role="tabpanel">
             <!-- Cards rendered by insights.js from INSIGHTS_ARTICLES config -->
+          <!-- Feed mount: JS (src/components/insights-feed.js) replaces the static
+               fallback below with the interactive filter strip, search and grid. The
+               static cards remain for no-JS crawlers and progressive enhancement. -->
+          <div class="insights-feed-mount" id="insights-feed-mount">
+            <div class="insights-cards-grid">
+              <article class="insights-card card-interactive">
+                <div class="insights-card-tag">Pricing</div>
+                <h3 class="insights-card-title">Understanding the AED Gold Peg</h3>
+                <p class="insights-card-body">
+                  The UAE Central Bank has pegged 1 USD = 3.6725 AED since 1997, so AED gold prices
+                  move exactly with USD prices — with zero FX noise.
+                </p>
+                <div class="insights-card-footer">
+                  <a href="content/guides/aed-peg-explained.html" class="insights-card-link"
+                    >Full AED peg guide →</a
+                  >
+                </div>
+              </article>
+              <article class="insights-card card-interactive">
+                <div class="insights-card-tag">Education</div>
+                <h3 class="insights-card-title">24K vs 22K vs 18K: Which Karat to Buy?</h3>
+                <p class="insights-card-body">
+                  24K is 99.9% pure — best for bars and coins. 22K (91.7%) is the Gulf jewellery
+                  standard. Price scales with purity.
+                </p>
+                <div class="insights-card-footer">
+                  <a href="content/guides/24k-vs-22k-vs-18k-gold/" class="insights-card-link"
+                    >24K vs 22K guide →</a
+                  >
+                </div>
+              </article>
+              <article class="insights-card card-interactive">
+                <div class="insights-card-tag">Market Hours</div>
+                <h3 class="insights-card-title">When Do Gold Markets Open? A GCC Guide</h3>
+                <p class="insights-card-body">
+                  Gold trades almost 24 hours a day, Sun 22:00 – Fri 21:00 UTC. Liquidity peaks at
+                  the London open and the London–New York overlap.
+                </p>
+                <div class="insights-card-footer">
+                  <a href="content/guides/gcc-market-hours.html" class="insights-card-link"
+                    >GCC market hours guide →</a
+                  >
+                </div>
+              </article>
+            </div>
           </div>
         </div>
       </section>
