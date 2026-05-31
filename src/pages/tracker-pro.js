@@ -22,6 +22,7 @@ import { renderTrackerCompareHints } from '../components/TrackerCompareHints.js'
 import { renderExportHelpTips } from '../components/ExportHelpTips.js';
 import { renderAlertsEducationTips } from '../components/AlertsEducationTips.js';
 import { initInlineCalc } from '../tracker/inline-calc.js';
+import { serializeCalculatorUrlState } from './calculator/url-state.js';
 import { bindControlShortcuts } from '../tracker/control-shortcuts.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { createAlertEngine } from '../lib/alert-engine.js';
@@ -345,12 +346,32 @@ function localizeStaticTrackerCopy() {
   });
 }
 
+function syncInlineCalcCalculatorLink() {
+  const link = document.getElementById('tracker-inline-calc-full-link');
+  const weightInput = document.getElementById('tracker-inline-calc-weight');
+  const karatSelect = document.getElementById('tracker-inline-calc-karat');
+  const currencySelect = document.getElementById('tracker-inline-calc-currency');
+  if (!link) return;
+  link.textContent = trackerTx('quickCalc.openFull');
+  const weight = weightInput?.value || '';
+  const karat = karatSelect?.value || state.selectedKarat || '24';
+  const currency = currencySelect?.value || state.selectedCurrency || 'AED';
+  link.href = `calculator.html${serializeCalculatorUrlState({
+    weight,
+    karat,
+    currency,
+    mode: 'value',
+    valueMode: 'weight',
+  })}&lang=${state.lang}`;
+}
+
 function syncInlineCalcSourceNote(freshnessKey, freshnessMeta) {
   inlineCalc?.update({
     goldPriceUsd: currentSpot(),
     rates: state.rates,
     lang: state.lang,
   });
+  syncInlineCalcCalculatorLink();
   setNodeText(
     'tracker-inline-calc-source',
     trackerTx('summary.freshnessCopy', {
@@ -1446,6 +1467,13 @@ async function init() {
     rates: state.rates,
     lang: state.lang,
   });
+  ['tracker-inline-calc-weight', 'tracker-inline-calc-karat', 'tracker-inline-calc-currency'].forEach(
+    (id) => {
+      document.getElementById(id)?.addEventListener('input', syncInlineCalcCalculatorLink);
+      document.getElementById(id)?.addEventListener('change', syncInlineCalcCalculatorLink);
+    }
+  );
+  syncInlineCalcCalculatorLink();
   renderTrackerAddonPanels();
   initRealtimeEngine();
   initAlertEngine();

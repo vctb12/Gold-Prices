@@ -130,6 +130,7 @@ const T = {
     val_result_label: 'Estimated Value',
     val_disclaimer:
       'Spot-linked reference estimate only. Final retail prices can include making charges, dealer margins, and taxes.',
+    find_shops_link: 'Find gold shops →',
     shop_vs_ref_title: 'Reference vs typical shop range',
     shop_vs_ref_intro:
       'Jewellery shops often quote above the raw gold reference. The range below is illustrative (8–22% making charges) — not a live shop price.',
@@ -235,6 +236,7 @@ const T = {
     val_result_label: 'القيمة التقديرية',
     val_disclaimer:
       'تقدير مرجعي مرتبط بالسعر الفوري فقط. قد تشمل أسعار التجزئة النهائية المصنعية وهوامش التجار والضرائب.',
+    find_shops_link: 'ابحث عن محلات الذهب ←',
     shop_vs_ref_title: 'المرجع مقابل نطاق المحلات التقريبي',
     shop_vs_ref_intro:
       'غالباً ما تقتبس محلات المجوهرات فوق قيمة الذهب الخام. النطاق أدناه توضيحي (مصنعية 8–22٪) — وليس سعر محل مباشر.',
@@ -968,6 +970,7 @@ function applyLang() {
   set('val-currency-hint', t('val_currency_hint'));
   set('val-result-label', t('val_result_label'));
   set('val-disclaimer', t('val_disclaimer'));
+  set('calc-find-shops-link', t('find_shops_link'));
   set('calc-scrap-h2', t('scrap_title'));
   set('calc-scrap-desc', t('scrap_desc'));
   set('scrap-weight-label', t('scrap_weight'));
@@ -1118,8 +1121,8 @@ function setupTabs() {
       });
       document.querySelectorAll('.calc-panel').forEach((p) => {
         const isTarget = p.id === `panel-${target}`;
+        p.classList.toggle('is-active', isTarget);
         p.classList.toggle('active', isTarget);
-        p.hidden = !isTarget;
       });
       updateValueUrlState();
       refreshMobileDockForActiveTab();
@@ -1138,6 +1141,12 @@ function syncKaratPurity() {
     return;
   }
   updateKaratPurityIndicator(_karatPurityRoot, karat);
+  if (_karatPurityRoot) {
+    _karatPurityRoot.classList.remove('price-pulse');
+    void _karatPurityRoot.offsetWidth;
+    _karatPurityRoot.classList.add('price-pulse');
+    window.setTimeout(() => _karatPurityRoot?.classList.remove('price-pulse'), 320);
+  }
 }
 
 // ── Wire inputs ──────────────────────────────────────────────────────────────

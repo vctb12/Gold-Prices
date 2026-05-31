@@ -30,6 +30,7 @@ import { countUp } from '../lib/count-up.js';
 import { copyWithToast } from '../lib/copy-toast.js';
 import { mountQuickConvertWidget } from '../components/QuickConvertWidget.js';
 import { initSwUpdateToast } from '../lib/sw-update-toast.js';
+import { showDataStatusBanner, hideDataStatusBanner } from '../lib/data-status-banner.js';
 import { clear, el, safeHref } from '../lib/safe-dom.js';
 import { track, EVENTS } from '../lib/analytics.js';
 import { enforceCanonicalOnDocument } from '../seo/canonical.js';
@@ -195,8 +196,7 @@ function setTrustChip(id, text, freshnessKey = 'neutral') {
 
 /** Deep-link to tracker with current karat strip unit preference. */
 function buildTrackerHref(overrides = {}) {
-  const unit =
-    karatStripUnit === 'tola' ? 'tola' : karatStripUnit === 'oz' ? 'oz' : 'gram';
+  const unit = karatStripUnit === 'tola' ? 'tola' : karatStripUnit === 'oz' ? 'oz' : 'gram';
   const params = new URLSearchParams({
     mode: 'live',
     cur: 'AED',
@@ -1057,6 +1057,7 @@ function applyRealtimeSnapshot(snapshot) {
     goldIsFallback = quote.isFallback ?? quote.forcedState === 'fallback';
     goldIsFresh = quote.isFresh ?? snapshot?.freshness?.state === 'live';
     cache.saveGoldPrice(quote.price, goldUpdatedAt);
+    hideDataStatusBanner();
     renderHeroCard();
   } else if (!goldPrice) {
     const priceEl = document.getElementById('hlc-price');
@@ -1473,6 +1474,19 @@ async function init() {
       setTrustChip('home-command-spot-chip', 'XAU/USD —', 'unavailable');
       setTextById('home-snapshot-status-value', tx('sourceUnavailable'));
       setTextById('home-snapshot-status-note', tx('priceUnavailableConnection'));
+      showDataStatusBanner({
+        variant: 'error',
+        lang,
+        message: tx('liveUnavailableBanner'),
+        onRetry: () => {
+          hideDataStatusBanner();
+          if (_realtimeEngine) {
+            _realtimeEngine.stop();
+            _realtimeEngine = null;
+          }
+          initRealtimeEngine();
+        },
+      });
     }
     // GCC grid skeleton timeout
     document.querySelectorAll('.gcc-card.skeleton-card').forEach((card) => {

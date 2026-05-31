@@ -12,6 +12,7 @@ import { escape as esc, safeHref as safeUrl, safeTel } from '../lib/safe-dom.js'
 import { track, EVENTS } from '../lib/analytics.js';
 import { copyWithToast } from '../lib/copy-toast.js';
 import { initPageEnter } from '../lib/page-enter.js';
+import { observeReveal } from '../lib/reveal.js';
 import {
   createSavedShop,
   isAuthenticated as isAccountAuthenticated,
@@ -645,7 +646,7 @@ function cityGoldRateUrl(shop) {
   return `countries/${country.slug}/gold-price/`;
 }
 
-async function copyShopDetails(shop) {
+async function copyShopDetails(shop, button = null) {
   const country = countryByCode(shop.countryCode);
   const lines = [
     shop.name,
@@ -654,10 +655,18 @@ async function copyShopDetails(shop) {
     shop.phone ? `${t('phone')}: ${shop.phone}` : null,
     safeUrl(shop.website) ? `${t('website')}: ${shop.website}` : null,
   ].filter(Boolean);
-  await copyWithToast(lines.join('\n'), {
+  const iconEl = button?.querySelector('.shop-action-icon');
+  const originalIcon = iconEl?.textContent;
+  const ok = await copyWithToast(lines.join('\n'), {
     successMessage: t('detailsCopied'),
     errorMessage: t('genericError'),
   });
+  if (ok && iconEl) {
+    iconEl.textContent = '✓';
+    window.setTimeout(() => {
+      iconEl.textContent = originalIcon || '⎘';
+    }, 1500);
+  }
 }
 
 function toggleShortlist(shopId) {
@@ -1337,7 +1346,7 @@ function buildShopCardMarkup(shop) {
       }
 
       return `
-      <article class="shop-card${shop.featured ? ' shop-card--featured' : ''}${isCluster ? ' shop-card--cluster' : ''}" data-shop-id="${esc(shop.id)}">
+      <article class="shop-card card-interactive${shop.featured ? ' shop-card--featured' : ''}${isCluster ? ' shop-card--cluster' : ''}" data-shop-id="${esc(shop.id)}">
         <header class="shop-card-head">
           <div>
             <h3>${esc(shop.name)}</h3>
@@ -1477,7 +1486,7 @@ function renderCards(shops) {
       .map(
         (city) => `
       <section class="shops-city-group" aria-labelledby="shops-city-${esc(city).replace(/\s+/g, '-')}">
-        <h2 class="shops-city-group__title" id="shops-city-${esc(city).replace(/\s+/g, '-')}">
+        <h2 class="shops-city-group__title" id="shops-city-${esc(city).replace(/\s+/g, '-')}" data-reveal>
           ${esc(city)}
           <span class="badge badge--karat">${groups.get(city).length}</span>
         </h2>
@@ -1527,7 +1536,7 @@ function bindShopCardHandlers() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const shop = SHOPS.find((s) => s.id === btn.dataset.copyShopId);
-      if (shop) copyShopDetails(shop);
+      if (shop) copyShopDetails(shop, btn);
     });
   });
 
@@ -1585,6 +1594,8 @@ function bindShopCardHandlers() {
       postShopEvent(shopId, 'directions');
     });
   });
+
+  observeReveal(grid);
 }
 
 function renderFeaturedSection() {
@@ -1863,6 +1874,7 @@ function renderShortlistBar() {
 function render() {
   syncUrlToState();
   const shops = sortedShops(filterShops());
+  const grid = document.getElementById('shops-grid');
 
   const empty = document.getElementById('shops-empty');
   const count = document.getElementById('shops-count');
@@ -1883,18 +1895,29 @@ function render() {
   if (sponsoredDisclosure) sponsoredDisclosure.hidden = STATE.listingTab !== 'sponsor';
 
   if (!shops.length) {
-    document.getElementById('shops-grid').replaceChildren();
+    if (grid) grid.replaceChildren();
     const emptyTextEl = document.getElementById('shops-empty-text');
     if (emptyTextEl) {
       const query = sanitizeSearchQueryForMessage(STATE.search);
       emptyTextEl.textContent = query ? t('emptyTextQuery')(query) : t('emptyText');
     }
-    empty.hidden = false;
+    if (empty) {
+      empty.hidden = false;
+      empty.classList.add('shops-empty--visible', 'reveal-on-scroll', 'is-in-view');
+    }
     return;
   }
 
-  empty.hidden = true;
-  renderCards(shops);
+  if (empty) empty.hidden = true;
+  if (grid) {
+    grid.classList.add('shops-grid--updating');
+    renderCards(shops);
+    window.requestAnimationFrame(() => {
+      grid.classList.remove('shops-grid--updating');
+    });
+  } else {
+    renderCards(shops);
+  }
 
   const groupToggle = document.getElementById('shops-group-by-city');
   if (groupToggle) groupToggle.checked = STATE.groupByCity;

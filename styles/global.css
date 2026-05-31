@@ -8581,6 +8581,16 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
 }
 
 /* Karat purity ring */
+@property --purity-fill {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+.karat-purity-indicator.price-pulse {
+  border-radius: var(--radius-md);
+}
+
 .karat-purity-indicator {
   display: flex;
   align-items: center;
@@ -8604,6 +8614,7 @@ details.nav-drawer-group > summary.nav-drawer-group-label {
     var(--border-subtle) var(--purity-fill, 75%) 100%
   );
   mask: radial-gradient(farthest-side, transparent 58%, #000 60%);
+  transition: --purity-fill 300ms var(--ease-out);
 }
 
 .karat-purity-ring__fill {

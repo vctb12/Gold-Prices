@@ -28,12 +28,11 @@
 
 - [x] BUILD 10: Price Alert System — full feature build (alert engine, manager drawer, trigger
       dialog, sound, import/export, WhatsApp share, 18 tests) — completed: 2026-05-30 — PR: (draft)
+- [x] Visual excellence session 7b (full-surface interaction rollout) — completed: 2026-05-30 — PR: (pending)
 - [x] Audit session 8 — memory leak fixes, alert() removal, lint cleanup, SEO h1 — completed:
       2026-05-30 — PR: (draft open)
-- [x] Visual excellence session 7 (global interactions + homepage polish) — completed: 2026-05-30 —
-      PR: (draft open)
-- [x] Launch push session 6 (content standardization, learn/insights) — completed: 2026-05-30 — PR:
-      #375
+- [x] Visual excellence session 7 (global interactions + homepage polish) — completed: 2026-05-30 — PR: #376
+- [x] Launch push session 6 (content standardization, learn/insights) — completed: 2026-05-30 — PR: #375
 
 - [x] Deep clean session 3: broken links, invest safe-dom, learn/insights split, cache.getPreference
       — completed: 2026-05-29 — PR: (pending)
