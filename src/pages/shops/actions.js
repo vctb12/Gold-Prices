@@ -3,6 +3,8 @@
  * Separates action handlers from main module
  */
 
+import { showCopyToast } from '../../lib/copy-toast.js';
+
 export function toggleShortlist(shopId, STATE, saveShortlistToStorage) {
   const idx = STATE.shortlist.indexOf(shopId);
   if (idx === -1) {
@@ -17,7 +19,7 @@ export function isInShortlist(shopId, STATE) {
   return STATE.shortlist.includes(shopId);
 }
 
-export function shareShop(shop) {
+export function shareShop(shop, STATE) {
   const url = `${location.origin}${location.pathname}?shop=${shop.id}`;
   const text = `${shop.name} — ${shop.market}, ${shop.city}`;
 
@@ -27,7 +29,7 @@ export function shareShop(shop) {
     navigator.clipboard
       ?.writeText(url)
       .then(() => {
-        alert(STATE.lang === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+        showCopyToast(STATE.lang === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
       })
       .catch(() => {});
   }

@@ -27,7 +27,6 @@ import { parseCalculatorUrlState, serializeCalculatorUrlState } from './calculat
 import '../lib/reveal.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
-import { copyWithToast } from '../lib/copy-toast.js';
 import {
   renderKaratPurityIndicator,
   updateKaratPurityIndicator,
@@ -1596,7 +1595,25 @@ async function init() {
   calcZakat(); // show nisab immediately from cache
 
   await fetchLiveData();
-  setInterval(fetchLiveData, CONSTANTS.GOLD_REFRESH_MS);
+  let _refreshTimer = setInterval(fetchLiveData, CONSTANTS.GOLD_REFRESH_MS);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(_refreshTimer);
+      _refreshTimer = null;
+    } else if (!_refreshTimer) {
+      fetchLiveData();
+      _refreshTimer = setInterval(fetchLiveData, CONSTANTS.GOLD_REFRESH_MS);
+    }
+  });
+  window.addEventListener(
+    'pagehide',
+    () => {
+      clearInterval(_refreshTimer);
+      _refreshTimer = null;
+    },
+    { once: true }
+  );
 
   track(EVENTS.PAGE_VIEW, { path: location.pathname, locale: STATE.lang });
   track(EVENTS.PRICE_VIEW, { path: location.pathname, locale: STATE.lang, surface: 'calculator' });

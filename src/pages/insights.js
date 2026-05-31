@@ -276,8 +276,26 @@ async function init() {
   // Fetch fresh price
   await fetchAndUpdatePriceBar();
 
-  // Refresh every 90 seconds while page is open
-  setInterval(fetchAndUpdatePriceBar, CONSTANTS.GOLD_REFRESH_MS);
+  // Refresh every 90 seconds while page is visible
+  let _refreshTimer = setInterval(fetchAndUpdatePriceBar, CONSTANTS.GOLD_REFRESH_MS);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(_refreshTimer);
+      _refreshTimer = null;
+    } else if (!_refreshTimer) {
+      fetchAndUpdatePriceBar();
+      _refreshTimer = setInterval(fetchAndUpdatePriceBar, CONSTANTS.GOLD_REFRESH_MS);
+    }
+  });
+  window.addEventListener(
+    'pagehide',
+    () => {
+      clearInterval(_refreshTimer);
+      _refreshTimer = null;
+    },
+    { once: true }
+  );
 }
 
 init();
