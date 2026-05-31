@@ -13,6 +13,7 @@ import { getBaselineHistory, getHistoryStats } from '../lib/historical-data.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
 import { mountRelatedGuides } from '../components/RelatedGuides.js';
+import { escape, safeHref } from '../lib/safe-dom.js';
 import {
   INSIGHTS_ARTICLES,
   INSIGHT_CATEGORIES,
@@ -357,15 +358,17 @@ function renderCategoryChips() {
 
 function buildCardHTML(article) {
   const lang = STATE.lang;
-  const title = article.title[lang] || article.title.en;
-  const excerpt = article.excerpt[lang] || article.excerpt.en;
+  const title = escape(article.title[lang] || article.title.en);
+  const excerpt = escape(article.excerpt[lang] || article.excerpt.en);
   const readMin = getReadTime(article.wordCount);
   const content = CONTENT[lang] ?? CONTENT.en;
-  const readTimeLabel = content['insights.readTime'].replace('{n}', readMin);
-  const catLabel = (INSIGHT_CATEGORIES[article.category] || {})[lang] || article.category;
-  const tagClass = CATEGORY_TAG_CLASS[article.category] || 'insight-tag--guide';
+  const readTimeLabel = escape(content['insights.readTime'].replace('{n}', readMin));
+  const catLabel = escape((INSIGHT_CATEGORIES[article.category] || {})[lang] || article.category);
+  const tagClass = escape(CATEGORY_TAG_CLASS[article.category] || 'insight-tag--guide');
+  const href = safeHref(article.href) || '#';
+  const readLink = lang === 'ar' ? 'اقرأ المزيد →' : 'Read →';
 
-  return `<article class="insight-card card-interactive" data-category="${article.category}" data-id="${article.id}" data-reveal>
+  return `<article class="insight-card card-interactive" data-category="${escape(article.category)}" data-id="${escape(article.id)}" data-reveal>
     <div class="insight-card-header">
       <span class="insight-tag-chip ${tagClass}">${catLabel}</span>
       <span class="insight-read-time">${readTimeLabel}</span>
@@ -373,11 +376,13 @@ function buildCardHTML(article) {
     <h3 class="insight-card-title">${title}</h3>
     <p class="insight-card-excerpt">${excerpt}</p>
     <div class="insight-card-footer">
-      <span class="insight-card-date">${article.date}</span>
-      <a href="${article.href}" class="insight-read-more">${lang === 'ar' ? 'اقرأ المزيد →' : 'Read →'}</a>
+      <span class="insight-card-date">${escape(article.date)}</span>
+      <a href="${href}" class="insight-read-more">${escape(readLink)}</a>
     </div>
   </article>`;
 }
+
+const MIN_CALLOUT_THRESHOLD_PCT = 0.1;
 
 function buildContextCallout() {
   if (STATE.goldPriceUsdPerOz <= 0) return '';
@@ -385,18 +390,20 @@ function buildContextCallout() {
   const records = getBaselineHistory();
   if (records.length < 2) return '';
 
-  // Get last week's average (look back 5-7 records)
+  // Get last 7 records for weekly average
   const recent = records.slice(-7);
   const weekAvg = recent.reduce((s, r) => s + r.price, 0) / recent.length;
   const pctChange = ((STATE.goldPriceUsdPerOz - weekAvg) / weekAvg) * 100;
 
-  if (Math.abs(pctChange) < 0.1) return ''; // Too small to be meaningful
+  if (Math.abs(pctChange) < MIN_CALLOUT_THRESHOLD_PCT) return '';
 
   const content = CONTENT[STATE.lang] ?? CONTENT.en;
   const dir = pctChange >= 0 ? content['insights.contextUp'] : content['insights.contextDown'];
   const pctStr = Math.abs(pctChange).toFixed(2) + '%';
-  const msg = content['insights.contextCallout'].replace('{dir}', dir).replace('{pct}', pctStr);
-  const linkText = content['insights.contextLink'];
+  const msg = escape(
+    content['insights.contextCallout'].replace('{dir}', dir).replace('{pct}', pctStr)
+  );
+  const linkText = escape(content['insights.contextLink']);
 
   const cls = pctChange >= 0 ? 'context-callout--up' : 'context-callout--down';
 
@@ -461,16 +468,18 @@ function renderFeed() {
     html += buildCardHTML(filtered[i]);
   }
 
+  // SAFETY: html is built from escape()-d config values + safeHref() validated
+  // URLs via buildCardHTML() and buildContextCallout(). No user input reaches innerHTML.
   grid.innerHTML = html;
 
   // Trigger reveal animations on new cards
-  const { observeReveal } = await_reveal();
+  const { observeReveal } = getRevealModule();
   if (observeReveal) observeReveal(grid);
 }
 
 // Lazy-load reveal to avoid circular deps
 let _revealModule = null;
-function await_reveal() {
+function getRevealModule() {
   if (_revealModule) return _revealModule;
   try {
     // reveal.js is already imported by page-enter; call observeReveal on the grid
