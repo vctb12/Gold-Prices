@@ -13,8 +13,8 @@
 
 ## 🟡 Up Next
 
-- [ ] BUILD 1: Live Price Ticker Marquee Bar (partially done via MarketSummaryTicker, needs sticky
-      header strip behavior) — priority: high
+- [ ] BUILD 6: Compare Tool — standalone interactive country comparison page (sortable table,
+      country chips, side-by-side detail, cheapest-to-buy callout) — priority: high
 - [ ] Replace hardcoded hex colors in CSS with design tokens (565 instances across styles/) —
       priority: medium — context: improves maintainability and dark mode consistency
 - [ ] Add visibilitychange cleanup to insights.js sparkline/charts if added — priority: low —
@@ -26,13 +26,20 @@
 
 ## ✅ Recently Completed
 
+- [x] BUILD 2: Country Pages Market Intelligence Panel — per-country
+      VAT/making-charge/retail-estimate panel + "Should I Buy Today?" indicator on every country
+      page (`src/config/market-intel.js`, `countries/country-page.js`, `styles/country-page.css`,
+      `tests/market-intel.test.js`) — completed: 2026-05-31 — PR: (draft)
 - [x] BUILD 10: Price Alert System — full feature build (alert engine, manager drawer, trigger
       dialog, sound, import/export, WhatsApp share, 18 tests) — completed: 2026-05-30 — PR: (draft)
-- [x] Visual excellence session 7b (full-surface interaction rollout) — completed: 2026-05-30 — PR: (pending)
+- [x] Visual excellence session 7b (full-surface interaction rollout) — completed: 2026-05-30 — PR:
+      (pending)
 - [x] Audit session 8 — memory leak fixes, alert() removal, lint cleanup, SEO h1 — completed:
       2026-05-30 — PR: (draft open)
-- [x] Visual excellence session 7 (global interactions + homepage polish) — completed: 2026-05-30 — PR: #376
-- [x] Launch push session 6 (content standardization, learn/insights) — completed: 2026-05-30 — PR: #375
+- [x] Visual excellence session 7 (global interactions + homepage polish) — completed: 2026-05-30 —
+      PR: #376
+- [x] Launch push session 6 (content standardization, learn/insights) — completed: 2026-05-30 — PR:
+      #375
 
 - [x] Deep clean session 3: broken links, invest safe-dom, learn/insights split, cache.getPreference
       — completed: 2026-05-29 — PR: (pending)
@@ -95,7 +102,7 @@
 ## 🏆 Big Build Catalog Status
 
 - [x] BUILD 1: Ticker Strip — done (existing `src/components/ticker.js` + `MarketSummaryTicker.js`)
-- [ ] BUILD 2: Country Pages — partial (pages exist, needs Market Intelligence Panel)
+- [x] BUILD 2: Country Pages — **done this session** (Market Intelligence Panel + buy indicator)
 - [x] BUILD 3: Price Chart — done (existing `src/components/chart.js` with 24H–ALL ranges)
 - [x] BUILD 4: Calculator Tabs — done (5 tabs: value, scrap, zakat, buying power, converter)
 - [x] BUILD 5: PWA — done (sw.js, manifest.json, offline.html, install prompt)
@@ -107,6 +114,11 @@
 
 ## Notes for Next Agent
 
+- BUILD 2 Market Intelligence Panel is injected by `countries/country-page.js` via
+  `ensureMarketIntelMount()` (no per-page HTML edits) and styled in `styles/country-page.css`.
+  Reference data lives in `src/config/market-intel.js` keyed by ISO code with a generic fallback.
+- The "Should I Buy Today?" indicator reads the shared `gtl_history` daily snapshots; country pages
+  now call `cache.saveHistorySnapshot(STATE)` so the 7-day average builds over repeat visits.
 - Alert engine is wired into tracker-pro.js `applyRealtimeSnapshot` — fires on every 90s price tick
 - Alert manager drawer CSS is at `styles/components/alert-manager.css` — imported only in
   tracker.html

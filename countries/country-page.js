@@ -23,6 +23,7 @@
  */
 
 import { CONSTANTS, KARATS } from '../src/config/index.js';
+import { getMarketIntel } from '../src/config/market-intel.js';
 import * as api from '../src/lib/api.js';
 import * as cache from '../src/lib/cache.js';
 import { usdPerGram, usdPerOz } from '../src/lib/price-calculator.js';
@@ -76,6 +77,25 @@ const T = {
     gram: 'gram',
     oz: 'troy oz',
     switchLang: 'العربية',
+    marketIntel: 'Market Intelligence',
+    miSub: 'Reference estimates for buyers — not financial advice.',
+    miLocalPrice: 'Current price · 22K per gram',
+    mi24hChange: '24h change',
+    miVat: 'VAT / sales tax',
+    miMaking: 'Typical making charge',
+    miMakingNote: '% of gold value (jewellery)',
+    miRetail: 'Est. retail · 22K per gram',
+    miRetailNote: 'spot + median making charge + tax',
+    miKaratPref: 'Popular karats',
+    miMarketNote: 'Market note',
+    miCalcCta: 'Open calculator →',
+    buyTitle: 'Should I Buy Today?',
+    buyFavorable: 'Below 7-day average — favorable',
+    buyElevated: 'Above 7-day average — elevated',
+    buyNormal: 'Within normal range',
+    buyNeedData: 'Building local price history — revisit over a few days to unlock this indicator.',
+    buyVs7d: 'vs 7-day average',
+    referenceOnly: 'Reference only — not financial advice.',
   },
   ar: {
     livePrice: 'سعر الذهب المباشر',
@@ -101,6 +121,25 @@ const T = {
     gram: 'غرام',
     oz: 'أوقية',
     switchLang: 'English',
+    marketIntel: 'معلومات السوق',
+    miSub: 'تقديرات مرجعية للمشترين — وليست نصيحة مالية.',
+    miLocalPrice: 'السعر الحالي · عيار 22 للغرام',
+    mi24hChange: 'تغير 24 ساعة',
+    miVat: 'ضريبة القيمة المضافة',
+    miMaking: 'أجور الصنعة المعتادة',
+    miMakingNote: '٪ من قيمة الذهب (مجوهرات)',
+    miRetail: 'تقدير التجزئة · عيار 22 للغرام',
+    miRetailNote: 'الفوري + متوسط الصنعة + الضريبة',
+    miKaratPref: 'العيارات الشائعة',
+    miMarketNote: 'ملاحظة السوق',
+    miCalcCta: 'افتح الحاسبة →',
+    buyTitle: 'هل أشتري اليوم؟',
+    buyFavorable: 'أقل من متوسط 7 أيام — مناسب',
+    buyElevated: 'أعلى من متوسط 7 أيام — مرتفع',
+    buyNormal: 'ضمن النطاق المعتاد',
+    buyNeedData: 'يتم بناء سجل الأسعار المحلي — عاوِد الزيارة خلال أيام لتفعيل هذا المؤشر.',
+    buyVs7d: 'مقارنة بمتوسط 7 أيام',
+    referenceOnly: 'لأغراض مرجعية فقط — وليست نصيحة مالية.',
   },
 };
 
@@ -241,6 +280,176 @@ function renderKaratTable(cfg) {
     <p class="cp-disclaimer">${t('disclaimer')}</p>`;
 }
 
+// ── Market Intelligence Panel + "Should I Buy Today?" indicator ──────────────
+function formatPct(value, withSign = false) {
+  const sign = withSign && value >= 0 ? '+' : '';
+  return `${sign}${value.toFixed(2)}%`;
+}
+
+/**
+ * Compute the rolling N-day average of the cached gold price (USD/oz) from the
+ * localStorage daily snapshots in STATE.history. Returns { avg, days } where
+ * `days` is how many distinct daily snapshots were available (capped at N).
+ */
+function recentAverage(days = 7) {
+  const history = Array.isArray(STATE.history) ? STATE.history : [];
+  const valid = history.filter((h) => h && typeof h.price === 'number' && h.price > 0);
+  if (!valid.length) return { avg: null, days: 0 };
+  const recent = valid.slice(-days);
+  const sum = recent.reduce((acc, h) => acc + h.price, 0);
+  return { avg: sum / recent.length, days: recent.length };
+}
+
+/**
+ * Build the "Should I Buy Today?" indicator markup. Compares the current live
+ * price against the rolling 7-day average from local daily snapshots. A ±0.5%
+ * band is treated as "within normal range". Reference only — never advice.
+ */
+function buyIndicatorHtml() {
+  const price = STATE.goldPriceUsdPerOz;
+  const { avg, days } = recentAverage(7);
+
+  // Require at least 3 distinct daily snapshots for a meaningful signal.
+  if (!price || avg === null || days < 3) {
+    return `
+      <div class="cp-mi-buy cp-mi-buy--pending">
+        <span class="cp-mi-buy-dot" aria-hidden="true">⚪</span>
+        <div class="cp-mi-buy-body">
+          <p class="cp-mi-buy-title">${t('buyTitle')}</p>
+          <p class="cp-mi-buy-status">${t('buyNeedData')}</p>
+        </div>
+      </div>`;
+  }
+
+  const deviation = ((price - avg) / avg) * 100;
+  let tone = 'normal';
+  let dot = '⚪';
+  let label = t('buyNormal');
+  if (deviation <= -0.5) {
+    tone = 'favorable';
+    dot = '🟢';
+    label = t('buyFavorable');
+  } else if (deviation >= 0.5) {
+    tone = 'elevated';
+    dot = '🔴';
+    label = t('buyElevated');
+  }
+
+  return `
+    <div class="cp-mi-buy cp-mi-buy--${tone}">
+      <span class="cp-mi-buy-dot" aria-hidden="true">${dot}</span>
+      <div class="cp-mi-buy-body">
+        <p class="cp-mi-buy-title">${t('buyTitle')}</p>
+        <p class="cp-mi-buy-status">${label}</p>
+        <p class="cp-mi-buy-meta">${formatPct(deviation, true)} ${t('buyVs7d')}</p>
+      </div>
+    </div>`;
+}
+
+// ── Render Market Intelligence Panel ─────────────────────────────────────────
+/**
+ * Insert the Market Intelligence section into the DOM if it is not already
+ * present. Placed immediately after the hero so it is the first thing buyers
+ * see. Idempotent — safe to call more than once.
+ */
+function ensureMarketIntelMount() {
+  if (document.getElementById('cp-market-intel')) return;
+  const main = document.querySelector('main');
+  if (!main) return;
+  const section = document.createElement('section');
+  section.className = 'cp-section cp-mi-section';
+  section.setAttribute('aria-label', 'Market intelligence');
+  const mount = document.createElement('div');
+  mount.id = 'cp-market-intel';
+  section.appendChild(mount);
+
+  const hero = main.querySelector('.cp-hero');
+  if (hero && hero.nextSibling) {
+    main.insertBefore(section, hero.nextSibling);
+  } else if (hero) {
+    main.appendChild(section);
+  } else {
+    main.insertBefore(section, main.firstChild);
+  }
+}
+
+function renderMarketIntel(cfg) {
+  const el = document.getElementById('cp-market-intel');
+  if (!el) return;
+
+  const intel = getMarketIntel(cfg.countryCode);
+  const rate = getRate(cfg);
+  const karat22 = KARATS.find((k) => k.code === '22');
+  const gram22 =
+    rate && STATE.goldPriceUsdPerOz
+      ? usdPerGram(STATE.goldPriceUsdPerOz, karat22.purity) * rate
+      : null;
+
+  const medianMaking = (intel.makingChargeMin + intel.makingChargeMax) / 2;
+  const retail22 = gram22 ? gram22 * (1 + medianMaking) * (1 + intel.vatRate) : null;
+
+  const changeVal = calcChange(STATE.goldPriceUsdPerOz);
+  const changeClass = changeVal !== null ? (changeVal >= 0 ? 'cp-mi-up' : 'cp-mi-down') : '';
+  const changeArrow = changeVal !== null ? (changeVal >= 0 ? '▲' : '▼') : '';
+  const changeHtml =
+    changeVal !== null
+      ? `<span class="cp-mi-change ${changeClass}">${changeArrow} ${formatPct(Math.abs(changeVal))}</span>`
+      : '—';
+
+  const note = STATE.lang === 'ar' ? intel.marketNoteAr : intel.marketNoteEn;
+  const vatNote = STATE.lang === 'ar' ? intel.vatNoteAr : intel.vatNoteEn;
+  const karatPref = STATE.lang === 'ar' ? intel.karatPrefAr : intel.karatPrefEn;
+  const makingRange = `${Math.round(intel.makingChargeMin * 100)}–${Math.round(intel.makingChargeMax * 100)}%`;
+  const calcHref = `/calculator.html?currency=${encodeURIComponent(cfg.currency)}#value`;
+
+  el.innerHTML = `
+    <div class="cp-mi-card" aria-label="${t('marketIntel')}">
+      <div class="cp-mi-header">
+        <h2 class="cp-mi-title">${cfg.flag} ${t('marketIntel')}</h2>
+        <p class="cp-mi-sub">${t('miSub')}</p>
+      </div>
+
+      <div class="cp-mi-grid">
+        <div class="cp-mi-stat">
+          <span class="cp-mi-label">${t('miLocalPrice')}</span>
+          <span class="cp-mi-value" aria-live="polite">${gram22 ? formatPrice(gram22, cfg.currency, cfg.decimals) : '—'}</span>
+        </div>
+        <div class="cp-mi-stat">
+          <span class="cp-mi-label">${t('mi24hChange')}</span>
+          <span class="cp-mi-value">${changeHtml}</span>
+        </div>
+        <div class="cp-mi-stat">
+          <span class="cp-mi-label">${t('miVat')}</span>
+          <span class="cp-mi-value">${Math.round(intel.vatRate * 100)}%</span>
+          <span class="cp-mi-hint">${vatNote}</span>
+        </div>
+        <div class="cp-mi-stat">
+          <span class="cp-mi-label">${t('miMaking')}</span>
+          <span class="cp-mi-value">${makingRange}</span>
+          <span class="cp-mi-hint">${t('miMakingNote')}</span>
+        </div>
+        <div class="cp-mi-stat cp-mi-stat--retail">
+          <span class="cp-mi-label">${t('miRetail')}</span>
+          <span class="cp-mi-value">${retail22 ? formatPrice(retail22, cfg.currency, cfg.decimals) : '—'}</span>
+          <span class="cp-mi-hint">${t('miRetailNote')}</span>
+        </div>
+        <div class="cp-mi-stat">
+          <span class="cp-mi-label">${t('miKaratPref')}</span>
+          <span class="cp-mi-value cp-mi-value--text">${karatPref}</span>
+        </div>
+      </div>
+
+      ${buyIndicatorHtml()}
+
+      <p class="cp-mi-note"><strong>${t('miMarketNote')}:</strong> ${note}</p>
+
+      <div class="cp-mi-footer">
+        <a href="${calcHref}" class="cp-mi-cta">${t('miCalcCta')}</a>
+        <span class="cp-mi-disclaimer">${t('referenceOnly')}</span>
+      </div>
+    </div>`;
+}
+
 function normalizeRelatedCountryUrl(file) {
   if (typeof file !== 'string') return '#';
   const trimmed = file.trim();
@@ -352,6 +561,7 @@ function renderFaq(cfg) {
 // ── Full render ──────────────────────────────────────────────────────────────
 function renderAll(cfg) {
   renderHero(cfg);
+  renderMarketIntel(cfg);
   renderKaratTable(cfg);
   renderRelated(cfg);
   renderRelatedCities(cfg);
@@ -380,6 +590,10 @@ async function fetchLiveData(cfg) {
         nextUpdateUtc: fxData.value.time_next_update_utc,
       });
     }
+
+    // Append today's snapshot so the "Should I Buy Today?" indicator can build a
+    // local 7-day price history over repeat visits.
+    cache.saveHistorySnapshot(STATE);
 
     renderAll(cfg);
     // Update bottom ticker with latest UAE prices
@@ -445,6 +659,10 @@ export async function initCountryPage(cfg) {
       renderAll(cfg);
     });
   });
+
+  // Ensure the Market Intelligence Panel mount exists (inserted after the hero).
+  // Done in JS so every country page picks it up without editing 20+ HTML files.
+  ensureMarketIntelMount();
 
   // Render from cache immediately
   renderAll(cfg);

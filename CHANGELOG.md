@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### BUILD 2 — Country Pages: Market Intelligence Panel — 2026-05-31
+
+**New feature:**
+
+- feat(countries): add a Market Intelligence Panel to every country gold-price page, rendered after
+  the hero by `countries/country-page.js`. Shows the live local 22K/gram price, 24h change, the
+  country VAT/sales-tax rate, typical making-charge range, a live retail estimate (spot + median
+  making charge + tax), popular karats, and a one-line market note.
+- feat(countries): add a "Should I Buy Today?" indicator comparing the current price to the rolling
+  7-day average from local daily snapshots — 🟢 below average / 🔴 above average / ⚪ within normal
+  range — explicitly labelled "reference only, not financial advice".
+- feat(config): add `src/config/market-intel.js` with hardcoded per-country reference data (VAT,
+  making charges, karat preferences, bilingual market notes) for all 28 countries plus a safe
+  generic fallback via `getMarketIntel(code)`.
+- feat(countries): country pages now persist daily price snapshots (`cache.saveHistorySnapshot`) so
+  the buy indicator builds local history over repeat visits.
+
+**Quality:**
+
+- i18n: all new panel strings provided in EN and AR; panel is fully RTL-mirrored via CSS logical
+  properties and adapts to dark mode through design tokens.
+- style(countries): new Market Intelligence styles appended to `styles/country-page.css` using only
+  design tokens, with 44px CTA tap target and a `prefers-reduced-motion` fallback.
+- test(config): add `tests/market-intel.test.js` (4 tests) covering record completeness, numeric
+  bounds, and the default fallback.
+
 ### Phase 0 stabilization hotfixes — 2026-05-18
 
 - chore(scripts): add script aliases required by the Phase 0 baseline sweep (`lint:css`,
