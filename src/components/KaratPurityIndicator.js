@@ -41,8 +41,10 @@ export function updateKaratPurityIndicator(root, karat, label = '') {
   const pct = getPurityPercent(karat);
   const ring = root.querySelector('.karat-purity-ring');
   const fill = root.querySelector('.karat-purity-ring__fill');
+  const track = root.querySelector('.karat-purity-ring__track');
   const labelEl = root.querySelector('.karat-purity-ring__label');
   const pctEl = root.querySelector('.karat-purity-ring__pct');
+  if (track) track.style.setProperty('--purity-fill', `${pct}%`);
   if (fill) fill.style.setProperty('--purity-fill', `${pct}%`);
   if (labelEl) labelEl.textContent = `${karat}K`;
   if (pctEl) pctEl.textContent = `${pct}%`;

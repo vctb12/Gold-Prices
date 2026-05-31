@@ -255,8 +255,10 @@
         </div>
       </section>
 
+      <!-- ── Calculator panels (crossfade) ── -->
+      <div class="tab-panels--crossfade calc-tab-panels">
       <!-- ── Calculator 1: Gold Value ── -->
-      <section class="calc-panel active" id="panel-value" role="tabpanel" aria-labelledby="calc-value-title">
+      <section class="calc-panel tab-panel is-active" id="panel-value" role="tabpanel" aria-labelledby="calc-value-title">
         <div class="calc-card">
           <h2 class="calc-card-title" id="calc-value-h2">How much is my gold worth?</h2>
           <p class="calc-card-desc" id="calc-value-desc">
@@ -367,7 +369,7 @@
             <div class="calc-result-main">
               <div class="calc-result-label" id="val-result-label">Estimated Value</div>
               <div class="calc-result-value" id="val-result-value">—</div>
-              <button class="calc-copy-btn" id="calc-copy-btn" type="button">Copy Result</button>
+              <button class="calc-copy-btn btn--shimmer" id="calc-copy-btn" type="button">Copy Result</button>
               <button
                 class="calc-copy-btn calc-save-btn"
                 data-save-calculation="value"
@@ -379,6 +381,11 @@
             </div>
             <div class="calc-result-breakdown" id="val-result-breakdown"></div>
             <div id="val-shop-vs-ref-mount" class="val-shop-vs-ref-mount" hidden></div>
+            <p class="calc-result-shops-link-wrap">
+              <a href="shops.html" class="link-accent calc-result-shops-link" id="calc-find-shops-link"
+                >Find gold shops →</a
+              >
+            </p>
             <div class="calc-result-note" id="val-nisab-indicator" role="status" aria-live="polite"></div>
             <div class="calc-result-actions">
               <button class="calc-copy-btn" id="calc-copy-link-btn" type="button">Copy Link</button>
@@ -400,7 +407,7 @@
       </section>
 
       <!-- ── Calculator 2: Scrap Gold ── -->
-      <section class="calc-panel" id="panel-scrap" role="tabpanel" aria-labelledby="calc-scrap-title" hidden>
+      <section class="calc-panel tab-panel" id="panel-scrap" role="tabpanel" aria-labelledby="calc-scrap-title">
         <div class="calc-card">
           <h2 class="calc-card-title" id="calc-scrap-h2">Scrap Gold Calculator</h2>
           <p class="calc-card-desc" id="calc-scrap-desc">
@@ -503,7 +510,7 @@
       </section>
 
       <!-- ── Calculator 3: Zakat ── -->
-      <section class="calc-panel" id="panel-zakat" role="tabpanel" aria-labelledby="calc-zakat-title" hidden>
+      <section class="calc-panel tab-panel" id="panel-zakat" role="tabpanel" aria-labelledby="calc-zakat-title">
         <div class="calc-card">
           <h2 class="calc-card-title" id="calc-zakat-h2">Zakat on Gold Calculator</h2>
           <p class="calc-card-desc" id="calc-zakat-desc">
@@ -587,7 +594,7 @@
       </section>
 
       <!-- ── Calculator 4: Buying Power ── -->
-      <section class="calc-panel" id="panel-buying" role="tabpanel" aria-labelledby="calc-buying-title" hidden>
+      <section class="calc-panel tab-panel" id="panel-buying" role="tabpanel" aria-labelledby="calc-buying-title">
         <div class="calc-card">
           <h2 class="calc-card-title" id="calc-buying-h2">Buying Power Calculator</h2>
           <p class="calc-card-desc" id="calc-buying-desc">
@@ -650,7 +657,7 @@
       </section>
 
       <!-- ── Calculator 5: Unit Converter ── -->
-      <section class="calc-panel" id="panel-convert" role="tabpanel" aria-labelledby="calc-convert-title" hidden>
+      <section class="calc-panel tab-panel" id="panel-convert" role="tabpanel" aria-labelledby="calc-convert-title">
         <div class="calc-card">
           <h2 class="calc-card-title" id="calc-convert-h2">Gold Weight Unit Converter</h2>
           <p class="calc-card-desc" id="calc-convert-desc">
@@ -697,6 +704,7 @@
           </div>
         </div>
       </section>
+      </div>
       <!-- Related tools -->
       <section class="calc-related" aria-label="Related tools">
         <div class="calc-related-inner">

@@ -318,7 +318,8 @@ export const TRANSLATIONS = {
     'tracker.calcMethodLink': 'Methodology →',
     'tracker.hints.reference': 'Spot-linked reference prices before making charges and VAT',
     'tracker.hints.referenceLink': 'Methodology',
-    'tracker.hints.shortcuts': 'R refresh · K karat · U unit · ⇧C copy · H live · C compare · ? help',
+    'tracker.hints.shortcuts':
+      'R refresh · K karat · U unit · ⇧C copy · H live · C compare · ? help',
     'tracker.quickToolsTitle': 'Tools & resources',
     'tracker.quickToolsCalculator': '⚖️ Calculator',
     'tracker.quickToolsCountries': '🌍 Countries',
@@ -534,6 +535,8 @@ export const TRANSLATIONS = {
     'home.sourceUnavailable': 'Unavailable',
     'home.priceUnavailableApi': 'Live reference price temporarily unavailable — retry shortly',
     'home.priceUnavailableConnection': 'Connection lost — waiting for the next live update',
+    'home.liveUnavailableBanner':
+      'Live gold price unavailable. Showing last known value if available.',
     'home.changeLabel': 'Today',
     'home.marketOpen': '● Market Open',
     'home.marketClosed': '○ Market Closed',
@@ -899,6 +902,8 @@ export const TRANSLATIONS = {
     'country.freshness.fallback': 'Fallback',
     'country.freshness.unavailable': 'Unavailable',
     'country.freshness.fixed': 'AED fixed peg',
+    'country.copySuccess': 'Price copied',
+    'country.copyFailed': 'Could not copy',
 
     // Learn hub catalog
     'learn.cat.start': 'Start here',
@@ -1501,6 +1506,7 @@ export const TRANSLATIONS = {
     'home.sourceUnavailable': 'غير متاح',
     'home.priceUnavailableApi': 'السعر المرجعي المباشر غير متاح مؤقتًا — أعد المحاولة بعد قليل',
     'home.priceUnavailableConnection': 'انقطع الاتصال — بانتظار التحديث المباشر التالي',
+    'home.liveUnavailableBanner': 'تعذّر تحميل سعر الذهب المباشر. يُعرض آخر سعر معروف إن وُجد.',
     'home.changeLabel': 'اليوم',
     'home.marketOpen': '● السوق مفتوح',
     'home.marketClosed': '○ السوق مغلق',
@@ -1859,6 +1865,8 @@ export const TRANSLATIONS = {
     'country.freshness.fallback': 'بديل احتياطي',
     'country.freshness.unavailable': 'غير متاح',
     'country.freshness.fixed': 'ربط الدرهم الثابت',
+    'country.copySuccess': 'تم نسخ السعر',
+    'country.copyFailed': 'تعذّر النسخ',
 
     // Learn hub catalog
     'learn.cat.start': 'ابدأ هنا',

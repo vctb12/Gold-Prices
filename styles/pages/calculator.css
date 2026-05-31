@@ -251,7 +251,13 @@
   display: none;
 }
 
-.calc-panel.active {
+.calc-tab-panels > .calc-panel {
+  display: block;
+  margin: var(--space-6) auto;
+}
+
+.calc-panel.active,
+.calc-panel.is-active {
   display: block;
 }
 
@@ -439,6 +445,11 @@
   line-height: 1.1;
   letter-spacing: -0.02em;
   transition: font-size var(--transition-slow);
+}
+
+.calc-result-shops-link-wrap {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
 }
 
 .calc-result-breakdown {
@@ -677,10 +688,30 @@
   .calc-tab {
     font-size: 0.75rem;
     padding: 0.45rem 0.6rem;
+    min-height: 44px;
+  }
+
+  .calc-input,
+  .calc-select,
+  .calc-input-row {
+    width: 100%;
+  }
+
+  .calc-input-row {
+    flex-direction: column;
+  }
+
+  .karat-purity-ring {
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .calc-section {
     padding: 1rem;
+  }
+
+  .calc-related-inner {
+    grid-template-columns: 1fr;
   }
 }
 

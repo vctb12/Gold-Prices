@@ -102,6 +102,10 @@ function buildStatCard(label, value, sub) {
 
 export function renderChart() {
   if (!_el.chart) return;
+  if (_el.chartWrap) {
+    _el.chartWrap.classList.add('is-loading');
+    window.setTimeout(() => _el.chartWrap?.classList.remove('is-loading'), 250);
+  }
   const rows = getVisibleHistoryRows();
   const historyOnly = rows.filter((row) => row.granularity !== 'live');
   const livePoint = rows.find((row) => row.granularity === 'live') || null;

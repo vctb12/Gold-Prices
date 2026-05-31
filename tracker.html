@@ -186,7 +186,7 @@
                 <span id="tp-refresh-badge" role="status" aria-live="polite">Waiting for first sync</span>
               </span>
               <span class="tracker-badge tracker-badge-source" id="tp-source-state-badge">Reference status</span>
-              <span class="tracker-badge tracker-badge-xauusd" id="tp-xauusd-badge" aria-label="XAU/USD spot price">
+              <span class="tracker-badge tracker-badge-xauusd tracker-hero-price" id="tp-xauusd-badge" aria-label="XAU/USD spot price">
                 <span aria-hidden="true">🏅</span>
                 <span>XAU/USD</span>
                 <strong id="tp-xauusd-value">—</strong>
@@ -656,7 +656,7 @@
               making charges, dealer margin, and VAT.
             </p>
             <div class="tracker-ladder-table-wrap" aria-label="Karat ladder">
-              <table class="tracker-table">
+              <table class="tracker-table tracker-karat-table table-interactive">
                 <caption class="sr-only">Karat ladder — spot-linked reference price per selected unit for the selected market</caption>
                 <thead>
                   <tr>
@@ -916,6 +916,12 @@
             <p class="source-note tracker-inline-calc__source" id="tracker-inline-calc-source">
               Source and freshness follow the live tracker context above.
             </p>
+            <a
+              href="calculator.html"
+              class="tracker-inline-link tracker-inline-calc-full-link"
+              id="tracker-inline-calc-full-link"
+              >Open full calculator →</a
+            >
           </div>
         </section>
       </section>

@@ -21,7 +21,7 @@ function t(lang, key, vars = {}) {
 function renderGuideCard(guide, lang) {
   const href = guide.href.startsWith('/') ? guide.href : `/${guide.href}`;
   const read = getLearnProgress().includes(guide.href);
-  return el('a', { href, class: `card card--bordered learn-guide-card${read ? ' learn-guide-card--read' : ''}` }, [
+  return el('a', { href, class: `card card--bordered learn-guide-card card-interactive${read ? ' learn-guide-card--read' : ''}` }, [
     el('div', { class: 'learn-guide-card__meta' }, [
       el('span', { class: `badge badge--${guide.level === 'beginner' ? 'info' : 'neutral'}` }, t(lang, `learn.level.${guide.level}`)),
       el('span', { class: 'learn-guide-card__time' }, t(lang, 'learn.readMin', { n: guide.readMin })),
@@ -69,10 +69,19 @@ export function mountLearnHubCatalog(options) {
           return title.includes(q) || desc.includes(q);
         });
         if (!guides.length) return null;
-        return el('section', { class: 'learn-hub-category' }, [
+        return el('section', { class: 'learn-hub-category', 'data-reveal': '' }, [
           el('h2', { class: 'learn-hub-category__title' }, t(lang, cat.titleKey)),
           el('p', { class: 'learn-hub-category__desc' }, t(lang, cat.descKey)),
-          el('div', { class: 'learn-hub-grid' }, guides.map((g) => renderGuideCard(g, lang))),
+          el(
+            'div',
+            { class: 'learn-hub-grid' },
+            guides.map((g, index) => {
+              const card = renderGuideCard(g, lang);
+              card.setAttribute('data-reveal', '');
+              card.setAttribute('data-reveal-delay', String(Math.min(index + 1, 6)));
+              return card;
+            })
+          ),
         ]);
       }).filter(Boolean)
     );

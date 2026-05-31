@@ -18,6 +18,8 @@ import { el, safeHref, clear, setText } from './safe-dom.js';
 import { track, EVENTS } from './analytics.js';
 import '../lib/reveal.js';
 import { initPageEnter } from './page-enter.js';
+import { countUp } from './count-up.js';
+import { copyWithToast } from './copy-toast.js';
 
 const _modUrl = new URL(import.meta.url);
 const _pageUrl = new URL(location.href);
@@ -223,6 +225,38 @@ function getFeaturedKarats(countryData) {
     .filter(Boolean);
 }
 
+function animatePriceEl(elNode, numericValue, formatFn, options = {}) {
+  if (!elNode || !Number.isFinite(numericValue)) {
+    if (elNode) setText(elNode, '—');
+    return;
+  }
+  countUp(elNode, numericValue, {
+    decimals: 2,
+    format: formatFn,
+    pulse: options.pulse !== false,
+    pulseTarget: elNode.closest('.country-price-card, .country-karat-card'),
+    minDurationMs: options.minDurationMs,
+    maxDurationMs: options.maxDurationMs,
+  });
+}
+
+function wireKaratCardCopy(button, text, lang) {
+  button.addEventListener('click', async () => {
+    const icon = button.querySelector('.country-karat-card__copy-icon');
+    const original = icon?.textContent || '⎘';
+    const ok = await copyWithToast(text, {
+      successMessage: tx(lang, 'copySuccess'),
+      errorMessage: tx(lang, 'copyFailed'),
+    });
+    if (ok && icon) {
+      icon.textContent = '✓';
+      window.setTimeout(() => {
+        icon.textContent = original;
+      }, 1500);
+    }
+  });
+}
+
 function wireLangToggles(navCtrl, lang) {
   if (!navCtrl?.getLangToggleButtons) return;
   navCtrl.getLangToggleButtons().forEach((button) => {
@@ -319,18 +353,21 @@ function renderCountryHero({ country, pageData, lang, gold, goldFreshness, fxFre
       heroMetrics.append(
         el(
           'article',
-          { class: 'country-price-card', dataset: { tone: freshnessTone(goldFreshness.key) } },
+          {
+            class: 'country-price-card card-interactive',
+            dataset: { tone: freshnessTone(goldFreshness.key) },
+          },
           [
             el(
               'p',
               { class: 'country-price-card__label' },
               `${karat.code}K · ${tx(lang, 'cardPerGram')}`
             ),
-            el(
-              'p',
-              { class: 'country-price-card__value', 'aria-live': 'polite' },
-              localPerGram ? formatPrice(localPerGram, country.currency, country.decimals) : '—'
-            ),
+            el('p', {
+              class: 'country-price-card__value',
+              'aria-live': 'polite',
+              'data-price-value': karat.code,
+            }),
             el(
               'p',
               { class: 'country-price-card__meta' },
@@ -338,6 +375,26 @@ function renderCountryHero({ country, pageData, lang, gold, goldFreshness, fxFre
             ),
           ]
         )
+      );
+    });
+    featured.forEach((karat) => {
+      const localPerGram = rate
+        ? calcLocalPrice(gold?.price || 0, karat.purity, rate, 'gram')
+        : null;
+      const valueEl = heroMetrics.querySelector(`[data-price-value="${karat.code}"]`);
+      if (!valueEl) return;
+      if (!localPerGram) {
+        setText(valueEl, '—');
+        return;
+      }
+      animatePriceEl(
+        valueEl,
+        localPerGram,
+        (n) => formatPrice(n, country.currency, country.decimals),
+        {
+          minDurationMs: karat.code === '24' ? 800 : 180,
+          maxDurationMs: karat.code === '24' ? 800 : 800,
+        }
       );
     });
   }
@@ -412,7 +469,10 @@ function renderCountryKaratCards({ country, pageData, lang, gold, rate, goldFres
       cardsRoot.append(
         el(
           'article',
-          { class: 'country-karat-card', dataset: { tone: freshnessTone(goldFreshness.key) } },
+          {
+            class: 'country-karat-card card-interactive',
+            dataset: { tone: freshnessTone(goldFreshness.key), karat: karat.code },
+          },
           [
             el('div', { class: 'country-karat-card__head' }, [
               el('h3', { class: 'country-karat-card__title' }, `${karat.code}K`),
@@ -422,15 +482,14 @@ function renderCountryKaratCards({ country, pageData, lang, gold, rate, goldFres
                 tx(lang, 'cardPurity', { purity: Math.round(karat.purity * 100) })
               ),
             ]),
-            el(
-              'p',
-              { class: 'country-karat-card__value' },
-              localPerGram ? formatPrice(localPerGram, country.currency, country.decimals) : '—'
-            ),
+            el('p', {
+              class: 'country-karat-card__value',
+              'data-karat-value': karat.code,
+            }),
             el('p', { class: 'country-karat-card__label' }, tx(lang, 'cardPerGram')),
             el('p', { class: 'country-karat-card__secondary' }, [
               `${tx(lang, 'cardPerOz')}: `,
-              localPerOz ? formatPrice(localPerOz, country.currency, country.decimals) : '—',
+              el('span', { 'data-karat-oz': karat.code }, '—'),
             ]),
             el(
               'p',
@@ -443,9 +502,49 @@ function renderCountryKaratCards({ country, pageData, lang, gold, rate, goldFres
                     : goldFreshness.ageText,
               })
             ),
+            el(
+              'button',
+              {
+                type: 'button',
+                class: 'country-karat-card__copy btn btn-sm btn-outline',
+                'aria-label':
+                  lang === 'ar' ? `نسخ سعر ${karat.code}K` : `Copy ${karat.code}K price`,
+              },
+              [
+                el('span', { class: 'country-karat-card__copy-icon', 'aria-hidden': 'true' }, '⎘'),
+                lang === 'ar' ? 'نسخ' : 'Copy',
+              ]
+            ),
           ]
         )
       );
+      const card = cardsRoot.lastElementChild;
+      const copyBtn = card?.querySelector('.country-karat-card__copy');
+      const gramText = localPerGram
+        ? formatPrice(localPerGram, country.currency, country.decimals)
+        : '—';
+      if (copyBtn && localPerGram) {
+        wireKaratCardCopy(
+          copyBtn,
+          `${karat.code}K · ${gramText} / ${tx(lang, 'cardPerGram')}`,
+          lang
+        );
+      }
+      const valueEl = card?.querySelector(`[data-karat-value="${karat.code}"]`);
+      if (valueEl && localPerGram) {
+        animatePriceEl(valueEl, localPerGram, (n) =>
+          formatPrice(n, country.currency, country.decimals)
+        );
+      } else if (valueEl) {
+        setText(valueEl, '—');
+      }
+      const ozEl = card?.querySelector(`[data-karat-oz="${karat.code}"]`);
+      if (ozEl) {
+        setText(
+          ozEl,
+          localPerOz ? formatPrice(localPerOz, country.currency, country.decimals) : '—'
+        );
+      }
     });
   }
 

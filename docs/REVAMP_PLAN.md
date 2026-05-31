@@ -13,7 +13,9 @@ them into the right section here before execution. Agent operating rules are in
 - Keep completed items as `[x]` with enough context to serve as a record. Don't re-open closed items
   to pad status; don't invent new phases to look ambitious.
 
-**Last updated:** 2026-05-30 (Session 7 visual excellence — global interaction system, homepage
+**Last updated:** 2026-05-30 (Session 7b visual excellence — full-surface interaction rollout: tracker/calc/shops/country/content polish, integration links, mobile 380px, error banner)
+
+Previous: 2026-05-30 (Session 7 visual excellence — global interaction system, homepage
 hero/GCC polish, price-pulse count-ups, page-enter on flagship pages, tracker deep-links from home)
 
 Previous: 2026-05-30 (Session 6 launch push — content page audit + `content-page-boot`,
@@ -55,6 +57,24 @@ global.css, shops.css, calculator.css, tracker-pro.css, invest.css; complete can
 removing all legacy `--color-surface` / `--color-border-subtle` / `--color-text` /
 `--color-text-muted` fallback overrides across home.css, shops.css, calculator.css, stub.css,
 order.css, global.css).
+
+### 2026-05-30 session 7b — full-surface visual rollout
+
+- [x] Tracker: interactive stat cards, karat table highlight + selected row, chart range crossfade, mobile dock pulse, inline calc → calculator deep link
+- [x] Calculator: tab crossfade panels, purity ring `@property` transition, copy shimmer, result → shops link
+- [x] Shops: `card-interactive`, copy ✓ feedback, grid `--updating` fade, city group `[data-reveal]`, empty fade-in
+- [x] Country pages (`page-hydrator`): hero/karat `countUp` + pulse, karat copy buttons, FAQ smooth accordion, city card hover
+- [x] Learn / methodology / insights: guide card hover, formula step reveal stagger, pulse card countUp
+- [x] Home: `data-status-banner` on prolonged fetch failure with retry
+- [x] Mobile 380px CSS pass (home GCC 2-col, tracker pills wrap, calc full-width inputs, shops single-column)
+- [x] Verified: `npm run build`; `npm test` 937/940 (3 pre-existing cache/provider/content-audit failures)
+
+### 2026-05-30 session 7 — visual excellence (interaction foundation)
+
+- [x] Global interaction system (cards, buttons, inputs, tables, price pulse, page-enter)
+- [x] Homepage hero/GCC polish, quick-convert, karat tooltips, countUp pulses
+- [x] Tracker / calculator / country CSS hooks; `initPageEnter` on flagship pages
+- [x] Tracker deep links from homepage with karat + unit preference
 
 ### 2026-05-30 session 6 — launch push (content + trust surfaces)
 

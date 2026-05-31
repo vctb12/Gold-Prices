@@ -27,8 +27,8 @@ function renderPriceChangeStrip(spot, dayOpenSpot) {
   const pct = (delta / dayOpenSpot) * 100;
   const isUp = delta >= 0;
   strip.hidden = false;
-  strip.classList.remove('tracker-price-change--up', 'tracker-price-change--down');
-  strip.classList.add(isUp ? 'tracker-price-change--up' : 'tracker-price-change--down');
+  strip.classList.remove('tracker-price-change-strip--up', 'tracker-price-change-strip--down');
+  strip.classList.add(isUp ? 'tracker-price-change-strip--up' : 'tracker-price-change-strip--down');
   strip.setAttribute('role', 'status');
   strip.setAttribute('aria-live', 'polite');
   const sign = isUp ? '+' : '−';
@@ -224,7 +224,7 @@ export function renderHero() {
     if (isFirst) {
       clear(_el.heroStats);
       statDefs.forEach((def) => {
-        const card = el('div', { class: 'tracker-hero-stat', 'data-stat-key': def.key }, [
+        const card = el('div', { class: 'tracker-hero-stat card-interactive', 'data-stat-key': def.key }, [
           el('div', { class: 'tracker-hero-k' }, def.label),
           el('div', { class: 'tracker-hero-v tracker-tabular-nums', 'data-stat-value': def.key }, '—'),
           el('div', { class: 'tracker-hero-s', 'data-stat-sub': def.key }, def.sub),
@@ -245,7 +245,12 @@ export function renderHero() {
         setText(valueEl, '—');
         return;
       }
-      countUp(valueEl, def.value, { decimals: def.key === 'usd24g' ? 3 : 2, format: def.format });
+      countUp(valueEl, def.value, {
+        decimals: def.key === 'usd24g' ? 3 : 2,
+        format: def.format,
+        pulse: true,
+        pulseTarget: valueEl.closest('.tracker-hero-stat'),
+      });
     });
   } else if (_el.heroStats && !spot) {
     clear(_el.heroStats);
@@ -319,6 +324,8 @@ export function renderHero() {
         decimals: 2,
         format: (n) =>
           n.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        pulse: true,
+        pulseTarget: mobilePriceEl.closest('.tracker-mobile-dock__price, .tracker-mobile-summary'),
       });
     } else {
       setText(mobilePriceEl, '—');
@@ -444,7 +451,9 @@ export function renderKaratTable() {
         vsCell,
       ];
       if (dayOpenSpot) cells.push(buildChangeIndicator(k));
-      fragment.append(el('tr', null, cells));
+      const rowAttrs =
+        k.code === _state.selectedKarat ? { class: 'is-selected' } : {};
+      fragment.append(el('tr', rowAttrs, cells));
     }
     clear(_el.karatTable);
     _el.karatTable.append(fragment);
@@ -459,6 +468,7 @@ export function renderKaratTable() {
       });
       const vs = price24 && p ? `${((p / price24) * 100).toFixed(1)}%` : '—';
       const row = _el.karatTable.querySelector(`[data-karat-price="${k.code}"]`)?.closest('tr');
+      if (row) row.classList.toggle('is-selected', k.code === _state.selectedKarat);
       const priceCell = _el.karatTable.querySelector(`[data-karat-price="${k.code}"]`);
       const vsCell = _el.karatTable.querySelector(`[data-karat-vs="${k.code}"]`);
       if (priceCell && p) {
