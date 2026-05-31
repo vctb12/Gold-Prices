@@ -24,6 +24,11 @@
 
 ## ✅ Recently Completed
 
+- [x] BUILD 8: Insights Market Analysis Feed — rebuilt the insights guide grid into a filterable,
+      searchable CSS-masonry feed (category strip with counts, debounced search, read-time,
+      bilingual cards, dynamic live "price context" card at position 3) backed by pure
+      `src/pages/insights/insights-data.js` + renderer `src/pages/insights/insights-feed.js` and 10
+      tests (`tests/insights-data.test.js`) — completed: 2026-05-31 — PR: (draft)
 - [x] BUILD 6: Compare Countries — standalone interactive `compare.html` (sortable table, karat
       tabs, country chips, side-by-side detail with per-karat bar chart, cheapest-to-buy callout,
       hash deep links) backed by pure `src/pages/compare/compare-core.js` + 13 tests — completed:
@@ -110,7 +115,8 @@
 - [x] BUILD 5: PWA — done (sw.js, manifest.json, offline.html, install prompt)
 - [x] BUILD 6: Compare Tool — **done this session** (standalone `compare.html` + `compare-core.js`)
 - [ ] BUILD 7: Shops Directory — partial (list + filter, needs map, card redesign)
-- [ ] BUILD 8: Insights Feed — partial (exists, needs category filter, masonry, search)
+- [x] BUILD 8: Insights Feed — **done this session** (category filter + masonry + search + live
+      context card)
 - [ ] BUILD 9: Homepage Overhaul — partial (recent polish sessions improved it significantly)
 - [x] BUILD 10: Alert System — **done this session** (engine + drawer + dialog + sound + tests)
 

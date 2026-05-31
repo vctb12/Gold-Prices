@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### BUILD 8 — Insights: Market Analysis Feed (filterable, searchable) — 2026-05-31
+
+**New feature:**
+
+- feat(insights): rebuild the insights guide grid into a rich, filterable market-analysis feed — a
+  category filter strip with live counts, a debounced (200 ms) client-side search, a CSS-column
+  masonry grid (3/2/1 columns) of bilingual insight cards (icon, category badge, excerpt, publish
+  date, estimated read time, "Read →" link), and a no-results / empty state.
+- feat(insights): add a dynamic "Today's gold price context" card injected at position 3 of the
+  feed, driven by the page's existing live price + 7-day price history (up / down / flat / unknown
+  states, EN/AR). Reuses the same cached price state — no extra fetches.
+- feat(insights): new pure, DOM-free data module `src/pages/insights/insights-data.js` (`INSIGHTS`,
+  `CATEGORIES`, `estimateReadTime`/`readTimeLabel` at 200 wpm, `categoryCounts`, `filterInsights`,
+  `categoryLabel`, `buildPriceContextCard`) with 10 unit tests in `tests/insights-data.test.js`.
+  Every feed entry links to an existing content page (link-checked by a test).
+- feat(insights): new renderer `src/pages/insights/insights-feed.js` builds all feed DOM via the
+  shared safe-DOM `el()` helper (no innerHTML), with category state encoded in the URL hash
+  (`#cat=…`), full RTL support, reveal-on-scroll, and a `prefers-reduced-motion` fallback. Styles
+  added in `styles/pages/insights.css`.
+
 ### BUILD 6 — Compare Countries: interactive cross-country tool — 2026-05-31
 
 **New feature:**

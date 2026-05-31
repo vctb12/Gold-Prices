@@ -206,7 +206,7 @@
         </div>
       </section>
 
-      <!-- Section 3: Insight Cards Grid -->
+      <!-- Section 3: Insight Feed (filterable, searchable masonry) -->
       <section id="weekly-brief" class="insights-section insights-section--alt">
         <div class="insights-inner">
           <div class="insights-section-header">
@@ -217,48 +217,35 @@
               Essential reading for GCC gold buyers
             </p>
           </div>
-          <div class="insights-cards-grid">
-            <article class="insights-card card-interactive">
-              <div class="insights-card-tag">Pricing</div>
-              <h3 class="insights-card-title">Understanding the AED Gold Peg</h3>
-              <p class="insights-card-body">
-                The UAE Central Bank has pegged 1 USD = 3.6725 AED since 1997. This means AED gold
-                prices move exactly with USD prices — with zero FX noise. It makes UAE one of the
-                most price-stable gold markets globally.
-              </p>
-              <div class="insights-card-footer">
-                <a href="content/guides/aed-peg-explained.html" class="insights-card-link"
-                  >Full AED peg guide →</a
-                >
-              </div>
-            </article>
-            <article class="insights-card card-interactive">
-              <div class="insights-card-tag">Education</div>
-              <h3 class="insights-card-title">24K vs 22K: Which is the Better Buy?</h3>
-              <p class="insights-card-body">
-                24K is 99.9% pure gold — ideal for bars and coins. 22K (91.7%) is Gulf jewelry
-                standard. The price scales with purity, but retail premiums don't always. For
-                investment, bars beat jewelry. For gifts, 22K has better durability.
-              </p>
-              <div class="insights-card-footer">
-                <a href="content/guides/24k-vs-22k.html" class="insights-card-link">24K vs 22K guide →</a>
-              </div>
-            </article>
-            <article class="insights-card card-interactive">
-              <div class="insights-card-tag">Market Hours</div>
-              <h3 class="insights-card-title">When Do Gold Markets Open? A GCC Guide</h3>
-              <p class="insights-card-body">
-                Gold trades 23.5 hours/day, Sun 22:00 – Fri 21:00 UTC. Best liquidity: London open
-                (07:00 UTC). Most volatile: when London and New York overlap. Weekend: closed Friday
-                evening through Sunday night.
-              </p>
-              <div class="insights-card-footer">
-                <a href="content/guides/gcc-market-hours.html" class="insights-card-link"
-                  >GCC market hours guide →</a
-                >
-              </div>
-            </article>
+
+          <!-- Feed toolbar: search + category filter strip (populated by insights.js) -->
+          <div class="insights-feed-toolbar">
+            <div class="insights-search">
+              <label class="sr-only" for="insights-search-input" id="insights-search-label">
+                Search insights
+              </label>
+              <span class="insights-search-icon" aria-hidden="true">🔎</span>
+              <input
+                type="search"
+                id="insights-search-input"
+                class="insights-search-input"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            <div
+              class="insights-filter-strip"
+              id="insights-filter-strip"
+              role="tablist"
+              aria-label="Filter insights by category"
+            ></div>
           </div>
+
+          <!-- JS-rendered masonry feed -->
+          <div class="insights-feed" id="insights-feed" aria-live="polite"></div>
+
+          <!-- Empty / no-results state -->
+          <p class="insights-feed-empty" id="insights-feed-empty" role="status" hidden></p>
         </div>
       </section>
 
