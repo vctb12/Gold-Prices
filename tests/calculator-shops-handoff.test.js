@@ -3,11 +3,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
 async function loadModule() {
-  const url = new URL(
-    'file://' +
-      path.resolve(__dirname, '..', 'src', 'pages', 'calculator', 'shops-handoff.js')
+  const url = pathToFileURL(
+    path.resolve(__dirname, '..', 'src', 'pages', 'calculator', 'shops-handoff.js')
   );
   return import(url.href);
 }
