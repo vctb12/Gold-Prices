@@ -3,10 +3,9 @@
  * Pure functions — unit-tested; keep pricing/hash contracts documented in docs/tracker-state.md.
  */
 
-const TRACKER_KARATS = new Set(['24', '22', '21', '18', '14', '10', '9']);
+const TRACKER_KARATS = new Set(['24', '22', '21', '20', '18', '16', '14']);
 const TRACKER_UNITS = new Set(['gram', 'tola', 'oz']);
-const TRACKER_MODES = new Set(['live', 'compare', 'history', 'method', 'exports']);
-
+const TRACKER_MODES = new Set(['live', 'compare', 'archive', 'method', 'exports']);
 /**
  * @param {string} currency
  * @param {Array<{ currency: string, code?: string }>} countries
