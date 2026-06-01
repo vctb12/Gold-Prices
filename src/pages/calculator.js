@@ -24,6 +24,11 @@ import {
   redirectToAccount,
 } from '../lib/public-account-client.js';
 import { parseCalculatorUrlState, serializeCalculatorUrlState } from './calculator/url-state.js';
+import {
+  buildShopsHref,
+  buildTrackerHashHref,
+  countryForCurrency,
+} from '../lib/cross-page-links.js';
 import '../lib/reveal.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
@@ -130,7 +135,6 @@ const T = {
     val_result_label: 'Estimated Value',
     val_disclaimer:
       'Spot-linked reference estimate only. Final retail prices can include making charges, dealer margins, and taxes.',
-    find_shops_link: 'Find gold shops →',
     shop_vs_ref_title: 'Reference vs typical shop range',
     shop_vs_ref_intro:
       'Jewellery shops often quote above the raw gold reference. The range below is illustrative (8–22% making charges) — not a live shop price.',
@@ -236,7 +240,6 @@ const T = {
     val_result_label: 'القيمة التقديرية',
     val_disclaimer:
       'تقدير مرجعي مرتبط بالسعر الفوري فقط. قد تشمل أسعار التجزئة النهائية المصنعية وهوامش التجار والضرائب.',
-    find_shops_link: 'ابحث عن محلات الذهب ←',
     shop_vs_ref_title: 'المرجع مقابل نطاق المحلات التقريبي',
     shop_vs_ref_intro:
       'غالباً ما تقتبس محلات المجوهرات فوق قيمة الذهب الخام. النطاق أدناه توضيحي (مصنعية 8–22٪) — وليس سعر محل مباشر.',
@@ -330,13 +333,27 @@ function updateMobileDock({ title, value, meta, targetId }) {
 function getSelectedCountryContext(currency) {
   return (
     COUNTRIES.find((country) => country.slug === STATE.countrySlug) ||
-    COUNTRIES.find((country) => country.currency === currency) ||
-    null
+    countryForCurrency(currency, COUNTRIES)
   );
 }
 
 function buildCountryPageHref(country) {
   return country?.slug ? `countries/${country.slug}/` : 'countries/index.html';
+}
+
+function updateShopsLink({ currency = 'AED' } = {}) {
+  const link = document.getElementById('calc-find-shops-link');
+  if (!link) return;
+  const country = getSelectedCountryContext(currency);
+  link.href = buildShopsHref({ countryCode: country?.code });
+  const countryName = country
+    ? STATE.lang === 'ar'
+      ? country.nameAr
+      : country.nameEn
+    : '';
+  link.textContent = countryName
+    ? tGlobal('calc.findShopsLinkCountry').replace('{country}', countryName)
+    : tGlobal('calc.findShopsLink');
 }
 
 function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
@@ -347,18 +364,19 @@ function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
   const note = document.getElementById('calc-live-tracker-note');
   if (!handoff || !trackerLink || !mobileTrackerLink || !note) return;
 
-  const params = new URLSearchParams({
+  const href = buildTrackerHashHref({
     mode: 'live',
     cur: currency,
-    k: String(karat),
+    k: karat,
     u: 'gram',
-    r: '30D',
     lang: STATE.lang,
+    range: '30D',
   });
-  const href = `tracker.html#${params.toString()}`;
   trackerLink.href = href;
   mobileTrackerLink.href = href;
   handoff.hidden = false;
+
+  updateShopsLink({ currency });
 
   const selectedCountry = getSelectedCountryContext(currency);
   if (countryLink) {
@@ -970,7 +988,9 @@ function applyLang() {
   set('val-currency-hint', t('val_currency_hint'));
   set('val-result-label', t('val_result_label'));
   set('val-disclaimer', t('val_disclaimer'));
-  set('calc-find-shops-link', t('find_shops_link'));
+  updateShopsLink({
+    currency: document.getElementById('val-currency')?.value || 'AED',
+  });
   set('calc-scrap-h2', t('scrap_title'));
   set('calc-scrap-desc', t('scrap_desc'));
   set('scrap-weight-label', t('scrap_weight'));

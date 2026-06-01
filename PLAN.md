@@ -23,8 +23,8 @@
 > Program (Tracks B–E):
 > [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](docs/plans/2026-06-01_ui-ux-audit-remediation-program.md)
 
-- [ ] **Track D1** — cross-page integration wiring (endless:
-      `@.github/prompts/endless-integration-wiring.prompt.md`)
+- [ ] **Track D1** — cross-page integration wiring (WB-102 in flight; remaining: shops city
+      spot-check, related guides, EN↔AR parity audit)
 - [ ] **NEXT_PR_SEQUENCE PR 1** — GDPR export/delete + dashboard + alerts docs (see
       [`docs/audits/NEXT_PR_SEQUENCE.md`](docs/audits/NEXT_PR_SEQUENCE.md))
 - [ ] **Repo C1a** — docs archive + supersession index only (no URL moves) —
@@ -47,6 +47,8 @@
 
 ## ✅ Recently Completed
 
+- [x] **WB-102** (partial — PR open) — home karat selection → tracker `#mode=live&cur=AED&k=&u=`;
+      calculator shops CTA with `?country=`; `src/lib/cross-page-links.js` — 2026-06-01
 - [x] **UI/UX audit Sessions 0–5** — first paint through CSS partials + a11y CI — completed:
       2026-06-01 — PRs: [#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)
 - [x] BUILD 8: Insights Market Analysis Feed — rebuilt the insights guide grid into a filterable,

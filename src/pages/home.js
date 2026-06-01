@@ -45,6 +45,8 @@ import { track, EVENTS } from '../lib/analytics.js';
 import { enforceCanonicalOnDocument } from '../seo/canonical.js';
 import { enforceHreflangAlternates } from '../seo/hreflang.js';
 import { buildMethodologyFaqSchema, injectFaqSchema } from '../seo/faq-schema.js';
+import { buildHomeTrackerHref } from '../lib/cross-page-links.js';
+import { serializeCalculatorUrlState } from './calculator/url-state.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const LANG_KEY = 'user_prefs';
@@ -82,6 +84,16 @@ let _realtimeEngine = null;
 let _refreshTimer = null;
 let _freshnessTimer = null;
 let _quickConvert = null;
+
+// Karat selected for tracker/calculator deep links — persisted in user_prefs
+let homeTrackerKarat = (() => {
+  try {
+    const k = JSON.parse(localStorage.getItem(LANG_KEY) || '{}').homeTrackerKarat;
+    return ['24', '22', '21', '18', '14'].includes(k) ? k : '24';
+  } catch {
+    return '24';
+  }
+})();
 
 // Karat strip unit preference — persisted in user_prefs localStorage
 let karatStripUnit = (() => {
@@ -198,18 +210,57 @@ function ensureHeroLoadingSkeletons() {
   mountSkeleton(document.getElementById('karat-strip-updated'), 'freshnessStrip');
 }
 
-/** Deep-link to tracker with current karat strip unit preference. */
-function buildTrackerHref(overrides = {}) {
-  const unit = karatStripUnit === 'tola' ? 'tola' : karatStripUnit === 'oz' ? 'oz' : 'gram';
-  const params = new URLSearchParams({
-    mode: 'live',
-    cur: 'AED',
-    k: '24',
-    u: unit,
-    lang,
+function persistHomeTrackerKarat(karat) {
+  try {
+    const p = JSON.parse(localStorage.getItem(LANG_KEY) || '{}');
+    p.homeTrackerKarat = karat;
+    localStorage.setItem(LANG_KEY, JSON.stringify(p));
+  } catch (_) {}
+}
+
+/** Deep-link to calculator with homepage karat + AED context. */
+function buildCalculatorHref(overrides = {}) {
+  return `calculator.html${serializeCalculatorUrlState({
+    karat: homeTrackerKarat,
+    currency: 'AED',
+    mode: 'value',
+    valueMode: 'weight',
     ...overrides,
+  })}`;
+}
+
+function updateKaratStripSelection() {
+  document.querySelectorAll('.karat-strip-item').forEach((item) => {
+    const karat = item.id?.replace('kstrip-', '');
+    const selected = karat === homeTrackerKarat;
+    item.classList.toggle('is-selected', selected);
+    item.setAttribute('aria-pressed', selected ? 'true' : 'false');
   });
-  return `tracker.html#${params.toString()}`;
+}
+
+function bindKaratStripSelection() {
+  document.querySelectorAll('.karat-strip-item').forEach((item) => {
+    const karat = item.id?.replace('kstrip-', '');
+    if (!['24', '22', '21', '18', '14'].includes(karat)) return;
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-label', tx('karatStripSelectAria').replace('{karat}', karat));
+    const selectKarat = (event) => {
+      if (event.target.closest('.kstrip-copy-btn')) return;
+      homeTrackerKarat = karat;
+      persistHomeTrackerKarat(karat);
+      updateKaratStripSelection();
+      syncCrossPageLinks();
+    };
+    item.addEventListener('click', selectKarat);
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        selectKarat(event);
+      }
+    });
+  });
+  updateKaratStripSelection();
 }
 
 function hasRealtimePathFailure() {
@@ -646,11 +697,17 @@ function renderGCCGrid() {
   grid.append(fragment);
 }
 
-function syncTrackerLinks() {
-  const href = buildTrackerHref();
+function syncCrossPageLinks() {
+  const unit = karatStripUnit === 'tola' ? 'tola' : karatStripUnit === 'oz' ? 'oz' : 'gram';
+  const trackerHref = buildHomeTrackerHref(homeTrackerKarat, unit, lang);
   for (const id of ['hero-cta-tracker', 'hlc-tracker-link', 'karat-strip-cta']) {
     const node = document.getElementById(id);
-    if (node) node.setAttribute('href', href);
+    if (node) node.setAttribute('href', trackerHref);
+  }
+  const calcHref = buildCalculatorHref();
+  for (const id of ['hero-cta-calculator', 'home-action-calc']) {
+    const node = document.getElementById(id);
+    if (node) node.setAttribute('href', calcHref);
   }
 }
 
@@ -719,7 +776,8 @@ function applyLangToPage() {
   setTextById('karat-strip-title', tx('karatStripTitle'));
   setTextById('karat-strip-sub', tx('karatStripSub'));
   setTextById('karat-strip-cta', tx('karatStripCta'));
-  syncTrackerLinks();
+  updateKaratStripSelection();
+  syncCrossPageLinks();
   setTextById('tools-title', tx('toolsTitle'));
   setTextById('tools-sub', tx('toolsSub'));
   setTextById('home-stats-title', tx('statsTitle'));
@@ -1177,9 +1235,11 @@ async function init() {
         b.setAttribute('aria-pressed', b.dataset.unit === unit ? 'true' : 'false');
       });
       renderKaratStrip();
-      syncTrackerLinks();
+      syncCrossPageLinks();
     });
   });
+
+  bindKaratStripSelection();
 
   // FAQ: one-open-at-a-time behaviour
   document.querySelectorAll('.faq-item').forEach((item) => {
