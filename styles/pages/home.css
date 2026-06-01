@@ -749,7 +749,13 @@
 
 .karat-strip-item {
   position: relative;
-  cursor: default;
+  cursor: pointer;
+}
+
+.karat-strip-item.is-selected {
+  border-color: var(--color-gold);
+  box-shadow: var(--shadow-sm);
+  background: color-mix(in srgb, var(--color-gold) 12%, var(--surface-raised));
 }
 
 .karat-strip-item:hover {

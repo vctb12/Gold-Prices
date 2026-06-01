@@ -20,7 +20,7 @@
 | ----- | ----- | ------ | -- | ------ | ------ | ----- |
 | WB-000 | Meta | `cursor/master-workbook-v1-cb21` | [#395](https://github.com/vctb12/GoldTickerLive/pull/395) | 🟡 open | — | Workbook v2 + appendices A–G |
 | WB-101 | Integration | `cursor/wb-101-gdpr-export-delete-cb21` | — | ⬜ | — | [D.2](./APPENDIX_D_SESSION_EXECUTION_GUIDES.md#d2-wb-101--gdpr-exportdelete-dashboard-ux) |
-| WB-102 | Integration | `cursor/wb-102-cross-page-deeplinks-cb21` | — | ⬜ | — | [D.1](./APPENDIX_D_SESSION_EXECUTION_GUIDES.md#d1-wb-102--cross-page-deep-links) |
+| WB-102 | Integration | `cursor/wb-102-cross-page-deeplinks-cb21` | [#399](https://github.com/vctb12/GoldTickerLive/pull/399) | 🟡 open | — | [D.1](./APPENDIX_D_SESSION_EXECUTION_GUIDES.md#d1-wb-102--cross-page-deep-links) |
 | WB-103 | Integration | `cursor/wb-103-tracker-alerts-ux-cb21` | — | ⬜ | — | — |
 | WB-104 | Integration | `cursor/wb-104-dashboard-polish-cb21` | — | ⬜ | — | — |
 | WB-105 | Backend | `cursor/wb-105-billing-canonical-cb21` | — | ⬜ | — | NEXT_PR PR4 |

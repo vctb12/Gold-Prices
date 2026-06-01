@@ -17,17 +17,19 @@
 
 ## 🔴 In Progress
 
+### Master workbook — WB-102 cross-page deep links (2026-06-01)
+
+- [ ] **WB-102** — home karat → tracker/calculator hash; calculator → shops by country; shared
+      `cross-page-links.js` + tests — branch `cursor/wb-102-cross-page-deeplinks-cb21`
+
 ### Post–UI/UX audit — next tracks (2026-06-01 hub)
 
 > UI/UX Sessions **0–5 merged** ([#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)).
 > Program (Tracks B–E):
 > [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](docs/plans/2026-06-01_ui-ux-audit-remediation-program.md)
 
-- [ ] **Track D1** — cross-page integration wiring (endless:
-      `@.github/prompts/endless-integration-wiring.prompt.md`) — calculator→shops country filter ✅
-      2026-06-01; remaining flows in program checklist
-      `@.github/prompts/endless-integration-wiring.prompt.md`) — in progress: shared
-      `page-handoff.js`, homepage tracker CTAs, karat-strip handoff, calc→shops country filter
+- [ ] **Track D1** — cross-page integration wiring (WB-102 in flight; remaining: shops city
+      spot-check, related guides, EN↔AR parity audit)
 - [ ] **NEXT_PR_SEQUENCE PR 1** — GDPR export/delete + dashboard + alerts docs (see
       [`docs/audits/NEXT_PR_SEQUENCE.md`](docs/audits/NEXT_PR_SEQUENCE.md))
 
@@ -48,6 +50,8 @@
 
 ## ✅ Recently Completed
 
+- [x] **WB-102** (partial — PR open) — home karat selection → tracker `#mode=live&cur=AED&k=&u=`;
+      calculator shops CTA with `?country=`; `src/lib/cross-page-links.js` — 2026-06-01
 - [x] **Repo C1a** — docs archive (`docs/archive/2026-06/`) + supersession index + plan stubs (no URL
       moves) — completed: 2026-06-01 —
       [`docs/plans/2026-06-01_repo-reorganization-program.md`](docs/plans/2026-06-01_repo-reorganization-program.md)
