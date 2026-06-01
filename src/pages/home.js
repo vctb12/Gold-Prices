@@ -232,9 +232,13 @@ function buildCalculatorHref(overrides = {}) {
 function updateKaratStripSelection() {
   document.querySelectorAll('.karat-strip-item').forEach((item) => {
     const karat = item.id?.replace('kstrip-', '');
-    const selected = karat === homeTrackerKarat;
+    const isSelectable = ['24', '22', '21', '18', '14'].includes(karat);
+    const selected = isSelectable && karat === homeTrackerKarat;
     item.classList.toggle('is-selected', selected);
     item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    if (isSelectable) {
+      item.setAttribute('aria-label', tx('karatStripSelectAria').replace('{karat}', karat));
+    }
   });
 }
 
