@@ -3,9 +3,10 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
 async function loadModule() {
-  const url = new URL('file://' + path.resolve(__dirname, '..', 'src', 'lib', 'cross-page-links.js'));
+  const url = pathToFileURL(path.resolve(__dirname, '..', 'src', 'lib', 'cross-page-links.js'));
   return import(url.href);
 }
 
