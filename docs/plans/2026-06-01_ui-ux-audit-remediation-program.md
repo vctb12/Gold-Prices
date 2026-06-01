@@ -1,7 +1,6 @@
 # UI/UX Audit Remediation — Multi-Session Program
 
-```yaml
-plan-status
+```yaml plan-status
 status: ready
 priority: P0
 class: program
