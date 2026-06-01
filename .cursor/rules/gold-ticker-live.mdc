@@ -37,3 +37,117 @@ Vanilla ES6, zero external JS dependencies, GitHub Pages hosted.
 - All prices: tabular-nums, freshness labels visible
 - Focus states on every interactive element
 - Zero broken internal links
+
+
+
+
+# UI/UX Audit Session Registry
+
+**Purpose:** Track every Cursor Composer session branch, PR, and status.
+**Update this file after every session.**
+
+| Session | Branch | PR | Status | Files Changed | Key Deliverable |
+|---------|--------|-----|--------|---------------|-----------------|
+| S1 (May 29) | cursor/harsh-cleanup-functional-pass-ebfb | #370 | ✅ MERGED | 580 | Country URL consolidation, ~345 pages deleted |
+| S2 (May 29) | cursor/autonomous-cleanup-consolidation-fda4 | #371 | ✅ MERGED | 94 | Stale ref sweep, city stubs, invest.js extraction |
+| S3 (May 29) | cursor/deep-clean-session3-* | — | ✅ MERGED | ~30 | 22 broken links, invest safe-dom, learn/insights split |
+| S4 (May 30) | cursor/premium-ui-ux-revamp-c50d | #373 | ✅ MERGED | 43 | Quick-convert, copy-toast, shop-vs-ref, purity ring |
+| S5 (May 30) | cursor/session5-terminal-polish-09de | #374 | ✅ MERGED | 19 | Tracker K/U/⇧C, shops sort/group/copy, badges |
+| S6 (May 30) | cursor/launch-push-session6-dc3d | #375 | ✅ MERGED | 73 | Content boot, methodology live, learn catalog, CI audits |
+| S7 (May 30) | cursor/visual-excellence-session7-cb10 | #376 | 📝 DRAFT | 17 | Global hover system, homepage hero polish |
+| A1 | cursor/ui-ux-phase1-first-paint-* | — | ⏳ QUEUED | — | Skeletons, cache-first, parallel fetch |
+| A2 | — | — | ⏳ QUEUED | — | Fix learn/invest/shops/404 empty pages |
+| A3 | — | — | ⏳ QUEUED | — | Single source of truth (naming, sources, karats) |
+| B1 | — | — | ⏳ QUEUED | — | Navigation overhaul |
+| B2 | — | — | ⏳ QUEUED | — | Homepage redesign (5-section) |
+| B3 | — | — | ⏳ QUEUED | — | Tracker terminal redesign |
+| B4 | — | — | ⏳ QUEUED | — | Global hover rollout to all pages |
+| C1 | — | — | ⏳ QUEUED | — | File/folder reorganization |
+| C2 | — | — | ⏳ QUEUED | — | Country page consolidation + pre-render |
+| C3 | — | — | ⏳ QUEUED | — | CI/CD + developer experience |
+| D1 | — | — | ⏳ QUEUED | — | Cross-page integration |
+| D2 | — | — | ⏳ QUEUED | — | Performance + SEO final pass |
+| D3 | — | — | ⏳ QUEUED | — | Accessibility pass |
+| E1 | — | — | ⏳ QUEUED | — | Monetization + analytics |
+| E2 | — | — | ⏳ QUEUED | — | AI integrations |
+
+---
+
+# Next PR Sequence
+
+## Immediate (this week)
+1. **Merge S7 PR #376** (visual excellence) — already drafted
+2. **Ship A1** — first-paint fix (skeletons, cache-first, parallel fetch)
+   - This is the single highest-impact change remaining
+3. **Ship REPO-1** — git hygiene (remove node_modules/dist from git)
+
+## Next week
+4. **A2** — Fix empty pages (learn, invest, shops, 404)
+5. **B1** — Navigation overhaul
+6. **B2** — Homepage redesign
+
+## Following week
+7. **A3** — Single sources of truth
+8. **B3** — Tracker terminal redesign
+9. **INT-1** — Link integrity audit
+
+## Ongoing (between dedicated sessions)
+- Run "Always Something" prompt for incremental fixes
+- Run "Visual Sweep" prompt for page-by-page polish
+- Run "Link Doctor" prompt after any structural change
+
+---
+
+# .cursorrules update (paste into .cursor/rules/gold-ticker-live.mdc)
+
+```
+## Project: Gold Ticker Live
+Domain: goldtickerlive.com
+Repo: vctb12/Gold-Prices (GitHub Pages deploy)
+Stack: Vanilla ES6 modules, zero external JS deps, CSS custom properties, bilingual EN/AR
+
+## Sacred invariants — NEVER change these values
+- AED peg: 3.6725 (in src/config/constants.js)
+- Troy ounce: 31.1035g (in src/config/constants.js)
+- Karat purity values (in src/config/karats.js)
+- Pricing formula (in src/lib/price-calculator.js)
+
+## Architecture rules
+- All UI strings: src/config/translations.js (EN + AR keys, never hardcode text)
+- RTL must work on everything built
+- CSS animations only (no JS animation libraries, no external deps)
+- Page-specific JS: src/pages/{page}.js
+- Shared components: src/components/
+- Shared utilities: src/lib/
+- Design tokens: :root block in styles/global.css (or styles/tokens.css after split)
+- npm test must pass at every commit
+
+## Before every session
+- Read @PLAN.md for current status and next priorities
+- Read @REVAMP_PLAN.md tail for recent session summaries
+- Read @docs/plans/README.md for plan file index
+
+## Session protocol
+- Commit after each logical change (max 3-5 files per commit)
+- git checkpoint before any multi-file refactor
+- Clear commit messages: "feat/fix/chore(scope): what — why"
+- At session end: npm test + npm run validate + npm run build — all green
+- Update PLAN.md "Recently Completed" section
+- Update REVAMP_PLAN.md with new session section
+- Open PR with summary
+
+## Quality standards
+- No placeholder comments (// TODO) — complete or skip
+- No "Loading..." text — use .skeleton CSS shimmer
+- Every animation: prefers-reduced-motion media query
+- Every interactive element: min 44px touch target
+- Every price: font-variant-numeric: tabular-nums + freshness label
+- Every button/link/card: hover + focus-visible states
+- Every internal link: must resolve to a real file
+
+## Known issues to always check for
+- Product name must be "Gold Ticker Live" (not "Gold Tracker Pro", not "GoldPrices")
+- Data source must say gold-api.com (not goldpricez.com)
+- Karat set must come from src/config/karats.js (don't hardcode different sets per page)
+- node_modules/ and dist/ must NOT be in git
+```
