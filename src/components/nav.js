@@ -300,16 +300,19 @@ function buildDrawerGroup(group, depth) {
 
   const active = groupIsActive(group.items);
 
+  const panelId = `nav-drawer-panel-${group.key}`;
+  const summaryId = `nav-drawer-summary-${group.key}`;
+
   return `
-    <details class="nav-drawer-group" ${active || group.key === 'prices' ? 'open' : ''}>
-      <summary class="nav-drawer-group-label">
+    <details class="nav-drawer-group" data-nav-group="${group.key}" ${active || group.key === 'prices' ? 'open' : ''}>
+      <summary class="nav-drawer-group-label" id="${summaryId}" aria-controls="${panelId}">
         <span class="nav-drawer-group-copy">
           <span>${escapeHtml(group.label)}</span>
           <small>${escapeHtml(group.description)}</small>
         </span>
         <span class="nav-drawer-group-caret" aria-hidden="true"></span>
       </summary>
-      <div class="nav-drawer-group-items">
+      <div class="nav-drawer-group-items" id="${panelId}" role="region" aria-labelledby="${summaryId}">
         ${itemsHtml}
       </div>
     </details>`;
@@ -437,6 +440,7 @@ export function injectNav(lang = 'en', depth = 0) {
                placeholder="${escapeHtml(data.drawerSearchPlaceholder || 'Search…')}"
                autocomplete="off"
                aria-label="${escapeHtml(data.drawerSearchPlaceholder || 'Search')}"
+               aria-controls="nav-search-overlay"
         />
       </div>
 

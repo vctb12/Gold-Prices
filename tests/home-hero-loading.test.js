@@ -7,41 +7,27 @@ const path = require('node:path');
 
 const HTML = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
-test('home hero command chips expose localized status landmark hook', () => {
-  assert.match(
-    HTML,
-    /<div class="home-command-card__chips" id="home-command-status" aria-label="Live status chips">/,
-    'expected #home-command-status container for localized aria-label updates'
-  );
+test('home hero ships a single live price card without duplicate karat grid', () => {
+  assert.match(HTML, /id="hero-live-card"/);
+  assert.doesNotMatch(HTML, /id="hlc-aed24"/);
+  assert.match(HTML, /id="hlc-karat-teaser-link"/);
 });
 
-test('home command chips render with loading skeleton classes', () => {
-  assert.match(
-    HTML,
-    /class="trust-chip skeleton-inline home-command-chip--loading"[\s\S]*id="home-command-freshness"[\s\S]*aria-busy="true"/,
-    'freshness chip should ship with loading skeleton class'
-  );
-  assert.match(
-    HTML,
-    /class="trust-chip skeleton-inline home-command-chip--loading"[\s\S]*id="home-command-spot-chip"[\s\S]*aria-busy="true"/,
-    'spot chip should ship with loading skeleton class'
-  );
-  assert.doesNotMatch(HTML, /id="home-command-freshness"[^>]*>Loading freshness/);
+test('home does not ship duplicate command card or market snapshot blocks', () => {
+  assert.doesNotMatch(HTML, /id="home-command-card"/);
+  assert.doesNotMatch(HTML, /id="home-market-snapshot-title"/);
 });
 
-test('home command metric values ship with skeleton placeholders', () => {
-  for (const id of [
-    'home-command-24-value',
-    'home-command-22-value',
-    'home-command-21-value',
-    'home-command-18-value',
-  ]) {
-    assert.match(
-      HTML,
-      new RegExp(
-        `class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"[\\s\\S]*id="${id}"`
-      ),
-      `${id} should ship with metric skeleton classes`
-    );
-  }
+test('home tools section exposes quick actions rail', () => {
+  assert.match(HTML, /class="home-tools"/);
+  assert.match(HTML, /id="home-action-rail"/);
+  assert.match(HTML, /id="home-quick-convert-mount"/);
+});
+
+test('home hero freshness uses skeleton strip until hydrated', () => {
+  assert.match(
+    HTML,
+    /id="hlc-updated"[\s\S]*shell-skeleton-freshness-strip/
+  );
+  assert.doesNotMatch(HTML, /id="hlc-updated"[^>]*>Loading/);
 });

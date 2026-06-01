@@ -2,7 +2,7 @@
 import { CONSTANTS, KARATS, COUNTRIES } from '../config/index.js';
 import { _state, _el, _priceFor, _currentSpot, tx, formatUsd, formatUnitLabel } from './_ctx.js';
 import { clear, el, setText } from '../lib/safe-dom.js';
-import { mountSkeleton, skeletonNode } from '../components/skeleton.js';
+import { mountSkeleton, skeletonNode, skeletonTableRow } from '../components/skeleton.js';
 import { getMarketStatus } from '../lib/live-status.js';
 import { pulseFreshness } from '../lib/freshness-pulse.js';
 import { countUp } from '../lib/count-up.js';
@@ -389,8 +389,19 @@ export function renderKaratTable() {
   const spot = _currentSpot();
   if (!spot) {
     clear(_el.karatTable);
-    _el.karatTable.append(el('tr', null, [el('td', { colspan: '4' }, tx('karatTableWaiting'))]));
+    const colCount = _el.karatTable.closest('table')?.querySelectorAll('thead th').length || 4;
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < KARATS.length; i += 1) {
+      fragment.append(skeletonTableRow(colCount));
+    }
+    _el.karatTable.append(fragment);
+    if (typeof _el.karatTable.setAttribute === 'function') {
+      _el.karatTable.setAttribute('aria-busy', 'true');
+    }
     return;
+  }
+  if (typeof _el.karatTable.removeAttribute === 'function') {
+    _el.karatTable.removeAttribute('aria-busy');
   }
   const price24 = _priceFor({
     currency: _state.selectedCurrency,

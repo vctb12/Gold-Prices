@@ -232,24 +232,11 @@
             <p class="hlc-trust-line" id="hlc-trust-line">
               Spot-linked reference · shops may add making charges, VAT, and margin
             </p>
-            <div class="hlc-grid">
-              <div class="hlc-item">
-                <span class="hlc-item-label" id="hlc-label-aed24">24K / gram (AED)</span>
-                <span class="hlc-item-val skeleton-inline shell-skeleton-karat" id="hlc-aed24" aria-busy="true"></span>
-              </div>
-              <div class="hlc-item">
-                <span class="hlc-item-label" id="hlc-label-aed22">22K / gram (AED)</span>
-                <span class="hlc-item-val skeleton-inline shell-skeleton-karat" id="hlc-aed22" aria-busy="true"></span>
-              </div>
-              <div class="hlc-item">
-                <span class="hlc-item-label" id="hlc-label-aed21">21K / gram (AED)</span>
-                <span class="hlc-item-val skeleton-inline shell-skeleton-karat" id="hlc-aed21" aria-busy="true"></span>
-              </div>
-              <div class="hlc-item">
-                <span class="hlc-item-label" id="hlc-label-aed18">18K / gram (AED)</span>
-                <span class="hlc-item-val skeleton-inline shell-skeleton-karat" id="hlc-aed18" aria-busy="true"></span>
-              </div>
-            </div>
+            <p class="hlc-karat-teaser" id="hlc-karat-teaser">
+              <a href="#karat-strip-title" class="hlc-karat-teaser-link" id="hlc-karat-teaser-link"
+                >View all karat prices below</a
+              >
+            </p>
             <div class="hlc-footer">
               <span
                 class="hlc-updated skeleton-text"
@@ -264,137 +251,25 @@
               >
             </div>
             <div id="home-freshness-badge-slot" class="home-addon-slot"></div>
-            <div id="home-market-status-panel" class="home-addon-slot"></div>
-            <div id="home-quote-meta-slot" class="home-addon-slot"></div>
-            <div id="home-realtime-sla-slot" class="home-addon-slot"></div>
+            <div id="home-realtime-sla-slot" class="home-addon-slot" hidden></div>
           </div>
         </div>
       </section>
 
-      <section class="home-command-center" aria-labelledby="home-command-center-title">
-        <div class="home-command-center-inner">
-          <div class="mobile-command-card home-command-card" id="home-command-card">
-            <div class="mobile-command-card__header">
-              <div>
-                <span class="section-kicker home-command-kicker" id="home-command-kicker"
-                  >Gold command center</span
-                >
-                <h2 class="mobile-command-card__title" id="home-command-center-title">
-                  Live price command card
-                </h2>
-                <p class="mobile-command-card__copy" id="home-command-copy">
-                  See the core UAE reference prices, spot status, and the next step in one mobile
-                  view.
-                </p>
-              </div>
-              <div class="home-command-card__chips" id="home-command-status" aria-label="Live status chips">
-                <span
-                  class="trust-chip skeleton-inline home-command-chip--loading"
-                  data-tone="live"
-                  id="home-command-freshness"
-                  aria-busy="true"
-                ></span>
-                <span
-                  class="trust-chip skeleton-inline home-command-chip--loading"
-                  data-tone="info"
-                  id="home-command-spot-chip"
-                  aria-busy="true"
-                ></span>
-              </div>
-            </div>
-
-            <div class="mobile-command-card__metrics home-command-card__metrics">
-              <div class="mobile-command-card__metric">
-                <span class="mobile-command-card__metric-label" id="home-command-24-label"
-                  >24K / gram (AED)</span
-                >
-                <strong
-                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
-                  id="home-command-24-value"
-                  aria-busy="true"
-                  ></strong
-                >
-                <span class="mobile-command-card__metric-note" id="home-command-24-note"
-                  >Spot-linked reference</span
-                >
-              </div>
-              <div class="mobile-command-card__metric">
-                <span class="mobile-command-card__metric-label" id="home-command-22-label"
-                  >22K / gram (AED)</span
-                >
-                <strong
-                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
-                  id="home-command-22-value"
-                  aria-busy="true"
-                  ></strong
-                >
-                <span class="mobile-command-card__metric-note" id="home-command-22-note"
-                  >Most common UAE jewellery benchmark</span
-                >
-              </div>
-              <div class="mobile-command-card__metric">
-                <span class="mobile-command-card__metric-label" id="home-command-21-label"
-                  >21K / gram (AED)</span
-                >
-                <strong
-                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
-                  id="home-command-21-value"
-                  aria-busy="true"
-                  ></strong
-                >
-                <span class="mobile-command-card__metric-note" id="home-command-21-note"
-                  >Useful for GCC comparisons</span
-                >
-              </div>
-              <div class="mobile-command-card__metric">
-                <span class="mobile-command-card__metric-label" id="home-command-18-label"
-                  >18K / gram (AED)</span
-                >
-                <strong
-                  class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat home-command-metric-loading"
-                  id="home-command-18-value"
-                  aria-busy="true"
-                  ></strong
-                >
-                <span class="mobile-command-card__metric-note" id="home-command-18-note"
-                  >Reference before making charges</span
-                >
-              </div>
-            </div>
-
-            <div class="mobile-command-card__footer">
-              <p class="source-note" id="home-command-note">
-                Spot-linked reference, before making charges and VAT.
+      <section class="home-tools" aria-labelledby="home-tools-title" data-reveal>
+        <div class="home-tools-inner">
+          <div class="section-intro section-intro--compact">
+            <div>
+              <span class="section-kicker" id="home-tools-kicker">Tools</span>
+              <h2 class="home-section-title" id="home-tools-title">Start from what you need</h2>
+              <p class="home-section-sub" id="home-tools-sub">
+                Calculator, compare, shops, and guides — two clicks from live prices.
               </p>
-              <div class="home-command-cta-row">
-                <a
-                  href="tracker.html#mode=live&amp;cur=AED&amp;k=24&amp;u=gram"
-                  class="btn btn-primary btn--shimmer"
-                  id="home-command-cta-tracker"
-                  >Open Tracker</a
-                >
-                <a href="calculator.html" class="btn btn-outline" id="home-command-cta-calculator"
-                  >Calculate Gold</a
-                >
-                <a href="countries/uae/gold-price/" class="btn btn-outline" id="home-command-cta-uae"
-                  >View UAE Prices</a
-                >
-                <a href="methodology.html" class="btn btn-ghost" id="home-command-cta-method"
-                  >See Methodology</a
-                >
-              </div>
             </div>
           </div>
-
-          <div class="home-command-side">
-            <div id="home-quick-convert-mount" class="home-quick-convert-mount" data-reveal></div>
-            <div class="home-command-actions">
-              <div class="section-intro section-intro--compact">
-                <div>
-                  <span class="section-kicker" id="home-action-rail-kicker">Quick actions</span>
-                  <h2 class="home-section-title" id="home-action-rail-title">Start from what you need</h2>
-                </div>
-              </div>
+          <div class="home-tools-grid">
+            <div id="home-quick-convert-mount" class="home-quick-convert-mount"></div>
+            <div class="home-tools-actions">
               <div class="action-rail" id="home-action-rail">
                 <a href="tracker.html" class="action-rail-link" id="home-action-track">
                   <span class="action-rail-link__kicker" id="home-action-track-kicker">Live</span>
@@ -435,80 +310,6 @@
                     >Understand why shop quotes differ from the reference price.</span
                   >
                 </a>
-              </div>
-            </div>
-
-            <div class="mobile-card-grid home-market-snapshot" aria-labelledby="home-market-snapshot-title">
-              <div class="mobile-command-card home-snapshot-card">
-                <div class="mobile-command-card__header">
-                  <div>
-                    <span class="section-kicker" id="home-market-snapshot-kicker">Market snapshot</span>
-                    <h2 class="mobile-command-card__title" id="home-market-snapshot-title">
-                      Reference context for mobile
-                    </h2>
-                  </div>
-                </div>
-                <div class="mobile-command-card__metrics">
-                  <div class="mobile-command-card__metric">
-                    <span class="mobile-command-card__metric-label" id="home-snapshot-uae-label"
-                      >UAE reference</span
-                    >
-                    <strong
-                      class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat"
-                      id="home-snapshot-uae-value"
-                      aria-busy="true"
-                    ></strong>
-                    <span class="mobile-command-card__metric-note" id="home-snapshot-uae-note"
-                      >24K per gram in AED</span
-                    >
-                  </div>
-                  <div class="mobile-command-card__metric">
-                    <span class="mobile-command-card__metric-label" id="home-snapshot-global-label"
-                      >Global spot</span
-                    >
-                    <strong
-                      class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat"
-                      id="home-snapshot-global-value"
-                      aria-busy="true"
-                    ></strong>
-                    <span class="mobile-command-card__metric-note" id="home-snapshot-global-note"
-                      >XAU/USD per troy ounce</span
-                    >
-                  </div>
-                  <div class="mobile-command-card__metric">
-                    <span class="mobile-command-card__metric-label" id="home-snapshot-peg-label"
-                      >AED peg</span
-                    >
-                    <strong class="mobile-command-card__metric-value" id="home-snapshot-peg-value"
-                      >3.6725</strong
-                    >
-                    <span class="mobile-command-card__metric-note" id="home-snapshot-peg-note"
-                      >Official fixed USD/AED reference</span
-                    >
-                  </div>
-                  <div class="mobile-command-card__metric">
-                    <span class="mobile-command-card__metric-label" id="home-snapshot-status-label"
-                      >Status</span
-                    >
-                    <strong
-                      class="mobile-command-card__metric-value skeleton-inline shell-skeleton-karat"
-                      id="home-snapshot-status-value"
-                      aria-busy="true"
-                    ></strong>
-                    <span class="mobile-command-card__metric-note" id="home-snapshot-status-note"
-                      >Live, cached, or stale is always labeled.</span
-                    >
-                  </div>
-                </div>
-                <div class="mobile-command-card__footer">
-                  <p class="source-note" id="home-market-snapshot-copy">
-                    Gold Ticker Live shows spot-linked reference pricing before retail premiums,
-                    making charges, and VAT.
-                  </p>
-                  <a href="methodology.html" class="section-link" id="home-market-snapshot-link"
-                    >Read methodology →</a
-                  >
-                </div>
               </div>
             </div>
           </div>

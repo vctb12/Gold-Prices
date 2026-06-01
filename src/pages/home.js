@@ -29,8 +29,6 @@ import { updateSpotBar } from '../components/spotBar.js';
 import { mountSharedShell } from '../components/site-shell.js';
 import { renderAdSlot } from '../components/adSlot.js';
 import { renderFreshnessBadge } from '../components/FreshnessBadge.js';
-import { renderMarketStatusPanel } from '../components/MarketStatusPanel.js';
-import { renderQuoteMetaPanel } from '../components/QuoteMetaPanel.js';
 import { renderRealtimeSlaPanel } from '../components/RealtimeSlaPanel.js';
 import { renderMethodologySection } from '../components/MethodologySection.js';
 import { renderLocationGuideSection } from '../components/LocationGuideSection.js';
@@ -197,31 +195,7 @@ function formatCountrySearchEmpty(query = '') {
 
 function ensureHeroLoadingSkeletons() {
   mountSkeleton(document.getElementById('hlc-updated'), 'freshnessStrip');
-  for (const id of ['hlc-aed24', 'hlc-aed22', 'hlc-aed21', 'hlc-aed18']) {
-    mountSkeleton(document.getElementById(id), 'karat');
-  }
   mountSkeleton(document.getElementById('karat-strip-updated'), 'freshnessStrip');
-  for (const id of ['home-snapshot-uae-value', 'home-snapshot-global-value', 'home-snapshot-status-value']) {
-    mountSkeleton(document.getElementById(id), 'karat');
-  }
-  const freshnessChip = document.getElementById('home-command-freshness');
-  const spotChip = document.getElementById('home-command-spot-chip');
-  if (freshnessChip?.classList.contains('home-command-chip--loading')) {
-    freshnessChip.replaceChildren(skeletonNode('freshnessChip'));
-  }
-  if (spotChip?.classList.contains('home-command-chip--loading')) {
-    spotChip.replaceChildren(skeletonNode('freshnessChip'));
-  }
-}
-
-function setTrustChip(id, text, freshnessKey = 'neutral') {
-  const target = document.getElementById(id);
-  if (!target) return;
-  target.textContent = text;
-  target.classList.remove('skeleton-inline', 'home-command-chip--loading');
-  target.removeAttribute('aria-busy');
-  target.dataset.tone =
-    freshnessKey === 'live' ? 'live' : freshnessKey === 'unavailable' ? 'neutral' : 'warning';
 }
 
 /** Deep-link to tracker with current karat strip unit preference. */
@@ -236,23 +210,6 @@ function buildTrackerHref(overrides = {}) {
     ...overrides,
   });
   return `tracker.html#${params.toString()}`;
-}
-
-function setCommandMetricValue(id, valueText = '—', numericTarget = null) {
-  const target = document.getElementById(id);
-  if (!target) return;
-  if (Number.isFinite(numericTarget)) {
-    countUp(target, numericTarget, {
-      decimals: 2,
-      format: () => valueText,
-      pulse: true,
-      pulseTarget: target.closest('.mobile-command-card__metric'),
-    });
-  } else {
-    target.textContent = valueText;
-  }
-  target.classList.remove('skeleton-inline', 'shell-skeleton-karat', 'home-command-metric-loading');
-  target.removeAttribute('aria-busy');
 }
 
 function hasRealtimePathFailure() {
@@ -301,16 +258,12 @@ function startFreshnessTimer() {
   if (_freshnessTimer) clearInterval(_freshnessTimer);
   let prevHlcText = '';
   let prevKstripText = '';
-  let prevCommandText = '';
-  let prevSnapshotText = '';
   _freshnessTimer = setInterval(() => {
     if (!goldPrice || !goldUpdatedAt) return;
     const { ageText, statusText, sourceText, key } = getFreshnessMeta();
     const ageClass = freshnessAgeClass(getLiveFreshness({ updatedAt: goldUpdatedAt, lang }).ageMs);
     const hlcText = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`;
     const kstripText = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${tx('updated')}: ${ageText}`;
-    const commandText = `${statusText} · ${sourceText} · ${ageText}`;
-    const snapshotText = `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('updated')}: ${ageText}`;
     const hlcEl = document.getElementById('hlc-updated');
     if (hlcEl && hlcText !== prevHlcText) {
       hlcEl.textContent = hlcText;
@@ -324,17 +277,6 @@ function startFreshnessTimer() {
       kstripEl.dataset.freshnessKey = key;
       kstripEl.dataset.freshnessAge = ageClass;
       prevKstripText = kstripText;
-    }
-    if (commandText !== prevCommandText) {
-      setTrustChip('home-command-freshness', commandText, key);
-      prevCommandText = commandText;
-    }
-    const snapshotStatus = document.getElementById('home-snapshot-status-value');
-    const snapshotNote = document.getElementById('home-snapshot-status-note');
-    if (snapshotStatus) snapshotStatus.textContent = `${statusText} · ${sourceText}`;
-    if (snapshotNote && snapshotText !== prevSnapshotText) {
-      snapshotNote.textContent = snapshotText;
-      prevSnapshotText = snapshotText;
     }
   }, 1_000);
 }
@@ -389,26 +331,6 @@ function renderHeroCard() {
     directionEl.hidden = true;
   }
   document.getElementById('hero-live-card')?.removeAttribute('aria-busy');
-  for (const [id, val] of [
-    ['hlc-aed24', aed24g],
-    ['hlc-aed22', aed22g],
-    ['hlc-aed21', aed21g],
-    ['hlc-aed18', aed18g],
-  ]) {
-    const cell = document.getElementById(id);
-    if (cell && val) {
-      cell.classList.remove('skeleton-inline', 'shell-skeleton-karat');
-      cell.removeAttribute('aria-busy');
-      countUp(cell, val, {
-        decimals: 2,
-        format: (n) => fmt.formatPrice(n, 'AED', 2),
-        pulse: true,
-        pulseTarget: cell.closest('.hlc-item'),
-      });
-    } else if (cell) {
-      cell.textContent = '—';
-    }
-  }
   const { ageText, isLive, statusText, sourceText, key } = getFreshnessMeta();
   const ageClass = freshnessAgeClass(getLiveFreshness({ updatedAt: goldUpdatedAt, lang }).ageMs);
   const hlcUpdatedEl = document.getElementById('hlc-updated');
@@ -481,17 +403,8 @@ function renderHeroCard() {
     isFresh: goldIsFresh,
   });
 
-  // Update karat strip
+  // Update karat strip (single homepage karat table)
   renderKaratStrip(k18);
-
-  // Update mobile command center
-  renderCommandCenter({
-    aed24g,
-    aed22g,
-    aed21g,
-    aed18g,
-    usd24oz,
-  });
   _quickConvert?.recalc?.();
 
   // Update freshness banner
@@ -532,41 +445,10 @@ function renderHomeTrustAddons() {
     );
   }
 
-  const marketSlot = document.getElementById('home-market-status-panel');
-  if (marketSlot) {
-    marketSlot.replaceChildren(
-      renderMarketStatusPanel({
-        lang,
-        className: 'home-market-status',
-        t: txGlobal,
-      })
-    );
-  }
-
   renderHomeRealtimePanels();
 }
 
 function renderHomeRealtimePanels() {
-  const metaMount = document.getElementById('home-quote-meta-slot');
-  if (metaMount) {
-    const freshness = getFreshnessMeta();
-    metaMount.replaceChildren(
-      renderQuoteMetaPanel({
-        lang,
-        statusLabel: freshness.statusText,
-        sourceLabel: freshness.sourceText,
-        providerId: formatProviderLabel(goldProviderId),
-        providerTimestamp: goldUpdatedAt,
-        fetchedAt: _realtimeSnapshot?.quote?.fetchedAt || goldUpdatedAt,
-        ageLabel: freshness.ageText,
-        pollIntervalMs: _realtimeSnapshot?.metrics?.nextPollInMs ?? null,
-        lastFetchLatencyMs: _realtimeSnapshot?.metrics?.latestNetworkLatencyMs ?? null,
-        t: txGlobal,
-        className: 'home-quote-meta-panel',
-      })
-    );
-  }
-
   const slaMount = document.getElementById('home-realtime-sla-slot');
   if (slaMount) {
     const debugFreshness = new URLSearchParams(location.search).get('debugFreshness') === '1';
@@ -616,54 +498,6 @@ function renderHomeAdditiveSections() {
       })
     );
   }
-}
-
-function renderCommandCenter(values = {}) {
-  const {
-    aed24g = null,
-    aed22g = null,
-    aed21g = null,
-    aed18g = null,
-    usd24oz = goldPrice,
-  } = values;
-  const { ageText, statusText, sourceText, key } = getFreshnessMeta();
-
-  setTrustChip(
-    'home-command-freshness',
-    `${txGlobal('freshness.statusLabel')}: ${statusText} · ${tx('source')}: ${sourceText} · ${ageText}`,
-    key
-  );
-  setTrustChip(
-    'home-command-spot-chip',
-    usd24oz ? `XAU/USD ${fmt.formatPrice(usd24oz, 'USD', 2)}` : 'XAU/USD —',
-    key
-  );
-
-  setCommandMetricValue(
-    'home-command-24-value',
-    aed24g ? fmt.formatPrice(aed24g, 'AED', 2) : '—',
-    aed24g
-  );
-  setCommandMetricValue(
-    'home-command-22-value',
-    aed22g ? fmt.formatPrice(aed22g, 'AED', 2) : '—',
-    aed22g
-  );
-  setCommandMetricValue(
-    'home-command-21-value',
-    aed21g ? fmt.formatPrice(aed21g, 'AED', 2) : '—',
-    aed21g
-  );
-  setCommandMetricValue(
-    'home-command-18-value',
-    aed18g ? fmt.formatPrice(aed18g, 'AED', 2) : '—',
-    aed18g
-  );
-
-  setTextById('home-snapshot-uae-value', aed24g ? fmt.formatPrice(aed24g, 'AED', 2) : '—');
-  setTextById('home-snapshot-global-value', usd24oz ? fmt.formatPrice(usd24oz, 'USD', 2) : '—');
-  setTextById('home-snapshot-status-value', `${statusText} · ${sourceText}`);
-  setTextById('home-snapshot-status-note', `${txGlobal('freshness.updatedUtcLabel')}: ${ageText}`);
 }
 
 // ── Render karat price strip ───────────────────────────────────────────────
@@ -814,12 +648,7 @@ function renderGCCGrid() {
 
 function syncTrackerLinks() {
   const href = buildTrackerHref();
-  for (const id of [
-    'hero-cta-tracker',
-    'hlc-tracker-link',
-    'karat-strip-cta',
-    'home-command-cta-tracker',
-  ]) {
+  for (const id of ['hero-cta-tracker', 'hlc-tracker-link', 'karat-strip-cta']) {
     const node = document.getElementById(id);
     if (node) node.setAttribute('href', href);
   }
@@ -848,24 +677,10 @@ function applyLangToPage() {
   setTextById('hero-cta-methodology', tx('heroCtaMethodology'));
   setTextById('hero-trust-line', tx('heroTrustLine'));
   setTextById('hlc-trust-line', tx('heroTrustShort'));
-  setTextById('home-command-kicker', tx('commandKicker'));
-  setTextById('home-command-center-title', tx('commandTitle'));
-  setTextById('home-command-copy', tx('commandCopy'));
-  setTextById('home-command-24-label', tx('lbl24aed'));
-  setTextById('home-command-22-label', tx('lbl22aed'));
-  setTextById('home-command-21-label', tx('lbl21aed'));
-  setTextById('home-command-18-label', tx('lbl18aed'));
-  setTextById('home-command-24-note', tx('command24Note'));
-  setTextById('home-command-22-note', tx('command22Note'));
-  setTextById('home-command-21-note', tx('command21Note'));
-  setTextById('home-command-18-note', tx('command18Note'));
-  setTextById('home-command-note', tx('commandNote'));
-  setTextById('home-command-cta-tracker', tx('commandCtaTracker'));
-  setTextById('home-command-cta-calculator', tx('commandCtaCalculator'));
-  setTextById('home-command-cta-uae', tx('commandCtaUae'));
-  setTextById('home-command-cta-method', tx('commandCtaMethod'));
-  setTextById('home-action-rail-kicker', tx('actionRailKicker'));
-  setTextById('home-action-rail-title', tx('actionRailTitle'));
+  setTextById('home-tools-kicker', tx('toolsKicker'));
+  setTextById('home-tools-title', tx('actionRailTitle'));
+  setTextById('home-tools-sub', tx('quickToolsSub'));
+  setTextById('hlc-karat-teaser-link', tx('karatTeaserLink'));
   setTextById('home-action-track-kicker', tx('actionTrackKicker'));
   setTextById('home-action-track-label', tx('actionTrackLabel'));
   setTextById('home-action-track-desc', tx('actionTrackDesc'));
@@ -881,25 +696,9 @@ function applyLangToPage() {
   setTextById('home-action-learn-kicker', tx('actionLearnKicker'));
   setTextById('home-action-learn-label', tx('actionLearnLabel'));
   setTextById('home-action-learn-desc', tx('actionLearnDesc'));
-  setTextById('home-market-snapshot-kicker', tx('snapshotKicker'));
-  setTextById('home-market-snapshot-title', tx('snapshotTitle'));
-  setTextById('home-snapshot-uae-label', tx('snapshotUaeLabel'));
-  setTextById('home-snapshot-uae-note', tx('snapshotUaeNote'));
-  setTextById('home-snapshot-global-label', tx('snapshotGlobalLabel'));
-  setTextById('home-snapshot-global-note', tx('snapshotGlobalNote'));
-  setTextById('home-snapshot-peg-label', tx('snapshotPegLabel'));
-  setTextById('home-snapshot-peg-note', tx('snapshotPegNote'));
-  setTextById('home-snapshot-status-label', tx('snapshotStatusLabel'));
-  setTextById('home-snapshot-status-note', tx('snapshotStatusNote'));
-  setTextById('home-market-snapshot-copy', tx('snapshotCopy'));
-  setTextById('home-market-snapshot-link', tx('snapshotLink'));
   setTextById('hlc-tracker-link', tx('trackerLink'));
   setTextById('hlc-title', tx('spotTitle'));
   setTextById('hlc-sub', tx('perOz'));
-  setTextById('hlc-label-aed24', tx('lbl24aed'));
-  setTextById('hlc-label-aed22', tx('lbl22aed'));
-  setTextById('hlc-label-aed21', tx('lbl21aed'));
-  setTextById('hlc-label-aed18', tx('lbl18aed'));
   setTextById('hlc-updated', tx('fetching'));
   setTextById('gcc-section-title', tx('gccLiveTitle'));
   setTextById('gcc-section-sub', tx('gccLiveSub'));
@@ -987,9 +786,6 @@ function applyLangToPage() {
   setTextById('home-location-guides-sub', txGlobal('locationGuides.sectionSub'));
   setTextById('home-location-guides-link', txGlobal('locationGuides.sectionLink'));
   document.getElementById('hfb-dismiss')?.setAttribute('aria-label', tx('freshnessDismiss'));
-  document
-    .getElementById('home-command-status')
-    ?.setAttribute('aria-label', tx('heroLiveStatusAria'));
 
   // Next-step guides section
   setTextById('next-step-title', tx('nextStepTitle'));
@@ -1087,7 +883,6 @@ async function fetchLiveData() {
       goldUpdatedAt = gold.updatedAt || goldUpdatedAt;
       cache.saveGoldPrice(gold.price, goldUpdatedAt);
       renderHeroCard();
-      renderCommandCenter();
       renderKaratStrip();
     }
   } catch {
@@ -1520,13 +1315,6 @@ async function init() {
         karatUpdEl.dataset.freshnessAge = 'unavailable';
       }
       document.getElementById('hero-live-card')?.removeAttribute('aria-busy');
-      setTrustChip('home-command-freshness', tx('sourceUnavailable'), 'unavailable');
-      setTrustChip('home-command-spot-chip', tx('sourceUnavailable'), 'unavailable');
-      for (const id of ['hlc-aed24', 'hlc-aed22', 'hlc-aed21', 'hlc-aed18']) {
-        mountSkeleton(document.getElementById(id), 'karat');
-      }
-      setTextById('home-snapshot-status-value', tx('sourceUnavailable'));
-      setTextById('home-snapshot-status-note', tx('priceUnavailableConnection'));
       showDataStatusBanner({
         variant: 'error',
         lang,

@@ -623,87 +623,55 @@
   text-decoration: none;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   MOBILE COMMAND CENTER
-   ══════════════════════════════════════════════════════════════ */
-.home-command-center {
-  padding: var(--space-5);
-  background: linear-gradient(180deg, var(--surface-accent), var(--surface-canvas));
+.hlc-karat-teaser {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
 }
 
-.home-command-center-inner {
+.hlc-karat-teaser-link {
+  color: var(--color-gold-dark);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.hlc-karat-teaser-link:hover {
+  color: var(--color-gold);
+  text-decoration: underline;
+}
+
+.hlc-karat-teaser-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-xs);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HOME TOOLS (quick convert + action rail)
+   ══════════════════════════════════════════════════════════════ */
+.home-tools {
+  padding: var(--space-5);
+  background: linear-gradient(180deg, var(--surface-accent), var(--surface-canvas));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.home-tools-inner {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.home-tools-grid {
   display: grid;
   gap: var(--space-4);
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   align-items: start;
 }
 
-.home-command-side {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.home-command-card {
-  gap: var(--space-5);
-  transition:
-    transform var(--transition-normal),
-    box-shadow var(--transition-normal),
-    border-color var(--transition-normal);
-}
-
-@media (hover: hover) {
-  .home-command-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-card-hover);
-    border-color: rgb(196 153 62 / 35%);
-  }
-}
-
-.home-command-kicker.section-kicker {
-  margin-bottom: var(--space-2);
-}
-
-.home-command-card__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.home-command-chip--loading {
-  color: transparent;
-  min-inline-size: 12rem;
-  min-block-size: 2rem;
-  border-color: transparent;
-}
-
-#home-command-spot-chip.home-command-chip--loading {
-  min-inline-size: 8rem;
-}
-
-.home-command-metric-loading {
-  color: transparent;
-  min-inline-size: 4.4rem;
-  min-block-size: 1.3em;
-}
-
-.home-command-cta-row {
-  display: grid;
-  gap: var(--space-2);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.home-tools-actions .action-rail {
+  margin-top: 0;
 }
 
 .section-intro--compact {
   margin-bottom: var(--space-3);
-}
-
-.home-market-snapshot .mobile-command-card {
-  min-height: 100%;
-}
-
-.home-market-snapshot .section-link {
-  font-weight: var(--weight-bold);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -857,11 +825,11 @@
 }
 
 @media (width <= 480px) {
-  .home-command-center {
+  .home-tools {
     padding: var(--space-4) var(--space-3);
   }
 
-  .home-command-cta-row {
+  .home-tools-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1574,7 +1542,7 @@
     gap: 2.5rem;
   }
 
-  .home-command-center-inner {
+  .home-tools-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1609,10 +1577,6 @@
    RESPONSIVE — 768px
    ══════════════════════════════════════════════════════════════ */
 @media (width <= 768px) {
-  .home-command-card__chips {
-    width: 100%;
-  }
-
   .tools-grid {
     grid-template-columns: repeat(2, 1fr);
   }

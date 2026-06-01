@@ -21,7 +21,8 @@ test.describe('Mobile smoke', () => {
   test('core pages load and show key controls at 390x844', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('main')).toBeVisible();
-    await expect(page.locator('#home-command-card')).toBeVisible();
+    await expect(page.locator('#hero-live-card')).toBeVisible();
+    await expect(page.locator('.home-tools')).toBeVisible();
     await expect(page.locator('.mobile-bottom-nav')).toBeVisible();
     await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="tracker"]')).toBeVisible();
     await expect(page.locator('.mobile-bottom-nav [data-mobile-nav="calculator"]')).toBeVisible();

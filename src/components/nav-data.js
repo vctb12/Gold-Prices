@@ -39,24 +39,11 @@ const RAW_NAV_DATA = {
         primary: true,
       },
       {
-        key: 'uae-prices',
-        href: '/countries/uae/',
-        label: 'UAE Prices',
-        description: 'AED prices and Dubai context',
-        primary: true,
-      },
-      {
         key: 'calculator',
         href: '/calculator.html',
         label: 'Calculator',
         description: 'Calculate value by weight and karat',
         primary: true,
-      },
-      {
-        key: 'shops',
-        href: '/shops.html',
-        label: 'Shops',
-        description: 'Browse shops and gold markets',
       },
     ],
     canonicalSurfaces: [
@@ -303,10 +290,10 @@ const RAW_NAV_DATA = {
         ],
       },
       {
-        key: 'buy-gold',
-        label: 'Buy Gold',
-        eyebrow: 'Directory & guides',
-        description: 'Shop directory, UAE markets, buyer guides, and premiums.',
+        key: 'discover',
+        label: 'Discover',
+        eyebrow: 'Shops, markets & guides',
+        description: 'Directory, regional pages, buyer guides, and market context.',
         layout: 'mega',
         featured: {
           href: '/shops.html',
@@ -315,9 +302,9 @@ const RAW_NAV_DATA = {
           icon: 'SHOP',
         },
         cta: {
-          href: '/content/submit-shop/',
-          label: 'Submit a shop listing',
-          description: 'Help improve the public directory with real business details.',
+          href: '/insights.html',
+          label: 'Read market insights',
+          description: 'Context for spot moves, retail gaps, and regional pricing.',
         },
         sections: [
           {
@@ -374,51 +361,6 @@ const RAW_NAV_DATA = {
             ],
           },
           {
-            key: 'premiums',
-            label: 'Premiums & charges',
-            description: 'Separate spot references from retail quotes.',
-            items: [
-              {
-                href: '/content/guides/gold-karat-comparison.html',
-                label: 'Karat premium context',
-                description: 'Purity context behind retail gaps',
-                icon: 'PRM',
-              },
-              {
-                href: '/content/gold-making-charges-guide/',
-                label: 'Making charges',
-                description: 'Jewellery fees explained',
-                icon: 'FEE',
-              },
-              {
-                href: '/content/order-gold/',
-                label: 'Order gold safely',
-                description: 'Checklist-style buying resource',
-                icon: 'ORD',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: 'markets',
-        label: 'Markets',
-        eyebrow: 'Regions & insights',
-        description: 'UAE, GCC, Arab markets, global references, and analysis.',
-        layout: 'mega',
-        featured: {
-          href: '/countries/uae/',
-          label: 'Start with UAE markets',
-          description: 'AED references, Dubai context, and market pages.',
-          icon: 'AE',
-        },
-        cta: {
-          href: '/insights.html',
-          label: 'Read market insights',
-          description: 'Context for spot moves, retail gaps, and regional pricing.',
-        },
-        sections: [
-          {
             key: 'gcc',
             label: 'UAE & GCC',
             description: 'Gulf country references.',
@@ -428,6 +370,7 @@ const RAW_NAV_DATA = {
                 label: 'Saudi Arabia',
                 description: 'SAR reference prices',
                 icon: 'SA',
+                primary: true,
               },
               {
                 href: '/countries/kuwait/',
@@ -446,12 +389,6 @@ const RAW_NAV_DATA = {
                 label: 'Bahrain',
                 description: 'BHD reference prices',
                 icon: 'BH',
-              },
-              {
-                href: '/countries/oman/',
-                label: 'Oman',
-                description: 'OMR reference prices',
-                icon: 'OM',
               },
             ],
           },
@@ -487,9 +424,9 @@ const RAW_NAV_DATA = {
             ],
           },
           {
-            key: 'global-context',
-            label: 'Global context',
-            description: 'Reference markets and editorial context.',
+            key: 'insights',
+            label: 'Insights & premiums',
+            description: 'Analysis, charges, and long-term context.',
             items: [
               {
                 href: '/insights.html',
@@ -499,16 +436,16 @@ const RAW_NAV_DATA = {
                 primary: true,
               },
               {
+                href: '/content/gold-making-charges-guide/',
+                label: 'Making charges',
+                description: 'Jewellery fees explained',
+                icon: 'FEE',
+              },
+              {
                 href: '/invest.html',
                 label: 'Investing guide',
                 description: 'Long-term gold context',
                 icon: 'INV',
-              },
-              {
-                href: '/insights.html#weekly-brief',
-                label: 'Weekly brief',
-                description: 'Curated market context',
-                icon: 'NEWS',
               },
             ],
           },
@@ -548,24 +485,11 @@ const RAW_NAV_DATA = {
         primary: true,
       },
       {
-        key: 'uae-prices',
-        href: '/countries/uae/',
-        label: 'أسعار الإمارات',
-        description: 'أسعار الدرهم وسياق دبي',
-        primary: true,
-      },
-      {
         key: 'calculator',
         href: '/calculator.html',
         label: 'الحاسبة',
         description: 'احسب القيمة حسب الوزن والعيار',
         primary: true,
-      },
-      {
-        key: 'shops',
-        href: '/shops.html',
-        label: 'المحلات',
-        description: 'تصفح المحلات وأسواق الذهب',
       },
     ],
     canonicalSurfaces: [
@@ -811,10 +735,10 @@ const RAW_NAV_DATA = {
         ],
       },
       {
-        key: 'buy-gold',
-        label: 'شراء الذهب',
-        eyebrow: 'دليل ومحلات',
-        description: 'دليل المحلات وأسواق الإمارات وأدلة الشراء والعلاوات.',
+        key: 'discover',
+        label: 'استكشف',
+        eyebrow: 'محلات وأسواق وأدلة',
+        description: 'دليل المحلات وصفحات الأسواق وأدلة الشراء والسياق التحليلي.',
         layout: 'mega',
         featured: {
           href: '/shops.html',
@@ -823,9 +747,9 @@ const RAW_NAV_DATA = {
           icon: 'SHOP',
         },
         cta: {
-          href: '/content/submit-shop/',
-          label: 'أضف بيانات محل',
-          description: 'ساعد في تحسين الدليل العام بتفاصيل أعمال حقيقية.',
+          href: '/insights.html',
+          label: 'اقرأ تحليلات السوق',
+          description: 'سياق حركة السعر الفوري وفروق التجزئة والتسعير الإقليمي.',
         },
         sections: [
           {
@@ -882,51 +806,6 @@ const RAW_NAV_DATA = {
             ],
           },
           {
-            key: 'premiums',
-            label: 'العلاوات والمصنعية',
-            description: 'افصل السعر المرجعي عن عرض المحل.',
-            items: [
-              {
-                href: '/content/guides/gold-karat-comparison.html',
-                label: 'سياق علاوة العيارات',
-                description: 'سياق النقاء وراء فروق التجزئة',
-                icon: 'PRM',
-              },
-              {
-                href: '/content/gold-making-charges-guide/',
-                label: 'المصنعية',
-                description: 'شرح رسوم المجوهرات',
-                icon: 'FEE',
-              },
-              {
-                href: '/content/order-gold/',
-                label: 'طلب الذهب بأمان',
-                description: 'مورد شراء بنمط قائمة تحقق',
-                icon: 'ORD',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: 'markets',
-        label: 'الأسواق',
-        eyebrow: 'مناطق وتحليلات',
-        description: 'الإمارات والخليج والأسواق العربية والمراجع العالمية والتحليلات.',
-        layout: 'mega',
-        featured: {
-          href: '/countries/uae/',
-          label: 'ابدأ بأسواق الإمارات',
-          description: 'مراجع الدرهم وسياق دبي وصفحات الأسواق.',
-          icon: 'AE',
-        },
-        cta: {
-          href: '/insights.html',
-          label: 'اقرأ تحليلات السوق',
-          description: 'سياق حركة السعر الفوري وفروق التجزئة والتسعير الإقليمي.',
-        },
-        sections: [
-          {
             key: 'gcc',
             label: 'الإمارات والخليج',
             description: 'مراجع دول الخليج.',
@@ -936,6 +815,7 @@ const RAW_NAV_DATA = {
                 label: 'السعودية',
                 description: 'أسعار مرجعية بالريال',
                 icon: 'SA',
+                primary: true,
               },
               {
                 href: '/countries/kuwait/',
@@ -954,12 +834,6 @@ const RAW_NAV_DATA = {
                 label: 'البحرين',
                 description: 'أسعار مرجعية بالدينار',
                 icon: 'BH',
-              },
-              {
-                href: '/countries/oman/',
-                label: 'عُمان',
-                description: 'أسعار مرجعية بالريال',
-                icon: 'OM',
               },
             ],
           },
@@ -995,9 +869,9 @@ const RAW_NAV_DATA = {
             ],
           },
           {
-            key: 'global-context',
-            label: 'سياق عالمي',
-            description: 'أسواق مرجعية وسياق تحريري.',
+            key: 'insights',
+            label: 'تحليلات وعلاوات',
+            description: 'سياق تحليلي ومصنعية واستثمار طويل الأجل.',
             items: [
               {
                 href: '/insights.html',
@@ -1007,16 +881,16 @@ const RAW_NAV_DATA = {
                 primary: true,
               },
               {
+                href: '/content/gold-making-charges-guide/',
+                label: 'المصنعية',
+                description: 'شرح رسوم المجوهرات',
+                icon: 'FEE',
+              },
+              {
                 href: '/invest.html',
                 label: 'دليل الاستثمار',
                 description: 'سياق طويل الأجل للذهب',
                 icon: 'INV',
-              },
-              {
-                href: '/insights.html#weekly-brief',
-                label: 'الملخص الأسبوعي',
-                description: 'سياق سوق منتقى',
-                icon: 'NEWS',
               },
             ],
           },
@@ -1069,7 +943,7 @@ export const PAGE_SHELLS = [
   },
   {
     page: 'shops',
-    section: 'buy-gold',
+    section: 'discover',
     shell: 'directory',
     accent: 'market',
     patterns: ['/shops.html', '/content/submit-shop/', '/content/order-gold/'],
@@ -1083,14 +957,14 @@ export const PAGE_SHELLS = [
   },
   {
     page: 'insights',
-    section: 'markets',
+    section: 'discover',
     shell: 'editorial',
     accent: 'insight',
     patterns: ['/insights.html', '/invest.html'],
   },
   {
     page: 'country',
-    section: 'markets',
+    section: 'discover',
     shell: 'market',
     accent: 'local',
     patterns: ['/countries/'],

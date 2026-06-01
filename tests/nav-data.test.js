@@ -44,7 +44,7 @@ test('NAV_DATA group keys match between locales', async () => {
   const enKeys = NAV_DATA.en.groups.map((g) => g.key);
   const arKeys = NAV_DATA.ar.groups.map((g) => g.key);
   // Top-level order is intentional IA: primary price checking, tools, buying, markets.
-  const expectedKeys = ['prices', 'tools', 'buy-gold', 'markets'];
+  const expectedKeys = ['prices', 'tools', 'discover'];
   assert.deepEqual(enKeys, expectedKeys);
   assert.deepEqual(arKeys, expectedKeys);
   assert.deepEqual(
@@ -215,6 +215,29 @@ test('NAV_DATA primary flag membership matches across locales per group', async 
         `Primary flag mismatch at ${en.key}[${j}] (en=${enP}, ar=${arP}): ${en.items[j].label} / ${ar.items[j].label}`
       );
     }
+  }
+});
+
+test('NAV_DATA primary links are slim (live + calculator only)', async () => {
+  const { NAV_DATA } = await loadNav();
+  for (const lang of ['en', 'ar']) {
+    assert.equal(
+      NAV_DATA[lang].primaryLinks.length,
+      2,
+      `${lang} should expose two primary nav links (live + calculator)`
+    );
+    const keys = NAV_DATA[lang].primaryLinks.map((l) => l.key);
+    assert.deepEqual(keys, ['live-prices', 'calculator']);
+  }
+});
+
+test('NAV_DATA drawer search placeholder exists in both locales', async () => {
+  const { NAV_DATA } = await loadNav();
+  for (const lang of ['en', 'ar']) {
+    assert.ok(
+      NAV_DATA[lang].drawerSearchPlaceholder,
+      `${lang}.drawerSearchPlaceholder missing`
+    );
   }
 });
 

@@ -112,10 +112,10 @@ copy and placeholders.
 
 ### Phase 4 — Navigation & layout polish (MEDIUM)
 
-- [ ] Nav: 6 groups → ~4–5; mobile accordion + in-menu search; keyboard order + ARIA tests
-- [ ] Homepage: one hero price + one karat table + one country grid + tools + FAQ
-- [ ] Tracker: visual grouping for 7 modes; skeleton rows not blank tables
-- [ ] Global hover/focus-visible on interactive elements (tokens)
+- [x] Nav: 6 groups → ~4–5; mobile accordion + in-menu search; keyboard order + ARIA tests
+- [x] Homepage: one hero price + one karat table + one country grid + tools + FAQ
+- [x] Tracker: visual grouping for 7 modes; skeleton rows not blank tables
+- [x] Global hover/focus-visible on interactive elements (tokens)
 
 ### Phase 5 — Performance & hygiene (MEDIUM/LOW)
 

@@ -6647,6 +6647,44 @@ a.gcc-card:focus-visible,
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Shared hover + focus for nav and compact controls */
+.nav-link,
+.nav-dropdown-btn,
+.nav-drawer-link,
+.nav-drawer-group-label,
+.nav-search-recent,
+.kstrip-unit-btn,
+.gcc-region-tab {
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .nav-link:hover,
+  .nav-dropdown-btn:hover,
+  .nav-drawer-link:hover,
+  .nav-search-recent:hover,
+  .kstrip-unit-btn:hover:not([aria-pressed='true']),
+  .gcc-region-tab:hover:not([aria-selected='true']) {
+    background: var(--surface-hover, var(--color-gold-tint));
+    color: var(--text-primary);
+  }
+}
+
+.nav-link:focus-visible,
+.nav-dropdown-btn:focus-visible,
+.nav-drawer-link:focus-visible,
+.nav-drawer-group-label:focus-visible,
+.nav-search-recent:focus-visible,
+.kstrip-unit-btn:focus-visible,
+.gcc-region-tab:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .link-accent,
 a.link-accent {
   color: var(--color-gold-dark);
