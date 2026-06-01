@@ -5,6 +5,12 @@
 > Sequence is ordered to unblock highest-leverage gaps first while keeping each PR reviewable. Risk:
 > 🟢 low · 🟡 medium · 🔴 high.
 
+> **2026-06-01 update:** For the full-site UI/UX audit (loading placeholders, empty pages, brand
+> drift), use the dedicated program instead of mixing with the sequence below:
+> [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](../plans/2026-06-01_ui-ux-audit-remediation-program.md)
+> and [`UI_UX_AUDIT_SESSION_REGISTRY.md`](./UI_UX_AUDIT_SESSION_REGISTRY.md). **Session 1 (first
+> paint) should land before PR 3 (tracker focus) below** if both are active.
+
 ---
 
 ## PR 1 — P0/P1 hot-fixes + missing integration glue

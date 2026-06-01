@@ -1,13 +1,28 @@
 # Gold Ticker Live — Active Task Plan
 
 > This file is the persistent task tracker for AI agents and human contributors. Agents: read this
-> before starting any task. Update it after completing work. Last updated: 2026-05-31
+> before starting any task. Update it after completing work. Last updated: 2026-06-01
 
 ---
 
 ## 🔴 In Progress
 
-<!-- Active tasks go here -->
+### UI/UX audit remediation (2026-06-01 program)
+
+> Master doc:
+> [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](docs/plans/2026-06-01_ui-ux-audit-remediation-program.md)
+> · Prompts:
+> [`docs/plans/2026-06-01_ui-ux-audit-session-prompts.md`](docs/plans/2026-06-01_ui-ux-audit-session-prompts.md)
+> · Registry:
+> [`docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md`](docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md)
+
+- [x] **Session 0** — planning docs + phase prompts (branch `cursor/ui-ux-audit-session-program-8c0a`)
+- [ ] **Session 1** — first paint: skeletons, cache-first prices, parallel fetch, error states
+      (`cursor/ui-ux-phase1-first-paint-8c0a`) — **ship first**
+- [ ] **Session 2** — learn / invest / shops / 404 (`cursor/ui-ux-phase2-empty-pages-8c0a`)
+- [ ] **Session 3** — naming, sources, karats, nav on all templates, country canonicals
+- [ ] **Session 4** — nav slim, homepage + tracker declutter
+- [ ] **Session 5** — CSS partials, lazy media, a11y CI (skip if SPA migration)
 
 ---
 

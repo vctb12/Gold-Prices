@@ -1177,6 +1177,12 @@ DELIVERABLE
 
 ## 8. Full UI/UX Revamp Prompt
 
+> **2026-06-01:** For the phased audit remediation (first paint → empty pages → consistency →
+> nav/layout → performance), prefer
+> [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](plans/2026-06-01_ui-ux-audit-remediation-program.md)
+> and `@.github/prompts/ui-ux-audit-phase1-first-paint.prompt.md` through phase 5. The prompt below
+> remains a broad revamp catch-all.
+
 **Purpose:** Drive a sitewide UI/UX revamp that makes Gold Ticker Live feel like a serious, premium,
 trustworthy live-gold-price platform — not a generic info site. Improve global polish, navigation,
 hero flow, card hierarchy, CTA clarity, mobile layout, RTL behavior, trust signals, and visual
