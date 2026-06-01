@@ -157,7 +157,7 @@ copy and placeholders.
 | Existing doc | Relationship |
 | ------------ | ------------ |
 | [`2026-05-21_next-session-prompts.md`](./2026-05-21_next-session-prompts.md) | Parallel track (shell/learn-hub). **This program takes priority for perceived “broken site” UX** until Session 1–2 land. |
-| [`2026-05-30_premium-ui-ux-revamp.md`](./2026-05-30_premium-ui-ux-revamp.md) | Visual polish; run **after** Session 1 cache-first + skeletons |
+| [`2026-05-30_premium-ui-ux-revamp.md`](../archive/2026-06/2026-05-30_premium-ui-ux-revamp.md) | Archived (C1a); superseded by Sessions 0–5 |
 | [`2026-04-24_navbar-audit-and-redesign.md`](./2026-04-24_navbar-audit-and-redesign.md) | Superseded for nav work by Session 4 |
 | [`docs/GOLD_TICKER_LIVE_AGENT_PROMPTS.md`](../GOLD_TICKER_LIVE_AGENT_PROMPTS.md) §8 | Legacy full revamp prompt; use **phase prompts** in `.github/prompts/ui-ux-audit-phase*.prompt.md` instead |
 
