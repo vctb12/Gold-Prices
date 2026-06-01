@@ -4,6 +4,8 @@
 > a new plan doc. Humans: archive to `docs/archive/YYYY-MM/` only in session **C1a/C3b** (see
 > [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md)).
 
+**Last updated:** 2026-06-01 (C1a — nine landed May 2026 session plans → [`docs/archive/2026-06/`](../archive/2026-06/); stubs in `docs/plans/`)
+
 ---
 
 ## Tier 0 — Always read first
@@ -23,9 +25,9 @@
 
 | File | Status | Supersedes |
 | ---- | ------ | ---------- |
-| [`2026-06-01_ui-ux-audit-remediation-program.md`](./2026-06-01_ui-ux-audit-remediation-program.md) | Sessions 0–5 **done**; Tracks B–E open | Ad-hoc "fix loading" prompts |
+| [`2026-06-01_ui-ux-audit-remediation-program.md`](./2026-06-01_ui-ux-audit-remediation-program.md) | Sessions 0–5 **done**; Tracks B–E open | May 2026 UI session plans (archived) |
 | [`2026-06-01_endless-session-prompts.md`](./2026-06-01_endless-session-prompts.md) | **Active** endless runs | Inline endless blocks in program doc |
-| [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md) | **Active** (not started) | Wave 3 #18 wholesale move without phases |
+| [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md) | **Active** — C1a **done**; C1b+ not started | Wave 3 #18 wholesale move without phases |
 | [`docs/audits/NEXT_PR_SEQUENCE.md`](../audits/NEXT_PR_SEQUENCE.md) | **Active** post-12-phase | — |
 
 ---
@@ -44,16 +46,22 @@
 
 ---
 
-## Tier 1 — Landed (2026-05-29 / 05-30) — historical record
+## Tier 1 — Archived (2026-06-01 C1a)
 
-| File | Notes |
-| ---- | ----- |
-| `2026-05-29_autonomous-harsh-stripping-session.md` | Country page removal — landed |
-| `2026-05-29_autonomous-cleanup-consolidation.md` | Ref sweep — landed |
-| `2026-05-29_deep-clean-session3.md` | Links + learn — landed |
-| `2026-05-29_harsh-cleanup-and-functional-pass.md` | Superseded for country work |
+Landed session plans live under [`docs/archive/2026-06/`](../archive/2026-06/). One-line stubs remain at
+the original `docs/plans/` filenames for backward-compatible links.
 
-**Archive candidate (C3b):** move to `docs/archive/2026-05/` when link audit passes.
+| Stub (`docs/plans/`) | Archive copy | Notes |
+| -------------------- | ------------ | ----- |
+| `2026-05-29_autonomous-harsh-stripping-session.md` | [archive](../archive/2026-06/2026-05-29_autonomous-harsh-stripping-session.md) | Country page removal — landed |
+| `2026-05-29_autonomous-cleanup-consolidation.md` | [archive](../archive/2026-06/2026-05-29_autonomous-cleanup-consolidation.md) | Ref sweep — landed |
+| `2026-05-29_deep-clean-session3.md` | [archive](../archive/2026-06/2026-05-29_deep-clean-session3.md) | Links + learn — landed |
+| `2026-05-29_harsh-cleanup-and-functional-pass.md` | [archive](../archive/2026-06/2026-05-29_harsh-cleanup-and-functional-pass.md) | Superseded for country work |
+| `2026-05-30_premium-ui-ux-revamp.md` | [archive](../archive/2026-06/2026-05-30_premium-ui-ux-revamp.md) | Superseded by UI/UX audit Sessions 0–5 |
+| `2026-05-30_session5-terminal-polish.md` | [archive](../archive/2026-06/2026-05-30_session5-terminal-polish.md) | Landed |
+| `2026-05-30_session6-launch-push.md` | [archive](../archive/2026-06/2026-05-30_session6-launch-push.md) | Landed |
+| `2026-05-30_visual-excellence-session7.md` | [archive](../archive/2026-06/2026-05-30_visual-excellence-session7.md) | Landed |
+| `2026-05-30_visual-excellence-session7b.md` | [archive](../archive/2026-06/2026-05-30_visual-excellence-session7b.md) | Landed |
 
 ---
 
@@ -83,7 +91,7 @@ Regenerate rather than edit stale numbers in place.
 | `docs/REVAMP_STATUS.md`, `docs/product/*` planning stubs | `REVAMP_PLAN.md` (removed 2026-04 refresh) |
 | `GOLD_TICKER_LIVE_AGENT_PROMPTS.md` §8 full UI revamp | `ui-ux-audit-phase*` + endless UI prompt |
 | `2026-04-24_navbar-audit-and-redesign.md` nav phases | UI/UX Session 4 (merged) + Track B1 |
-| Duplicate "Governing constraints" in proposal files | `AGENTS.md` only |
+| Duplicate constraint blocks in proposal files | [`AGENTS.md`](../../AGENTS.md) only |
 
 ---
 
@@ -103,4 +111,5 @@ Regenerate rather than edit stale numbers in place.
 1. **No new** `docs/plans/*_PROPOSAL.md` without a row in [`docs/plans/README.md`](./README.md).
 2. **Endless work** → `.github/prompts/endless-*.prompt.md`, not new plan files.
 3. **One-shot programs** → one `YYYY-MM-DD_<slug>.md` + registry if multi-PR.
-4. **Archive** → `docs/archive/YYYY-MM/<original-name>.md` + stub line in README status table.
+4. **Archive** → `docs/archive/YYYY-MM/<original-name>.md` + one-line stub at the original `docs/plans/` path.
+5. **C3b** — additional completed proposals archive here after link audit; do not duplicate C1a moves.

@@ -1,11 +1,13 @@
 # Repo Reorganization Program — Phased Sessions
 
 ```yaml plan-status
-status: ready
+status: active
 priority: P1
 class: program
 owner: @vctb12
 created: "2026-06-01"
+sessions_done: [C1a]
+next_session: C1b
 blocked_on: "Owner sign-off on reports/cleanup-audit/CANDIDATES.md for deletions"
 guardrails_reviewed: true
 ```
@@ -32,7 +34,7 @@ guardrails_reviewed: true
 
 | ID | Focus | Risk | Depends on |
 | -- | ----- | ---- | ------------ |
-| **C1a** | Docs archive + supersession index only | 🟢 | — |
+| **C1a** | Docs archive + supersession index only | ✅ done | — |
 | **C1b** | CSS: ensure partials import graph documented; no moves | 🟢 | Session 5 CSS split on main |
 | **C1c** | Move `styles/pages/*` co-location **or** document why not | 🟡 | Owner |
 | **C1d** | `assets/` consolidation (favicons, og-image) | 🟡 | Link audit |

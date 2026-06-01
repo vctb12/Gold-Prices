@@ -17,7 +17,8 @@ skills_used: []
 
 > **Status:** 📥 _Proposal — Phase 0 reconciled. Phase 1 (audit-only) is in progress on branch
 > `copilot/clean-repo-files-dead-code`. Phases 2+ are gated by owner sign-off on
-> `reports/cleanup-audit/CANDIDATES.md`._
+> `reports/cleanup-audit/CANDIDATES.md`._ **Constraints:** [`AGENTS.md`](../../AGENTS.md) only — no
+> public URL removal, no SEO/sitemap regression, DOM-safety baseline intact, ≤ ~50 files per removal PR.
 >
 > The **single source of truth** for execution is [`docs/REVAMP_PLAN.md`](../REVAMP_PLAN.md) §29
 > ("Repo hygiene pass"). This file is the verbatim capture of the originating prompt plus the agreed
@@ -30,12 +31,6 @@ skills_used: []
 Captured from the prompt: _"full repo files cleaning, remove dead code, dead files and clean all
 files and be extra conservative and be careful"_ (2026-04-23). Reconciled with the audit-first /
 delete-last plan agreed in the same conversation.
-
-## Governing constraints
-
-See [`AGENTS.md`](../../AGENTS.md) — product-trust guardrails apply. In particular for cleanup: no
-public URL removed as cleanup, no sitemap / SEO regression, DOM-safety baseline doesn't regress, and
-small scoped PRs (≤ ~50 files per removal PR).
 
 ## Goal
 

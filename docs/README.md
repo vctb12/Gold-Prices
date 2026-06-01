@@ -5,16 +5,21 @@ holds the master plan plus human-facing reference docs.
 
 ## Plan & proposals
 
+**Session routing (read first):**
+[`plans/2026-06-01_master-operations-hub.md`](./plans/2026-06-01_master-operations-hub.md) ·
+[`PLAN.md`](../PLAN.md) · [`plans/ARCHIVE_AND_SUPERSESSION_INDEX.md`](./plans/ARCHIVE_AND_SUPERSESSION_INDEX.md)
+
 | File                                               | Role                                                                              |
 | -------------------------------------------------- | --------------------------------------------------------------------------------- |
 | [`GOLD_TICKER_LIVE_MASTER_WORKBOOK.md`](./GOLD_TICKER_LIVE_MASTER_WORKBOOK.md) | **Start here** — workbook v2: vision, 25 gaps, 50+ sessions, 16 scanners, 90-day map. |
 | [`workbook/`](./workbook/) | **Deep appendices** A–G: surfaces, CI, API map, execution guides, tests, secrets, SEO. |
 | [`workbook/WORKBOOK_SESSION_REGISTRY.md`](./workbook/WORKBOOK_SESSION_REGISTRY.md) | Workbook session branch ↔ PR tracker + priority queue. |
-| [`plans/2026-06-01_master-operations-hub.md`](./plans/2026-06-01_master-operations-hub.md) | One-screen routing summary (details in workbook). |
+| [`plans/2026-06-01_master-operations-hub.md`](./plans/2026-06-01_master-operations-hub.md) | **One-screen routing** — priority queue, what shipped, endless prompts index. |
 | [`REVAMP_PLAN.md`](./REVAMP_PLAN.md)               | Master plan — tracks in progress, decisions, production tracks, issues, backlog.  |
 | [`plans/README.md`](./plans/README.md)             | Proposal intake + priority matrix. New plans follow `plans/YYYY-MM-DD_<slug>.md`. |
-| [`plans/ARCHIVE_AND_SUPERSESSION_INDEX.md`](./plans/ARCHIVE_AND_SUPERSESSION_INDEX.md) | Which docs are authoritative vs archive candidates. |
-| [`plans/`](./plans/)                               | Raw proposal captures.                                                            |
+| [`plans/ARCHIVE_AND_SUPERSESSION_INDEX.md`](./plans/ARCHIVE_AND_SUPERSESSION_INDEX.md) | Which docs are authoritative vs archived. |
+| [`plans/`](./plans/)                               | Active proposal captures (landed sessions → stubs pointing to archive).           |
+| [`archive/2026-06/`](./archive/2026-06/)           | Landed May 2026 session plans (C1a, 2026-06-01).                                  |
 | [`AGENT_REFRESH_PLAN.md`](./AGENT_REFRESH_PLAN.md) | Historical record of the 2026-04 agent-instruction refresh.                       |
 
 ## Reference docs
