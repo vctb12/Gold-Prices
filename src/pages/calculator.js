@@ -24,7 +24,7 @@ import {
   redirectToAccount,
 } from '../lib/public-account-client.js';
 import { parseCalculatorUrlState, serializeCalculatorUrlState } from './calculator/url-state.js';
-import { buildShopsHandoffUrl, buildTrackerHandoffUrl } from '../lib/page-handoff.js';
+import { buildShopsHandoffHref } from './calculator/shops-handoff.js';
 import '../lib/reveal.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
@@ -340,14 +340,30 @@ function buildCountryPageHref(country) {
   return country?.slug ? `countries/${country.slug}/` : 'countries/index.html';
 }
 
+let _shopsHandoffListenersBound = false;
+
 function updateShopsHandoff({ currency = 'AED' } = {}) {
-  const shopsLink = document.getElementById('calc-find-shops-link');
-  if (!shopsLink) return;
+  if (!_shopsHandoffListenersBound) {
+    _shopsHandoffListenersBound = true;
+    const bindCurrencySelect = (id) => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      const handler = () => updateShopsHandoff({ currency: select.value || 'AED' });
+      select.addEventListener('change', handler);
+      select.addEventListener('input', handler);
+    };
+    ['val-currency', 'scrap-currency', 'zakat-currency', 'buy-currency'].forEach(bindCurrencySelect);
+  }
+
   const selectedCountry = getSelectedCountryContext(currency);
-  shopsLink.href = buildShopsHandoffUrl({
-    countryCode: selectedCountry?.code,
+  const href = buildShopsHandoffHref({
+    countryCode: selectedCountry?.code || '',
     lang: STATE.lang,
   });
+  for (const id of ['calc-find-shops-link', 'calc-related-shops-link']) {
+    const link = document.getElementById(id);
+    if (link) link.href = href;
+  }
 }
 
 function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
