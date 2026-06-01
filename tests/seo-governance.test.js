@@ -75,7 +75,7 @@ test('summarize reports grouped counts and risk totals', () => {
 });
 
 test('required noindex policy flags targeted pages that are still indexable', () => {
-  const needsNoindexPath = 'invest.html';
+  const needsNoindexPath = 'content/tools/investment-return.html';
   assert.equal(REQUIRED_NOINDEX_PATTERNS.some((p) => p.test(needsNoindexPath)), true);
 
   const report = summarize([

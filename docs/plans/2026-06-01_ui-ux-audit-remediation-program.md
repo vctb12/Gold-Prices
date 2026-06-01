@@ -9,9 +9,9 @@ created: "2026-06-01"
 last_updated: "2026-06-01"
 source: external-audit-prompt-2026-06-01
 sessions_total: 6
-sessions_open: 4
-next_session: 2
-next_branch: cursor/ui-ux-phase2-empty-pages-8c0a
+sessions_open: 3
+next_session: 3
+next_branch: cursor/ui-ux-phase3-consistency-8c0a
 blocked_on: ""
 guardrails_reviewed: true
 skills_used: [mobile-ux-review, pricing-data-integrity, frontend-design-system, seo-governance]
@@ -91,13 +91,12 @@ copy and placeholders.
 
 ### Phase 2 — Empty / abandoned pages (CRITICAL)
 
-- [ ] **Learn:** static educational body without JS; TOC + anchor links aligned to homepage `#karats`
-- [ ] **Invest:** anchor text on icon links; budget widget skeletons → values; `theme-color` → site
-      gold; **decision:** rebuild vs merge into `/content/guides/` + redirect (keep `noindex` until
-      real content)
-- [ ] **Shops:** skeleton cards, honest empty state, counters reflect loaded data (or hide from nav if
+- [x] **Learn:** static educational body without JS; TOC + anchor links aligned to homepage `#karats`
+- [x] **Invest:** anchor text on icon links; budget widget skeletons → values; `theme-color` → site
+      gold; **decision:** rebuild properly (interactive planner retained; removed `noindex`)
+- [x] **Shops:** skeleton cards, honest empty state, counters reflect loaded data (or hide from nav if
       backend dead)
-- [ ] **404:** branded `404.html` + GitHub Pages config
+- [x] **404:** branded `404.html` + GitHub Pages config
 
 ### Phase 3 — Consistency (HIGH)
 
@@ -188,11 +187,10 @@ TODO (owner): add under backlog / UX in [`docs/REVAMP_PLAN.md`](../REVAMP_PLAN.m
   [`2026-06-01_ui-ux-audit-session-prompts.md`](./2026-06-01_ui-ux-audit-session-prompts.md) or
   `@.github/prompts/ui-ux-audit-phase1-first-paint.prompt.md`
 
-### 2026-06-01 — cursor (Session 1 — first paint)
+### 2026-06-01 — cursor (Session 2 — empty pages)
 
-- **Slice:** Phase 1
-- **Branch:** `cursor/ui-ux-phase1-first-paint-f3bc`
-- **Completed:** `skeleton.js`, `price-fetch-error.js`, `fetchGoldAndFX`, cache-first hydrators,
-  skeleton HTML on index/tracker/shops/invest/country shells
-- **Validation:** `npm test`, `npm run lint`, `npm run validate`, `npm run build` (agent-run)
-- **Next action:** Session 2 empty pages (`cursor/ui-ux-phase2-empty-pages-8c0a`)
+- **Slice:** Phase 2
+- **Branch:** `cursor/ui-ux-phase2-empty-pages-8dc5`
+- **Completed:** Learn static fallback generator + preserve-on-EN; invest static anchors + theme-color + indexable; shops skeleton stats/cards + Supabase upgrade without flash; branded 404 static chrome
+- **Validation:** `npm test`, `npm run validate`, `npm run build` (agent-run)
+- **Next action:** Session 3 consistency (`cursor/ui-ux-phase3-consistency-8c0a`)

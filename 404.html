@@ -14,6 +14,8 @@
     <meta name="theme-color" content="#d4a017" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="style" href="/styles/critical.css" />
+    <link rel="stylesheet" href="/styles/critical.css" />
     <link rel="stylesheet" href="/styles/global.css" />
     <style>
       .notfound-wrap {
@@ -249,10 +251,86 @@
           transition: none;
         }
       }
+
+      .static-site-chrome {
+        border-bottom: 1px solid var(--border-default, #e2e8f0);
+        background: var(--surface-primary, #fff);
+      }
+
+      .static-site-chrome-inner,
+      .static-site-footer-inner {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0.85rem 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .static-site-brand {
+        font-weight: 700;
+        color: var(--color-gold, #c4993e);
+        text-decoration: none;
+      }
+
+      .static-site-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+      }
+
+      .static-site-nav a {
+        color: var(--text-primary, #0f172a);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .static-site-nav a:hover {
+        color: var(--color-gold, #c4993e);
+      }
+
+      .static-site-footer {
+        border-top: 1px solid var(--border-default, #e2e8f0);
+        margin-top: 2rem;
+        background: var(--surface-secondary, #f8f5ef);
+      }
+
+      .static-site-footer p {
+        margin: 0;
+        color: var(--text-secondary, #64748b);
+        font-size: 0.85rem;
+      }
+
+      .static-site-footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .static-site-footer-links a {
+        color: var(--text-primary, #0f172a);
+        text-decoration: none;
+        font-size: 0.85rem;
+      }
     </style>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="static-site-chrome" id="nf-static-header" aria-label="Site navigation">
+      <div class="static-site-chrome-inner">
+        <a href="/" class="static-site-brand">Gold Ticker Live</a>
+        <nav class="static-site-nav" aria-label="Primary">
+          <a href="/tracker.html">Live Tracker</a>
+          <a href="/calculator.html">Calculator</a>
+          <a href="/countries/index.html">Countries</a>
+          <a href="/learn.html">Learn</a>
+          <a href="/content/search/">Search</a>
+        </nav>
+      </div>
+    </header>
     <main id="main-content">
       <div class="notfound-wrap">
         <!-- Live reference price pill (populated by not-found.js from local cache) -->
@@ -359,6 +437,18 @@
         </nav>
       </div>
     </main>
+
+    <footer class="static-site-footer" id="nf-static-footer">
+      <div class="static-site-footer-inner">
+        <p>Reference gold prices for GCC &amp; Arab world — not retail shop quotes.</p>
+        <nav class="static-site-footer-links" aria-label="Footer">
+          <a href="/methodology.html">Methodology</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+          <a href="/content/faq/">FAQ</a>
+        </nav>
+      </div>
+    </footer>
 
     <script type="module" src="/src/pages/not-found.js"></script>
   </body>

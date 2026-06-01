@@ -178,6 +178,8 @@ window.addEventListener('error', (event) => {
 
 const lang = getLang();
 const shell = mountSharedShell({ lang, depth: 0 });
+document.getElementById('nf-static-header')?.remove();
+document.getElementById('nf-static-footer')?.remove();
 applyLang(lang);
 prefillSearch();
 renderFreshnessPill(lang);

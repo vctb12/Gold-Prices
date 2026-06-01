@@ -1,6 +1,8 @@
 /**
  * Learn page entry point.
  * Mounts shared shell and renders learn-hub article content from the shared model.
+ * English static HTML in learn.html is preserved on first paint; JS enhances or
+ * re-renders for Arabic / missing fallback.
  */
 
 import * as cache from '../lib/cache.js';
@@ -8,6 +10,7 @@ import { mountSharedShell } from '../components/site-shell.js';
 import { injectBreadcrumbs } from '../components/breadcrumbs.js';
 import { getArticle } from '../learn-hub/content-registry.js';
 import { renderArticle } from '../learn-hub/article-renderer.js';
+import { createTocRenderer } from '../learn-hub/toc-renderer.js';
 import { mountLearnHubCatalog } from './learn-hub-ui.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { mountRelatedGuides } from '../components/RelatedGuides.js';
@@ -32,6 +35,10 @@ const STATE = {
 
 function normalizeLang(value) {
   return value === 'ar' ? 'ar' : 'en';
+}
+
+function hasStaticFallback() {
+  return document.getElementById('learn-article-root')?.dataset?.staticFallback === 'true';
 }
 
 function applyLang(renderer) {
@@ -63,6 +70,35 @@ function renderMissingArticle() {
   root.appendChild(message);
 }
 
+function mountArticleExperience(article) {
+  if (!article) {
+    applyLang(null);
+    renderMissingArticle();
+    console.error('[learn] Missing learn article model in learn-hub registry');
+    return { renderer: null, toc: null };
+  }
+
+  if (hasStaticFallback() && STATE.lang === 'en') {
+    const toc = createTocRenderer({
+      article,
+      language: STATE.lang,
+      container: '#learn-toc-root',
+    });
+    toc.enhanceStatic();
+    applyLang(null);
+    return { renderer: null, toc };
+  }
+
+  const renderer = renderArticle({
+    article,
+    language: STATE.lang,
+    articleContainer: '#learn-article-root',
+    tocContainer: '#learn-toc-root',
+  });
+  applyLang(renderer);
+  return { renderer, toc: null };
+}
+
 function init() {
   cache.loadState(STATE);
 
@@ -81,30 +117,20 @@ function init() {
   initPageEnter('#main-content');
 
   const article = getArticle('learn');
-  if (!article) {
-    applyLang(null);
-    renderMissingArticle();
-    console.error('[learn] Missing learn article model in learn-hub registry');
-    return;
-  }
-  const renderer = renderArticle({
-    article,
-    language: STATE.lang,
-    articleContainer: '#learn-article-root',
-    tocContainer: '#learn-toc-root',
-  });
+  let experience = mountArticleExperience(article);
 
   navCtrl.getLangToggleButtons().forEach((btn) => {
     btn.addEventListener('click', () => {
       STATE.lang = STATE.lang === 'en' ? 'ar' : 'en';
       cache.savePreference('lang', STATE.lang);
       shell.updateLang(STATE.lang);
-      applyLang(renderer);
+      experience.toc?.destroy();
+      experience = mountArticleExperience(article);
+      mountLearnHubCatalog({ lang: STATE.lang, container: '#learn-catalog-root' });
       scrollToHashTarget();
     });
   });
 
-  applyLang(renderer);
   scrollToHashTarget();
   mountRelatedGuides({ lang: STATE.lang });
 }

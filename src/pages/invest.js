@@ -877,12 +877,17 @@ function renderPlanner() {
     currency,
     decimals
   );
+  const budgetEl = document.getElementById('result-budget');
+  budgetEl.classList.remove('skeleton-inline', 'shell-skeleton-price-md');
+  budgetEl.removeAttribute('aria-busy');
   document.getElementById('result-budget-note').textContent = tx('planBudgetNote');
 
   const gramsEl = document.getElementById('result-grams');
   const ouncesEl = document.getElementById('result-ounces');
   if (grams != null) {
     gramsEl.textContent = formatWeightGrams(grams);
+    gramsEl.classList.remove('skeleton-inline', 'shell-skeleton-karat');
+    gramsEl.removeAttribute('aria-busy');
   } else if (!state.goldPriceUsdPerOz) {
     mountSkeleton(gramsEl, 'karat');
   } else {
@@ -894,6 +899,8 @@ function renderPlanner() {
 
   if (ounces != null) {
     ouncesEl.textContent = formatWeightOz(ounces);
+    ouncesEl.classList.remove('skeleton-inline', 'shell-skeleton-karat');
+    ouncesEl.removeAttribute('aria-busy');
   } else if (!state.goldPriceUsdPerOz) {
     mountSkeleton(ouncesEl, 'karat');
   } else {
@@ -908,6 +915,8 @@ function renderPlanner() {
   if (state.frequency === 'monthly') {
     fourthLabel.textContent = tx('resultAnnual');
     fourthValue.textContent = formatWeightGrams(annual);
+    fourthValue.classList.remove('skeleton-inline', 'shell-skeleton-karat');
+    fourthValue.removeAttribute('aria-busy');
     fourthNote.textContent =
       state.lang === 'ar'
         ? 'إذا حافظت على الوتيرة نفسها 12 شهراً'
@@ -926,6 +935,8 @@ function renderPlanner() {
           : state.lang === 'ar'
             ? 'منخفض'
             : 'Low';
+    fourthValue.classList.remove('skeleton-inline', 'shell-skeleton-karat');
+    fourthValue.removeAttribute('aria-busy');
     fourthNote.textContent =
       state.type === 'ETF'
         ? tx('planEtfNote')

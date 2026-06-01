@@ -1269,9 +1269,17 @@ function updateHeaderStats() {
     SHOPS.map((shop) => countryByCode(shop.countryCode)?.group).filter(Boolean)
   );
 
-  document.getElementById('shops-stat-listings').textContent = String(SHOPS.length);
-  document.getElementById('shops-stat-countries').textContent = String(uniqueCountries.size);
-  document.getElementById('shops-stat-regions').textContent = String(uniqueRegions.size);
+  const setStat = (id, value) => {
+    const elNode = document.getElementById(id);
+    if (!elNode) return;
+    elNode.textContent = String(value);
+    elNode.classList.remove('skeleton-inline', 'shell-skeleton-price-md', 'shell-skeleton-karat');
+    elNode.removeAttribute('aria-busy');
+  };
+
+  setStat('shops-stat-listings', SHOPS.length);
+  setStat('shops-stat-countries', uniqueCountries.size);
+  setStat('shops-stat-regions', uniqueRegions.size);
 }
 
 function activeFilterSummary() {
@@ -1930,7 +1938,10 @@ function render() {
   const count = document.getElementById('shops-count');
   if (count) count.textContent = t('count')(shops.length);
   const controlsCount = document.getElementById('shops-controls-count');
-  if (controlsCount) controlsCount.textContent = t('count')(shops.length);
+  if (controlsCount) {
+    controlsCount.textContent = t('count')(shops.length);
+    controlsCount.removeAttribute('aria-busy');
+  }
   activeFilterSummary();
   renderMobileQuickFilters();
   renderFilterPills();
@@ -2348,11 +2359,9 @@ init();
 // most up-to-date directory without any visible delay.
 (async function upgradeToLiveData() {
   const grid = document.getElementById('shops-grid');
-  const loading = document.getElementById('shops-loading');
   const error = document.getElementById('shops-error');
-  if (loading) loading.hidden = false;
-  if (error) error.hidden = true;
-  if (grid) grid.classList.add('shops-grid--upgrading');
+  const hadLocalListings = SHOPS.length > 0;
+
   try {
     const remote = await fetchSupabaseShops();
     if (remote && Array.isArray(remote) && remote.length > 0) {
@@ -2365,9 +2374,8 @@ init();
     }
   } catch (err) {
     console.warn('[shops] Could not fetch Supabase data; using fallback:', err.message);
-    if (error) error.hidden = false;
+    if (!hadLocalListings && error) error.hidden = false;
   } finally {
-    if (loading) loading.hidden = true;
     if (grid) grid.classList.remove('shops-grid--upgrading');
   }
 })();

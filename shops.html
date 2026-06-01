@@ -114,15 +114,27 @@
 
           <div class="shops-hero-stats" aria-label="Directory overview">
             <div class="shops-stat">
-              <span class="shops-stat-value" id="shops-stat-listings">0</span>
+              <span
+                class="shops-stat-value skeleton-inline shell-skeleton-price-md"
+                id="shops-stat-listings"
+                aria-busy="true"
+              ></span>
               <span class="shops-stat-label" id="shops-stat-listings-label">Shops &amp; markets</span>
             </div>
             <div class="shops-stat">
-              <span class="shops-stat-value" id="shops-stat-countries">0</span>
+              <span
+                class="shops-stat-value skeleton-inline shell-skeleton-karat"
+                id="shops-stat-countries"
+                aria-busy="true"
+              ></span>
               <span class="shops-stat-label" id="shops-stat-countries-label">Countries</span>
             </div>
             <div class="shops-stat">
-              <span class="shops-stat-value" id="shops-stat-regions">0</span>
+              <span
+                class="shops-stat-value skeleton-inline shell-skeleton-karat"
+                id="shops-stat-regions"
+                aria-busy="true"
+              ></span>
               <span class="shops-stat-label" id="shops-stat-regions-label">Regions</span>
             </div>
           </div>
@@ -207,7 +219,9 @@
             />
           </label>
           <div class="shops-controls-summary" id="shops-controls-summary">
-            <p class="shops-controls-summary-count" id="shops-controls-count">0 listings</p>
+            <p class="shops-controls-summary-count" id="shops-controls-count">
+              <span class="skeleton-inline shell-skeleton-freshness-strip" aria-busy="true"></span>
+            </p>
             <p class="shops-controls-summary-active" id="shops-controls-active">
               Showing all listings
             </p>
@@ -366,7 +380,13 @@
             <p id="shops-count" aria-live="polite"></p>
           </div>
 
-          <div id="shops-grid" class="shops-grid"></div>
+          <div id="shops-grid" class="shops-grid">
+            <div class="shops-skeleton-grid shops-skeleton-grid--initial" aria-hidden="true">
+              <div class="shops-skeleton-card"><span class="skeleton-inline shell-skeleton-block"></span></div>
+              <div class="shops-skeleton-card"><span class="skeleton-inline shell-skeleton-block"></span></div>
+              <div class="shops-skeleton-card"><span class="skeleton-inline shell-skeleton-block"></span></div>
+            </div>
+          </div>
           <div id="shops-loading" class="shops-empty shops-loading-skeleton" hidden aria-live="polite">
             <div class="shops-skeleton-grid" aria-hidden="true">
               <div class="shops-skeleton-card"><span class="skeleton-inline shell-skeleton-block"></span></div>

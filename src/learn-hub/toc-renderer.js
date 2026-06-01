@@ -179,8 +179,24 @@ export function createTocRenderer({
     return wrapper;
   }
 
+  function enhanceStatic() {
+    if (!root || !article) return null;
+    linkMap.clear();
+    root.querySelectorAll('a.learn-hub-toc-link[href^="#"]').forEach((link) => {
+      const href = link.getAttribute('href') || '';
+      const id = decodeURIComponent(href.slice(1));
+      if (!id) return;
+      linkMap.set(id, link);
+    });
+    observeSections();
+    const firstId = buildEntries(article)[0]?.id;
+    if (firstId) setActive(firstId, { notify: false });
+    return root;
+  }
+
   return {
     render,
+    enhanceStatic,
     setLanguage(nextLanguage) {
       currentLanguage = nextLanguage === 'ar' ? 'ar' : 'en';
       render();
