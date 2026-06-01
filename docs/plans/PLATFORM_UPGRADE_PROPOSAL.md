@@ -41,11 +41,8 @@ engineering engagement touching repo structure, CI, Python layer, navigation, ro
 tracker, SEO, admin panel, chatbot, WhatsApp flow, orders, X post generator, charts, and currency
 converter.
 
-## Governing constraints
-
-See [`AGENTS.md`](../../AGENTS.md) — product-trust guardrails, static-architecture preservation,
-DOM-safety baseline, honest verification. Anything in the raw proposal below that conflicts with
-those guardrails is downgraded until the owner explicitly approves it.
+> **Constraints:** [`AGENTS.md`](../../AGENTS.md) only — anything in the raw proposal below that
+> conflicts with those guardrails is downgraded until the owner explicitly approves it.
 
 ---
 

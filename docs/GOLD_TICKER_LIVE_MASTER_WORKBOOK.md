@@ -829,7 +829,7 @@ flowchart LR
 | **1 — Backlog narrative** | `docs/REVAMP_PLAN.md` |
 | **2 — Programs** | `2026-06-01_ui-ux-audit-remediation-program.md`, `2026-06-01_repo-reorganization-program.md`, `NEXT_PR_SEQUENCE.md` |
 | **3 — Audits (point-in-time)** | `docs/audits/*`, `docs/GOLD_TICKER_LIVE_LATEST_WEBSITE_STATE_AUDIT.md` |
-| **4 — Archive candidates** | Landed `2026-05-29_*` plans → `docs/archive/2026-06/` when WB-501 runs |
+| **4 — Archive candidates** | Landed `2026-05-29_*` + May UI session plans → [`docs/archive/2026-06/`](./archive/2026-06/) (C1a, 2026-06-01) |
 
 Full index: [`docs/plans/ARCHIVE_AND_SUPERSESSION_INDEX.md`](./plans/ARCHIVE_AND_SUPERSESSION_INDEX.md)
 
