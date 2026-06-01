@@ -56,6 +56,10 @@ function walk(dir, base = '', results = []) {
     const full = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {
+      // Duplicate country hub — canonical is /countries/{slug}/ not /gold-price/
+      if (entry.name === 'gold-price' && base.startsWith('countries/')) {
+        continue;
+      }
       const idx = path.join(full, 'index.html');
       if (fs.existsSync(idx) && !isNoindex(idx)) {
         results.push({ urlPath: rel + '/', file: idx });

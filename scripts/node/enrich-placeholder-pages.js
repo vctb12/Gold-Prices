@@ -191,7 +191,7 @@ ${links
   .join('\n')}
       </ul>
       <p class="stub-related">
-        See also: <a href="/countries/${country.slug}/gold-price/">Gold price in ${escapeHtml(
+        See also: <a href="/countries/${country.slug}/">Gold price in ${escapeHtml(
           countryEn
         )}</a> · <a href="/shops.html">All gold shops</a> · <a href="/methodology.html">Methodology</a>
       </p>
@@ -282,7 +282,7 @@ ${karats
       <p class="stub-related">
         Back to: <a href="/countries/${country.slug}/${city.slug}/">${escapeHtml(
           cityEn
-        )} overview</a> · <a href="/countries/${country.slug}/gold-price/">${escapeHtml(
+        )} overview</a> · <a href="/countries/${country.slug}/">${escapeHtml(
           countryEn
         )} gold price</a> · <a href="/methodology.html">How prices are calculated</a>
       </p>

@@ -82,10 +82,12 @@ function buildStubPage(country, city) {
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <script type="application/ld+json">${JSON.stringify(breadcrumbLd)}</script>
+    <link rel="stylesheet" href="../../../../styles/global.css" />
     <link rel="stylesheet" href="../../stub-city.css" />
   </head>
   <body>
-    <main>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <main id="main-content">
       <nav aria-label="Breadcrumb" class="stub-breadcrumbs">
         <a href="/">Home</a> ›
         <a href="/countries/${country.slug}/">${escapeHtml(country.nameEn)}</a> ›
@@ -113,7 +115,7 @@ function buildStubPage(country, city) {
       </ul>
       <p class="stub-related">
         See also:
-        <a href="/countries/${country.slug}/gold-price/">Gold price in ${escapeHtml(country.nameEn)}</a>
+        <a href="/countries/${country.slug}/">Gold price in ${escapeHtml(country.nameEn)}</a>
         · <a href="/shops.html">All gold shops</a>
         · <a href="/methodology.html">Methodology</a>
       </p>
@@ -121,6 +123,18 @@ function buildStubPage(country, city) {
         <a href="${canonical}?lang=ar" hreflang="ar">العربية: ${escapeHtml(city.nameAr)} — ${escapeHtml(country.nameAr)}</a>
       </p>
     </main>
+    <script type="module">
+      import { bootContentPage } from '../../../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 3,
+        crumbs: [
+          { label: 'Home', url: '/' },
+          { label: '${escapeHtml(country.nameEn)}', url: '/countries/${country.slug}/' },
+          { label: '${escapeHtml(city.nameEn)}', url: '#' },
+        ],
+        relatedGuides: false,
+      });
+    </script>
   </body>
 </html>
 `;

@@ -40,7 +40,7 @@ const RAW_NAV_DATA = {
       },
       {
         key: 'uae-prices',
-        href: '/countries/uae/gold-price/',
+        href: '/countries/uae/',
         label: 'UAE Prices',
         description: 'AED prices and Dubai context',
         primary: true,
@@ -127,7 +127,7 @@ const RAW_NAV_DATA = {
                 primary: true,
               },
               {
-                href: '/countries/uae/gold-price/',
+                href: '/countries/uae/',
                 label: 'UAE gold prices',
                 description: 'AED prices and Dubai context',
                 icon: 'AE',
@@ -407,7 +407,7 @@ const RAW_NAV_DATA = {
         description: 'UAE, GCC, Arab markets, global references, and analysis.',
         layout: 'mega',
         featured: {
-          href: '/countries/uae/gold-price/',
+          href: '/countries/uae/',
           label: 'Start with UAE markets',
           description: 'AED references, Dubai context, and market pages.',
           icon: 'AE',
@@ -424,31 +424,31 @@ const RAW_NAV_DATA = {
             description: 'Gulf country references.',
             items: [
               {
-                href: '/countries/saudi-arabia/gold-price/',
+                href: '/countries/saudi-arabia/',
                 label: 'Saudi Arabia',
                 description: 'SAR reference prices',
                 icon: 'SA',
               },
               {
-                href: '/countries/kuwait/gold-price/',
+                href: '/countries/kuwait/',
                 label: 'Kuwait',
                 description: 'KWD reference prices',
                 icon: 'KW',
               },
               {
-                href: '/countries/qatar/gold-price/',
+                href: '/countries/qatar/',
                 label: 'Qatar',
                 description: 'QAR reference prices',
                 icon: 'QA',
               },
               {
-                href: '/countries/bahrain/gold-price/',
+                href: '/countries/bahrain/',
                 label: 'Bahrain',
                 description: 'BHD reference prices',
                 icon: 'BH',
               },
               {
-                href: '/countries/oman/gold-price/',
+                href: '/countries/oman/',
                 label: 'Oman',
                 description: 'OMR reference prices',
                 icon: 'OM',
@@ -461,25 +461,25 @@ const RAW_NAV_DATA = {
             description: 'Regional pages across MENA.',
             items: [
               {
-                href: '/countries/egypt/gold-price/',
+                href: '/countries/egypt/',
                 label: 'Egypt',
                 description: 'EGP reference prices',
                 icon: 'EG',
               },
               {
-                href: '/countries/jordan/gold-price/',
+                href: '/countries/jordan/',
                 label: 'Jordan',
                 description: 'JOD reference prices',
                 icon: 'JO',
               },
               {
-                href: '/countries/morocco/gold-price/',
+                href: '/countries/morocco/',
                 label: 'Morocco',
                 description: 'MAD reference prices',
                 icon: 'MA',
               },
               {
-                href: '/countries/turkey/gold-price/',
+                href: '/countries/turkey/',
                 label: 'Turkey',
                 description: 'TRY reference prices',
                 icon: 'TR',
@@ -549,7 +549,7 @@ const RAW_NAV_DATA = {
       },
       {
         key: 'uae-prices',
-        href: '/countries/uae/gold-price/',
+        href: '/countries/uae/',
         label: 'أسعار الإمارات',
         description: 'أسعار الدرهم وسياق دبي',
         primary: true,
@@ -635,7 +635,7 @@ const RAW_NAV_DATA = {
                 primary: true,
               },
               {
-                href: '/countries/uae/gold-price/',
+                href: '/countries/uae/',
                 label: 'أسعار الإمارات',
                 description: 'أسعار الدرهم وسياق دبي',
                 icon: 'AE',
@@ -915,7 +915,7 @@ const RAW_NAV_DATA = {
         description: 'الإمارات والخليج والأسواق العربية والمراجع العالمية والتحليلات.',
         layout: 'mega',
         featured: {
-          href: '/countries/uae/gold-price/',
+          href: '/countries/uae/',
           label: 'ابدأ بأسواق الإمارات',
           description: 'مراجع الدرهم وسياق دبي وصفحات الأسواق.',
           icon: 'AE',
@@ -932,31 +932,31 @@ const RAW_NAV_DATA = {
             description: 'مراجع دول الخليج.',
             items: [
               {
-                href: '/countries/saudi-arabia/gold-price/',
+                href: '/countries/saudi-arabia/',
                 label: 'السعودية',
                 description: 'أسعار مرجعية بالريال',
                 icon: 'SA',
               },
               {
-                href: '/countries/kuwait/gold-price/',
+                href: '/countries/kuwait/',
                 label: 'الكويت',
                 description: 'أسعار مرجعية بالدينار',
                 icon: 'KW',
               },
               {
-                href: '/countries/qatar/gold-price/',
+                href: '/countries/qatar/',
                 label: 'قطر',
                 description: 'أسعار مرجعية بالريال',
                 icon: 'QA',
               },
               {
-                href: '/countries/bahrain/gold-price/',
+                href: '/countries/bahrain/',
                 label: 'البحرين',
                 description: 'أسعار مرجعية بالدينار',
                 icon: 'BH',
               },
               {
-                href: '/countries/oman/gold-price/',
+                href: '/countries/oman/',
                 label: 'عُمان',
                 description: 'أسعار مرجعية بالريال',
                 icon: 'OM',
@@ -969,25 +969,25 @@ const RAW_NAV_DATA = {
             description: 'صفحات إقليمية عبر الشرق الأوسط وشمال أفريقيا.',
             items: [
               {
-                href: '/countries/egypt/gold-price/',
+                href: '/countries/egypt/',
                 label: 'مصر',
                 description: 'أسعار مرجعية بالجنيه',
                 icon: 'EG',
               },
               {
-                href: '/countries/jordan/gold-price/',
+                href: '/countries/jordan/',
                 label: 'الأردن',
                 description: 'أسعار مرجعية بالدينار',
                 icon: 'JO',
               },
               {
-                href: '/countries/morocco/gold-price/',
+                href: '/countries/morocco/',
                 label: 'المغرب',
                 description: 'أسعار مرجعية بالدرهم',
                 icon: 'MA',
               },
               {
-                href: '/countries/turkey/gold-price/',
+                href: '/countries/turkey/',
                 label: 'تركيا',
                 description: 'أسعار مرجعية بالليرة',
                 icon: 'TR',

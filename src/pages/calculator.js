@@ -336,7 +336,7 @@ function getSelectedCountryContext(currency) {
 }
 
 function buildCountryPageHref(country) {
-  return country?.slug ? `countries/${country.slug}/gold-price/` : 'countries/index.html';
+  return country?.slug ? `countries/${country.slug}/` : 'countries/index.html';
 }
 
 function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
@@ -1018,6 +1018,7 @@ function applyLang() {
 
   document.documentElement.lang = STATE.lang;
   document.documentElement.dir = STATE.lang === 'ar' ? 'rtl' : 'ltr';
+  populateKaratSelects();
   refreshMobileDockForActiveTab();
 }
 
@@ -1553,8 +1554,34 @@ function applyUrlPreset() {
   });
 }
 
+function populateKaratSelects() {
+  const ids = ['val-karat', 'scrap-karat', 'zakat-karat', 'buy-karat'];
+  for (const id of ids) {
+    const select = document.getElementById(id);
+    if (!select) continue;
+    const previous = select.value;
+    select.replaceChildren(
+      ...KARATS.map((k) => {
+        const pct = (k.purity * 100).toFixed(1);
+        const label =
+          STATE.lang === 'ar'
+            ? `عيار ${k.code} (${pct}%)`
+            : `${k.code}K (${pct}%)`;
+        const opt = document.createElement('option');
+        opt.value = k.code;
+        opt.textContent = label;
+        return opt;
+      })
+    );
+    if (KARATS.some((k) => k.code === previous)) select.value = previous;
+    else if (KARATS.some((k) => k.code === '22')) select.value = '22';
+    else if (KARATS[0]) select.value = KARATS[0].code;
+  }
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
+  populateKaratSelects();
   cache.loadState(STATE);
 
   const urlLang = new URLSearchParams(location.search).get('lang');

@@ -20,7 +20,8 @@
 - [ ] **Session 1** — first paint: skeletons, cache-first prices, parallel fetch, error states
       (`cursor/ui-ux-phase1-first-paint-8c0a`) — **ship first**
 - [ ] **Session 2** — learn / invest / shops / 404 (`cursor/ui-ux-phase2-empty-pages-8c0a`)
-- [ ] **Session 3** — naming, sources, karats, nav on all templates, country canonicals
+- [x] **Session 3** — naming, sources, karats, nav on all templates, country canonicals
+      (`cursor/ui-ux-phase3-consistency-86ca`)
 - [ ] **Session 4** — nav slim, homepage + tracker declutter
 - [ ] **Session 5** — CSS partials, lazy media, a11y CI (skip if SPA migration)
 

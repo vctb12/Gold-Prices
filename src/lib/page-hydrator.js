@@ -31,7 +31,7 @@ const depth = _relPath ? _relPath.split('/').filter(Boolean).length : 0;
 
 const AED_PEG = CONSTANTS.AED_PEG;
 const TROY_OZ_GRAMS = CONSTANTS.TROY_OZ_GRAMS;
-const DEFAULT_COUNTRY_KARATS = ['24', '22', '21', '18', '14'];
+const DEFAULT_COUNTRY_KARATS = KARATS.map((k) => k.code);
 const MARKET_LABELS = {
   gcc: { en: 'GCC reference market', ar: 'مرجع أسواق الخليج' },
   levant: { en: 'Arab market reference', ar: 'مرجع الأسواق العربية' },
@@ -979,7 +979,7 @@ async function hydrate() {
   ) {
     injectBreadcrumbs('country', {
       countryName: getCountryName(country, lang),
-      countryUrl: withBase(`countries/${country.slug}/gold-price/`),
+      countryUrl: withBase(`countries/${country.slug}/`),
     });
     const pageData = getCountryPageData();
     const cachedGold = cache.getFallbackGoldPrice();

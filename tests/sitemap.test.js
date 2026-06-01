@@ -140,15 +140,11 @@ test('every existing country page is present in the sitemap', () => {
     const idx = path.join(REPO_ROOT, 'countries', c.slug, 'index.html');
     if (!fs.existsSync(idx)) continue;
     checked++;
-    // Country index is typically a noindex meta-refresh to `gold-price/`;
-    // the generator correctly emits the gold-price page instead. Accept
-    // either form so noindex country stubs don't trigger false failures.
     const slash = `${CANONICAL_ORIGIN}/countries/${c.slug}/`;
     const html = `${CANONICAL_ORIGIN}/countries/${c.slug}/index.html`;
-    const goldPrice = `${CANONICAL_ORIGIN}/countries/${c.slug}/gold-price/`;
     assert.ok(
-      all.has(slash) || all.has(html) || all.has(goldPrice),
-      `Expected sitemap to include a loc for country "${c.slug}"`
+      all.has(slash) || all.has(html),
+      `Expected sitemap to include canonical hub for country "${c.slug}"`
     );
   }
   assert.ok(checked > 0, 'Expected to verify at least one country page');

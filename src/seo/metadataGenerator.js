@@ -116,9 +116,9 @@ export function generateMetadata(routeType, params = {}) {
       break;
 
     case 'tracker':
-      title = `Gold Tracker Pro — Live Price Workspace | UAE, GCC | ${SITE_NAME}`;
+      title = `Gold Command Center — Live Tracker | UAE, GCC | ${SITE_NAME}`;
       description =
-        'Live gold price tracker: 24 countries, 7 karats, historical chart, alerts, planners and CSV exports. Auto-refresh with a visible freshness label.';
+        'Live gold price tracker for Gold Ticker Live: 24+ countries, 7 karat grades (14K–24K), chart, alerts, and exports. Spot source updates hourly; page re-polls ~90s.';
       canonical = `${SITE_URL}/tracker.html`;
       breadcrumbs = [
         { name: 'Home', url: `${SITE_URL}/` },

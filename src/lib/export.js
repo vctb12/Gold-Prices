@@ -133,7 +133,7 @@ export function exportJSON(STATE, prices) {
     goldUpdatedAt: STATE.freshness?.goldUpdatedAt,
     fxUpdatedAt: STATE.freshness?.fxUpdatedAt,
     freshnessState,
-    dataSource: 'gold-api.com / open.er-api.com',
+    dataSource: 'goldpricez.com / open.er-api.com',
     dataResolution: 'live snapshot — spot-linked reference estimate',
     selectedRange: STATE.range || null,
     selectedCurrency: STATE.selectedCurrency || null,

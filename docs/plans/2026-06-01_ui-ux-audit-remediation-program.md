@@ -100,14 +100,15 @@ copy and placeholders.
 
 ### Phase 3 — Consistency (HIGH)
 
-- [ ] Single product name: **Gold Ticker Live** (retire “Gold Tracker Pro” in onboarding; “Command
+- [x] Single product name: **Gold Ticker Live** (retire “Gold Tracker Pro” in onboarding; “Command
       Center” = section label only)
-- [ ] Single attribution + refresh statement (README source of truth: gold-api.com + FX provider;
-      reconcile 90s poll vs hourly source updates in copy)
-- [ ] All karat UIs driven by `src/config/karats.js`; fix “7 karats” marketing claims
-- [ ] `nav.js` + `footer.js` on buying guide, content guides, country, city templates
-- [ ] Canonicalize `/countries/{cc}/` vs `/countries/{cc}/gold-price/` (301 + `<link rel="canonical">`
-      across generated pages)
+- [x] Single attribution + refresh statement (PLAN.md / README: GoldPriceZ + open.er-api.com;
+      hourly source + ~90s client re-poll in copy)
+- [x] All karat UIs driven by `src/config/karats.js`; marketing count matches config (7 grades,
+      14K–24K)
+- [x] `nav.js` + `footer.js` on buying guide, content guides (bootContentPage), city stub hubs
+- [x] Canonicalize `/countries/{cc}/` vs `/countries/{cc}/gold-price/` (301 + `<link rel="canonical">`
+      + sitemap excludes duplicates)
 
 ### Phase 4 — Navigation & layout polish (MEDIUM)
 

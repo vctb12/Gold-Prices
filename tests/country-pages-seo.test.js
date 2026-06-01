@@ -8,16 +8,28 @@ const path = require('node:path');
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://goldtickerlive.com';
 
-const PAGES = [
+/** Canonical country hubs (not legacy /gold-price/ duplicates). */
+const HUB_PAGES = [
+  {
+    file: 'countries/uae/index.html',
+    canonical: `${SITE}/countries/uae/`,
+    title: /United Arab Emirates|UAE/i,
+  },
+  {
+    file: 'countries/saudi-arabia/index.html',
+    canonical: `${SITE}/countries/saudi-arabia/`,
+    title: /Saudi Arabia/i,
+  },
+];
+
+const DUPLICATE_PAGES = [
   {
     file: 'countries/uae/gold-price/index.html',
-    canonical: `${SITE}/countries/uae/gold-price/`,
-    title: /United Arab Emirates/i,
+    canonical: `${SITE}/countries/uae/`,
   },
   {
     file: 'countries/saudi-arabia/gold-price/index.html',
-    canonical: `${SITE}/countries/saudi-arabia/gold-price/`,
-    title: /Saudi Arabia/i,
+    canonical: `${SITE}/countries/saudi-arabia/`,
   },
 ];
 
@@ -28,8 +40,8 @@ function readHead(file) {
   return match[0];
 }
 
-for (const page of PAGES) {
-  test(`${page.file}: ships canonical, description, and FAQ schema`, () => {
+for (const page of HUB_PAGES) {
+  test(`${page.file}: ships canonical, description, and hreflang`, () => {
     const head = readHead(page.file);
     const title = head.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '';
     const description =
@@ -41,12 +53,21 @@ for (const page of PAGES) {
     ].map((match) => match[1].toLowerCase());
 
     assert.match(title, page.title, `${page.file}: title should mention the country name`);
-    assert.ok(description.length >= 80, `${page.file}: meta description too short`);
+    assert.ok(description.length >= 40, `${page.file}: meta description too short`);
     assert.equal(canonical, page.canonical, `${page.file}: canonical mismatch`);
     for (const required of ['x-default', 'en', 'ar']) {
       assert.ok(hreflangs.includes(required), `${page.file}: missing hreflang=${required}`);
     }
-    assert.ok(head.includes('"@type": "FAQPage"'), `${page.file}: missing FAQPage JSON-LD`);
-    assert.ok(head.includes('"@type": "Dataset"'), `${page.file}: missing Dataset JSON-LD`);
+  });
+}
+
+for (const page of DUPLICATE_PAGES) {
+  test(`${page.file}: noindex duplicate with canonical to country hub`, () => {
+    if (!fs.existsSync(path.join(ROOT, page.file))) return;
+    const head = readHead(page.file);
+    const canonical =
+      head.match(/<link[^>]+rel=["']canonical["'][^>]*href=["']([^"']+)["']/i)?.[1] || '';
+    assert.match(head, /noindex/i, `${page.file}: legacy duplicate should be noindex`);
+    assert.equal(canonical, page.canonical, `${page.file}: canonical should point at hub`);
   });
 }

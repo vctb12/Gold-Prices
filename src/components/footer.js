@@ -1,4 +1,10 @@
-import { NEWSLETTER_API_ENDPOINT, FORMSPREE_ENDPOINT } from '../config/index.js';
+import {
+  NEWSLETTER_API_ENDPOINT,
+  FORMSPREE_ENDPOINT,
+  DATA_ATTRIBUTION,
+  getKaratCountLabel,
+  getRefreshStatement,
+} from '../config/index.js';
 import { NAV_DATA } from './nav-data.js';
 import { escapeHtml, resolveHref } from './nav/helpers.js';
 import { track, EVENTS } from '../lib/analytics.js';
@@ -61,7 +67,7 @@ export function injectFooter(lang = 'en', depth = 0) {
         }</p>
         <div class="footer-brand-badges">
           <span class="footer-badge">${isAr ? '24+ دولة' : '24+ Countries'}</span>
-          <span class="footer-badge">${isAr ? '7 عيارات' : '7 Karats'}</span>
+          <span class="footer-badge">${escapeHtml(getKaratCountLabel(isAr ? 'ar' : 'en'))}</span>
           <span class="footer-badge">${isAr ? 'ثنائي اللغة' : 'EN / AR'}</span>
         </div>
       </div>
@@ -107,9 +113,11 @@ export function injectFooter(lang = 'en', depth = 0) {
   <div class="footer-bottom">
     <div class="footer-inner">
       <div class="footer-sources">
-        <span>${isAr ? 'بيانات الأسعار من' : 'Price data by'} <a href="https://goldpricez.com" target="_blank" rel="noopener">GoldPriceZ.com</a></span>
+        <span>${isAr ? 'بيانات الأسعار من' : 'Price data by'} <a href="${DATA_ATTRIBUTION.gold.url}" target="_blank" rel="noopener">${escapeHtml(DATA_ATTRIBUTION.gold.label)}</a></span>
         <span class="footer-sep" aria-hidden="true">·</span>
-        <span>${isAr ? 'أسعار الصرف:' : 'FX data:'} <a href="https://open.er-api.com" target="_blank" rel="noopener">open.er-api.com</a></span>
+        <span>${isAr ? 'أسعار الصرف:' : 'FX data:'} <a href="${DATA_ATTRIBUTION.fx.url}" target="_blank" rel="noopener">${escapeHtml(DATA_ATTRIBUTION.fx.label)}</a></span>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <span class="footer-refresh-note">${escapeHtml(getRefreshStatement(isAr ? 'ar' : 'en'))}</span>
         <span class="footer-sep" aria-hidden="true">·</span>
         <span>${isAr ? 'الدرهم الإماراتي:' : 'AED peg:'} <a href="${r('../methodology.html')}">${isAr ? '3.6725 ثابت' : '3.6725 fixed'}</a></span>
         <span class="footer-sep" aria-hidden="true">·</span>

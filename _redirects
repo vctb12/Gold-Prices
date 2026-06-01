@@ -115,6 +115,10 @@
 /countries/:country/:city/gold-rate/:karat/  /countries/:country/:city/gold-rate/      301
 /countries/:country/:city/gold-rate/:karat    /countries/:country/:city/gold-rate/      301
 
+# --- Country gold-price duplicate → canonical country hub -------------------
+/countries/:country/gold-price/      /countries/:country/      301
+/countries/:country/gold-price       /countries/:country/      301
+
 # --- Country pages: /countries/<slug>.html → /countries/<slug>/ -------------
 # Baseline scan (reports/links-initial.json) shows several internal links use
 # the flat `.html` form while actual files live at `/countries/<slug>/index.html`.

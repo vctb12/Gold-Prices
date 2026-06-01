@@ -3,7 +3,17 @@
  * Fetches live gold + FX data in parallel, renders the hero live card
  * and GCC quick-price grid. Cache-first: shows cached data instantly.
  */
-import { CONSTANTS, BASE_PATH, KARATS, COUNTRIES, TRANSLATIONS } from '../config/index.js';
+import {
+  CONSTANTS,
+  BASE_PATH,
+  KARATS,
+  COUNTRIES,
+  TRANSLATIONS,
+  getKaratCount,
+  getKaratCountLabel,
+  getKaratRangeLabel,
+  getRefreshStatement,
+} from '../config/index.js';
 import * as api from '../lib/api.js';
 import * as cache from '../lib/cache.js';
 import * as calc from '../lib/price-calculator.js';
@@ -771,7 +781,7 @@ function renderGCCGrid() {
     const card = slug
       ? el(
           'a',
-          { href: safeHref(`./countries/${slug}/gold-price/`), class: 'gcc-card card-interactive' },
+          { href: safeHref(`./countries/${slug}/`), class: 'gcc-card card-interactive' },
           cardChildren
         )
       : el('div', { class: 'gcc-card gcc-card--no-link card-interactive' }, cardChildren);
@@ -824,7 +834,12 @@ function applyLangToPage() {
   setTextById('hero-live-label', tx('heroLive'));
   setTextById('hero-title-main', tx('heroTitle'));
   setTextById('hero-title-sub', tx('heroSub'));
-  setTextById('hero-lead', tx('heroLead'));
+  setTextById(
+    'hero-lead',
+    lang === 'ar'
+      ? `تتبع أسعار الذهب المرجعية المرتبطة بالسعر الفوري للإمارات والخليج وأسواق العالم العربي عبر أكثر من 24 دولة و${getKaratCount()} عيارات وعملات محلية.`
+      : `Track spot-linked gold reference prices for the UAE, GCC, and Arab markets across 24+ countries, ${getKaratCountLabel('en')}, and local currencies.`
+  );
   setTextById('hero-cta-tracker', tx('heroCta1'));
   setTextById('hero-cta-calculator', tx('heroCtaCalculator'));
   setTextById('hero-cta-countries', tx('heroCta2'));
@@ -893,8 +908,8 @@ function applyLangToPage() {
   setTextById('trust-live-sub', tx('trustLiveSub'));
   setTextById('trust-countries', tx('trustCountries'));
   setTextById('trust-countries-sub', tx('trustCountriesSub'));
-  setTextById('trust-karats', tx('trustKarats'));
-  setTextById('trust-karats-sub', tx('trustKaratsSub'));
+  setTextById('trust-karats', getKaratCountLabel(lang));
+  setTextById('trust-karats-sub', getKaratRangeLabel(lang));
   setTextById('trust-aed', tx('trustAed'));
   setTextById('trust-aed-sub', tx('trustAedSub'));
   setTextById('trust-bilingual', tx('trustBilingual'));
@@ -912,7 +927,7 @@ function applyLangToPage() {
   setTextById('home-stats-sub', tx('statsSub'));
   setTextById('home-stat-1-value', tx('stat1Value'));
   setTextById('home-stat-1-label', tx('stat1Label'));
-  setTextById('home-stat-2-value', tx('stat2Value'));
+  setTextById('home-stat-2-value', String(getKaratCount()));
   setTextById('home-stat-2-label', tx('stat2Label'));
   setTextById('home-stat-3-value', tx('stat3Value'));
   setTextById('home-stat-3-label', tx('stat3Label'));

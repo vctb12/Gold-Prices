@@ -3,7 +3,12 @@
  */
 
 import * as api from '../lib/api.js';
-import { CONSTANTS } from '../config/index.js';
+import {
+  CONSTANTS,
+  KARATS,
+  formatPurityPercent,
+  getMillesimalFineness,
+} from '../config/index.js';
 import { getBaselineHistory, getHistoryStats } from '../lib/historical-data.js';
 import { el } from '../lib/safe-dom.js';
 
@@ -114,6 +119,28 @@ function renderFormulaPipeline(spotUsd, lang) {
   root.replaceChildren(list, units);
 }
 
+function renderKaratTable(lang = 'en') {
+  const tbody = document.getElementById('method-karat-tbody');
+  if (!tbody) return;
+
+  tbody.replaceChildren(
+    ...KARATS.map((k) => {
+      const num = Number(k.code);
+      const denom = 24;
+      const fraction =
+        lang === 'ar'
+          ? `${num}/24 = ${k.purity.toFixed(4)}`
+          : `${num}/24 = ${k.purity.toFixed(4)}`;
+      return el('tr', null, [
+        el('th', { scope: 'row' }, el('strong', null, `${k.code}K`)),
+        el('td', null, formatPurityPercent(k.purity)),
+        el('td', null, fraction),
+        el('td', null, String(getMillesimalFineness(k.purity))),
+      ]);
+    })
+  );
+}
+
 function renderUnitTable(spotUsd, lang = 'en') {
   const tbody = document.getElementById('method-unit-tbody');
   if (!tbody || !(spotUsd > 0)) return;
@@ -208,6 +235,7 @@ function renderHistoricalContext(lang) {
  */
 export async function initMethodologyLive(lang = 'en') {
   injectFaqSchema();
+  renderKaratTable(lang);
   let spot = 0;
   try {
     const data = await api.fetchGold();

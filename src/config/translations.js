@@ -121,7 +121,7 @@ export const TRANSLATIONS = {
     'tracker.heroSub': 'Spot-linked live reference workspace',
     'tracker.heroKicker': 'Gold command center',
     'tracker.heroCopy':
-      'Track reference prices across 24+ markets, 7 karats, and live freshness states before you compare shop quotes.',
+      'Track reference prices across 24+ markets, all supported karat grades, and live freshness states before you compare shop quotes.',
     'tracker.heroCopyLink': 'How prices are calculated →',
     'tracker.welcome.chip1Bold': 'Live tab',
     'tracker.welcome.chip1Rest': '— current prices for 24+ countries',
@@ -453,7 +453,7 @@ export const TRANSLATIONS = {
     'home.heroTitle': 'Gold Prices Today',
     'home.heroSub': 'UAE, GCC & Arab World',
     'home.heroLead':
-      'Track spot-linked gold reference prices for the UAE, GCC, and Arab markets across 24+ countries, 7 karats, and local currencies.',
+      'Track spot-linked gold reference prices for the UAE, GCC, and Arab markets across 24+ countries, seven karat grades (14K–24K), and local currencies.',
     'home.heroCta1': 'Open Live Tracker',
     'home.heroCtaCalculator': 'Use Gold Calculator',
     'home.heroCta2': 'Browse Countries',
@@ -574,7 +574,7 @@ export const TRANSLATIONS = {
       'Spot-linked reference estimates only — final retail and jewelry quotes can include making charges, dealer margin, and taxes.',
     'home.toolTrackerTitle': 'Live Tracker',
     'home.toolTrackerDesc':
-      'Full price matrix — 24+ countries, 7 karats, per gram & per ounce. Auto-refresh with a visible freshness label.',
+      'Full price matrix — 24+ countries, seven karats (14K–24K), per gram & per ounce. Auto-refresh with a visible freshness label.',
     'home.toolTrackerCta': 'Open Tracker →',
     'home.toolCalcTitle': 'Gold Calculator',
     'home.toolCalcDesc':

@@ -18,10 +18,12 @@
     <meta name="twitter:title" content="Gold Rate in Marrakech, Morocco | Gold Ticker Live" />
     <meta name="twitter:description" content="Navigate to live Marrakech gold rates (24K–18K in MAD) or gold shops. Reference pricing hub — commercial rates live on the gold-rate page." />
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://goldtickerlive.com/"},{"@type":"ListItem","position":2,"name":"Morocco","item":"https://goldtickerlive.com/countries/morocco/"},{"@type":"ListItem","position":3,"name":"Marrakech","item":"https://goldtickerlive.com/countries/morocco/marrakech/"}]}</script>
+    <link rel="stylesheet" href="../../../../styles/global.css" />
     <link rel="stylesheet" href="../../stub-city.css" />
   </head>
   <body>
-    <main>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <main id="main-content">
       <nav aria-label="Breadcrumb" class="stub-breadcrumbs">
         <a href="/">Home</a> ›
         <a href="/countries/morocco/">Morocco</a> ›
@@ -49,7 +51,7 @@
       </ul>
       <p class="stub-related">
         See also:
-        <a href="/countries/morocco/gold-price/">Gold price in Morocco</a>
+        <a href="/countries/morocco/">Gold price in Morocco</a>
         · <a href="/shops.html">All gold shops</a>
         · <a href="/methodology.html">Methodology</a>
       </p>
@@ -57,5 +59,17 @@
         <a href="https://goldtickerlive.com/countries/morocco/marrakech/?lang=ar" hreflang="ar">العربية: مراكش — المغرب</a>
       </p>
     </main>
+    <script type="module">
+      import { bootContentPage } from '../../../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 3,
+        crumbs: [
+          { label: 'Home', url: '/' },
+          { label: 'Morocco', url: '/countries/morocco/' },
+          { label: 'Marrakech', url: '#' },
+        ],
+        relatedGuides: false,
+      });
+    </script>
   </body>
 </html>

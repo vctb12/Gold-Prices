@@ -18,10 +18,12 @@
     <meta name="twitter:title" content="Gold Rate in Giza, Egypt | Gold Ticker Live" />
     <meta name="twitter:description" content="Navigate to live Giza gold rates (24K–18K in EGP) or gold shops. Reference pricing hub — commercial rates live on the gold-rate page." />
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://goldtickerlive.com/"},{"@type":"ListItem","position":2,"name":"Egypt","item":"https://goldtickerlive.com/countries/egypt/"},{"@type":"ListItem","position":3,"name":"Giza","item":"https://goldtickerlive.com/countries/egypt/giza/"}]}</script>
+    <link rel="stylesheet" href="../../../../styles/global.css" />
     <link rel="stylesheet" href="../../stub-city.css" />
   </head>
   <body>
-    <main>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <main id="main-content">
       <nav aria-label="Breadcrumb" class="stub-breadcrumbs">
         <a href="/">Home</a> ›
         <a href="/countries/egypt/">Egypt</a> ›
@@ -49,7 +51,7 @@
       </ul>
       <p class="stub-related">
         See also:
-        <a href="/countries/egypt/gold-price/">Gold price in Egypt</a>
+        <a href="/countries/egypt/">Gold price in Egypt</a>
         · <a href="/shops.html">All gold shops</a>
         · <a href="/methodology.html">Methodology</a>
       </p>
@@ -57,5 +59,17 @@
         <a href="https://goldtickerlive.com/countries/egypt/giza/?lang=ar" hreflang="ar">العربية: الجيزة — مصر</a>
       </p>
     </main>
+    <script type="module">
+      import { bootContentPage } from '../../../../src/lib/content-page-boot.js';
+      bootContentPage({
+        depth: 3,
+        crumbs: [
+          { label: 'Home', url: '/' },
+          { label: 'Egypt', url: '/countries/egypt/' },
+          { label: 'Giza', url: '#' },
+        ],
+        relatedGuides: false,
+      });
+    </script>
   </body>
 </html>

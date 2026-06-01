@@ -224,7 +224,7 @@ function renderHero(cfg) {
       </div>`
           : ''
       }
-      <div class="cp-update-time">${t('lastUpdate')}: ${STATE.status.goldStale ? 'Cached/Fallback' : 'Live'} · ${STATE.freshness.goldUpdatedAt ? new Date(STATE.freshness.goldUpdatedAt).toLocaleString(STATE.lang === 'ar' ? 'ar-AE' : 'en-AE', { timeZone: cfg.timezone, hour12: true, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'} · Source: goldpricez.com</div>
+      <div class="cp-update-time">${t('lastUpdate')}: ${STATE.status.goldStale ? 'Cached/Fallback' : 'Live'} · ${STATE.freshness.goldUpdatedAt ? new Date(STATE.freshness.goldUpdatedAt).toLocaleString(STATE.lang === 'ar' ? 'ar-AE' : 'en-AE', { timeZone: cfg.timezone, hour12: true, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'} · Gold: GoldPriceZ · FX: open.er-api.com</div>
     </div>`;
 }
 
@@ -234,7 +234,7 @@ function renderKaratTable(cfg) {
   const el = document.getElementById('cp-karat-table');
   if (!el) return;
 
-  const showKarats = ['24', '22', '21', '18'];
+  const showKarats = KARATS.map((k) => k.code);
   const rows = showKarats
     .map((code) => {
       const karat = KARATS.find((k) => k.code === code);
