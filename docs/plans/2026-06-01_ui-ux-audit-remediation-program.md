@@ -162,7 +162,7 @@ copy and placeholders.
 
 ## REVAMP_PLAN.md hook
 
-Add under backlog / UX (owner may relocate):
+TODO (owner): add under backlog / UX in [`docs/REVAMP_PLAN.md`](../REVAMP_PLAN.md) (owner may relocate):
 
 ```markdown
 ### UI/UX audit remediation (2026-06-01)
