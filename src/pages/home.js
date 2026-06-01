@@ -45,6 +45,11 @@ import { track, EVENTS } from '../lib/analytics.js';
 import { enforceCanonicalOnDocument } from '../seo/canonical.js';
 import { enforceHreflangAlternates } from '../seo/hreflang.js';
 import { buildMethodologyFaqSchema, injectFaqSchema } from '../seo/faq-schema.js';
+import {
+  applyTrackerHandoffToIds,
+  buildTrackerHandoffUrl,
+  karatFromKstripItem,
+} from '../lib/page-handoff.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const LANG_KEY = 'user_prefs';
@@ -198,10 +203,10 @@ function ensureHeroLoadingSkeletons() {
   mountSkeleton(document.getElementById('karat-strip-updated'), 'freshnessStrip');
 }
 
-/** Deep-link to tracker with current karat strip unit preference. */
+/** Deep-link to tracker with current karat strip unit + language. */
 function buildTrackerHref(overrides = {}) {
   const unit = karatStripUnit === 'tola' ? 'tola' : karatStripUnit === 'oz' ? 'oz' : 'gram';
-  const params = new URLSearchParams({
+  return buildTrackerHandoffUrl({
     mode: 'live',
     cur: 'AED',
     k: '24',
@@ -209,7 +214,6 @@ function buildTrackerHref(overrides = {}) {
     lang,
     ...overrides,
   });
-  return `tracker.html#${params.toString()}`;
 }
 
 function hasRealtimePathFailure() {
@@ -646,12 +650,36 @@ function renderGCCGrid() {
   grid.append(fragment);
 }
 
-function syncTrackerLinks() {
-  const href = buildTrackerHref();
-  for (const id of ['hero-cta-tracker', 'hlc-tracker-link', 'karat-strip-cta']) {
-    const node = document.getElementById(id);
-    if (node) node.setAttribute('href', href);
-  }
+function syncTrackerLinks(overrides = {}) {
+  applyTrackerHandoffToIds(buildTrackerHref(overrides));
+}
+
+function initKaratStripTrackerHandoff() {
+  document.querySelectorAll('.karat-strip-item').forEach((item) => {
+  document.querySelectorAll('.karat-strip-item').forEach((item) => {
+    item.setAttribute('role', 'link');
+    item.setAttribute('tabindex', '0');
+    const karat = karatFromKstripItem(item);
+    const go = () => {
+      if (!karat) return;
+      const href = buildTrackerHref({ k: karat });
+      track(EVENTS.TRACKER_VIEW, { surface: 'home_karat_strip', karat, currency: 'AED' });
+      window.location.assign(href);
+    };
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.kstrip-copy-btn')) return;
+      go();
+    });
+    item.addEventListener('keydown', (e) => {
+      if (e.target.closest('.kstrip-copy-btn')) return;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        go();
+      }
+    });
+  });
+    });
+  });
 }
 
 // ── Apply full page language ───────────────────────────────────────────────
@@ -1154,6 +1182,8 @@ async function init() {
       }, 1500);
     }
   });
+
+  initKaratStripTrackerHandoff();
 
   // Karat strip unit toggle
   document.querySelectorAll('.kstrip-unit-btn').forEach((btn) => {

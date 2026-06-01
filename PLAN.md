@@ -24,7 +24,8 @@
 > [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](docs/plans/2026-06-01_ui-ux-audit-remediation-program.md)
 
 - [ ] **Track D1** — cross-page integration wiring (endless:
-      `@.github/prompts/endless-integration-wiring.prompt.md`)
+      `@.github/prompts/endless-integration-wiring.prompt.md`) — in progress: shared
+      `page-handoff.js`, homepage tracker CTAs, karat-strip handoff, calc→shops country filter
 - [ ] **NEXT_PR_SEQUENCE PR 1** — GDPR export/delete + dashboard + alerts docs (see
       [`docs/audits/NEXT_PR_SEQUENCE.md`](docs/audits/NEXT_PR_SEQUENCE.md))
 

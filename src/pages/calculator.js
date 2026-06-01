@@ -24,6 +24,7 @@ import {
   redirectToAccount,
 } from '../lib/public-account-client.js';
 import { parseCalculatorUrlState, serializeCalculatorUrlState } from './calculator/url-state.js';
+import { buildShopsHandoffUrl, buildTrackerHandoffUrl } from '../lib/page-handoff.js';
 import '../lib/reveal.js';
 import { initPageEnter } from '../lib/page-enter.js';
 import { countUp } from '../lib/count-up.js';
@@ -339,7 +340,19 @@ function buildCountryPageHref(country) {
   return country?.slug ? `countries/${country.slug}/` : 'countries/index.html';
 }
 
+function updateShopsHandoff({ currency = 'AED' } = {}) {
+  const shopsLink = document.getElementById('calc-find-shops-link');
+  if (!shopsLink) return;
+  const selectedCountry = getSelectedCountryContext(currency);
+  shopsLink.href = buildShopsHandoffUrl({
+    countryCode: selectedCountry?.code,
+    lang: STATE.lang,
+  });
+}
+
 function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
+  updateShopsHandoff({ currency });
+
   const handoff = document.getElementById('calc-tracker-handoff');
   const trackerLink = document.getElementById('calc-tracker-link');
   const countryLink = document.getElementById('calc-country-link');
@@ -347,7 +360,7 @@ function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
   const note = document.getElementById('calc-live-tracker-note');
   if (!handoff || !trackerLink || !mobileTrackerLink || !note) return;
 
-  const params = new URLSearchParams({
+  const href = buildTrackerHandoffUrl({
     mode: 'live',
     cur: currency,
     k: String(karat),
@@ -355,7 +368,6 @@ function updateTrackerHandoff({ karat = '22', currency = 'AED' } = {}) {
     r: '30D',
     lang: STATE.lang,
   });
-  const href = `tracker.html#${params.toString()}`;
   trackerLink.href = href;
   mobileTrackerLink.href = href;
   handoff.hidden = false;
