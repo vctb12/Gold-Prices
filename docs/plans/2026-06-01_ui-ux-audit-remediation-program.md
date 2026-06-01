@@ -1,7 +1,7 @@
 # UI/UX Audit Remediation — Multi-Session Program
 
 ```yaml plan-status
-status: ready
+status: active
 priority: P0
 class: program
 owner: @vctb12
@@ -9,9 +9,9 @@ created: "2026-06-01"
 last_updated: "2026-06-01"
 source: external-audit-prompt-2026-06-01
 sessions_total: 6
-sessions_open: 0
-next_session: done
-next_branch: ""
+sessions_implementation_done: 6
+next_track: "D1 integration wiring — see docs/plans/2026-06-01_master-operations-hub.md"
+next_branch: "cursor/integration-d1-wiring-cb21"
 blocked_on: ""
 guardrails_reviewed: true
 skills_used: [mobile-ux-review, pricing-data-integrity, frontend-design-system, seo-governance]
@@ -25,9 +25,12 @@ skills_used: [mobile-ux-review, pricing-data-integrity, frontend-design-system, 
 
 | File | Purpose |
 | ---- | ------- |
+| [`2026-06-01_master-operations-hub.md`](./2026-06-01_master-operations-hub.md) | **Routing hub** — what to do after Sessions 0–5 |
+| [`2026-06-01_endless-session-prompts.md`](./2026-06-01_endless-session-prompts.md) | Endless iteration prompts by category |
+| [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md) | Phased file/folder moves (C1a–C3b) |
 | [`2026-06-01_ui-ux-audit-session-prompts.md`](./2026-06-01_ui-ux-audit-session-prompts.md) | Copy-paste Composer prompts per session |
 | [`.github/prompts/ui-ux-audit-phase*.prompt.md`](../../.github/prompts/) | Cursor / Copilot @-mention prompts |
-| [`docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md`](../audits/UI_UX_AUDIT_SESSION_REGISTRY.md) | Branch ↔ PR ↔ status tracker (update each session) |
+| [`docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md`](../audits/UI_UX_AUDIT_SESSION_REGISTRY.md) | Branch ↔ PR ↔ status tracker (Sessions 0–5 complete) |
 
 ---
 
@@ -544,6 +547,10 @@ Do it as a dedicated session with a single focus: move files, update paths, veri
 ---
 
 ## Endless/reusable prompts
+
+**Canonical catalog (2026-06-01):** [`2026-06-01_endless-session-prompts.md`](./2026-06-01_endless-session-prompts.md)
+and [`.github/prompts/endless-*.prompt.md`](../../.github/prompts/). The snippets below are retained
+for backward compatibility; prefer the linked files for Composer `@` mentions.
 
 These prompts can be run repeatedly. Each time Cursor runs one, it scans the current state
 and finds something to improve. They never run out of work.

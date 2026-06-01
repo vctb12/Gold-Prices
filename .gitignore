@@ -25,6 +25,10 @@ node_modules/
 !.cursor/mcp.json
 !.cursor/rules/
 !.cursor/rules/*.mdc
+!.cursor/skills/
+!.cursor/skills/**/SKILL.md
+!.cursor/agents/
+!.cursor/agents/*.md
 .idea/
 
 # Environment

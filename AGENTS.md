@@ -167,6 +167,9 @@ Non-negotiables. Each has a one-line _Why:_ so you can make good edge-case decis
 
 ## 9. Where the plan lives
 
+- **Master workbook (canonical for agents):** `docs/GOLD_TICKER_LIVE_MASTER_WORKBOOK.md` — product
+  vision, evidence-backed gaps, numbered WB sessions, discovery scanners, verification. Session
+  log: `docs/workbook/WORKBOOK_SESSION_REGISTRY.md`. Composer: `@.github/prompts/master-workbook-session.prompt.md`.
 - **Master plan:** `docs/REVAMP_PLAN.md` — tracks in progress, decisions, production tracks, issues,
   backlog. Update the specific section you touched in the same PR.
 - **Proposal intake:** `docs/plans/` — raw captures from prompts, plus `docs/plans/README.md`

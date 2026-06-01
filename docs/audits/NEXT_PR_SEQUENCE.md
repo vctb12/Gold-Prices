@@ -5,11 +5,10 @@
 > Sequence is ordered to unblock highest-leverage gaps first while keeping each PR reviewable. Risk:
 > 🟢 low · 🟡 medium · 🔴 high.
 
-> **2026-06-01 update:** For the full-site UI/UX audit (loading placeholders, empty pages, brand
-> drift), use the dedicated program instead of mixing with the sequence below:
-> [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](../plans/2026-06-01_ui-ux-audit-remediation-program.md)
-> and [`UI_UX_AUDIT_SESSION_REGISTRY.md`](./UI_UX_AUDIT_SESSION_REGISTRY.md). **Session 1 (first
-> paint) should land before PR 3 (tracker focus) below** if both are active.
+> **2026-06-01 update:** UI/UX audit **Sessions 0–5 are merged** ([#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)).
+> Use [`docs/plans/2026-06-01_master-operations-hub.md`](../plans/2026-06-01_master-operations-hub.md)
+> for priority routing. **PR 3 (tracker focus) is unblocked** — coordinate with Track B3 in the UI/UX
+> program if doing tracker declutter.
 
 ---
 

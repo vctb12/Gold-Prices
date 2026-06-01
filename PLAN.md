@@ -1,34 +1,41 @@
 # Gold Ticker Live — Active Task Plan
 
 > This file is the persistent task tracker for AI agents and human contributors. Agents: read this
-> before starting any task. Update it after completing work. Last updated: 2026-06-01
+> before starting any task. Update it after completing work. Last updated: 2026-06-01 (ops hub)
+
+**Master workbook v2 (read first):**
+[`docs/GOLD_TICKER_LIVE_MASTER_WORKBOOK.md`](docs/GOLD_TICKER_LIVE_MASTER_WORKBOOK.md)
+· appendices [`docs/workbook/`](docs/workbook/)
+· `@.github/prompts/master-workbook-session.prompt.md`  
+**Short hub:**
+[`docs/plans/2026-06-01_master-operations-hub.md`](docs/plans/2026-06-01_master-operations-hub.md)
+· Endless prompts:
+[`docs/plans/2026-06-01_endless-session-prompts.md`](docs/plans/2026-06-01_endless-session-prompts.md)
+· `@.github/prompts/session-pick-next-work.prompt.md`
 
 ---
 
 ## 🔴 In Progress
 
-### UI/UX audit remediation (2026-06-01 program)
+### Post–UI/UX audit — next tracks (2026-06-01 hub)
 
-> Master doc:
+> UI/UX Sessions **0–5 merged** ([#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)).
+> Program (Tracks B–E):
 > [`docs/plans/2026-06-01_ui-ux-audit-remediation-program.md`](docs/plans/2026-06-01_ui-ux-audit-remediation-program.md)
-> · Prompts:
-> [`docs/plans/2026-06-01_ui-ux-audit-session-prompts.md`](docs/plans/2026-06-01_ui-ux-audit-session-prompts.md)
-> · Registry:
-> [`docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md`](docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md)
 
-- [x] **Session 0** — planning docs + phase prompts (branch `cursor/ui-ux-audit-session-program-8c0a`)
-- [ ] **Session 1** — first paint: skeletons, cache-first prices, parallel fetch, error states
-      (`cursor/ui-ux-phase1-first-paint-8c0a`) — **ship first**
-- [ ] **Session 2** — learn / invest / shops / 404 (`cursor/ui-ux-phase2-empty-pages-8c0a`)
-- [x] **Session 3** — naming, sources, karats, nav on all templates, country canonicals
-      (`cursor/ui-ux-phase3-consistency-86ca`)
-- [ ] **Session 4** — nav slim, homepage + tracker declutter
-- [ ] **Session 5** — CSS partials, lazy media, a11y CI (skip if SPA migration)
+- [ ] **Track D1** — cross-page integration wiring (endless:
+      `@.github/prompts/endless-integration-wiring.prompt.md`)
+- [ ] **NEXT_PR_SEQUENCE PR 1** — GDPR export/delete + dashboard + alerts docs (see
+      [`docs/audits/NEXT_PR_SEQUENCE.md`](docs/audits/NEXT_PR_SEQUENCE.md))
+- [ ] **Repo C1a** — docs archive + supersession index only (no URL moves) —
+      [`docs/plans/2026-06-01_repo-reorganization-program.md`](docs/plans/2026-06-01_repo-reorganization-program.md)
 
 ---
 
 ## 🟡 Up Next
 
+- [ ] **Track B1–B4** — visual polish (nav, homepage, tracker terminal, hover rollout) — after D1
+- [ ] **NEXT_PR_SEQUENCE PR 2** — noindex plan for stub karat pages (no deletions)
 - [ ] Replace hardcoded hex colors in CSS with design tokens (565 instances across styles/) —
       priority: medium — context: improves maintainability and dark mode consistency
 - [ ] Add visibilitychange cleanup to insights.js sparkline/charts if added — priority: low —
@@ -40,6 +47,8 @@
 
 ## ✅ Recently Completed
 
+- [x] **UI/UX audit Sessions 0–5** — first paint through CSS partials + a11y CI — completed:
+      2026-06-01 — PRs: [#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)
 - [x] BUILD 8: Insights Market Analysis Feed — rebuilt the insights guide grid into a filterable,
       searchable CSS-masonry feed (category strip with counts, debounced search, read-time,
       bilingual cards, dynamic live "price context" card at position 3) backed by pure

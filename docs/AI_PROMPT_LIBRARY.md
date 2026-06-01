@@ -21,6 +21,7 @@ If you author a new prompt, follow this standard.
 
 |   # | Prompt                                                                                    | When to use                                 | Output                                            | Related agent                                  |
 | --: | ----------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
+|   0 | [`master-workbook-session`](../.github/prompts/master-workbook-session.prompt.md)         | **Default for any work block** — read workbook, run one WB session | One scoped PR + registry update | any                                            |
 |   1 | [`pr-review`](../.github/prompts/pr-review.prompt.md)                                     | Reviewing any PR                            | Verdict + findings + verification + follow-ups    | `gold-ticker-live-reviewer`                    |
 |   2 | [`mobile-ux-audit`](../.github/prompts/mobile-ux-audit.prompt.md)                         | Mobile / RTL polish across primary surfaces | Per-page report + screenshots                     | `frontend-polish-agent`                        |
 |   3 | [`workflow-debug`](../.github/prompts/workflow-debug.prompt.md)                           | Any failing GitHub Actions workflow         | Root cause + fix + verification                   | `workflow-safety-agent`                        |
@@ -34,6 +35,21 @@ If you author a new prompt, follow this standard.
 |  11 | [`country-pages-expansion`](../.github/prompts/country-pages-expansion.prompt.md)         | Add / improve country pages                 | Real local content + SEO + AR                     | `seo-governance-agent`                         |
 |  12 | [`shops-data-honesty`](../.github/prompts/shops-data-honesty.prompt.md)                   | Audit shops directory                       | Honesty findings + UX fixes                       | `frontend-polish-agent`                        |
 |  13 | [`x-twitter-automation-review`](../.github/prompts/x-twitter-automation-review.prompt.md) | Audit hourly X-post pipeline                | Posture + findings + observability summary        | `workflow-safety-agent`                        |
+|  14 | [`session-pick-next-work`](../.github/prompts/session-pick-next-work.prompt.md) | Don't know what to do — pick one slice from hub | One PR from priority queue                        | any                                            |
+|  15 | [`endless-repo-discovery`](../.github/prompts/endless-repo-discovery.prompt.md) | Repeatable repo hygiene                     | One hygiene fix per run                           | `gold-ticker-live-reviewer`                    |
+|  16 | [`endless-ui-visual-sweep`](../.github/prompts/endless-ui-visual-sweep.prompt.md) | Repeatable UI polish per page               | One page visual fix                               | `frontend-polish-agent`                        |
+|  17 | [`endless-frontend-polish`](../.github/prompts/endless-frontend-polish.prompt.md) | Repeatable frontend fixes                   | One JS/HTML/CSS fix                               | `frontend-polish-agent`                        |
+|  18 | [`endless-backend-hardening`](../.github/prompts/endless-backend-hardening.prompt.md) | Repeatable backend gaps                     | One API/auth/test fix                             | `backend-admin-agent`                          |
+|  19 | [`endless-integration-wiring`](../.github/prompts/endless-integration-wiring.prompt.md) | Repeatable cross-page links                 | One flow/link fix                                 | `seo-governance-agent`                         |
+|  20 | [`endless-monetization-growth`](../.github/prompts/endless-monetization-growth.prompt.md) | Ethical monetization / analytics            | One growth fix                                    | `gold-ticker-live-reviewer`                    |
+|  21 | [`endless-ai-integration`](../.github/prompts/endless-ai-integration.prompt.md) | Gated AI/docs/templates                     | One safe AI-related change                        | `gold-ticker-live-reviewer`                    |
+|  22 | [`endless-docs-governance`](../.github/prompts/endless-docs-governance.prompt.md) | Doc truth vs main                           | One doc drift fix                                 | `gold-ticker-live-reviewer`                    |
+|  23 | [`endless-gold-product-trust`](../.github/prompts/endless-gold-product-trust.prompt.md) | Pricing/freshness truth                     | One trust fix                                     | `pricing-data-agent`                           |
+|  — | [`ui-ux-audit-phase1`…`phase5`](../.github/prompts/) | One-shot UI/UX audit sessions (merged 2026-06-01) | Bounded phase PR                                  | `frontend-polish-agent`                        |
+
+> **Master workbook:** [`docs/GOLD_TICKER_LIVE_MASTER_WORKBOOK.md`](./GOLD_TICKER_LIVE_MASTER_WORKBOOK.md)  
+> **Endless catalog (copy-paste):** [`docs/plans/2026-06-01_endless-session-prompts.md`](./plans/2026-06-01_endless-session-prompts.md)  
+> **Routing hub:** [`docs/plans/2026-06-01_master-operations-hub.md`](./plans/2026-06-01_master-operations-hub.md)
 
 ## Agent routing matrix
 
