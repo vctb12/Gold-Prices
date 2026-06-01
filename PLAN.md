@@ -17,6 +17,11 @@
 
 ## 🔴 In Progress
 
+### Master workbook — WB-102 cross-page deep links (2026-06-01)
+
+- [ ] **WB-102** — home karat → tracker/calculator hash; calculator → shops by country; shared
+      `cross-page-links.js` + tests — branch `cursor/wb-102-cross-page-deeplinks-cb21`
+
 ### Post–UI/UX audit — next tracks (2026-06-01 hub)
 
 > UI/UX Sessions **0–5 merged** ([#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)).
