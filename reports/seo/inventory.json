@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAtDate": "2026-05-30",
+  "generatedAtDate": "2026-06-01",
   "summary": {
-    "totalHtmlFiles": 340,
-    "withCanonical": 338,
+    "totalHtmlFiles": 341,
+    "withCanonical": 339,
     "withoutCanonical": 2,
-    "withOgImage": 244,
-    "withoutOgImage": 96,
-    "withJsonLd": 331,
-    "withoutJsonLd": 9,
-    "hreflangEnArPairs": 331,
-    "noindexCount": 88
+    "withOgImage": 251,
+    "withoutOgImage": 90,
+    "withJsonLd": 338,
+    "withoutJsonLd": 3,
+    "hreflangEnArPairs": 338,
+    "noindexCount": 102
   },
   "records": [
     {
@@ -371,6 +371,42 @@
       "jsonLdParseFailures": null
     },
     {
+      "path": "compare.html",
+      "exempt": null,
+      "lang": "en",
+      "dir": "ltr",
+      "title": "Compare Gold Prices by Country — GCC & Arab World | Gold Ticker Live",
+      "metaDescription": "Compare live gold prices and all-in retail estimates across the UAE, GCC and the wider Arab world. Sortable table, country chips, side-by-side detail and a cheapest-to-buy callout.",
+      "canonical": "https://goldtickerlive.com/compare.html",
+      "robots": null,
+      "ogTitle": "Compare Gold Prices by Country | Gold Ticker Live",
+      "ogDescription": "Side-by-side gold price comparison across the GCC and Arab world — live reference prices, VAT, making charges and all-in retail estimates.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/compare.html",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/compare.html?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/compare.html"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/compare.html"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
+      "jsonLdParseFailures": null
+    },
+    {
       "path": "content/dubai-gold-rate-guide/index.html",
       "exempt": null,
       "lang": "en",
@@ -401,8 +437,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -438,8 +474,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -475,8 +511,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -512,8 +548,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -551,8 +587,7 @@
       "jsonLdTypes": [
         "BreadcrumbList",
         "Dataset",
-        "Product",
-        "WebPage"
+        "Product"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -589,8 +624,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -627,8 +661,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -665,8 +698,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -703,8 +735,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -741,8 +772,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -779,8 +809,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -817,8 +846,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -855,8 +883,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -893,8 +920,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -931,8 +957,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -969,8 +994,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1007,8 +1031,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1045,8 +1068,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1083,8 +1105,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1121,8 +1142,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1159,8 +1179,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1197,8 +1216,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1235,8 +1253,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1273,8 +1290,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1311,8 +1327,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1349,8 +1364,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1387,8 +1401,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1425,8 +1438,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1463,8 +1475,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1501,8 +1512,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1539,8 +1549,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1615,8 +1624,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1653,8 +1661,7 @@
       ],
       "jsonLdTypes": [
         "Article",
-        "BreadcrumbList",
-        "WebPage"
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1690,6 +1697,7 @@
         }
       ],
       "jsonLdTypes": [
+        "Article",
         "BreadcrumbList"
       ],
       "hasStructuredData": true,
@@ -1726,8 +1734,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1763,8 +1771,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1837,8 +1845,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1874,8 +1882,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1932,8 +1940,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -1969,8 +1977,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -2006,8 +2014,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -2080,8 +2088,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -2117,8 +2125,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -2154,8 +2162,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -2191,8 +2199,8 @@
         }
       ],
       "jsonLdTypes": [
-        "BreadcrumbList",
-        "WebPage"
+        "Article",
+        "BreadcrumbList"
       ],
       "hasStructuredData": true,
       "jsonLdParseFailures": null
@@ -2424,27 +2432,27 @@
       "dir": "ltr",
       "title": "Gold price today in Algeria — DZD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Algeria, with 24K, 22K, 21K, 18K, and 14K rates in DZD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/algeria/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/algeria/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Algeria — DZD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Algeria, with 24K, 22K, 21K, 18K, and 14K rates in DZD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/algeria/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/algeria/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/algeria/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/algeria/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/algeria/gold-price/"
+          "href": "https://goldtickerlive.com/countries/algeria/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/algeria/gold-price/"
+          "href": "https://goldtickerlive.com/countries/algeria/"
         }
       ],
       "jsonLdTypes": [
@@ -2609,27 +2617,27 @@
       "dir": "ltr",
       "title": "Gold price today in Bahrain — BHD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Bahrain, with 24K, 22K, 21K, 18K, and 14K rates in BHD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/bahrain/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/bahrain/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Bahrain — BHD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Bahrain, with 24K, 22K, 21K, 18K, and 14K rates in BHD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/bahrain/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/bahrain/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/bahrain/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/bahrain/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/bahrain/gold-price/"
+          "href": "https://goldtickerlive.com/countries/bahrain/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/bahrain/gold-price/"
+          "href": "https://goldtickerlive.com/countries/bahrain/"
         }
       ],
       "jsonLdTypes": [
@@ -3416,27 +3424,27 @@
       "dir": "ltr",
       "title": "Gold price today in Egypt — EGP reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Egypt, with 24K, 22K, 21K, 18K, and 14K rates in EGP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/egypt/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/egypt/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Egypt — EGP reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Egypt, with 24K, 22K, 21K, 18K, and 14K rates in EGP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/egypt/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/egypt/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/egypt/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/egypt/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/egypt/gold-price/"
+          "href": "https://goldtickerlive.com/countries/egypt/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/egypt/gold-price/"
+          "href": "https://goldtickerlive.com/countries/egypt/"
         }
       ],
       "jsonLdTypes": [
@@ -3819,27 +3827,27 @@
       "dir": "ltr",
       "title": "Gold price today in India — INR reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in India, with 24K, 22K, 21K, 18K, and 14K rates in INR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/india/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/india/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in India — INR reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in India, with 24K, 22K, 21K, 18K, and 14K rates in INR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/india/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/india/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/india/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/india/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/india/gold-price/"
+          "href": "https://goldtickerlive.com/countries/india/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/india/gold-price/"
+          "href": "https://goldtickerlive.com/countries/india/"
         }
       ],
       "jsonLdTypes": [
@@ -4334,27 +4342,27 @@
       "dir": "ltr",
       "title": "Gold price today in Iraq — IQD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Iraq, with 24K, 22K, 21K, 18K, and 14K rates in IQD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/iraq/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/iraq/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Iraq — IQD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Iraq, with 24K, 22K, 21K, 18K, and 14K rates in IQD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/iraq/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/iraq/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/iraq/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/iraq/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/iraq/gold-price/"
+          "href": "https://goldtickerlive.com/countries/iraq/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/iraq/gold-price/"
+          "href": "https://goldtickerlive.com/countries/iraq/"
         }
       ],
       "jsonLdTypes": [
@@ -4371,20 +4379,35 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Gold Price in Iraq — Redirecting…",
-      "metaDescription": "Redirecting to the live gold price page for Iraq.",
-      "canonical": "https://goldtickerlive.com/countries/iraq/gold-price/",
-      "robots": "noindex,follow",
-      "ogTitle": null,
-      "ogDescription": null,
-      "ogImage": null,
-      "ogUrl": null,
-      "ogType": null,
-      "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
+      "title": "Gold price today in Iraq — IQD reference rates | Gold Ticker Live",
+      "metaDescription": "Today spot-linked reference gold price in Iraq, with 24K, 22K, 21K, 18K, and 14K rates in IQD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/iraq/",
+      "robots": null,
+      "ogTitle": "Gold price today in Iraq — IQD reference rates | Gold Ticker Live",
+      "ogDescription": "Today spot-linked reference gold price in Iraq, with 24K, 22K, 21K, 18K, and 14K rates in IQD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/countries/iraq/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/countries/iraq/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/countries/iraq/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/countries/iraq/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -4504,27 +4527,27 @@
       "dir": "ltr",
       "title": "Gold price today in Jordan — JOD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Jordan, with 24K, 22K, 21K, 18K, and 14K rates in JOD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/jordan/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/jordan/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Jordan — JOD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Jordan, with 24K, 22K, 21K, 18K, and 14K rates in JOD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/jordan/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/jordan/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/jordan/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/jordan/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/jordan/gold-price/"
+          "href": "https://goldtickerlive.com/countries/jordan/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/jordan/gold-price/"
+          "href": "https://goldtickerlive.com/countries/jordan/"
         }
       ],
       "jsonLdTypes": [
@@ -4799,27 +4822,27 @@
       "dir": "ltr",
       "title": "Gold price today in Kuwait — KWD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Kuwait, with 24K, 22K, 21K, 18K, and 14K rates in KWD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/kuwait/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/kuwait/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Kuwait — KWD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Kuwait, with 24K, 22K, 21K, 18K, and 14K rates in KWD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/kuwait/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/kuwait/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/kuwait/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/kuwait/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/kuwait/gold-price/"
+          "href": "https://goldtickerlive.com/countries/kuwait/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/kuwait/gold-price/"
+          "href": "https://goldtickerlive.com/countries/kuwait/"
         }
       ],
       "jsonLdTypes": [
@@ -5314,27 +5337,27 @@
       "dir": "ltr",
       "title": "Gold price today in Lebanon — LBP reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Lebanon, with 24K, 22K, 21K, 18K, and 14K rates in LBP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/lebanon/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/lebanon/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Lebanon — LBP reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Lebanon, with 24K, 22K, 21K, 18K, and 14K rates in LBP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/lebanon/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/lebanon/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/lebanon/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/lebanon/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/lebanon/gold-price/"
+          "href": "https://goldtickerlive.com/countries/lebanon/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/lebanon/gold-price/"
+          "href": "https://goldtickerlive.com/countries/lebanon/"
         }
       ],
       "jsonLdTypes": [
@@ -5719,27 +5742,27 @@
       "dir": "ltr",
       "title": "Gold price today in Libya — LYD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Libya, with 24K, 22K, 21K, 18K, and 14K rates in LYD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/libya/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/libya/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Libya — LYD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Libya, with 24K, 22K, 21K, 18K, and 14K rates in LYD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/libya/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/libya/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/libya/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/libya/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/libya/gold-price/"
+          "href": "https://goldtickerlive.com/countries/libya/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/libya/gold-price/"
+          "href": "https://goldtickerlive.com/countries/libya/"
         }
       ],
       "jsonLdTypes": [
@@ -6124,27 +6147,27 @@
       "dir": "ltr",
       "title": "Gold price today in Morocco — MAD reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Morocco, with 24K, 22K, 21K, 18K, and 14K rates in MAD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/morocco/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/morocco/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Morocco — MAD reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Morocco, with 24K, 22K, 21K, 18K, and 14K rates in MAD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/morocco/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/morocco/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/morocco/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/morocco/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/morocco/gold-price/"
+          "href": "https://goldtickerlive.com/countries/morocco/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/morocco/gold-price/"
+          "href": "https://goldtickerlive.com/countries/morocco/"
         }
       ],
       "jsonLdTypes": [
@@ -6419,27 +6442,27 @@
       "dir": "ltr",
       "title": "Gold price today in Oman — OMR reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Oman, with 24K, 22K, 21K, 18K, and 14K rates in OMR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/oman/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/oman/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Oman — OMR reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Oman, with 24K, 22K, 21K, 18K, and 14K rates in OMR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/oman/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/oman/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/oman/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/oman/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/oman/gold-price/"
+          "href": "https://goldtickerlive.com/countries/oman/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/oman/gold-price/"
+          "href": "https://goldtickerlive.com/countries/oman/"
         }
       ],
       "jsonLdTypes": [
@@ -6824,27 +6847,27 @@
       "dir": "ltr",
       "title": "Gold price today in Pakistan — PKR reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Pakistan, with 24K, 22K, 21K, 18K, and 14K rates in PKR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/pakistan/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/pakistan/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Pakistan — PKR reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Pakistan, with 24K, 22K, 21K, 18K, and 14K rates in PKR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/pakistan/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/pakistan/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/pakistan/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/pakistan/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/pakistan/gold-price/"
+          "href": "https://goldtickerlive.com/countries/pakistan/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/pakistan/gold-price/"
+          "href": "https://goldtickerlive.com/countries/pakistan/"
         }
       ],
       "jsonLdTypes": [
@@ -6861,20 +6884,35 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Gold Price in Pakistan — Redirecting…",
-      "metaDescription": "Redirecting to the live gold price page for Pakistan.",
-      "canonical": "https://goldtickerlive.com/countries/pakistan/gold-price/",
-      "robots": "noindex,follow",
-      "ogTitle": null,
-      "ogDescription": null,
-      "ogImage": null,
-      "ogUrl": null,
-      "ogType": null,
-      "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
+      "title": "Gold price today in Pakistan — PKR reference rates | Gold Ticker Live",
+      "metaDescription": "Today spot-linked reference gold price in Pakistan, with 24K, 22K, 21K, 18K, and 14K rates in PKR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/pakistan/",
+      "robots": null,
+      "ogTitle": "Gold price today in Pakistan — PKR reference rates | Gold Ticker Live",
+      "ogDescription": "Today spot-linked reference gold price in Pakistan, with 24K, 22K, 21K, 18K, and 14K rates in PKR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/countries/pakistan/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/countries/pakistan/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/countries/pakistan/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/countries/pakistan/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -7324,27 +7362,27 @@
       "dir": "ltr",
       "title": "Gold price today in Palestine — ILS reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Palestine, with 24K, 22K, 21K, 18K, and 14K rates in ILS per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/palestine/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/palestine/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Palestine — ILS reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Palestine, with 24K, 22K, 21K, 18K, and 14K rates in ILS per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/palestine/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/palestine/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/palestine/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/palestine/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/palestine/gold-price/"
+          "href": "https://goldtickerlive.com/countries/palestine/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/palestine/gold-price/"
+          "href": "https://goldtickerlive.com/countries/palestine/"
         }
       ],
       "jsonLdTypes": [
@@ -7361,20 +7399,35 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Gold Price in Palestine — Redirecting…",
-      "metaDescription": "Redirecting to the live gold price page for Palestine.",
-      "canonical": "https://goldtickerlive.com/countries/palestine/gold-price/",
-      "robots": "noindex,follow",
-      "ogTitle": null,
-      "ogDescription": null,
-      "ogImage": null,
-      "ogUrl": null,
-      "ogType": null,
-      "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
+      "title": "Gold price today in Palestine — ILS reference rates | Gold Ticker Live",
+      "metaDescription": "Today spot-linked reference gold price in Palestine, with 24K, 22K, 21K, 18K, and 14K rates in ILS per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/palestine/",
+      "robots": null,
+      "ogTitle": "Gold price today in Palestine — ILS reference rates | Gold Ticker Live",
+      "ogDescription": "Today spot-linked reference gold price in Palestine, with 24K, 22K, 21K, 18K, and 14K rates in ILS per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/countries/palestine/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/countries/palestine/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/countries/palestine/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/countries/palestine/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -8006,27 +8059,27 @@
       "dir": "ltr",
       "title": "Gold price today in Qatar — QAR reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Qatar, with 24K, 22K, 21K, 18K, and 14K rates in QAR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/qatar/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/qatar/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Qatar — QAR reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Qatar, with 24K, 22K, 21K, 18K, and 14K rates in QAR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/qatar/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/qatar/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/qatar/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/qatar/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/qatar/gold-price/"
+          "href": "https://goldtickerlive.com/countries/qatar/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/qatar/gold-price/"
+          "href": "https://goldtickerlive.com/countries/qatar/"
         }
       ],
       "jsonLdTypes": [
@@ -8263,27 +8316,27 @@
       "dir": "ltr",
       "title": "Gold price today in Saudi Arabia — SAR reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Saudi Arabia, with 24K, 22K, 21K, 18K, and 14K rates in SAR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/saudi-arabia/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/saudi-arabia/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Saudi Arabia — SAR reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Saudi Arabia, with 24K, 22K, 21K, 18K, and 14K rates in SAR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/saudi-arabia/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/saudi-arabia/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/saudi-arabia/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/saudi-arabia/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/saudi-arabia/gold-price/"
+          "href": "https://goldtickerlive.com/countries/saudi-arabia/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/saudi-arabia/gold-price/"
+          "href": "https://goldtickerlive.com/countries/saudi-arabia/"
         }
       ],
       "jsonLdTypes": [
@@ -8778,27 +8831,27 @@
       "dir": "ltr",
       "title": "Gold price today in Sudan — SDG reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Sudan, with 24K, 22K, 21K, 18K, and 14K rates in SDG per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/sudan/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/sudan/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Sudan — SDG reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Sudan, with 24K, 22K, 21K, 18K, and 14K rates in SDG per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/sudan/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/sudan/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/sudan/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/sudan/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/sudan/gold-price/"
+          "href": "https://goldtickerlive.com/countries/sudan/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/sudan/gold-price/"
+          "href": "https://goldtickerlive.com/countries/sudan/"
         }
       ],
       "jsonLdTypes": [
@@ -9403,27 +9456,27 @@
       "dir": "ltr",
       "title": "Gold price today in Syria — SYP reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Syria, with 24K, 22K, 21K, 18K, and 14K rates in SYP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/syria/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/syria/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Syria — SYP reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Syria, with 24K, 22K, 21K, 18K, and 14K rates in SYP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/syria/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/syria/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/syria/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/syria/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/syria/gold-price/"
+          "href": "https://goldtickerlive.com/countries/syria/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/syria/gold-price/"
+          "href": "https://goldtickerlive.com/countries/syria/"
         }
       ],
       "jsonLdTypes": [
@@ -9550,20 +9603,35 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Gold Price in Syria — Redirecting…",
-      "metaDescription": "Redirecting to the live gold price page for Syria.",
-      "canonical": "https://goldtickerlive.com/countries/syria/gold-price/",
-      "robots": "noindex,follow",
-      "ogTitle": null,
-      "ogDescription": null,
-      "ogImage": null,
-      "ogUrl": null,
-      "ogType": null,
-      "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
+      "title": "Gold price today in Syria — SYP reference rates | Gold Ticker Live",
+      "metaDescription": "Today spot-linked reference gold price in Syria, with 24K, 22K, 21K, 18K, and 14K rates in SYP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/syria/",
+      "robots": null,
+      "ogTitle": "Gold price today in Syria — SYP reference rates | Gold Ticker Live",
+      "ogDescription": "Today spot-linked reference gold price in Syria, with 24K, 22K, 21K, 18K, and 14K rates in SYP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/countries/syria/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/countries/syria/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/countries/syria/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/countries/syria/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -9573,27 +9641,27 @@
       "dir": "ltr",
       "title": "Gold price today in Tunisia — TND reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Tunisia, with 24K, 22K, 21K, 18K, and 14K rates in TND per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/tunisia/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/tunisia/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Tunisia — TND reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Tunisia, with 24K, 22K, 21K, 18K, and 14K rates in TND per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/tunisia/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/tunisia/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/tunisia/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/tunisia/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/tunisia/gold-price/"
+          "href": "https://goldtickerlive.com/countries/tunisia/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/tunisia/gold-price/"
+          "href": "https://goldtickerlive.com/countries/tunisia/"
         }
       ],
       "jsonLdTypes": [
@@ -10088,27 +10156,27 @@
       "dir": "ltr",
       "title": "Gold price today in Turkey — TRY reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Turkey, with 24K, 22K, 21K, 18K, and 14K rates in TRY per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/turkey/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/turkey/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Turkey — TRY reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Turkey, with 24K, 22K, 21K, 18K, and 14K rates in TRY per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/turkey/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/turkey/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/turkey/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/turkey/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/turkey/gold-price/"
+          "href": "https://goldtickerlive.com/countries/turkey/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/turkey/gold-price/"
+          "href": "https://goldtickerlive.com/countries/turkey/"
         }
       ],
       "jsonLdTypes": [
@@ -10125,20 +10193,35 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Gold Price in Turkey — Redirecting…",
-      "metaDescription": "Redirecting to the live gold price page for Turkey.",
-      "canonical": "https://goldtickerlive.com/countries/turkey/gold-price/",
-      "robots": "noindex,follow",
-      "ogTitle": null,
-      "ogDescription": null,
-      "ogImage": null,
-      "ogUrl": null,
-      "ogType": null,
-      "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
+      "title": "Gold price today in Turkey — TRY reference rates | Gold Ticker Live",
+      "metaDescription": "Today spot-linked reference gold price in Turkey, with 24K, 22K, 21K, 18K, and 14K rates in TRY per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/turkey/",
+      "robots": null,
+      "ogTitle": "Gold price today in Turkey — TRY reference rates | Gold Ticker Live",
+      "ogDescription": "Today spot-linked reference gold price in Turkey, with 24K, 22K, 21K, 18K, and 14K rates in TRY per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/countries/turkey/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/countries/turkey/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/countries/turkey/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/countries/turkey/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -10916,27 +10999,27 @@
       "dir": "ltr",
       "title": "Gold price today in United Arab Emirates — AED reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in United Arab Emirates, with 24K, 22K, 21K, 18K, and 14K rates in AED per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/uae/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/uae/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in United Arab Emirates — AED reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in United Arab Emirates, with 24K, 22K, 21K, 18K, and 14K rates in AED per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/uae/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/uae/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/uae/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/uae/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/uae/gold-price/"
+          "href": "https://goldtickerlive.com/countries/uae/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/uae/gold-price/"
+          "href": "https://goldtickerlive.com/countries/uae/"
         }
       ],
       "jsonLdTypes": [
@@ -11503,27 +11586,27 @@
       "dir": "ltr",
       "title": "Gold price today in Yemen — YER reference rates | Gold Ticker Live",
       "metaDescription": "Today spot-linked reference gold price in Yemen, with 24K, 22K, 21K, 18K, and 14K rates in YER per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/yemen/gold-price/",
-      "robots": null,
+      "canonical": "https://goldtickerlive.com/countries/yemen/",
+      "robots": "noindex,follow",
       "ogTitle": "Gold price today in Yemen — YER reference rates | Gold Ticker Live",
       "ogDescription": "Today spot-linked reference gold price in Yemen, with 24K, 22K, 21K, 18K, and 14K rates in YER per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
-      "ogUrl": "https://goldtickerlive.com/countries/yemen/gold-price/",
+      "ogUrl": "https://goldtickerlive.com/countries/yemen/",
       "ogType": "website",
       "twitterCard": "summary_large_image",
       "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
       "hreflang": [
         {
           "lang": "ar",
-          "href": "https://goldtickerlive.com/countries/yemen/gold-price/?lang=ar"
+          "href": "https://goldtickerlive.com/countries/yemen/?lang=ar"
         },
         {
           "lang": "en",
-          "href": "https://goldtickerlive.com/countries/yemen/gold-price/"
+          "href": "https://goldtickerlive.com/countries/yemen/"
         },
         {
           "lang": "x-default",
-          "href": "https://goldtickerlive.com/countries/yemen/gold-price/"
+          "href": "https://goldtickerlive.com/countries/yemen/"
         }
       ],
       "jsonLdTypes": [
@@ -11540,20 +11623,35 @@
       "exempt": null,
       "lang": "en",
       "dir": "ltr",
-      "title": "Gold Price in Yemen — Redirecting…",
-      "metaDescription": "Redirecting to the live gold price page for Yemen.",
-      "canonical": "https://goldtickerlive.com/countries/yemen/gold-price/",
-      "robots": "noindex,follow",
-      "ogTitle": null,
-      "ogDescription": null,
-      "ogImage": null,
-      "ogUrl": null,
-      "ogType": null,
-      "twitterCard": null,
-      "twitterImage": null,
-      "hreflang": [],
-      "jsonLdTypes": [],
-      "hasStructuredData": false,
+      "title": "Gold price today in Yemen — YER reference rates | Gold Ticker Live",
+      "metaDescription": "Today spot-linked reference gold price in Yemen, with 24K, 22K, 21K, 18K, and 14K rates in YER per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/yemen/",
+      "robots": null,
+      "ogTitle": "Gold price today in Yemen — YER reference rates | Gold Ticker Live",
+      "ogDescription": "Today spot-linked reference gold price in Yemen, with 24K, 22K, 21K, 18K, and 14K rates in YER per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "ogImage": "https://goldtickerlive.com/assets/og-image.png",
+      "ogUrl": "https://goldtickerlive.com/countries/yemen/",
+      "ogType": "website",
+      "twitterCard": "summary_large_image",
+      "twitterImage": "https://goldtickerlive.com/assets/og-image.png",
+      "hreflang": [
+        {
+          "lang": "ar",
+          "href": "https://goldtickerlive.com/countries/yemen/?lang=ar"
+        },
+        {
+          "lang": "en",
+          "href": "https://goldtickerlive.com/countries/yemen/"
+        },
+        {
+          "lang": "x-default",
+          "href": "https://goldtickerlive.com/countries/yemen/"
+        }
+      ],
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ],
+      "hasStructuredData": true,
       "jsonLdParseFailures": null
     },
     {
@@ -12006,7 +12104,7 @@
       "canonical": "https://goldtickerlive.com/",
       "robots": null,
       "ogTitle": "Gold Ticker Live — Live Gold Prices for GCC & the Arab World | أسعار الذهب المباشرة",
-      "ogDescription": "Track live gold spot prices in 24 countries across GCC, Levant, Africa and globally. 7 karats. Bilingual EN/AR. Free, with a visible freshness label.",
+      "ogDescription": "Track live gold spot prices in 24+ countries. Seven karat grades (14K–24K) from GoldPriceZ spot + open.er-api.com FX. Source updates hourly; pages re-poll ~90s. Bilingual EN/AR.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",
       "ogUrl": "https://goldtickerlive.com/",
       "ogType": "website",
@@ -12077,7 +12175,7 @@
       "title": "Gold Investing Guide — UAE, Saudi & Egypt | Gold Ticker Live",
       "metaDescription": "A practical gold investing guide for UAE, Saudi Arabia, and Egypt. Build a live budget plan, compare bullion vs jewelry vs ETFs, and buy gold more rationally.",
       "canonical": "https://goldtickerlive.com/invest.html",
-      "robots": "noindex,follow",
+      "robots": null,
       "ogTitle": "Gold Investing Guide | Rational Gold Plan for UAE, Saudi & Egypt",
       "ogDescription": "A practical gold investing guide for UAE, Saudi Arabia, and Egypt. Build a live budget plan, compare bullion vs jewelry vs ETFs, and buy gold more rationally.",
       "ogImage": "https://goldtickerlive.com/assets/og-image.png",

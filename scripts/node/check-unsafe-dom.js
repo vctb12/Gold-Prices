@@ -65,6 +65,8 @@ const BASELINE = {
   'src/components/breadcrumbs.js': 0, // Migrated to pure DOM (createElement/textContent) on 2026-04-28. Caller-supplied label/url treated as text, not HTML.
   'src/components/footer.js': 2,
   'src/components/nav.js': 2,
+  'src/components/shops-compare.js': 3, // Compare bar + modal; all dynamic strings via esc()/safeUrl()
+  'src/components/shops-map.js': 1, // Leaflet popup fallback message (static string)
   'src/components/spotBar.js': 0, // Migrated to DOM construction on 2026-04-28 (was 1 sink, all values were safe computed strings).
   'src/components/ticker.js': 0, // Migrated buildCopyNode + injectTicker to DOM construction on 2026-04-28 (was 1 sink).
   'src/lib/cache.js': 0, // showStorageQuotaWarning migrated to DOM construction on 2026-04-28 (was 1 sink, all hardcoded strings).

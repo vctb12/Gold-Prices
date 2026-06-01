@@ -32,7 +32,10 @@ const REQUIRED_CHECKS = [
   { id: 'og:image', re: /property=["']og:image["']/i },
   { id: 'twitter:card', re: /name=["']twitter:card["']/i },
   { id: 'breadcrumb-schema', re: /"@type":\s*"BreadcrumbList"/ },
-  { id: 'webpage-schema', re: /"@type":\s*"WebPage"/ },
+  {
+    id: 'webpage-schema',
+    re: /"@type":\s*"(?:WebPage|Article|Product|Dataset|FAQPage)"/,
+  },
   { id: 'shell', re: /injectNav|bootContentPage|mountSharedShell/ },
   { id: 'skip-link', re: /class=["']skip-link["']/ },
   { id: 'main-landmark', re: /<main[^>]+id=["']main-content["']/i },

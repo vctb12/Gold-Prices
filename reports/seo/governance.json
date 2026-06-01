@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-30T09:19:18.001Z",
+  "generatedAt": "2026-06-01T09:15:43.095Z",
   "summary": {
     "groups": {
-      "core": 60,
+      "core": 61,
       "countries": 190,
       "cities": 69,
       "markets": 4,
       "content": 50
     },
     "totals": {
-      "htmlPages": 373,
-      "indexablePages": 252,
-      "thinRiskPages": 169,
+      "htmlPages": 374,
+      "indexablePages": 239,
+      "thinRiskPages": 153,
       "duplicateRiskClusters": 0,
       "missingCanonical": 0,
       "missingHreflang": 0,
@@ -54,12 +54,12 @@
           "words": 101
         },
         {
-          "path": "content/gold-price-history/index.html",
-          "words": 103
+          "path": "compare.html",
+          "words": 108
         },
         {
           "path": "content/search/index.html",
-          "words": 34
+          "words": 94
         },
         {
           "path": "countries/algeria/algiers/gold-rate/index.html",
@@ -78,12 +78,8 @@
           "words": 34
         },
         {
-          "path": "countries/algeria/gold-price/index.html",
-          "words": 97
-        },
-        {
           "path": "countries/algeria/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/algeria/oran/gold-rate/index.html",
@@ -94,12 +90,8 @@
           "words": 34
         },
         {
-          "path": "countries/bahrain/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/bahrain/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/bahrain/manama/gold-rate/index.html",
@@ -146,12 +138,8 @@
           "words": 34
         },
         {
-          "path": "countries/egypt/gold-price/index.html",
-          "words": 97
-        },
-        {
           "path": "countries/egypt/index.html",
-          "words": 36
+          "words": 33
         },
         {
           "path": "countries/india/chennai/gold-rate/index.html",
@@ -170,12 +158,8 @@
           "words": 34
         },
         {
-          "path": "countries/india/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/india/index.html",
-          "words": 36
+          "words": 33
         },
         {
           "path": "countries/india/mumbai/gold-rate/index.html",
@@ -198,7 +182,7 @@
           "words": 59
         },
         {
-          "path": "countries/iraq/gold-price/index.html",
+          "path": "countries/iraq/index.html",
           "words": 96
         },
         {
@@ -210,12 +194,8 @@
           "words": 34
         },
         {
-          "path": "countries/jordan/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/jordan/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/jordan/irbid/gold-rate/index.html",
@@ -234,10 +214,6 @@
           "words": 34
         },
         {
-          "path": "countries/kuwait/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/kuwait/hawalli/gold-rate/index.html",
           "words": 49
         },
@@ -247,7 +223,7 @@
         },
         {
           "path": "countries/kuwait/index.html",
-          "words": 37
+          "words": 34
         },
         {
           "path": "countries/kuwait/kuwait-city/gold-rate/index.html",
@@ -274,12 +250,8 @@
           "words": 34
         },
         {
-          "path": "countries/lebanon/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/lebanon/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/lebanon/sidon/gold-rate/index.html",
@@ -306,12 +278,8 @@
           "words": 34
         },
         {
-          "path": "countries/libya/gold-price/index.html",
-          "words": 97
-        },
-        {
           "path": "countries/libya/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/libya/misrata/gold-rate/index.html",
@@ -338,12 +306,8 @@
           "words": 34
         },
         {
-          "path": "countries/morocco/gold-price/index.html",
-          "words": 97
-        },
-        {
           "path": "countries/morocco/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/morocco/marrakech/gold-rate/index.html",
@@ -362,12 +326,8 @@
           "words": 34
         },
         {
-          "path": "countries/oman/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/oman/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/oman/muscat/gold-rate/index.html",
@@ -394,7 +354,7 @@
           "words": 34
         },
         {
-          "path": "countries/pakistan/gold-price/index.html",
+          "path": "countries/pakistan/index.html",
           "words": 96
         },
         {
@@ -414,7 +374,7 @@
           "words": 59
         },
         {
-          "path": "countries/palestine/gold-price/index.html",
+          "path": "countries/palestine/index.html",
           "words": 96
         },
         {
@@ -446,12 +406,8 @@
           "words": 34
         },
         {
-          "path": "countries/qatar/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/qatar/index.html",
-          "words": 37
+          "words": 34
         },
         {
           "path": "countries/saudi-arabia/dammam/gold-rate/index.html",
@@ -462,12 +418,8 @@
           "words": 35
         },
         {
-          "path": "countries/saudi-arabia/gold-price/index.html",
-          "words": 99
-        },
-        {
           "path": "countries/saudi-arabia/index.html",
-          "words": 39
+          "words": 36
         },
         {
           "path": "countries/saudi-arabia/jeddah/gold-rate/index.html",
@@ -498,12 +450,8 @@
           "words": 35
         },
         {
-          "path": "countries/sudan/gold-price/index.html",
-          "words": 97
-        },
-        {
           "path": "countries/sudan/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/sudan/khartoum/gold-rate/index.html",
@@ -538,20 +486,16 @@
           "words": 59
         },
         {
-          "path": "countries/syria/gold-price/index.html",
-          "words": 96
-        },
-        {
           "path": "countries/syria/homs/gold-shops/index.html",
           "words": 59
         },
         {
-          "path": "countries/tunisia/gold-price/index.html",
-          "words": 97
+          "path": "countries/syria/index.html",
+          "words": 96
         },
         {
           "path": "countries/tunisia/index.html",
-          "words": 34
+          "words": 31
         },
         {
           "path": "countries/tunisia/sfax/gold-rate/index.html",
@@ -582,7 +526,7 @@
           "words": 59
         },
         {
-          "path": "countries/turkey/gold-price/index.html",
+          "path": "countries/turkey/index.html",
           "words": 96
         },
         {
@@ -622,12 +566,8 @@
           "words": 36
         },
         {
-          "path": "countries/uae/gold-price/index.html",
-          "words": 102
-        },
-        {
           "path": "countries/uae/index.html",
-          "words": 59
+          "words": 56
         },
         {
           "path": "countries/uae/ras-al-khaimah/gold-rate/index.html",
@@ -658,7 +598,7 @@
           "words": 59
         },
         {
-          "path": "countries/yemen/gold-price/index.html",
+          "path": "countries/yemen/index.html",
           "words": 96
         },
         {
@@ -690,10 +630,6 @@
           "words": 122
         },
         {
-          "path": "learn.html",
-          "words": 44
-        },
-        {
           "path": "methodology/index.html",
           "words": 128
         }
@@ -715,7 +651,7 @@
       "canonical": "",
       "hreflangs": [],
       "hasSchema": false,
-      "wordCount": 74,
+      "wordCount": 100,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1107,7 +1043,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 717,
+      "wordCount": 722,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1127,6 +1063,25 @@
       ],
       "hasSchema": true,
       "wordCount": 101,
+      "thinRisk": true,
+      "missingCanonical": false,
+      "missingHreflang": false,
+      "missingSchema": false
+    },
+    {
+      "path": "compare.html",
+      "group": "core",
+      "noindex": false,
+      "title": "Compare Gold Prices by Country — GCC &amp; Arab World | Gold Ticker Live",
+      "description": "Compare live gold prices and all-in retail estimates across the UAE, GCC and the wider Arab world. Sortable table, country chips, side-by-side detail and a cheapest-to-buy callout.",
+      "canonical": "https://goldtickerlive.com/compare.html",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 108,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1266,8 +1221,8 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 103,
-      "thinRisk": true,
+      "wordCount": 171,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -1304,7 +1259,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1575,
+      "wordCount": 1579,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1323,7 +1278,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1546,
+      "wordCount": 1550,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1589,7 +1544,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1840,
+      "wordCount": 1844,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1608,7 +1563,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1393,
+      "wordCount": 1397,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1703,7 +1658,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1692,
+      "wordCount": 1696,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1779,7 +1734,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 2059,
+      "wordCount": 2063,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1817,7 +1772,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1722,
+      "wordCount": 1726,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1855,7 +1810,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 322,
+      "wordCount": 326,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1874,7 +1829,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 94,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -1893,7 +1848,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 105,
+      "wordCount": 109,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2155,7 +2110,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2212,7 +2167,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2221,10 +2176,10 @@
     {
       "path": "countries/algeria/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Algeria — DZD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Algeria, with 24K, 22K, 21K, 18K, and 14K rates in DZD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/algeria/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/algeria/",
       "hreflangs": [
         "x-default",
         "en",
@@ -2232,7 +2187,7 @@
       ],
       "hasSchema": true,
       "wordCount": 97,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -2250,7 +2205,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2307,7 +2262,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2316,10 +2271,10 @@
     {
       "path": "countries/bahrain/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Bahrain — BHD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Bahrain, with 24K, 22K, 21K, 18K, and 14K rates in BHD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/bahrain/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/bahrain/",
       "hreflangs": [
         "x-default",
         "en",
@@ -2327,7 +2282,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -2345,7 +2300,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2402,7 +2357,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2459,7 +2414,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2516,7 +2471,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2573,7 +2528,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2630,7 +2585,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2649,7 +2604,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 710,
+      "wordCount": 707,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2725,7 +2680,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2734,10 +2689,10 @@
     {
       "path": "countries/egypt/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Egypt — EGP reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Egypt, with 24K, 22K, 21K, 18K, and 14K rates in EGP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/egypt/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/egypt/",
       "hreflangs": [
         "x-default",
         "en",
@@ -2745,7 +2700,7 @@
       ],
       "hasSchema": true,
       "wordCount": 97,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -2763,7 +2718,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 36,
+      "wordCount": 33,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2877,7 +2832,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2934,7 +2889,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -2943,10 +2898,10 @@
     {
       "path": "countries/india/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in India — INR reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in India, with 24K, 22K, 21K, 18K, and 14K rates in INR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/india/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/india/",
       "hreflangs": [
         "x-default",
         "en",
@@ -2954,7 +2909,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -2972,7 +2927,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 36,
+      "wordCount": 33,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3029,7 +2984,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3086,7 +3041,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3143,7 +3098,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3200,7 +3155,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3209,10 +3164,29 @@
     {
       "path": "countries/iraq/gold-price/index.html",
       "group": "countries",
+      "noindex": true,
+      "title": "Gold price today in Iraq — IQD reference rates | Gold Ticker Live",
+      "description": "Today spot-linked reference gold price in Iraq, with 24K, 22K, 21K, 18K, and 14K rates in IQD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/iraq/",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 96,
+      "thinRisk": false,
+      "missingCanonical": false,
+      "missingHreflang": false,
+      "missingSchema": false
+    },
+    {
+      "path": "countries/iraq/index.html",
+      "group": "countries",
       "noindex": false,
       "title": "Gold price today in Iraq — IQD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Iraq, with 24K, 22K, 21K, 18K, and 14K rates in IQD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/iraq/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/iraq/",
       "hreflangs": [
         "x-default",
         "en",
@@ -3221,21 +3195,6 @@
       "hasSchema": true,
       "wordCount": 96,
       "thinRisk": true,
-      "missingCanonical": false,
-      "missingHreflang": false,
-      "missingSchema": false
-    },
-    {
-      "path": "countries/iraq/index.html",
-      "group": "countries",
-      "noindex": true,
-      "title": "Gold Price in Iraq — Redirecting…",
-      "description": "Redirecting to the live gold price page for Iraq.",
-      "canonical": "https://goldtickerlive.com/countries/iraq/gold-price/",
-      "hreflangs": [],
-      "hasSchema": false,
-      "wordCount": 13,
-      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -3291,7 +3250,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3300,10 +3259,10 @@
     {
       "path": "countries/jordan/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Jordan — JOD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Jordan, with 24K, 22K, 21K, 18K, and 14K rates in JOD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/jordan/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/jordan/",
       "hreflangs": [
         "x-default",
         "en",
@@ -3311,7 +3270,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -3329,7 +3288,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3386,7 +3345,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3443,7 +3402,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3452,10 +3411,10 @@
     {
       "path": "countries/kuwait/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Kuwait — KWD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Kuwait, with 24K, 22K, 21K, 18K, and 14K rates in KWD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/kuwait/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/kuwait/",
       "hreflangs": [
         "x-default",
         "en",
@@ -3463,7 +3422,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -3519,7 +3478,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3538,7 +3497,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 37,
+      "wordCount": 34,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3595,7 +3554,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 115,
+      "wordCount": 119,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3652,7 +3611,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3709,7 +3668,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3718,10 +3677,10 @@
     {
       "path": "countries/lebanon/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Lebanon — LBP reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Lebanon, with 24K, 22K, 21K, 18K, and 14K rates in LBP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/lebanon/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/lebanon/",
       "hreflangs": [
         "x-default",
         "en",
@@ -3729,7 +3688,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -3747,7 +3706,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3804,7 +3763,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3861,7 +3820,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3918,7 +3877,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -3927,10 +3886,10 @@
     {
       "path": "countries/libya/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Libya — LYD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Libya, with 24K, 22K, 21K, 18K, and 14K rates in LYD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/libya/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/libya/",
       "hreflangs": [
         "x-default",
         "en",
@@ -3938,7 +3897,7 @@
       ],
       "hasSchema": true,
       "wordCount": 97,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -3956,7 +3915,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4013,7 +3972,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4070,7 +4029,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4127,7 +4086,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 110,
+      "wordCount": 114,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4136,10 +4095,10 @@
     {
       "path": "countries/morocco/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Morocco — MAD reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Morocco, with 24K, 22K, 21K, 18K, and 14K rates in MAD per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/morocco/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/morocco/",
       "hreflangs": [
         "x-default",
         "en",
@@ -4147,7 +4106,7 @@
       ],
       "hasSchema": true,
       "wordCount": 97,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -4165,7 +4124,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4222,7 +4181,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4279,7 +4238,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4288,10 +4247,10 @@
     {
       "path": "countries/oman/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Oman — OMR reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Oman, with 24K, 22K, 21K, 18K, and 14K rates in OMR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/oman/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/oman/",
       "hreflangs": [
         "x-default",
         "en",
@@ -4299,7 +4258,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -4317,7 +4276,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4374,7 +4333,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4431,7 +4390,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4488,7 +4447,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4497,10 +4456,29 @@
     {
       "path": "countries/pakistan/gold-price/index.html",
       "group": "countries",
+      "noindex": true,
+      "title": "Gold price today in Pakistan — PKR reference rates | Gold Ticker Live",
+      "description": "Today spot-linked reference gold price in Pakistan, with 24K, 22K, 21K, 18K, and 14K rates in PKR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/pakistan/",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 96,
+      "thinRisk": false,
+      "missingCanonical": false,
+      "missingHreflang": false,
+      "missingSchema": false
+    },
+    {
+      "path": "countries/pakistan/index.html",
+      "group": "countries",
       "noindex": false,
       "title": "Gold price today in Pakistan — PKR reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Pakistan, with 24K, 22K, 21K, 18K, and 14K rates in PKR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/pakistan/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/pakistan/",
       "hreflangs": [
         "x-default",
         "en",
@@ -4509,21 +4487,6 @@
       "hasSchema": true,
       "wordCount": 96,
       "thinRisk": true,
-      "missingCanonical": false,
-      "missingHreflang": false,
-      "missingSchema": false
-    },
-    {
-      "path": "countries/pakistan/index.html",
-      "group": "countries",
-      "noindex": true,
-      "title": "Gold Price in Pakistan — Redirecting…",
-      "description": "Redirecting to the live gold price page for Pakistan.",
-      "canonical": "https://goldtickerlive.com/countries/pakistan/gold-price/",
-      "hreflangs": [],
-      "hasSchema": false,
-      "wordCount": 13,
-      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -4579,7 +4542,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 110,
+      "wordCount": 114,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4636,7 +4599,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4693,7 +4656,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4750,7 +4713,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4759,10 +4722,29 @@
     {
       "path": "countries/palestine/gold-price/index.html",
       "group": "countries",
+      "noindex": true,
+      "title": "Gold price today in Palestine — ILS reference rates | Gold Ticker Live",
+      "description": "Today spot-linked reference gold price in Palestine, with 24K, 22K, 21K, 18K, and 14K rates in ILS per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/palestine/",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 96,
+      "thinRisk": false,
+      "missingCanonical": false,
+      "missingHreflang": false,
+      "missingSchema": false
+    },
+    {
+      "path": "countries/palestine/index.html",
+      "group": "countries",
       "noindex": false,
       "title": "Gold price today in Palestine — ILS reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Palestine, with 24K, 22K, 21K, 18K, and 14K rates in ILS per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/palestine/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/palestine/",
       "hreflangs": [
         "x-default",
         "en",
@@ -4771,21 +4753,6 @@
       "hasSchema": true,
       "wordCount": 96,
       "thinRisk": true,
-      "missingCanonical": false,
-      "missingHreflang": false,
-      "missingSchema": false
-    },
-    {
-      "path": "countries/palestine/index.html",
-      "group": "countries",
-      "noindex": true,
-      "title": "Gold Price in Palestine — Redirecting…",
-      "description": "Redirecting to the live gold price page for Palestine.",
-      "canonical": "https://goldtickerlive.com/countries/palestine/gold-price/",
-      "hreflangs": [],
-      "hasSchema": false,
-      "wordCount": 13,
-      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -4841,7 +4808,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4898,7 +4865,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 110,
+      "wordCount": 114,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -4955,7 +4922,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 114,
+      "wordCount": 118,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5012,7 +4979,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 114,
+      "wordCount": 118,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5031,7 +4998,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 654,
+      "wordCount": 651,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5107,7 +5074,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5116,10 +5083,10 @@
     {
       "path": "countries/qatar/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Qatar — QAR reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Qatar, with 24K, 22K, 21K, 18K, and 14K rates in QAR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/qatar/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/qatar/",
       "hreflangs": [
         "x-default",
         "en",
@@ -5127,7 +5094,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -5145,7 +5112,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 37,
+      "wordCount": 34,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5183,7 +5150,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 688,
+      "wordCount": 685,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5240,7 +5207,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 115,
+      "wordCount": 119,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5249,10 +5216,10 @@
     {
       "path": "countries/saudi-arabia/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Saudi Arabia — SAR reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Saudi Arabia, with 24K, 22K, 21K, 18K, and 14K rates in SAR per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/saudi-arabia/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/saudi-arabia/",
       "hreflangs": [
         "x-default",
         "en",
@@ -5260,7 +5227,7 @@
       ],
       "hasSchema": true,
       "wordCount": 99,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -5278,7 +5245,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 39,
+      "wordCount": 36,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5335,7 +5302,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 115,
+      "wordCount": 119,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5392,7 +5359,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 116,
+      "wordCount": 120,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5449,7 +5416,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 116,
+      "wordCount": 120,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5506,7 +5473,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 115,
+      "wordCount": 119,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5515,10 +5482,10 @@
     {
       "path": "countries/sudan/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Sudan — SDG reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Sudan, with 24K, 22K, 21K, 18K, and 14K rates in SDG per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/sudan/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/sudan/",
       "hreflangs": [
         "x-default",
         "en",
@@ -5526,7 +5493,7 @@
       ],
       "hasSchema": true,
       "wordCount": 97,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -5544,7 +5511,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5601,7 +5568,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5658,7 +5625,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 110,
+      "wordCount": 114,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5715,7 +5682,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 114,
+      "wordCount": 118,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5772,7 +5739,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5829,7 +5796,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5838,10 +5805,10 @@
     {
       "path": "countries/syria/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Syria — SYP reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Syria, with 24K, 22K, 21K, 18K, and 14K rates in SYP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/syria/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/syria/",
       "hreflangs": [
         "x-default",
         "en",
@@ -5849,7 +5816,7 @@
       ],
       "hasSchema": true,
       "wordCount": 96,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -5905,7 +5872,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -5914,14 +5881,18 @@
     {
       "path": "countries/syria/index.html",
       "group": "countries",
-      "noindex": true,
-      "title": "Gold Price in Syria — Redirecting…",
-      "description": "Redirecting to the live gold price page for Syria.",
-      "canonical": "https://goldtickerlive.com/countries/syria/gold-price/",
-      "hreflangs": [],
-      "hasSchema": false,
-      "wordCount": 13,
-      "thinRisk": false,
+      "noindex": false,
+      "title": "Gold price today in Syria — SYP reference rates | Gold Ticker Live",
+      "description": "Today spot-linked reference gold price in Syria, with 24K, 22K, 21K, 18K, and 14K rates in SYP per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/syria/",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 96,
+      "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -5929,10 +5900,10 @@
     {
       "path": "countries/tunisia/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in Tunisia — TND reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Tunisia, with 24K, 22K, 21K, 18K, and 14K rates in TND per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/tunisia/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/tunisia/",
       "hreflangs": [
         "x-default",
         "en",
@@ -5940,7 +5911,7 @@
       ],
       "hasSchema": true,
       "wordCount": 97,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -5958,7 +5929,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 34,
+      "wordCount": 31,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6015,7 +5986,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6072,7 +6043,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6129,7 +6100,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6186,7 +6157,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6195,10 +6166,29 @@
     {
       "path": "countries/turkey/gold-price/index.html",
       "group": "countries",
+      "noindex": true,
+      "title": "Gold price today in Turkey — TRY reference rates | Gold Ticker Live",
+      "description": "Today spot-linked reference gold price in Turkey, with 24K, 22K, 21K, 18K, and 14K rates in TRY per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/turkey/",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 96,
+      "thinRisk": false,
+      "missingCanonical": false,
+      "missingHreflang": false,
+      "missingSchema": false
+    },
+    {
+      "path": "countries/turkey/index.html",
+      "group": "countries",
       "noindex": false,
       "title": "Gold price today in Turkey — TRY reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Turkey, with 24K, 22K, 21K, 18K, and 14K rates in TRY per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/turkey/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/turkey/",
       "hreflangs": [
         "x-default",
         "en",
@@ -6207,21 +6197,6 @@
       "hasSchema": true,
       "wordCount": 96,
       "thinRisk": true,
-      "missingCanonical": false,
-      "missingHreflang": false,
-      "missingSchema": false
-    },
-    {
-      "path": "countries/turkey/index.html",
-      "group": "countries",
-      "noindex": true,
-      "title": "Gold Price in Turkey — Redirecting…",
-      "description": "Redirecting to the live gold price page for Turkey.",
-      "canonical": "https://goldtickerlive.com/countries/turkey/gold-price/",
-      "hreflangs": [],
-      "hasSchema": false,
-      "wordCount": 13,
-      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -6277,7 +6252,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6334,7 +6309,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6391,7 +6366,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 124,
+      "wordCount": 128,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6448,7 +6423,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 119,
+      "wordCount": 123,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6467,7 +6442,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 583,
+      "wordCount": 580,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6486,7 +6461,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 733,
+      "wordCount": 730,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6562,7 +6537,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 119,
+      "wordCount": 123,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6619,7 +6594,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 119,
+      "wordCount": 123,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6628,10 +6603,10 @@
     {
       "path": "countries/uae/gold-price/index.html",
       "group": "countries",
-      "noindex": false,
+      "noindex": true,
       "title": "Gold price today in United Arab Emirates — AED reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in United Arab Emirates, with 24K, 22K, 21K, 18K, and 14K rates in AED per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/uae/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/uae/",
       "hreflangs": [
         "x-default",
         "en",
@@ -6639,7 +6614,7 @@
       ],
       "hasSchema": true,
       "wordCount": 102,
-      "thinRisk": true,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -6657,7 +6632,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 59,
+      "wordCount": 56,
       "thinRisk": true,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6752,7 +6727,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 130,
+      "wordCount": 134,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6809,7 +6784,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 119,
+      "wordCount": 123,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6866,7 +6841,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 130,
+      "wordCount": 134,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6923,7 +6898,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -6932,10 +6907,29 @@
     {
       "path": "countries/yemen/gold-price/index.html",
       "group": "countries",
+      "noindex": true,
+      "title": "Gold price today in Yemen — YER reference rates | Gold Ticker Live",
+      "description": "Today spot-linked reference gold price in Yemen, with 24K, 22K, 21K, 18K, and 14K rates in YER per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
+      "canonical": "https://goldtickerlive.com/countries/yemen/",
+      "hreflangs": [
+        "x-default",
+        "en",
+        "ar"
+      ],
+      "hasSchema": true,
+      "wordCount": 96,
+      "thinRisk": false,
+      "missingCanonical": false,
+      "missingHreflang": false,
+      "missingSchema": false
+    },
+    {
+      "path": "countries/yemen/index.html",
+      "group": "countries",
       "noindex": false,
       "title": "Gold price today in Yemen — YER reference rates | Gold Ticker Live",
       "description": "Today spot-linked reference gold price in Yemen, with 24K, 22K, 21K, 18K, and 14K rates in YER per gram, freshness labels, and direct links to the tracker, calculator, methodology, and country market context.",
-      "canonical": "https://goldtickerlive.com/countries/yemen/gold-price/",
+      "canonical": "https://goldtickerlive.com/countries/yemen/",
       "hreflangs": [
         "x-default",
         "en",
@@ -6944,21 +6938,6 @@
       "hasSchema": true,
       "wordCount": 96,
       "thinRisk": true,
-      "missingCanonical": false,
-      "missingHreflang": false,
-      "missingSchema": false
-    },
-    {
-      "path": "countries/yemen/index.html",
-      "group": "countries",
-      "noindex": true,
-      "title": "Gold Price in Yemen — Redirecting…",
-      "description": "Redirecting to the live gold price page for Yemen.",
-      "canonical": "https://goldtickerlive.com/countries/yemen/gold-price/",
-      "hreflangs": [],
-      "hasSchema": false,
-      "wordCount": 13,
-      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -7014,7 +6993,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7071,7 +7050,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 109,
+      "wordCount": 113,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7219,7 +7198,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1639,
+      "wordCount": 1623,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7238,7 +7217,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 590,
+      "wordCount": 464,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7247,7 +7226,7 @@
     {
       "path": "invest.html",
       "group": "core",
-      "noindex": true,
+      "noindex": false,
       "title": "Gold Investing Guide — UAE, Saudi &amp; Egypt | Gold Ticker Live",
       "description": "A practical gold investing guide for UAE, Saudi Arabia, and Egypt. Build a live budget plan, compare bullion vs jewelry vs ETFs, and buy gold more rationally.",
       "canonical": "https://goldtickerlive.com/invest.html",
@@ -7257,7 +7236,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 119,
+      "wordCount": 589,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7276,8 +7255,8 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 44,
-      "thinRisk": true,
+      "wordCount": 1435,
+      "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
       "missingSchema": false
@@ -7295,7 +7274,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1854,
+      "wordCount": 1986,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7386,7 +7365,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 530,
+      "wordCount": 525,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
@@ -7619,7 +7598,7 @@
         "ar"
       ],
       "hasSchema": true,
-      "wordCount": 1967,
+      "wordCount": 1950,
       "thinRisk": false,
       "missingCanonical": false,
       "missingHreflang": false,
