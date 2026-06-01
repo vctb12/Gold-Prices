@@ -209,7 +209,7 @@ Verified 2026-06-01 on `main` (excluding `node_modules/`, `dist/`).
 | `scripts/node/` | validate, SEO, sitemap, build | CI gates |
 | `scripts/python/` | fetch, post, spike, newsletter | `sys.path` → `utils.*` |
 | `.github/workflows/` (21) | CI, deploy, hourly gold/X | See Part 10 |
-| `tests/` (1059 tests) | node:test + e2e | Set JWT env vars |
+| `tests/` | node:test + e2e | Set JWT env vars |
 | `docs/` | Reference + **this workbook** | |
 | `reports/` | Point-in-time audits | Regenerate, don't hand-edit scores |
 
