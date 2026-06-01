@@ -243,9 +243,14 @@ function walkJs(dir) {
 }
 
 const srcJsFiles = walkJs(path.join(ROOT, 'src'));
+const tmpModuleCheckFile = path.join(ROOT, '.tmp-validate-build-syntax-check.mjs');
 let syntaxIssues = 0;
 for (const jsFile of srcJsFiles) {
-  const result = spawnSync(process.execPath, ['--check', jsFile], {
+  const fileToCheck = jsFile.endsWith('.mjs') ? jsFile : tmpModuleCheckFile;
+  if (fileToCheck === tmpModuleCheckFile) {
+    fs.writeFileSync(tmpModuleCheckFile, fs.readFileSync(jsFile, 'utf8'), 'utf8');
+  }
+  const result = spawnSync(process.execPath, ['--check', fileToCheck], {
     encoding: 'utf8',
   });
   if (result.status !== 0) {
@@ -255,6 +260,7 @@ for (const jsFile of srcJsFiles) {
     syntaxIssues++;
   }
 }
+if (fs.existsSync(tmpModuleCheckFile)) fs.unlinkSync(tmpModuleCheckFile);
 if (syntaxIssues === 0) ok(`Checked ${srcJsFiles.length} src JS files — valid syntax`);
 
 // ── 5. Duplicate consecutive lines in page modules (merge-artifact guard) ───
