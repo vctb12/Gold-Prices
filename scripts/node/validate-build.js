@@ -10,6 +10,8 @@
  *   1. Required static files exist (sw.js, robots.txt, etc.)
  *   2. No `await` inside non-async functions in HTML inline scripts
  *   3. Critical JS module imports resolve to existing files
+ *   4. All src JS modules pass node --check (parse errors before Vite)
+ *   5. No duplicate consecutive source lines in src/pages (merge-artifact guard)
  *
  * Exit code 0 = all checks pass, 1 = issues found.
  */
@@ -18,6 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '../..');
 let errors = 0;
@@ -219,6 +222,76 @@ for (const d of CRITICAL_DIRS) {
   }
 }
 if (importIssues === 0) ok('All critical JS imports resolve');
+
+// ── 4. JS syntax (node --check) — catches merge dupes / parse errors early ─
+
+console.log('\n\uD83D\uDD0D Checking src/**/*.js syntax (node --check)\u2026');
+
+function walkJs(dir) {
+  const results = [];
+  if (!fs.existsSync(dir)) return results;
+  for (const entry of fs.readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    const stat = fs.statSync(full);
+    if (stat.isDirectory()) {
+      results.push(...walkJs(full));
+    } else if (entry.endsWith('.js') || entry.endsWith('.mjs')) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+const srcJsFiles = walkJs(path.join(ROOT, 'src'));
+const tmpModuleCheckFile = path.join(ROOT, '.tmp-validate-build-syntax-check.mjs');
+let syntaxIssues = 0;
+for (const jsFile of srcJsFiles) {
+  const fileToCheck = jsFile.endsWith('.mjs') ? jsFile : tmpModuleCheckFile;
+  if (fileToCheck === tmpModuleCheckFile) {
+    fs.writeFileSync(tmpModuleCheckFile, fs.readFileSync(jsFile, 'utf8'), 'utf8');
+  }
+  const result = spawnSync(process.execPath, ['--check', fileToCheck], {
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) {
+    const rel = path.relative(ROOT, jsFile);
+    const detail = (result.stderr || result.stdout || '').trim().split('\n')[0];
+    error(`${rel}: syntax error${detail ? ` — ${detail}` : ''}`);
+    syntaxIssues++;
+  }
+}
+if (fs.existsSync(tmpModuleCheckFile)) fs.unlinkSync(tmpModuleCheckFile);
+if (syntaxIssues === 0) ok(`Checked ${srcJsFiles.length} src JS files — valid syntax`);
+
+// ── 5. Duplicate consecutive lines in page modules (merge-artifact guard) ───
+
+console.log('\n\uD83D\uDD0D Checking src/pages for duplicate consecutive lines\u2026');
+
+const DUPLICATE_LINE_MIN = 24;
+let duplicateLineIssues = 0;
+const pagesDir = path.join(ROOT, 'src/pages');
+if (fs.existsSync(pagesDir)) {
+  for (const filePath of walkJs(pagesDir)) {
+    if (!filePath.endsWith('.js')) continue;
+    const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+    for (let i = 1; i < lines.length; i++) {
+      const prev = lines[i - 1].trim();
+      const curr = lines[i].trim();
+      if (
+        prev.length >= DUPLICATE_LINE_MIN &&
+        prev === curr &&
+        !prev.startsWith('//') &&
+        !prev.startsWith('*')
+      ) {
+        error(
+          `${path.relative(ROOT, filePath)}:${i + 1} — duplicate consecutive line (likely merge artifact): "${curr.slice(0, 72)}${curr.length > 72 ? '\u2026' : ''}"`
+        );
+        duplicateLineIssues++;
+      }
+    }
+  }
+}
+if (duplicateLineIssues === 0) ok('No duplicate consecutive lines in src/pages');
 
 // ── Summary ─────────────────────────────────────────────────────────────────
 

@@ -656,7 +656,6 @@ function syncTrackerLinks(overrides = {}) {
 
 function initKaratStripTrackerHandoff() {
   document.querySelectorAll('.karat-strip-item').forEach((item) => {
-  document.querySelectorAll('.karat-strip-item').forEach((item) => {
     item.setAttribute('role', 'link');
     item.setAttribute('tabindex', '0');
     const karat = karatFromKstripItem(item);
@@ -676,8 +675,6 @@ function initKaratStripTrackerHandoff() {
         e.preventDefault();
         go();
       }
-    });
-  });
     });
   });
 }
