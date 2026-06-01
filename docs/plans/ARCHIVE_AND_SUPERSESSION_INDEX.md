@@ -3,6 +3,8 @@
 > **Purpose:** One place to know which `.md` file is authoritative. Agents: read this before creating
 > a new plan doc. Humans: archive to `docs/archive/YYYY-MM/` only in session **C1a/C3b** (see
 > [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md)).
+>
+> **Last updated:** 2026-06-01 (session **C1a** — index + README statuses; no plan file moves).
 
 ---
 
@@ -25,8 +27,9 @@
 | ---- | ------ | ---------- |
 | [`2026-06-01_ui-ux-audit-remediation-program.md`](./2026-06-01_ui-ux-audit-remediation-program.md) | Sessions 0–5 **done**; Tracks B–E open | Ad-hoc "fix loading" prompts |
 | [`2026-06-01_endless-session-prompts.md`](./2026-06-01_endless-session-prompts.md) | **Active** endless runs | Inline endless blocks in program doc |
-| [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md) | **Active** (not started) | Wave 3 #18 wholesale move without phases |
+| [`2026-06-01_repo-reorganization-program.md`](./2026-06-01_repo-reorganization-program.md) | **Active** — **C1a done**; C1b–C3b open | Wave 3 #18 wholesale move without phases |
 | [`docs/audits/NEXT_PR_SEQUENCE.md`](../audits/NEXT_PR_SEQUENCE.md) | **Active** post-12-phase | — |
+| [`docs/audits/UI_UX_AUDIT_SESSION_REGISTRY.md`](../audits/UI_UX_AUDIT_SESSION_REGISTRY.md) | **Historical** Sessions 0–5 merged | Per-session branches only |
 
 ---
 
@@ -41,6 +44,8 @@
 | [`2026-05-21_next-session-prompts.md`](./2026-05-21_next-session-prompts.md) | 🟡 shell work | Defer if conflicts with open UX |
 | [`REPO_CLEANUP_PROPOSAL.md`](./REPO_CLEANUP_PROPOSAL.md) | Phase 1 audit | Deletions gated on `CANDIDATES.md` |
 | [`PLATFORM_UPGRADE_PROPOSAL.md`](./PLATFORM_UPGRADE_PROPOSAL.md) | 📥 pending | Reconcile to REVAMP_PLAN only |
+| [`PRODUCT_SIMPLIFICATION_AND_SEO_CLEANUP_PLAN.md`](./PRODUCT_SIMPLIFICATION_AND_SEO_CLEANUP_PLAN.md) | 📥 locked / NEXT_PR PR2 | No deletions until owner sign-off |
+| [`TRACKER_COMMAND_CENTER_RESTRUCTURE.md`](./TRACKER_COMMAND_CENTER_RESTRUCTURE.md) | 📥 pending | Tracker revamp in REVAMP_PLAN |
 
 ---
 
@@ -48,12 +53,28 @@
 
 | File | Notes |
 | ---- | ----- |
-| `2026-05-29_autonomous-harsh-stripping-session.md` | Country page removal — landed |
-| `2026-05-29_autonomous-cleanup-consolidation.md` | Ref sweep — landed |
-| `2026-05-29_deep-clean-session3.md` | Links + learn — landed |
-| `2026-05-29_harsh-cleanup-and-functional-pass.md` | Superseded for country work |
+| [`2026-05-29_autonomous-harsh-stripping-session.md`](./2026-05-29_autonomous-harsh-stripping-session.md) | Country page removal — landed |
+| [`2026-05-29_autonomous-cleanup-consolidation.md`](./2026-05-29_autonomous-cleanup-consolidation.md) | Ref sweep — landed |
+| [`2026-05-29_deep-clean-session3.md`](./2026-05-29_deep-clean-session3.md) | Links + learn — landed |
+| [`2026-05-29_harsh-cleanup-and-functional-pass.md`](./2026-05-29_harsh-cleanup-and-functional-pass.md) | Superseded for country work |
+| [`2026-05-30_premium-ui-ux-revamp.md`](./2026-05-30_premium-ui-ux-revamp.md) | Homepage quick-convert + micro-interactions |
+| [`2026-05-30_session5-terminal-polish.md`](./2026-05-30_session5-terminal-polish.md) | Tracker terminal polish |
+| [`2026-05-30_session6-launch-push.md`](./2026-05-30_session6-launch-push.md) | Content standardization |
+| [`2026-05-30_visual-excellence-session7.md`](./2026-05-30_visual-excellence-session7.md) | Global interaction system |
+| [`2026-05-30_visual-excellence-session7b.md`](./2026-05-30_visual-excellence-session7b.md) | Full-surface interaction rollout |
+| [`2026-05-31_country-market-intelligence.md`](./2026-05-31_country-market-intelligence.md) | BUILD 2 market intel panel |
+| [`2026-05-31_insights-feed.md`](./2026-05-31_insights-feed.md) / [`2026-05-31_insights-feed-build8.md`](./2026-05-31_insights-feed-build8.md) | Insights feed (prefer build8 doc) |
 
-**Archive candidate (C3b):** move to `docs/archive/2026-05/` when link audit passes.
+**Archive candidate (C3b):** move landed rows above to `docs/archive/2026-05/` when link audit passes.
+**C1a policy:** keep files in `docs/plans/` until C3b; status lives in [`docs/plans/README.md`](./README.md).
+
+---
+
+## Tier 1 — Landed (2026-06 UI/UX audit)
+
+| File | Notes |
+| ---- | ----- |
+| [`2026-06-01_ui-ux-audit-session-prompts.md`](./2026-06-01_ui-ux-audit-session-prompts.md) | Sessions 0–5 copy-paste; **superseded** by merged PRs + `.github/prompts/ui-ux-audit-phase*.prompt.md` |
 
 ---
 
@@ -83,7 +104,8 @@ Regenerate rather than edit stale numbers in place.
 | `docs/REVAMP_STATUS.md`, `docs/product/*` planning stubs | `REVAMP_PLAN.md` (removed 2026-04 refresh) |
 | `GOLD_TICKER_LIVE_AGENT_PROMPTS.md` §8 full UI revamp | `ui-ux-audit-phase*` + endless UI prompt |
 | `2026-04-24_navbar-audit-and-redesign.md` nav phases | UI/UX Session 4 (merged) + Track B1 |
-| Duplicate "Governing constraints" in proposal files | `AGENTS.md` only |
+| Duplicate "Governing constraints" in proposal files | `AGENTS.md` only (short pointer sections OK) |
+| Ad-hoc `docs/plans/2026-04-23_*` one-shots | Reconcile into REVAMP_PLAN or close in README matrix |
 
 ---
 
@@ -95,6 +117,17 @@ Regenerate rather than edit stale numbers in place.
 | [`docs/AI_PROMPT_LIBRARY.md`](../AI_PROMPT_LIBRARY.md) | Index of `.github/prompts` |
 | [`docs/GOLD_TICKER_LIVE_AGENT_PROMPTS.md`](../GOLD_TICKER_LIVE_AGENT_PROMPTS.md) | Deep 50+ prompt catalog |
 | [`2026-06-01_endless-session-prompts.md`](./2026-06-01_endless-session-prompts.md) | Repeatable discovery prompts |
+
+---
+
+## Archive layout (`docs/archive/`)
+
+| Path | Role |
+| ---- | ---- |
+| [`docs/archive/README.md`](../archive/README.md) | Archive policy + month folders |
+| `docs/archive/YYYY-MM/<original-name>.md` | Frozen copy after C3b move |
+
+Physical moves are **C3b only**. C1a updates indices and README statuses without breaking inbound links.
 
 ---
 

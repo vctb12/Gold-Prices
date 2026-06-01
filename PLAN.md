@@ -27,8 +27,6 @@
       `@.github/prompts/endless-integration-wiring.prompt.md`)
 - [ ] **NEXT_PR_SEQUENCE PR 1** — GDPR export/delete + dashboard + alerts docs (see
       [`docs/audits/NEXT_PR_SEQUENCE.md`](docs/audits/NEXT_PR_SEQUENCE.md))
-- [ ] **Repo C1a** — docs archive + supersession index only (no URL moves) —
-      [`docs/plans/2026-06-01_repo-reorganization-program.md`](docs/plans/2026-06-01_repo-reorganization-program.md)
 
 ---
 
@@ -47,6 +45,9 @@
 
 ## ✅ Recently Completed
 
+- [x] **Repo C1a** — docs archive scaffold + supersession index refresh (no plan file moves) —
+      completed: 2026-06-01 — see
+      [`docs/plans/ARCHIVE_AND_SUPERSESSION_INDEX.md`](docs/plans/ARCHIVE_AND_SUPERSESSION_INDEX.md)
 - [x] **UI/UX audit Sessions 0–5** — first paint through CSS partials + a11y CI — completed:
       2026-06-01 — PRs: [#387](https://github.com/vctb12/GoldTickerLive/pull/387)–[#393](https://github.com/vctb12/GoldTickerLive/pull/393)
 - [x] BUILD 8: Insights Market Analysis Feed — rebuilt the insights guide grid into a filterable,

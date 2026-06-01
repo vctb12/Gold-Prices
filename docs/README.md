@@ -14,6 +14,7 @@ holds the master plan plus human-facing reference docs.
 | [`REVAMP_PLAN.md`](./REVAMP_PLAN.md)               | Master plan — tracks in progress, decisions, production tracks, issues, backlog.  |
 | [`plans/README.md`](./plans/README.md)             | Proposal intake + priority matrix. New plans follow `plans/YYYY-MM-DD_<slug>.md`. |
 | [`plans/ARCHIVE_AND_SUPERSESSION_INDEX.md`](./plans/ARCHIVE_AND_SUPERSESSION_INDEX.md) | Which docs are authoritative vs archive candidates. |
+| [`archive/README.md`](./archive/README.md)         | Frozen landed plans (`docs/archive/YYYY-MM/`); moves are C3b only.                |
 | [`plans/`](./plans/)                               | Raw proposal captures.                                                            |
 | [`AGENT_REFRESH_PLAN.md`](./AGENT_REFRESH_PLAN.md) | Historical record of the 2026-04 agent-instruction refresh.                       |
 

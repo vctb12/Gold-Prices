@@ -7,7 +7,7 @@ class: meta
 owner: @vctb12
 created: "2026-06-01"
 last_updated: "2026-06-01"
-next_action: "Run Track C Session C1a (docs archive) or NEXT_PR_SEQUENCE PR 1"
+next_action: "Run NEXT_PR_SEQUENCE PR 1 or Track D1 integration wiring"
 ```
 
 > **Superseded for depth by the Master Workbook v2** —
@@ -43,12 +43,11 @@ Do **not** parallelize tracks that touch the same files. Recommended sequence:
 | :---: | ----- | ------- | ------- |
 | 1 | **Integration** | D1 — cross-page deep links | Low risk; improves flagship flows without moves |
 | 2 | **Backend / trust** | NEXT_PR_SEQUENCE **PR 1** — GDPR export/delete + alerts docs | Closes P0 integration gaps |
-| 3 | **Repo hygiene** | C1a — docs archive + supersession index only | No URL moves; reduces agent confusion |
-| 4 | **Repo hygiene** | C1b–C1f — micro moves (see reorg program) | One subsystem per PR; owner sign-off on `CANDIDATES.md` |
-| 5 | **SEO / product** | NEXT_PR_SEQUENCE **PR 2** — noindex plan for karat stubs | Sitemap shrink; no deletions |
-| 6 | **Visual polish** | B1–B4 (nav polish, homepage, tracker terminal, hover rollout) | After integration glue |
-| 7 | **Monetization** | E1 — AdSense + GA4 events | No empty ad holes |
-| 8 | **AI** | E2 — commentary / assist widgets | Gated: disclaimers + no secrets in git |
+| 3 | **Repo hygiene** | C1b–C1f — micro moves (see reorg program) | C1a index done; owner sign-off on `CANDIDATES.md` for deletes |
+| 4 | **SEO / product** | NEXT_PR_SEQUENCE **PR 2** — noindex plan for karat stubs | Sitemap shrink; no deletions |
+| 5 | **Visual polish** | B1–B4 (nav polish, homepage, tracker terminal, hover rollout) | After integration glue |
+| 6 | **Monetization** | E1 — AdSense + GA4 events | No empty ad holes |
+| 7 | **AI** | E2 — commentary / assist widgets | Gated: disclaimers + no secrets in git |
 
 **Defer unless owner approves:** full root → `pages/` HTML move (C1 mega), SPA migration, provider
 switch in same PR as UX, edits to `post_gold.yml` / `gold-price-fetch.yml` / `data/gold_price.json` /

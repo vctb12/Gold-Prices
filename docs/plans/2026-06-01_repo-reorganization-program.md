@@ -32,7 +32,7 @@ guardrails_reviewed: true
 
 | ID | Focus | Risk | Depends on |
 | -- | ----- | ---- | ------------ |
-| **C1a** | Docs archive + supersession index only | 🟢 | — |
+| **C1a** | Docs archive + supersession index only | ✅ done 2026-06-01 | — |
 | **C1b** | CSS: ensure partials import graph documented; no moves | 🟢 | Session 5 CSS split on main |
 | **C1c** | Move `styles/pages/*` co-location **or** document why not | 🟡 | Owner |
 | **C1d** | `assets/` consolidation (favicons, og-image) | 🟡 | Link audit |
@@ -47,20 +47,19 @@ guardrails_reviewed: true
 
 ---
 
-## C1a — Docs consolidation (recommended first)
+## C1a — Docs consolidation ✅ (2026-06-01)
 
-**Branch:** `cursor/repo-c1a-docs-archive-cb21`
+**Branch:** `cursor/repo-c1a-docs-archive-9c06`
 
-**Tasks:**
+**Done:**
 
-1. Update [`ARCHIVE_AND_SUPERSESSION_INDEX.md`](./ARCHIVE_AND_SUPERSESSION_INDEX.md).
-2. Move **completed** plan files (UI/UX sessions done, landed 2026-05-29 cleanup) to
-   `docs/archive/2026-06/` with a one-line pointer stub left in `docs/plans/` OR update README
-   status only (prefer **status update** without move if links are widespread).
-3. Trim duplicate "Governing constraints" blocks in old proposals (point to `AGENTS.md`).
-4. Ensure `docs/README.md` lists the master operations hub.
+1. Updated [`ARCHIVE_AND_SUPERSESSION_INDEX.md`](./ARCHIVE_AND_SUPERSESSION_INDEX.md) (landed 2026-05-30 rows, C3b policy, audit registries).
+2. **Status-only** for landed plans — no physical moves (links remain in `docs/plans/` until C3b).
+3. Governing-constraint sections in proposals already point to `AGENTS.md` (no long duplicates).
+4. [`docs/README.md`](../README.md) already lists master operations hub + supersession index.
+5. Added [`docs/archive/README.md`](../archive/README.md) scaffold for C3b.
 
-**Verify:** Docs-only PR; link check with `rg` for broken relative links.
+**Verify:** Docs-only PR; `rg` link spot-check on touched paths.
 
 ---
 
